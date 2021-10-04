@@ -1,0 +1,1 @@
+{"version":3,"sources":["webpack://client/./src/styles/main.scss"],"names":[],"mappings":"AACA,EACI,WAGJ,KACI,sB","file":"main.css","sourcesContent":["\r\np {\r\n    color: black;\r\n}\r\n\r\nbody {\r\n    background-color: yellow;\r\n}"],"sourceRoot":""}

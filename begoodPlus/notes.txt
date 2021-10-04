@@ -1,0 +1,156 @@
+
+
+CELERY:
+run windows:
+celery -A begoodPlus beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler
+flower -A begoodPlus --port=5555
+celery -A begoodPlus worker -l info --pool=solo
+
+
+
+
+ses-smtp-user.20200925-221629
+SMTP Username:
+AKIAWNTXXG5ZMK4B5AR4
+SMTP Password:
+BOISBR/TRfYsLzTyjxtxs15KTRfx1lCJLPqbwDbpLoNW
+
+
+
+
+
+- הוספת מוצרים מרובים: לא לאפשר מידה 36 לחולצות לדוגמא
+- לכתוב מחדש את הבוט
+- טופס הזמנה
+- הוספת יצירת קטלוגים
+
+- frade out nexts
+- bigger circles, center number
+
+add content to title in google
+
+steps for deploy
+in settings.py:
+    change debug to False
+    comment this line =====> 'debug_toolbar.middleware.DebugToolbarMiddleware', # TODO: remove in production
+    run python manage.py collectstatic
+    
+    
+    
+connect to Putty:
+    cd BeGoodPlus/begoodPlus/
+    pull from git
+    
+    read requeierements.txt
+        sudo su
+        activate env: source /home/ubuntu/env/bin/activate
+        pip install -r requirements.txt
+        python manage.py migrate
+        #python manage.py collectstatic
+        python /home/ubuntu/BeGoodPlus2/begoodPlus/manage.py collectstatic
+        
+        sudo supervisorctl restart all
+        sudo service nginx restart
+    sudo nginx -t
+
+
+
+TODO: add h1 to catalog_page
+TODO: facebook
+TODO: mail design
+
+copy db: cp -v ~/BeGoodPlus/begoodPlus/db.sqlite3  ~/db_backup/$(date +%y_%m_%d).db.sqlite3
+
+
+
+
+# new deploy
+
+on mechine startup:
+sudo apt-get update
+sudo apt-get install python3-pip -y
+sudo pip3 install gunicorn
+sudo apt-get install supervisor
+sudo apt-get install nginx -y
+sudo pip3 install django
+
+git clone https://github.com/nhrnhr0/BeGoodPlus2.git
+sudo apt-get install python3-venv
+python3 -m venv env
+source env/bin/activate
+pip3 install gunicorn
+pip install -r BeGoodPlus2/begoodPlus/requirements.txt
+
+# <copy secrects>
+cd /etc/supervisor/conf.d/
+whereis gunicorn ===>  /usr/local/bin/gunicorn
+
+sudo nano /etc/supervisor/config.d/gunicorn.conf
+FILE: cat /etc/supervisor/conf.d/gunicorn.conf
+/////////////////////////////////////////////////////////////////////
+
+[program:gunicorn]
+
+directory=/home/ubuntu/BeGoodPlus2/begoodPlus
+
+command=/home/ubuntu/env/bin/gunicorn --workers 3 --bind unix:/home/ubuntu/BeGoodPlus2/begoodPlus/app.sock begoodPlus.wsgi:application
+
+autostart=true
+
+autorestart=true
+
+stderr_logfile=/var/log/gunicorn/gunicorn.err.log
+
+stdout_logfile=/var/log/gunicorn/gunicorn.out.log
+
+[group:guni]
+
+programs:gunicorn
+/////////////////////////////////////////////////////////////////////
+
+ sudo mkdir /var/log/gunicorn
+
+sudo supervisorctl reread
+sudo supervisorctl update
+sudo supervisorctl restart all
+sudo supervisorctl status
+
+# NGINX
+
+
+cd /etc/nginx/sites-available/
+sudo touch django.conf
+sudo nano django.conf
+FILE:
+/////////////////////////////////////////////////////////////////////
+server {
+        listen 80;
+        server_name ms-global.co.il;
+
+        location / {
+                include proxy_params;
+                proxy_pass http://unix:/home/ubuntu/BeGoodPlus2/begoodPlus/app.sock;
+        }
+
+        location /static {
+                autoindex on;
+                alias /home/ubuntu/BeGoodPlus2/begoodPlus/static;
+        }
+        location /media {
+                autoindex on;
+                alias /home/ubuntu/BeGoodPlus2/begoodPlus/static/media_root;
+        }
+}
+
+
+/////////////////////////////////////////////////////////////////////
+sudo nginx -t
+sudo ln /etc/nginx/sites-available/django.conf /etc/nginx/sites-enabled/
+
+
+
+TODO:
+mobile
+sitemap
+tobots.txt
+https v2

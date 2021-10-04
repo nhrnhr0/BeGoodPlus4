@@ -1,0 +1,253 @@
+{% extends "admin/change_form.html" %}
+{% load i18n admin_urls %}
+{%load static%}
+
+{% block extrahead %}{{ block.super }}
+    <script type="text/javascript" src="{% url 'admin:jsi18n' %}"></script>
+    {{ media }}
+    
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+    
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/js/select2.min.js"></script>
+{% endblock %}
+
+
+{% block field_sets %}
+    {% for fieldset in adminform %}
+        {% include "admin/includes/fieldset.html" %}
+    {% endfor %}
+    
+    <div id="add_multiple_products_section">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h1 style>הוספת מלאים מרובים</h1>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <legend>
+                ספק:
+                    <select id="provider_select" class="my-select" placeholder="הכנס שם ספק" >
+                        
+                    </select>
+                </legend>
+            </div>
+            <div class="col-md-3">
+                <legend>
+                שיטת אריזה
+                    <select id="packingType_select" class="my-select" >
+                    </select>
+                </legend>
+            </div>
+            <div class="col-md-3">
+                <legend>
+                גודל: 
+                    <select id="size_select" multiple class="my-select" >
+                    </select>
+                </legend>
+            </div>
+            <div class="col-md-3">
+                <legend>
+                צבע
+                    <select id="color_select" multiple class="my-select" >
+                    </select>
+                </legend>
+            </div>
+            <div class="col-md-3">
+                <legend>
+                כמות
+                    <input type="number" min="1" id="amount" />
+                </legend>
+            </div>
+            <div class="col-md-3">
+                <legend>
+                כפתורים
+                    <div class="col">
+                        <button id="generate_table_btn"class="btn btn-primary" type="button">צור טבלה</button>
+                        <button id="save_products_btn"class="btn btn-secondary" type="button">עדכן מלאי</button>
+                    </div>
+                </legend>
+            </div>
+            <div class="table-responsive">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ספק</th>
+                <th>שיטת אריזה</th>
+                <th>גודל</th>
+                <th>צבע</th>
+                <th>כמות</th>
+                <th>חדש</th>
+                <th>כמות מעודכנת</th>
+            </tr>
+        </thead>
+        <tbody id="multiple_stocks_table">
+        </tbody>
+    </table>
+</div>
+            
+        </div>
+    </div>
+</div>
+<script>
+    // this 2 function calculate cartesian product. by calling cartesian
+    const f = (a, b) => [].concat(...a.map(d => b.map(e => [].concat(d, e))));
+    const cartesian = (a, b, ...c) => (b ? cartesian(f(a, b), ...c) : a);
+    var product_id = undefined;
+    $(document).ready(function(){
+        product_id = document.querySelector("#product_form > div > fieldset > div.form-row.field-id.field-category_index > div.fieldBox.field-id > div").innerText 
+        //if(product_id)
+        //add_multiple_products_section
+        // TODO: WTF is this code?!
+        if(product_id == '-' || undefined) { // no product id, so it's a new product, can't insert multiple stocks before saving
+            $("#add_multiple_products_section").hide();
+        }
+        $('.my-select').select2({
+            width: '100%',
+        });
+        
+        // saveing all the providers, packing type, size, color
+        information = {};
+        
+        
+        // ajax calls to get all the options for showing the options to the uesr
+        $.ajax({ url: "/api/providers",
+            success: function(data){
+                console.log(data)
+                information["providers"] = data.providers;
+                var providers = data.providers;
+                for(var i = 0; i < providers.length; i++) {
+                    $("#provider_select").append('<option value="'+providers[i].id+'">'+providers[i].name+'</option>');
+                }
+                $("#provider_select").trigger('change');
+        }});
+        
+        $.ajax({ url: "/api/packingTypes",
+            success: function(data){
+                console.log(data)
+                var packing_types = data.packingType;
+                information["packingType"] = data.packingType;
+                for(var i = 0; i < packing_types.length; i++) {
+                    $("#packingType_select").append('<option value="'+packing_types[i].id+'">'+packing_types[i].name+'</option>');
+                }
+        }});
+        
+        $.ajax({ url: "/api/productSizes",
+            success: function(data){
+                console.log(data)
+                var product_sizes = data.productSizes;
+                information["productSizes"] = data.productSizes;
+                for(var i = 0; i < product_sizes.length; i++) {
+                    $("#size_select").append('<option value="'+product_sizes[i].id+'">'+product_sizes[i].size+'</option>');
+                }
+            }
+        });
+        
+        $.ajax({ url: "/api/productColors",
+            success: function(data){
+                console.log(data)
+                information["productColors"] = data.productColors;
+                var product_colors = data.productColors;
+                for(var i = 0; i < product_colors.length; i++) {
+                    $("#color_select").append('<option value="'+product_colors[i].id+'">'+product_colors[i].name+'</option>');
+                }
+            }
+        });
+    });
+    
+    
+    $("#generate_table_btn").click(function(){
+        //console.log(information);
+        
+        // get the user input:
+        var selected_provider = $("#provider_select").children("option:selected").val();
+        var selected_packingType = $("#packingType_select").children("option:selected").val();
+        var selected_sizes = [];
+        var selected_sizes_jq = $("#size_select option:selected");
+        for(var i = 0; i < selected_sizes_jq.length; i++) {
+            selected_sizes.push(selected_sizes_jq[i].value);
+        }
+        
+        var selected_colors = [];
+        var selected_colors_jq = $("#color_select option:selected");
+        for(var i = 0; i < selected_colors_jq.length; i++) {
+            selected_colors.push(selected_colors_jq[i].value);
+        }
+        var amount = $("#amount").val()
+        
+        // genereate all possible combinations 
+        var newStocks = cartesian([selected_provider], [selected_packingType], selected_sizes, selected_colors, [amount]);
+        // read the id field of the product in the change_form
+        // used to send it with ajax to add all the stocks to the product
+        multiple_stocks_for_insertion = {'stocks': newStocks,
+                                        'product': product_id};
+
+        generate_multiple_stocks_table(newStocks)
+        
+    });
+    
+    $("#save_products_btn").click(function() {
+        $("#save_products_btn").attr("disabled", true);
+        if(multiple_stocks_for_insertion) {
+            for(var i = 0; i < multiple_stocks_for_insertion['stocks'].length; i++) {
+                multiple_stocks_for_insertion['stocks'][i][4] = $("#amount_" + i).val();
+                $("#amount_" + i).attr("disabled", true);
+            }
+            
+            var ajax_data = JSON.stringify({"data": multiple_stocks_for_insertion})
+            $.ajax({ url: "/api/add_multiple_stocks",
+                type: "POST",
+                data: {
+                'content': ajax_data,
+                'csrfmiddlewaretoken': '{{ csrf_token }}',
+            },
+                success: function(data){                    
+                    parse_data = JSON.parse(data);
+                    generate_multiple_stocks_table(parse_data.data.stocks)
+                    $("#save_products_btn").attr("disabled", false);
+                }
+            });
+        }
+    });
+    
+    function generate_multiple_stocks_table(newStocks) {
+        newTbody = ''
+        for(var i = 0; i < newStocks.length; i++) {
+            product_row = newStocks[i];
+            
+            // used to find the info name throuth id
+            find_id = (dic, id) => {
+                for(var i = 0; i < dic.length;i++) {
+                    if(dic[i].id == id)
+                        return dic[i];
+                }
+            }
+            image_src = undefined
+            if (product_row[5]) {
+                image_src = 'admin/img/icon-yes.svg'
+            }
+            else {
+                image_src = 'admin/img/icon-no.svg'
+            }
+            // generate table row
+            row = `<tr>
+                    <td>${find_id(information.providers, product_row[0]).name}</td>
+                    <td>${find_id(information.packingType, product_row[1]).name}</td>
+                    <td>${find_id(information.productSizes, product_row[2]).size}</td>
+                    <td>${find_id(information.productColors, product_row[3]).name}</td>
+                    <td><input type="number" min="1" value="${product_row[4]}" id="amount_${i}" /></td>
+                    <td> <img src="{% static "" %}${image_src}" alt="True"> </td>
+                    <td> ${product_row[6]} </td>
+                </tr>`
+            newTbody += row;
+        }
+        
+        // clear the table and add all the rows
+        $("#multiple_stocks_table").empty();
+        $("#multiple_stocks_table").append(newTbody);
+    }
+</script>
+{% endblock %}

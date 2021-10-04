@@ -1,0 +1,163 @@
+body {
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
+  margin: 0px;
+  padding: 0px;
+  font-size: 18px;
+}
+
+* {
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
+}
+
+nav {
+  border-bottom: 1px solid #ccc;
+  background: #f1f1f1;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  position: relative;
+}
+
+nav img {
+  width: 208px;
+  height: 69px;
+}
+
+nav .mobile-bar {
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  padding: 0.5em 1em;
+  display: none;
+}
+
+@media (max-width: 480px) {
+  nav .mobile-bar {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+  }
+}
+
+nav .mobile-bar span {
+  display: block;
+  height: 2px;
+  width: 20px;
+  margin: 2px;
+  background: #888;
+}
+
+nav .mobile-bar.active {
+  background: #333;
+}
+
+nav .mobile-bar.active span {
+  background: white;
+}
+
+nav .mobile-bar:hover {
+  background: #e1e1e1;
+}
+
+nav .mobile-bar:hover span {
+  background: #444;
+}
+
+nav .mobile-bar:hover.active {
+  background: #222;
+}
+
+nav .mobile-bar:hover.active span {
+  background: white;
+}
+
+nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  -webkit-transition: ease 1s all;
+  transition: ease 1s all;
+}
+
+@media (max-width: 480px) {
+  nav ul {
+    opacity: 0;
+    max-height: 0px;
+    overflow: hidden;
+    visibility: none;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 100%;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+        -ms-flex-direction: column;
+            flex-direction: column;
+    background-color: #f1f1f1;
+    margin-left: -100%;
+  }
+  nav ul.active {
+    opacity: 1;
+    max-height: 500px;
+    right: 0;
+    margin-left: 0%;
+    background-color: #e1e1e1;
+  }
+  nav ul.active li {
+    display: block;
+  }
+  nav ul.active li a {
+    display: block;
+  }
+}
+
+nav ul li {
+  display: inline-block;
+  margin-top: 10%;
+}
+
+nav ul li a {
+  display: inline-block;
+  color: black;
+  text-decoration: none;
+  padding: 0.5em 1em;
+}
+
+nav ul li a:hover {
+  background: #e1e1e1;
+  color: #79b085;
+}
+
+.section-1 {
+  display: -ms-grid;
+  display: grid;
+  position: relative;
+  background-color: #f1f1f1;
+}
+
+.section-1 img {
+  position: absolute;
+}
+
+@media (max-width: 480px) {
+  .section-1 img {
+    position: relative;
+  }
+}
+
+.section-1 .main-content {
+  height: 500px;
+}
+/*# sourceMappingURL=freeflow.css.map */

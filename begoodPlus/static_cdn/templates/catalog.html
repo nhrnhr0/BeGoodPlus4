@@ -1,0 +1,737 @@
+{% extends "newBase.html" %}
+
+{% load i18n %}
+{% load static %}
+{% load bootstrap5 %}
+
+{% block head_title %}{% trans "Catalog" %}{% endblock %}
+{% block extra_head %}
+<!--
+<link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/gh/kenwheeler/slick@1.8.1/slick/slick.css" />
+<link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/gh/kenwheeler/slick@1.8.1/slick/slick-theme.css" />
+-->
+<!--<link rel="stylesheet" href="{%static 'assets/css/swiper.css'%}">-->
+<!-- <link rel="stylesheet" href="https://unpkg.com/swiper@6.5.0/swiper-bundle.min.css"> -->
+<!--<script src="https://kit.fontawesome.com/022c0fea0b.js" crossorigin="anonymous" defer></script>-->
+<!-- <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet"> 
+<link rel="stylesheet" href="{%static 'assets/catalog/css/countdowncube.css'%}" />
+-->
+<link rel="stylesheet" href="{%static 'assets/catalog/css/flipdown.min.css'%}" />
+<link rel="stylesheet" href="{%static 'assets/catalog/css/style.css' %}">
+{% endblock extra_head%}
+
+{% block content %}
+
+<div class="bg-wraper">
+    <div class="section-2">
+        <div class="section-2-fotter">
+            <span class="part1">כבר לא צריך לסוע רחוק</span>
+            <span class="part2">בשביל מוצרי צריכה בסיסים</span>
+            <!--
+            &bull; עיינו באתר
+            &bull; הוסיפו לעגלה
+            &bull; שלחו אלינו
+            &bull;
+            -->
+
+        </div>
+    </div>
+    <div class="section-1">
+
+        <div class="swiper-container swiper-main">
+            <div class="parallax-bg" data-swiper-parallax="23%"></div>
+            <div class="swiper-wrapper">
+                <div class="swiper-slide slide-1">
+                    <div class="text">
+                    <div class="title" data-swiper-parallax-duration="2000" data-swiper-parallax-y="-500">
+                        מגוון חנויות
+                    </div>
+                    <div class="subtitle" data-swiper-parallax-duration="2000" data-swiper-parallax-y="-500">
+                        ברחבי הדרום
+                    </div>
+                </div>
+
+                </div>
+                <div class="swiper-slide slide-2">
+                    <div class="text">
+                    <div class="title" data-swiper-parallax-duration="2000" data-swiper-parallax-y="500">
+                        מלאי מוצרים רחב
+                    </div>
+                    <div class="subtitle" data-swiper-parallax-duration="2000" data-swiper-parallax-y="500">
+                        >מוצרים<
+                    </div>
+                </div>
+                </div>
+
+                <div class="swiper-slide slide-3">
+                    <div class="text">
+                    <div class="title" data-swiper-parallax-duration="2000" data-swiper-parallax-y="500">
+                        נשמח לעמוד לשירותכם
+                    </div>
+                    <div class="subtitle" data-swiper-parallax-duration="2000" data-swiper-parallax-y="500">
+
+                    </div>
+                </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div class="section-1-5">
+        <div class="container">
+            <div class="hero-description gold-animation">
+                <h1 class="hero-description-title gold-animation">
+                    אמ אס גלובל
+                </h1>
+                מתמחה באספקת בגדי עבודה, מוצרי טקסטיל ואביזרי מיתוג
+                למוסדות ולחנויות.
+                <br>
+                אפשרויות הדפסה ורקמה על מגוון מוצרים. שירותי גרפיקה
+                מתקדמים.
+                <br>
+                מחלקת הייטק המספקת שירותי בניית אתרים, הקמת תוכנה ושיווק
+                אינטרנטי יעיל לבעלי העסקים.
+            </div>
+            <!--
+            <div class="progress progress-striped">
+                <div class="progress-bar">
+                </div>
+            </div>
+            -->
+        </div>
+
+        <div class="logo-swiper">
+            <div class="swiper-wrapper">
+                {%for logo in logos %}
+                    <div class="swiper-slide my-slick-slide">
+                        <img class="slide-image" height="100px" width="auto"
+                            src="{{logo.img.url}}"/>
+                    </div>
+                {%endfor%}
+
+            </div>
+        </div>
+    </div>
+
+
+    <div class="catalog">
+
+        {%for album in albums%}
+        {%if album.is_public%}
+        <h3 class="album-description" style="display: none;" id="album_description_{{album.id}}">{{album.description}}
+        </h3>
+        <h3 class="album-fotter" style="display: none;" id="album_fotter_{{album.id}}">{{album.fotter}}</h3>
+
+        <div class="title-wraper">
+            <button data-album-id="{{album.id}}" onclick="openCategoryModal({{album.id}})" class="title btn">
+                {{album.title}}
+            </button>
+        </div>
+        {%if album.timer != None %}
+        <div id="timer-{{album.id}}" class="timer">
+            <h1 id="timer-title-{{album.id}}" class="timer-text">
+                המבצעים יסתיימו בעוד...
+            </h1>
+            <div id="counter-{{album.id}}" class="flipdown" name="counter" data-time="{{album.timer|safe}}">
+            </div>
+        </div>
+        {%endif%}
+        <div class="container">
+            <div name="slick-slider-{{album.id}}" id="slick-slider-{{album.id}}"
+                class="swiper-container swiper-category slick-slider">
+                <div class="swiper-wrapper">
+                    {%for img in album.sorted_image_set%}
+                    <div class="wraper-my-slick-slide swiper-slide">
+                        <div data-album-id="{{album.id}}" data-my-slide-index="{{forloop.counter0}}"
+                            data-prod-id="{{img.id}}" class="my-slick-slide shadow-lg">
+                            <!--<img height="100px" width="100px" class="swiper-lazy" data-src="media/{{img.image_thumbnail}}"
+                            alt="{{img.description}}" />
+                            <div class="swiper-lazy-preloader swiper-lazy-preloader-white"></div>                        
+                        -->
+                            {% if img.can_tag%}
+                            <img class="can-tag" alt=""
+                                src="{%static 'assets/catalog/imgs/can_tag.jpeg'%}" />
+                            {%endif%}
+
+                            {%if img.discount %}
+                            <img class="discount" src="{{img.discount}}" alt="discount" />
+                            {%endif%}
+
+
+                            <img class="product-image" loading="lazy" height="100px" width="100px" src="media/{{img.image_thumbnail}}"
+                                alt="{{img.description}}" />
+
+
+                            <div class="img-title">{{img.title}}</div>
+
+                            <!-- product SEO -->
+                            <h5 style="display: none;">{{img.title}}</h5>
+                            <h4 style="display: none;">{{img.description}}</h4>
+                        </div>
+                        <div class="like-btn" name="like-btn">
+                            <div class="like-wrapper" data-prod-id="{{img.id}}">
+                                <a name="like-btn">
+                                    <span name="like-btn">
+                                        <img src="{%static 'assets/catalog/imgs/icons8-plus-48.png'%}"> הוסף
+                                    </span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {%endfor%}
+
+                </div>
+            </div>
+            <div class="swiper-button-prev"></div>
+            <div class="swiper-button-next"></div>
+        </div>
+
+
+
+        {%endif%}
+        {%endfor%}
+    </div>
+
+
+    <div class="section-3">
+        <div class="container">
+            <div class="abount-us">
+
+                <div class="begood-logo-wraper">
+                    <img src="{%static 'assets\catalog\imgs\begood_plus_logo_layout.png' %}" />
+                    ביגוד פלוס
+                </div>
+                מבית אמ. אס. גלובל מתחמה במתן פתרונות טקסטיל למוסדות, עסקים, חנויות ועוד.
+                <br>
+                אצלנו תמצאו מגוון רחב של פריטים כמו נעליים, מכנסיים, חולצות, ביגוד חורף, כובעים, ציוד בטיחות, ביגוד
+                מקצועי
+                ומוצרים נוספים.
+                <br>
+                הדפסות ורקמות על גבי המוצרים
+                <br>
+                אנו נדאג שתשקיעו מינימום מאמץ ותקבלו מקסימום תוצאה במחיר מנצח
+            </div>
+            <div class="check-list">
+                <div class="part part-1">
+                       
+                        <div class="wrapper">
+                            <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg"
+                                xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 98.5 98.5"
+                                enable-background="new 0 0 98.5 98.5" xml:space="preserve">
+                                <path class="checkmark" fill="none" stroke-width="8" stroke-miterlimit="10" d="M81.7,17.8C73.5,9.3,62,4,49.2,4
+C24.3,4,4,24.3,4,49.2s20.3,45.2,45.2,45.2s45.2-20.3,45.2-45.2c0-8.6-2.4-16.6-6.5-23.4l0,0L45.6,68.2L24.7,47.3" />
+                            </svg>
+                        </div>
+                        <div class="text">שירות אדיב ומקצועי</div>
+            </div>
+            <div class="part part-2">
+                        <div class="wrapper">
+                            <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg"
+                                xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 98.5 98.5"
+                                enable-background="new 0 0 98.5 98.5" xml:space="preserve">
+                                <path class="checkmark" fill="none" stroke-width="8" stroke-miterlimit="10" d="M81.7,17.8C73.5,9.3,62,4,49.2,4
+C24.3,4,4,24.3,4,49.2s20.3,45.2,45.2,45.2s45.2-20.3,45.2-45.2c0-8.6-2.4-16.6-6.5-23.4l0,0L45.6,68.2L24.7,47.3" />
+                            </svg>
+                        </div>
+                        <div class="text">מוצרים איכותיים</div>
+                    </div>
+                    <div class="part part-3">
+                        
+                        <div class="wrapper">
+                            <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg"
+                                xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 98.5 98.5"
+                                enable-background="new 0 0 98.5 98.5" xml:space="preserve">
+                                <path class="checkmark" fill="none" stroke-width="8" stroke-miterlimit="10" d="M81.7,17.8C73.5,9.3,62,4,49.2,4
+C24.3,4,4,24.3,4,49.2s20.3,45.2,45.2,45.2s45.2-20.3,45.2-45.2c0-8.6-2.4-16.6-6.5-23.4l0,0L45.6,68.2L24.7,47.3" />
+                            </svg>
+                        </div>
+                        <div class="text">חיסכון בזמן יקר</div>
+                    </div>
+                    <div class="part part-4">
+                        
+                        <div class="wrapper">
+                            <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg"
+                                xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 98.5 98.5"
+                                enable-background="new 0 0 98.5 98.5" xml:space="preserve">
+                                <path class="checkmark" fill="none" stroke-width="8" stroke-miterlimit="10" d="M81.7,17.8C73.5,9.3,62,4,49.2,4
+C24.3,4,4,24.3,4,49.2s20.3,45.2,45.2,45.2s45.2-20.3,45.2-45.2c0-8.6-2.4-16.6-6.5-23.4l0,0L45.6,68.2L24.7,47.3" />
+                            </svg>
+                        </div>
+                        <div class="text">מחירים משתלמים והוגנים</div>
+                    </div>
+                    <div class="part part-5">
+                        
+                        <div class="wrapper">
+                            <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg"
+                                xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 98.5 98.5"
+                                enable-background="new 0 0 98.5 98.5" xml:space="preserve">
+                                <path class="checkmark" fill="none" stroke-width="8" stroke-miterlimit="10" d="M81.7,17.8C73.5,9.3,62,4,49.2,4
+C24.3,4,4,24.3,4,49.2s20.3,45.2,45.2,45.2s45.2-20.3,45.2-45.2c0-8.6-2.4-16.6-6.5-23.4l0,0L45.6,68.2L24.7,47.3" />
+                            </svg>
+                        </div>
+                        <div class="text">זמני אספקה מהירים</div>
+                    </div>
+
+
+            </div>
+        </div>
+    </div>
+
+    <div class="section-4">
+        <div class="container">
+            <div class="card">
+              <img loading="lazy" src="{%static 'assets/catalog/imgs/shops/img1.jpeg'%}">
+              <div class="card__head"><div class="text">מ.ד. אספקה</div></div>
+            </div>
+            <div class="card">
+                <img loading="lazy" src="{%static 'assets/catalog/imgs/shops/img2.jpeg'%}">
+              <div class="card__head">
+                  <div class="text">כולבו ניר יצחק</div></div>
+            </div>
+            <div class="card">
+                <img loading="lazy" src="{%static 'assets/catalog/imgs/shops/img3.jpeg'%}">
+              <div class="card__head">
+                  <div class="text">כולבו גילת</div>
+                </div>
+            </div>
+            <div class="card">
+                <img loading="lazy" src="{%static 'assets/catalog/imgs/shops/img4.jpeg'%}">
+              <div class="card__head"><div class="text">עוד חנויות</div></div>
+            </div>
+            <div class="card">
+              <img src="{%static 'assets/catalog/imgs/shops/img5.jpeg'%}">
+              <div class="card__head"><div class="text">Sleepy Cat</div></div>
+            </div>
+          </div>
+    </div>
+
+</div>
+
+<div class="modal" id="catalogProductsModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header text-center">
+                <img class="header-logo header-logo-r" src="{%static 'assets/base/imgs/logo_ms.png' %}" />
+                <h5 class="modal-title  w-100">M.S global</h5>
+                <img class="header-logo header-logo-l" src="{%static 'assets/base/imgs/begood_plus_logo.png' %}" />
+
+                <button type="button" class="close close-modal" data-dismiss="catalogModal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>M.S global</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="modal-send-products-btn" class="btn btn-primary">שלח</button>
+                <button type="button" class="btn btn-secondary close-modal" data-dismiss="catalogModal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="contact-form-wraper2">
+    <div class="contact-form-wraper">
+        <form id="catalog-contact-form" action="{%url 'form-change'%}" method="post"
+            class="contact-form">
+            {% csrf_token %}
+            <input type="hidden" name="taskName" id="taskName" value="catalog-ec6bb117-c8fa-4a38-989a-ab0e0805e44e">
+            <h2 class="form-header">
+                לקבלת הצעת מחיר משתלמת
+                <div class="mark-strong">&nbsp;ללא&nbsp;</div>
+                עלות
+                <div class="mark-strong">&nbsp;וללא&nbsp;</div>
+                התחייבות השאירו פרטים ומיד נחזור אליכם
+            </h2>
+            </h2>
+            {% bootstrap_form contactForm %}
+            {% buttons %}
+            <button type="submit" class="btn btn-success form-submit">לשליחת טופס לחץ כאן</button>
+            {% endbuttons %}
+        </form>
+    </div>
+</div>
+
+
+<form method="POST" id="deleteProductForm" action="tasks/delete-user-liked-product">
+    {%csrf_token%}
+</form>
+{%endblock%}
+
+{%block extra_body%}
+<!--
+<script type="text/javascript" src="//cdn.jsdelivr.net/gh/kenwheeler/slick@1.8.1/slick/slick.min.js"></script>
+-->
+
+<!--<script src="https://zachleat.github.io/BigText/dist/bigtext.js"></script>-->
+<!-- <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script> 
+<script type="text/javascript" src="{%static 'assets/catalog/js/countdowncube.js' %}"></script>
+-->
+<script src="{%static 'assets/catalog/js/flipdown.min.js'%}"></script>
+<script src="{%static 'assets/catalog/js/catalog.js'%}"></script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        /*
+    var logo_swiper = new Swiper(".logo-swiper", {
+        //freeMode: true,
+        //freeModeFluid: true,
+        loop: true,
+        speed:4000,
+        spaceBetween: 50,
+        slidesPerView: "auto",
+        autoplay: {
+            delay:0,
+        }
+    });
+    console.log('logo_swiper',logo_swiper);
+*/
+
+        var t0 = performance.now()
+        var counters = $('[name="counter"]');
+        for (var i = 0; i < counters.length; i++) {
+            counter = counters[i];
+            
+            
+            var today = Date.now();
+            var time = new Date($(counter).data().time);
+            if (today < time.getTime()) {
+                var albumId = counter.id.split('-').pop();
+                $(`#timer-${albumId}`).addClass('active');
+                var t = Math.floor(time.getTime() / 1000);
+                var flipdown = new FlipDown(t, counter.id, {
+                    theme: 'light'
+                });
+                flipdown.start();
+            }
+        }
+        /*
+            $.ajax({
+                type: "GET",
+                url: '/catalogTimer',
+                success: (json) => {
+                    //allAlbums = ;
+                    console.log(json);
+                    
+                },
+                error: (e) => {
+                    console.log('error:', e);
+                },
+                dataType: "json"```
+            });
+            */
+        /*var x = window.matchMedia("(min-width: 1312px)");
+        if(x.matches == false) {
+            $('.main-slide .text-wraper').bigtext();
+        }*/
+
+        //updateProductsCart();
+        /*$('.main-slider').slick({
+            slidesToShow: 1,
+            slidesToScroll: 1,
+            //autoplay: true,
+            autoplay: false,
+            speed: 1000,
+            autoplaySpeed: 6000,
+            pauseOnFocus: true,
+            focusOnSelect: false,
+            rtl: true,
+            swipeToSlide: false,
+            //lazyLoad: 'ondemand',
+            dots: true,
+            draggable: false,
+            infinite: true,
+            arrows: false,
+        });*/
+
+        var swiper = new Swiper('.swiper-main', {
+            speed: 1200,
+            parallax: true,
+            loop: true,
+            autoplay: {
+                delay: 6000,
+            },
+            /*watchSlidesProgress: true,
+            watchSlidesVisibility: true,*/
+        });
+
+
+
+        //albums = getAllAlbums();
+        /*
+        var catalogMarkup = ``;
+        var catalogPreload = ``;
+        var k = 0;
+        for (var i = 0; i < albums.length; i++) {
+            var albumMarkup = ``;
+            album = albums[i];
+            if (albums[i].is_public) {
+                albumMarkup += `
+                    <!--<div class="title">${album.title}</div>-->
+                    <div class="title-wraper">
+                        <button data-album-id="${album.id}" onclick="openCategoryModal(${album.id})" class="title btn">${album.title}</button>
+                    </div>
+                    <div class="container">
+                        <div name="slick-slider-${album.id}" id="slick-slider-${i}" class="slick-slider">`
+                albumPreload = ``;
+                for (var j = 0; j < album.images_list.length; j++) {
+                    var img = album.images_list[j];
+                    albumMarkup += `
+                        <div class="wraper-my-slick-slide">
+                            <div data-album-id="${album.id}" data-my-slide-index="${j}" data-prod-id="${img.id}" class="my-slick-slide shadow-lg">
+                                <img data-lazy="${img.image_thumbnail}" alt="${img.description}" />
+                                <div class="img-title">${img.title}</div>
+                            </div>
+                            <div class="like-btn" name="like-btn">
+                                <div class="like-wrapper" data-prod-id="${img.id}">
+                                    <a name="like-btn"><span name="like-btn">הוסף להצעת מחיר</span></a>
+                                </div>
+                            </div>
+                            
+                        </div>
+                        `
+                    albumPreload += `<link rel="prefetch" width="923px" height="715px" href="${img.image}" />`;
+                }
+                albumMarkup += `</div></div>`
+            }
+            catalogMarkup += albumMarkup;
+            catalogPreload += albumPreload;
+        }
+        $('.catalog').html(catalogMarkup).append(catalogPreload);
+        */
+        var swipers = [];
+        var swiperDom = $('.swiper-category');
+        for (var i = 0; i < swiperDom.length; i++) {
+            swipers.push(new Swiper(swiperDom[i], {
+                // Enable lazy loading
+                //lazy: true,
+                effect: 'coverflow',
+                grabCursor: true,
+                speed: 125,
+                loop: true,
+                centeredSlides: true,
+                slidesPerView: 5,
+                loopedSlides: 8,
+                loadPrevNext: true,
+                loadOnTransitionStart: true,
+                //checkInView: true,
+                slideToClickedSlide: true,
+                breakpoints: {
+                    // when window width is >= 320px
+                    220: {
+                    slidesPerView: 2,
+                    },
+                    750: {
+                        slidesPerView: 3,
+                    },
+                    // when window width is >= 640px
+                    1000: {
+                        slidesPerView: 4,
+                    },
+                    1100: {
+                        slidesPerView: 5,
+                    }
+                },
+
+                coverflowEffect: {
+                    rotate: -13,
+                    stretch: 10,
+                    depth: 100,
+                    modifier: 1,
+
+                    slideShadows: false,
+                },
+
+                pagination: {
+                    el: '.swiper-pagination',
+                    clickable: true,
+                },
+                navigation: {
+                    nextEl: `#${swiperDom[i].id} ~ .swiper-button-prev`,
+                    prevEl: `#${swiperDom[i].id} ~ .swiper-button-next`,
+                },
+            }));
+            /*
+            var last_swiper = swipers[swipers.length - 1];
+            last_swiper.on('transitionEnd', function (d) {
+                console.log('transitionEnd');
+                set_selected_slide_bigger(d);
+            });
+            last_swiper.update();*/
+            /*
+            last_swiper.on('afterInit', function(d) {
+                console.log('afterInit');
+                set_selected_slide_bigger(d);
+            });
+            */
+            //set_selected_slide_bigger(last_swiper);
+        }
+        //var swipers = new Swiper
+        /*var swipers = new Swiper('.swiper-category', {
+            // Enable lazy loading
+            lazy: true,
+            effect: 'coverflow',
+            grabCursor: true,
+            speed: 100,
+            loop: true,
+            centeredSlides: true,
+            slidesPerView: 5,
+            loadPrevNext: true,
+            loadOnTransitionStart: true,
+            checkInView: true,
+            slideToClickedSlide: true,
+
+            coverflowEffect: {
+                rotate: 30,
+                stretch: 0,
+                depth: 100,
+                modifier: 1,
+
+                slideShadows: false,
+            },
+
+            pagination: {
+                el: '.swiper-pagination',
+                clickable: true,
+            },
+            navigation: {
+                nextEl: '.swiper-button-prev',
+                prevEl: '.swiper-button-next',
+            },
+
+        });*/
+        mySwiper = swipers[0];
+        if ( mySwiper.params.slidesPerView > 2) {
+            mySwiper.params.slidesPerView = mySwiper.params.slidesPerView - 1;
+            mySwiper.update();
+        }
+        
+        
+        // TODO: start index from 0 and choose a diffrent selector so the first (main) slider is not selected
+        /*for (var i = 1; i < slisks.length; i++) {
+
+
+            //var numberOfItems = $(slisks[i]).find('.my-slick-slide').length
+            /*var isDots = true;
+            if (numberOfItems > 20) {
+                isDots = false;
+            }*/
+        /*
+        var isDots = false;
+        $(slisks[i]).slick({
+            slidesToShow: 4,
+            slidesToScroll: 1,
+            dots: isDots,
+            speed: 100,
+            focusOnSelect: false,
+            rtl: true,
+            swipeToSlide: true,
+            lazyLoad: 'ondemand',
+            draggable: false,
+            infinite: true,
+
+
+            responsive: [{
+                breakpoint: 500,
+                settings: {
+                    slidesToShow: 3,
+                }
+            }]
+        });*/
+        /*
+        $('.catalog').flyto({
+            item: '',
+            target: '#cart-btn',
+            button: '.my-slick-slide + .like-btn .like-wrapper',
+        });*/
+
+
+        $('.my-slick-slide + .like-btn .like-wrapper').on('click', (e) => {
+            console.log('like clicked', e);
+            flyToCart($(e.currentTarget.parentNode.parentNode).find('img.product-image'));
+            addClientLikeProduct(e.currentTarget.dataset.prodId);
+        });
+
+        $('.my-slick-slide').on('click', (e) => {
+            console.log('.my-slick-slide', e, e.currentTarget.dataset.prodId);
+            /*if (e.target.getAttribute('name') == 'like-btn') {
+                click(e.currentTarget.dataset.prodId);
+                //$(e.currentTarget).addClass('checked');
+                //$('#product-like-btn').prop("checked", true);
+            } else {*/
+            {
+                var prodId = parseInt(e.currentTarget.dataset.prodId);
+                var albumId = parseInt(e.currentTarget.dataset.albumId);
+                openProductModal(prodId,albumId, 250);
+            }
+
+        });
+
+        $('#modal-add-btn').click((e) => {
+            flyToCart($(`#catalog-image-${e.currentTarget.value}`));
+            console.log('modal-add-btn', e);
+            
+            addClientLikeProduct(e.currentTarget.value)
+            return false;
+        });
+        //task = myStorage.getItem('user_click_task');
+        //activateUserTask(task);
+        handleSearchTasks();
+        //updateClientLikedUI();
+
+        var t1 = performance.now()
+        console.log("document ready took " + (t1 - t0) + " milliseconds.");
+
+
+    });
+
+    
+
+    function handleSearchTasks() {
+        var openCategoryTask = myStorage.getItem('search_open_category');
+        if (openCategoryTask != null) {
+            openCategoryModal(openCategoryTask);
+            myStorage.removeItem('search_open_category');
+
+        }
+
+        var openProductTask = myStorage.getItem('search_open_product');
+        if (openProductTask != null) {
+            $(`.my-slick-slide[data-prod-id=${openProductTask}]`).click();
+            //var prod = $(`div[data-prod-id=${openProductTask}]`);
+            //prod.click();
+
+            myStorage.removeItem('search_open_product');
+        }
+    }
+    /*
+    function activateUserTask(task) {
+        if (task == "catalog-ec6bb117-c8fa-4a38-989a-ab0e0805e44e") {
+            setTimeout(() => {
+                //document.getElementById('contact-form').scrollIntoView();
+                window.scrollTo(0, document.body.scrollHeight);
+                //myStorage.setItem('user_click_task', undefined);
+                myStorage.removeItem('user_click_task');
+            }, 1000);
+        } else if (task == "products-ec6bb117-c8fa-4a38-989a-ab0e0805e44e") {
+            loadProductsModal();
+            myStorage.removeItem('user_click_task');
+        }
+    }
+    */
+</script>
+{%endblock%}
+
+
+
+<!--
+    credits:
+    <div>Icons made by <a href="https://www.flaticon.com/authors/pixel-perfect" title="Pixel perfect">Pixel perfect</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
+<div>Icons made by <a href="https://www.flaticon.com/authors/icongeek26" title="Icongeek26">Icongeek26</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
+<a target="_blank" href="undefined/icons/set/check-mark-emoji">Check Mark icon</a> icon by <a target="_blank" href="">Icons8</a>
+<a target="_blank" href="undefined/icons/set/arrow">Arrow icon</a> icon by <a target="_blank" href="">Icons8</a>
+<a target="_blank" href="undefined/icons/set/plus-math--v2">Plus Math icon</a> icon by <a target="_blank" href="">Icons8</a>
+<a target="_blank" href="undefined/icons/set/plus-math--v1">Plus Math icon</a> icon by <a target="_blank" href="">Icons8</a>
+-->

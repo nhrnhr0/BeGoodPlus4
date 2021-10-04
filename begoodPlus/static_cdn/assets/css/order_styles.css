@@ -1,0 +1,282 @@
+@import url('https://fonts.googleapis.com/css?family=Muli&display=swap');
+@import url('https://fonts.googleapis.com/css?family=Open+Sans:400,500&display=swap');
+
+* {
+	box-sizing: border-box;
+}
+
+body {
+	background-color: #9b59b6;
+	font-family: 'Open Sans', sans-serif;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 100vh;
+	margin: 0;
+	
+	/* hebrew support */
+	direction: rtl;
+}
+
+.container {
+	background-color: #fff;
+	border-radius: 5px;
+	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+	overflow: hidden;
+	width: 700px;
+	max-width: 100%;
+}
+
+.container .form-outer {
+    width: 100%;
+    
+}
+.form-outer .form {
+    display: flex;
+    width: 400%;
+}
+.form-outer form .page {
+    width: 25%;
+    transition: margin-right 0.3s ease-in-out
+}
+
+.form-outer form .page .title {
+    text-align: right;
+    font-size: 25px;
+    font-weight: 500;
+}
+
+.header {
+	border-bottom: 1px solid #f0f0f0;
+	background-color: #f7f7f7;
+	padding: 20px 40px;
+}
+
+.header h2 {
+	margin: 0;
+}
+
+/*.form {
+	padding: 30px 40px;	
+}*/
+
+.form-control {
+	margin-bottom: 10px;
+	padding-bottom: 20px;
+	position: relative;
+	margin-left: 50px;
+	margin-right: 50px;
+}
+
+.form-control label {
+	display: inline-block;
+	margin-bottom: 5px;
+}
+
+.form-control input {
+	border: 2px solid #f0f0f0;
+	border-radius: 4px;
+	display: block;
+	font-family: inherit;
+	font-size: 14px;
+	padding: 10px;
+	width: 100%;
+}
+
+.form-control i {
+    position: absolute;
+    top: 40px;
+    left: 10px;
+    visibility: hidden;
+}
+/*.form-control input {
+    padding-right: 30px;
+}*/
+.form-control input:focus {
+	outline: 0;
+	border-color: #777;
+}
+
+.form-control.success input {
+	border-color: #2ecc71;
+}
+
+.form-control.error input {
+	border-color: #e74c3c;
+}
+
+.form-control small {
+	color: #e74c3c;
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	visibility: hidden;
+}
+
+.form-control.error small {
+	visibility: visible;
+}
+
+.form-control.success i.fa-check-circle {
+    color: #2ecc71;
+    visibility: visible;
+    
+}
+
+.form-control.error i.fa-exclamation-circle {
+    color: #e74c3c;
+    visibility: visible;
+    
+}
+
+
+
+.form button {
+	background-color: #8e44ad;
+	border: 2px solid #8e44ad;
+	border-radius: 4px;
+	color: #fff;
+	display: block;
+	font-family: inherit;
+	font-size: 16px;
+	padding: 10px;
+	margin-top: 20px;
+	width: 100%;
+}
+
+.form .button:hover {
+    background: #000;
+}
+
+
+.container .progress-bar {
+    direction: ltr; /* ??? */
+    display: flex;
+    margin: 40px 0;
+}
+
+
+.container .progress-bar .step {
+    position: relative;
+    text-align: center;
+    width: 100%;
+}
+
+.container .progress-bar .step:after {
+    position: absolute;
+    content: '';
+    bottom: 11px;
+    height: 3px;
+    width: 500px;
+    color: #2ecc71;
+    display: block;
+    /*background: #262626;*/
+    /*right: -51px;*/
+}
+
+.container .progress-bar .step p {
+    font-size:  18px;
+    font-weight: 500;
+    color:#000;
+    margin-bottom: 8px;
+    transition: 0.2s;
+}
+.container .progress-bar .step p.active {
+    color: #d43f8d;
+}
+
+
+.container .progress-bar .step .bullet {
+    position: relative;
+    height: 25px;
+    width: 25px;
+    border: 2px solid #000;
+    display: inline-block;
+    font-weight: 500;
+    border-radius: 50%;
+    font-size: 17px;
+    line-height: 25px;
+    transition: 0.2s;
+}
+
+
+.progress-bar .step .bullet.active {
+    border-color: #d43f8d;
+    background: #d43f8d;
+}
+
+
+
+.container .progress-bar .step .bullet:before,
+.container .progress-bar .step .bullet:after {
+    position: absolute;
+    content: '';
+    bottom: 11px;
+    height: 3px;
+    width: 167px;
+    /*background: #262626;*/
+    /*right: -51px;*/
+}
+
+
+/*TODO: show the line to the next progress-bar item on mobiles too */
+@media screen and (max-width: 700px) {
+    .container .progress-bar .step .bullet:before,
+    .container .progress-bar .step .bullet:after { 
+        width: 100%;
+    }
+}
+
+/*.progress-bar .step .bullet:after {*/
+.container .progress-bar .step .bullet.active:after {
+    background: #d43f8d;
+    transform: scaleX(0);
+    transform-origin: left;
+    animation: animate 0.3s linear forwards;
+}
+
+
+@keyframes animate {
+    100% {
+        transform: scaleX(1);
+    }
+}
+
+.container .progress-bar .step:last-child .bullet:before,
+.container .progress-bar .step:last-child .bullet:after {
+    display: none;
+}
+
+
+.container .progress-bar .step span {
+    font-weight: 500;
+    font-size: 17px;
+    line-height: 25px;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.container .progress-bar .step .bullet.active span {
+    display: none;
+}
+
+.container .progress-bar .step .check {
+    position: absolute;
+    left: 50%;
+    top: 83%; /*70%*/
+    font-size: 17px;
+    transform: translate(-50%,-50%);
+    display: none;
+}
+
+.container .progress-bar .step .check.active {
+    display: block;
+    color: #fff;
+}
+.form-btn {
+    transition-duration: 0.4s;
+}
+.form-btn:hover {
+    background: #9b59b6;
+}

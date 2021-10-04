@@ -1,0 +1,1094 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-09-19 13:08+0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n == 2 && n % "
+"1 == 0) ? 1: (n % 10 == 0 && n % 1 == 0 && n > 10) ? 2 : 3;\n"
+
+#: .\catalogAlbum\models.py:47 .\catalogImages\models.py:17
+#: .\category\models.py:7
+msgid "title"
+msgstr "כותרת"
+
+#: .\catalogAlbum\models.py:48
+msgid "slug"
+msgstr "סלאג"
+
+#: .\catalogAlbum\models.py:49 .\catalogImages\models.py:18
+#: .\glofa_types\models.py:12
+msgid "description"
+msgstr "תיאור"
+
+#: .\catalogAlbum\models.py:50
+msgid "fotter"
+msgstr ""
+
+#: .\catalogAlbum\models.py:51
+msgid "keyworks"
+msgstr "מילות מפתח"
+
+#: .\catalogAlbum\models.py:52
+msgid "album list"
+msgstr "רשימת אלבומים"
+
+#: .\catalogAlbum\models.py:54
+msgid "is public"
+msgstr "האם פומבי"
+
+#: .\catalogAlbum\models.py:98
+#, fuzzy
+#| msgid "Catalog image"
+msgid "catalog image"
+msgstr "תמונת קטלוג"
+
+#: .\catalogAlbum\models.py:99
+#, fuzzy
+#| msgid "Catalog image"
+msgid "catalog album"
+msgstr "תמונת קטלוג"
+
+#: .\catalogImages\models.py:19
+#, fuzzy
+#| msgid "code"
+msgid "barcode"
+msgstr "קוד"
+
+#: .\catalogImages\models.py:20
+msgid "whatsapp text"
+msgstr "טקסט לוואצאפ"
+
+#: .\catalogImages\models.py:23
+msgid "short description"
+msgstr "תיאור קצר"
+
+#: .\catalogImages\models.py:25 .\catalogImages\models.py:187
+#: .\catalogLogos\models.py:10 .\catalogLogos\models.py:21
+#: .\clientImages\models.py:11 .\glofa_types\models.py:24
+#: .\productImages\models.py:12 .\product\models.py:99
+msgid "image"
+msgstr "תמונה"
+
+#: .\catalogImages\models.py:26
+msgid "image thumbnail"
+msgstr "תמונה ריבוע"
+
+#: .\catalogImages\models.py:28
+msgid "cost price"
+msgstr "מחיר עלות"
+
+#: .\catalogImages\models.py:29
+msgid "store price"
+msgstr "מחיר חנות"
+
+#: .\catalogImages\models.py:30
+msgid "private client price"
+msgstr "מחיר לקוח פרטי"
+
+#: .\catalogImages\models.py:33
+msgid "packing type from provider"
+msgstr "שיטת אריזה מהספק"
+
+#: .\catalogImages\models.py:34
+msgid "packing type for client"
+msgstr "שיטת אריזה ללקוח"
+
+#: .\catalogImages\models.py:35
+msgid "colors"
+msgstr "צבעים"
+
+#: .\catalogImages\models.py:36
+msgid "sizes"
+msgstr "גדלים"
+
+#: .\catalogImages\models.py:37
+msgid "providers"
+msgstr "ספקים"
+
+#: .\catalogImages\models.py:40
+msgid "can tag"
+msgstr "ניתן למיתוג"
+
+#: .\catalogImages\models.py:63
+msgid "cost price (no VAT)"
+msgstr "מחיר עלות (ללא מע'מ)"
+
+#: .\catalogImages\models.py:67
+msgid "store price  (no VAT)"
+msgstr "מחיר חנות (ללא מע'מ)"
+
+#: .\catalogImages\models.py:70
+msgid "private client price (no VAT)"
+msgstr "מחיר לקוח פרטי (ללא מע'מ)"
+
+#: .\catalogImages\models.py:74
+msgid "Catalog image"
+msgstr "תמונת קטלוג"
+
+#: .\catalogImages\models.py:75
+msgid "Catalog images"
+msgstr "תמונות קטלוג"
+
+#: .\catalogImages\models.py:181
+msgid "thumbnail"
+msgstr "תמונה קטנה"
+
+#: .\catalogLogos\models.py:9 .\clientLikedImages\models.py:7
+#: .\core\models.py:9 .\customerCart\models.py:10 .\dashboard\models.py:8
+#: .\freeFlow\models.py:8 .\myUserTasks\models.py:19 .\myUserTasks\models.py:27
+#: .\product\models.py:21 .\provider\models.py:12
+msgid "name"
+msgstr "שם"
+
+#: .\category\models.py:10
+#, fuzzy
+#| msgid "color representation"
+msgid "catalog representation"
+msgstr "ייצוג צבע"
+
+#: .\category\models.py:13 .\product\models.py:22
+msgid "category"
+msgstr "קטגוריה"
+
+#: .\category\models.py:14
+msgid "categories"
+msgstr "קטגוריות"
+
+#: .\category\models.py:19
+msgid "products count"
+msgstr "צבעי מוצר"
+
+#: .\clientImages\models.py:7
+#, fuzzy
+#| msgid "client name"
+msgid "Client image"
+msgstr "שם לקוח"
+
+#: .\clientImages\models.py:8
+#, fuzzy
+#| msgid "Catalog images"
+msgid "Client images"
+msgstr "תמונות קטלוג"
+
+#: .\clientLikedImages\models.py:8 .\core\models.py:11
+#: .\customerCart\models.py:12 .\freeFlow\models.py:9
+#: .\myUserTasks\models.py:21 .\myUserTasks\models.py:29 .\order\models.py:24
+msgid "email"
+msgstr "אימייל"
+
+#: .\clientLikedImages\models.py:9
+#, fuzzy
+#| msgid "number"
+msgid "phone number"
+msgstr "מספר"
+
+#: .\clientLikedImages\models.py:10 .\core\models.py:12 .\freeFlow\models.py:12
+#: .\myUserTasks\models.py:22
+msgid "message"
+msgstr "הודעה"
+
+#: .\clientLikedImages\models.py:12
+#, fuzzy
+#| msgid "submit date"
+msgid "submited date"
+msgstr "תאריך הגשה"
+
+#: .\color\models.py:9
+#, fuzzy
+#| msgid "color"
+msgid "Color"
+msgstr "צבע"
+
+#: .\color\models.py:10
+msgid "Colors"
+msgstr "צבע"
+
+#: .\color\models.py:12
+msgid "color name"
+msgstr "צבע"
+
+#: .\color\models.py:13 .\order_detail\models.py:15 .\stock\models.py:20
+msgid "color"
+msgstr "צבע"
+
+#: .\core\models.py:10 .\customerCart\models.py:11 .\myUserTasks\models.py:20
+#: .\myUserTasks\models.py:28
+#, fuzzy
+#| msgid "telephone"
+msgid "phone"
+msgstr "טלפון"
+
+#: .\core\models.py:45
+msgid "number of results"
+msgstr ""
+
+#: .\dashboard\models.py:15
+msgid "date"
+msgstr ""
+
+#: .\freeFlow\models.py:10 .\order\models.py:23
+msgid "telephone"
+msgstr "טלפון"
+
+#: .\freeFlow\models.py:11
+#, fuzzy
+#| msgid "amount"
+msgid "country"
+msgstr "כמות"
+
+#: .\freeFlow\models.py:13
+#, fuzzy
+#| msgid "private compeny"
+msgid "is private person"
+msgstr "חברה פרטית"
+
+#: .\freeFlow\models.py:14
+msgid "create date"
+msgstr "תאריך יצירה"
+
+#: .\glofa_types\models.py:9
+msgid "glofa type"
+msgstr "סוג גלופה"
+
+#: .\glofa_types\models.py:10
+msgid "glofa types"
+msgstr "סוגי גלופה"
+
+#: .\glofa_types\models.py:11
+msgid "number"
+msgstr "מספר"
+
+#: .\glofa_types\models.py:13
+#, fuzzy
+#| msgid "suport printing"
+msgid "supported products"
+msgstr "תומך בהדפסה"
+
+#: .\glofa_types\models.py:22
+#, fuzzy
+#| msgid "Catalog image"
+msgid "glofa image"
+msgstr "תמונת קטלוג"
+
+#: .\glofa_types\models.py:23
+#, fuzzy
+#| msgid "glofa types"
+msgid "glofa images"
+msgstr "סוגי גלופה"
+
+#: .\order\models.py:16
+#, fuzzy
+#| msgid "Orders"
+msgid "Order"
+msgstr "הזמנות"
+
+#: .\order\models.py:17
+msgid "Orders"
+msgstr "הזמנות"
+
+#: .\order\models.py:19
+msgid "submit date"
+msgstr "תאריך הגשה"
+
+#: .\order\models.py:20
+msgid "client name"
+msgstr "שם לקוח"
+
+#: .\order\models.py:21 .\provider\models.py:13
+msgid "private compeny"
+msgstr "חברה פרטית"
+
+#: .\order\models.py:22
+msgid "addres"
+msgstr "כתובת"
+
+#: .\order\models.py:25
+msgid "contact man"
+msgstr "איש קשר"
+
+#: .\order\models.py:26
+msgid "cellphone"
+msgstr "נייד"
+
+#: .\order_detail\models.py:10
+msgid "Order detail"
+msgstr "פרטי הזמנה"
+
+#: .\order_detail\models.py:11
+msgid "Order details"
+msgstr "פרטי הזמנות"
+
+#: .\order_detail\models.py:12
+msgid "order"
+msgstr "הזמנה"
+
+#: .\order_detail\models.py:13
+msgid "product"
+msgstr "מוצר"
+
+#: .\order_detail\models.py:14 .\productSize\models.py:13 .\stock\models.py:19
+msgid "size"
+msgstr "גודל"
+
+#: .\order_detail\models.py:16
+msgid "amount"
+msgstr "כמות"
+
+#: .\order_detail\models.py:17
+msgid "add printing"
+msgstr "הוסף הדפסה"
+
+#: .\order_detail\models.py:18
+msgid "add embroidery"
+msgstr "הוסף רקמה"
+
+#: .\order_detail_addons\models.py:11 .\order_detail_addons\models.py:12
+#, fuzzy
+#| msgid "Order details"
+msgid "Order detail addons"
+msgstr "פרטי הזמנות"
+
+#: .\order_detail_addons\models.py:15
+#, fuzzy
+#| msgid "suport printing"
+msgid "is print"
+msgstr "תומך בהדפסה"
+
+#: .\order_detail_addons\models.py:16
+msgid "glofa"
+msgstr "גלופה"
+
+#: .\order_detail_addons\models.py:18
+msgid "logo"
+msgstr "לוגו"
+
+#: .\order_detail_addons\models.py:19
+msgid "logo description"
+msgstr "תיאור לוגו"
+
+#: .\packingType\models.py:7
+msgid "Packing type"
+msgstr "שיטת אריזה"
+
+#: .\packingType\models.py:8
+msgid "Packing types"
+msgstr "שיטות אריזה"
+
+#: .\productColor\models.py:10
+msgid "product color"
+msgstr "צבע מוצר"
+
+#: .\productColor\models.py:11
+msgid "product colors"
+msgstr "צבעי מוצר"
+
+#: .\productColor\models.py:15 .\productSize\models.py:14
+#: .\provider\models.py:14
+msgid "code"
+msgstr "קוד"
+
+#: .\productColor\models.py:22
+msgid "color representation"
+msgstr "ייצוג צבע"
+
+#: .\productImages\models.py:8
+msgid "Product image"
+msgstr "תמונת מוצר"
+
+#: .\productImages\models.py:9
+msgid "Product images"
+msgstr "תמונות מוצרים"
+
+#: .\productImages\models.py:13 .\product\models.py:17
+msgid "Product"
+msgstr "מוצר"
+
+#: .\productSize\models.py:8
+msgid "Product size"
+msgstr "גודל מוצר"
+
+#: .\productSize\models.py:9
+msgid "Product sizes"
+msgstr "גדלי מוצרים"
+
+#: .\product\admin.py:97
+msgid " Selected Record(s) Marked as Active pringing Successfully"
+msgstr " מוצרים מסומנים סומנו כתומכים בהדפסה"
+
+#: .\product\admin.py:98
+msgid "make prining active"
+msgstr "הפוך הדפסה לזמינה"
+
+#: .\product\admin.py:102
+msgid " Selected Record(s) Marked as Active embroidery Successfully"
+msgstr " מוצרים מסומנים סומנו כתומכים ברקמה"
+
+#: .\product\admin.py:103
+msgid "make embroidery active"
+msgstr "הפוך רקמה לזמינה"
+
+#: .\product\admin.py:107
+msgid " Selected Record(s) Marked as Inactive pringing Successfully"
+msgstr " מוצרים מסומנים סומנו כלא תומכי הדפסה"
+
+#: .\product\admin.py:108
+msgid "make prining inactive"
+msgstr "הפוך הדפסה ללא זמינה"
+
+#: .\product\admin.py:112
+msgid " Selected Record(s) Marked as Inactive embroidery Successfully"
+msgstr " מוצרים מסומנים סומנו כלא תומכי רקמה"
+
+#: .\product\admin.py:113
+msgid "make embroidery inactive"
+msgstr "הפוך רקמה ללא זמינה"
+
+#: .\product\models.py:18
+msgid "Products"
+msgstr "מוצרים"
+
+#: .\product\models.py:28
+msgid "suport printing"
+msgstr "תומך בהדפסה"
+
+#: .\product\models.py:29
+msgid "suport embroidery"
+msgstr "תומך ברקמה"
+
+#: .\product\models.py:30
+msgid "content"
+msgstr "תוכן"
+
+#: .\product\models.py:31
+msgid "comments"
+msgstr "הערות"
+
+#: .\product\models.py:50
+msgid "customer catalog number"
+msgstr "מספר קטלוג לקוח"
+
+#: .\product\models.py:78
+msgid "total stock at us"
+msgstr "כמות כוללת אצלנו"
+
+#: .\provider\models.py:8
+msgid "Provider"
+msgstr "ספק"
+
+#: .\provider\models.py:9
+msgid "Providers"
+msgstr "ספקים"
+
+#: .\provider\models.py:20
+msgid "stocks count"
+msgstr "מספר מלאי"
+
+#: .\static_cdn\templates\OLD_UNUSED\freeflow2.html:86
+msgid "Home"
+msgstr "בית"
+
+#: .\static_cdn\templates\OLD_UNUSED\freeflow2.html:87
+msgid "About Us"
+msgstr "אודות"
+
+#: .\static_cdn\templates\OLD_UNUSED\freeflow2.html:88
+msgid "Benefits & Advantages"
+msgstr "יתרונות"
+
+#: .\static_cdn\templates\OLD_UNUSED\freeflow2.html:89
+msgid "Instructions"
+msgstr "הוראות"
+
+#: .\static_cdn\templates\OLD_UNUSED\freeflow2.html:90
+msgid "videos"
+msgstr "סרטונים"
+
+#: .\static_cdn\templates\OLD_UNUSED\freeflow2.html:110
+msgid "contact"
+msgstr "צור קשר"
+
+#: .\static_cdn\templates\OLD_UNUSED\freeflow2.html:125
+msgid "Welcome to"
+msgstr "ברוך הבא"
+
+#: .\static_cdn\templates\OLD_UNUSED\freeflow2.html:126
+msgid "FREE FLOW"
+msgstr "FREE FLOW"
+
+#: .\static_cdn\templates\OLD_UNUSED\freeflow2.html:127
+msgid ""
+"Tired of watering the pots every day? You must have noticed that growing "
+"plants is an action that requires time and effort ... not anymore!"
+msgstr ""
+"נמאס לך כל יום להשקות את העציצים? בטח כבר שמת לב שלגדל צמחים זאת פעולה "
+"שדורשת זמן והתעסקות..."
+
+#: .\static_cdn\templates\OLD_UNUSED\freeflow2.html:128
+msgid "we have a solution for you!"
+msgstr "יש לנו את הפתרון המושלם עבורך!"
+
+#: .\static_cdn\templates\OLD_UNUSED\freeflow2.html:130
+msgid "The Perfect Solution"
+msgstr "לפתרון המושלם"
+
+#: .\static_cdn\templates\OLD_UNUSED\freeflow2.html:140
+msgid ""
+"Free Flow: A product designed for irrigating plants in places where there is "
+"no pressurized water source."
+msgstr "Free Flow הפתרון המושלם להשקיית צמחים במקומות שבהם אין מקור מים בלחץ."
+
+#: .\static_cdn\templates\OLD_UNUSED\freeflow2.html:143
+msgid "1 to 6 Plants"
+msgstr "1 ל 6 צמחים"
+
+#: .\static_cdn\templates\OLD_UNUSED\freeflow2.html:145
+msgid ""
+"The perfect solution for watering the plants on the balcony, on the "
+"windowsill, in the office, at home And wherever you want to grow your plants."
+msgstr ""
+"הפתרון המושלם להשקיית הצמחים במרפסת, על אדן החלון, במשרד, בבית ובכל מקום בו "
+"תרצו לגדל את הצמחים שלכם."
+
+#: .\static_cdn\templates\OLD_UNUSED\freeflow2.html:151
+msgid "Use it in the office, at home, or anywhere you want"
+msgstr "השתמש במשרד, בבית, או בכל מקום שתרצה"
+
+#: .\static_cdn\templates\OLD_UNUSED\freeflow2.html:152
+msgid ""
+"It is so small and compact that you can even use it to put your favorite "
+"plant in the office, home, garden or anywhere you see fit"
+msgstr ""
+"הוא כל כך קטן וקומפקטי, שאפשר אפילו להשתמש בו בכדי לשים את הצמח האהוב עליכם "
+"במשרד, בבית, בגינה או בכל מקום שנראה לכם מתאים"
+
+#: .\static_cdn\templates\OLD_UNUSED\freeflow2.html:159
+msgid "Saves water and time"
+msgstr "חוסך מים וזמן"
+
+#: .\static_cdn\templates\OLD_UNUSED\freeflow2.html:160
+msgid ""
+"Focused and efficient watering allows you to enjoy the convenience of an "
+"automatic irrigation system without wasting water and valuable time!"
+msgstr ""
+"השקייה ממוקדת ויעילה מאפשרת לך ליהנות מנוחות מערכת השקיה אוטומטית ללא בזבוז "
+"מים וזמן יקר!"
+
+#: .\static_cdn\templates\OLD_UNUSED\freeflow2.html:167
+msgid "Eco-friendly system"
+msgstr "מערכת ידידותית לסביבה "
+
+#: .\static_cdn\templates\OLD_UNUSED\freeflow2.html:168
+msgid ""
+"The irrigation system does not consume electricity, and allows recycling and "
+"reuse of most standard plastic bottles"
+msgstr ""
+"מערכת השקייה שלא צורכת חשמל, ומאפשרת מחזור ושימוש חוזר ברוב בקבוקי הפלסטיק "
+"הסטנדרטים"
+
+#: .\static_cdn\templates\OLD_UNUSED\freeflow2.html:184
+msgid "FreeFlow Benefits & Advantages"
+msgstr "יתרונות של free flow"
+
+#: .\static_cdn\templates\OLD_UNUSED\freeflow2.html:194
+#: .\static_cdn\templates\OLD_UNUSED\freeflow2.html:278
+msgid "Multi Plants Watering: One Single Plant and Up to Six Plants"
+msgstr "מערכת השקיה לצמח הבודד ועד שישה צמחים."
+
+#: .\static_cdn\templates\OLD_UNUSED\freeflow2.html:200
+#: .\static_cdn\templates\OLD_UNUSED\freeflow2.html:282
+msgid "Gravitational Watering: Non-Pressurized System"
+msgstr "מערכת השקיה בגרביטציה וללא לחץ מים."
+
+#: .\static_cdn\templates\OLD_UNUSED\freeflow2.html:208
+#: .\static_cdn\templates\OLD_UNUSED\freeflow2.html:286
+msgid "Plug & Play: Watering System, Easy to Use- Just Fill &Go"
+msgstr "מערכת השקיה, קלה לשימוש - פשוט Fill & Go"
+
+#: .\static_cdn\templates\OLD_UNUSED\freeflow2.html:216
+msgid ""
+"Eco-Friendly System: Reusing Almost Any Standard Plastic Bottle, without the "
+"use of batteries"
+msgstr ""
+"מערכת ידידותית לסביבה: שימוש חוזר כמעט בכל בקבוק פלסטיק רגיל וללא צורך "
+"בבטריות"
+
+#: .\static_cdn\templates\OLD_UNUSED\freeflow2.html:225
+#: .\static_cdn\templates\OLD_UNUSED\freeflow2.html:294
+msgid "Accurate and efficient watering"
+msgstr "השקיה מדויקת ויעילה"
+
+#: .\static_cdn\templates\OLD_UNUSED\freeflow2.html:233
+#: .\static_cdn\templates\OLD_UNUSED\freeflow2.html:298
+msgid "Time saving"
+msgstr "חוסך זמן"
+
+#: .\static_cdn\templates\OLD_UNUSED\freeflow2.html:241
+msgid "Irrigation without dirt, wet floor or puddles."
+msgstr "השקיה ללא לכלוך וללא רצפה רטובה ושלוליות."
+
+#: .\static_cdn\templates\OLD_UNUSED\freeflow2.html:249
+#: .\static_cdn\templates\OLD_UNUSED\freeflow2.html:306
+msgid "A system that helps success in growing plants."
+msgstr "מערכת המסייעת להצלחה שבגידול הצמחים."
+
+#: .\static_cdn\templates\OLD_UNUSED\freeflow2.html:257
+#: .\static_cdn\templates\OLD_UNUSED\freeflow2.html:310
+msgid "Quality time for parents and children - education for sustainability."
+msgstr "זמן איכות הורים וילדים-חינוך לקיימות."
+
+#: .\static_cdn\templates\OLD_UNUSED\freeflow2.html:265
+#: .\static_cdn\templates\OLD_UNUSED\freeflow2.html:314
+msgid "Fertilizers can be added to irrigation water."
+msgstr "ניתן להוסיף דשנים למי ההשקיה."
+
+#: .\static_cdn\templates\OLD_UNUSED\freeflow2.html:290
+msgid ""
+"Eco-Friendly System: Reusing Almost Any Standard Plastic Bottle and without "
+"the use of batteries"
+msgstr ""
+"מערכת ידידותית לסביבה: שימוש חוזר כמעט בכל בקבוק פלסטיק רגיל וללא צורך "
+"בבטריות"
+
+#: .\static_cdn\templates\OLD_UNUSED\freeflow2.html:302
+msgid "Irrigation without dirt and without wet floor and puddles."
+msgstr "השקיה ללא לכלוך וללא רצפה רטובה ושלוליות."
+
+#: .\static_cdn\templates\OLD_UNUSED\freeflow2.html:336
+msgid "FreeFlow System Design"
+msgstr "FreeFlow חלקי המערכת"
+
+#: .\static_cdn\templates\OLD_UNUSED\freeflow2.html:354
+msgid "Videos & Assembly instructions Manuals"
+msgstr "סרטונים & הוראות הרכבה"
+
+#: .\static_cdn\templates\OLD_UNUSED\freeflow2.html:358
+msgid "Free Flow - Single Plant"
+msgstr "Free Flow - צמח יחיד"
+
+#: .\static_cdn\templates\OLD_UNUSED\freeflow2.html:366
+msgid "Free Flow - Multi Plants"
+msgstr "Free Flow - שישה צמחים"
+
+#: .\static_cdn\templates\OLD_UNUSED\freeflow2.html:390
+msgid ""
+"To view and purchase, enter the map and go to the branch closest to you!"
+msgstr "לצפיה ורכישה היכנסו למפה וגשו לסניף הקרוב אליכם!"
+
+#: .\static_cdn\templates\OLD_UNUSED\new_my_logo.html:7
+msgid "קטלוג מוצרי פרסום"
+msgstr ""
+
+#: .\static_cdn\templates\OLD_UNUSED\websites.html:7
+msgid "technology"
+msgstr ""
+
+#: .\static_cdn\templates\catalog.html:7
+#, fuzzy
+#| msgid "Catalog image"
+msgid "Catalog"
+msgstr "תמונת קטלוג"
+
+#: .\static_cdn\templates\newMain.html:7
+msgid "Main"
+msgstr ""
+
+#: .\static_cdn\templates\success.html:7
+msgid "Success"
+msgstr ""
+
+#: .\stock\models.py:13
+msgid "Stock"
+msgstr "מלאי"
+
+#: .\stock\models.py:14
+msgid "Stocks"
+msgstr "מלאים"
+
+#: .\stock\models.py:17
+msgid "product name"
+msgstr "שם מוצר"
+
+#: .\stock\models.py:18
+msgid "product provider"
+msgstr "ספק מוצר"
+
+#: .\stock\models.py:21
+msgid "packing type"
+msgstr "שיטת אריזה"
+
+#: .\stock\models.py:22
+msgid "provider makat"
+msgstr "מק\"ט של הספק"
+
+#: .\stock\models.py:23
+msgid "stock at us"
+msgstr "כמות אצלנו"
+
+#: .\stock\models.py:24
+msgid "exist at provider"
+msgstr "קיים אצל הספק"
+
+#: .\stock\models.py:25
+msgid "provider resupply date"
+msgstr "תאריך חידוש מלאי אצל הספק"
+
+#: .\stock\models.py:27
+msgid "buy cost"
+msgstr "מחיר עלות"
+
+#: .\stock\models.py:29
+msgid "cost for institucional without tax from"
+msgstr "מחיר לקוח מוסדי ללא מע\"מ מ"
+
+#: .\stock\models.py:30
+msgid "to"
+msgstr "עד"
+
+#: .\stock\models.py:31
+msgid "cost for single client with tax"
+msgstr "מחיר לקוח בודד כולל מע\"מ"
+
+#: .\stock\models.py:38
+msgid "buy const with tax"
+msgstr "מחיר עלות כולל מע\"מ"
+
+#: .\stock\models.py:42
+msgid "institutional client price range"
+msgstr "טווח מחירים ללקוח עסקי"
+
+#: .\stock\models.py:55
+msgid "makat"
+msgstr "מק\"ט"
+
+#, fuzzy
+#~| msgid "Some translatable text"
+#~ msgid "Value"
+#~ msgstr "טקסט שצריך לתרגם"
+
+#, fuzzy
+#~| msgid "create date"
+#~ msgid "Advanced filters"
+#~ msgstr "תאריך יצירה"
+
+#, fuzzy
+#~| msgid "contact"
+#~ msgid "Contains"
+#~ msgstr "צור קשר"
+
+#, fuzzy
+#~| msgid "Time saving"
+#~ msgid "DateTime Range"
+#~ msgstr "חוסך זמן"
+
+#, fuzzy
+#~| msgid "create date"
+#~ msgid "Greater Than"
+#~ msgstr "תאריך יצירה"
+
+#, fuzzy
+#~| msgid "create date"
+#~ msgid "Greater Than or Equal To"
+#~ msgstr "תאריך יצירה"
+
+#, fuzzy
+#~| msgid "client name"
+#~ msgid "Field"
+#~ msgstr "שם לקוח"
+
+#, fuzzy
+#~| msgid "create date"
+#~ msgid "Advanced Filter"
+#~ msgstr "תאריך יצירה"
+
+#, fuzzy
+#~| msgid "create date"
+#~ msgid "Advanced Filters"
+#~ msgstr "תאריך יצירה"
+
+#, fuzzy
+#~| msgid "title"
+#~ msgid "Title"
+#~ msgstr "כותרת"
+
+#, fuzzy
+#~| msgid "create date"
+#~ msgid "Created by"
+#~ msgstr "תאריך יצירה"
+
+#, fuzzy
+#~| msgid "create date"
+#~ msgid "Created at"
+#~ msgstr "תאריך יצירה"
+
+#, fuzzy
+#~| msgid "create date"
+#~ msgid "Create advanced filter"
+#~ msgstr "תאריך יצירה"
+
+#, fuzzy
+#~| msgid "create date"
+#~ msgid "Change advanced filter"
+#~ msgstr "תאריך יצירה"
+
+#~ msgid "Messages"
+#~ msgstr "הודעה"
+
+#, fuzzy
+#~| msgid "number"
+#~ msgid "Enter a valid value."
+#~ msgstr "מספר"
+
+#, fuzzy
+#~| msgid "number"
+#~ msgid "Enter a valid integer."
+#~ msgstr "מספר"
+
+#, fuzzy
+#~| msgid "addres"
+#~ msgid "Enter a valid email address."
+#~ msgstr "כתובת"
+
+#, fuzzy
+#~| msgid "addres"
+#~ msgid "Enter a valid IPv4 address."
+#~ msgstr "כתובת"
+
+#, fuzzy
+#~| msgid "number"
+#~ msgid "Enter a number."
+#~ msgstr "מספר"
+
+#, fuzzy
+#~| msgid "number"
+#~ msgid "Decimal number"
+#~ msgstr "מספר"
+
+#, fuzzy
+#~| msgid "Some translatable text"
+#~ msgid "Duration"
+#~ msgstr "טקסט שצריך לתרגם"
+
+#, fuzzy
+#~| msgid "addres"
+#~ msgid "Email address"
+#~ msgstr "כתובת"
+
+#, fuzzy
+#~| msgid "number"
+#~ msgid "Floating point number"
+#~ msgstr "מספר"
+
+#, fuzzy
+#~| msgid "addres"
+#~ msgid "IPv4 address"
+#~ msgstr "כתובת"
+
+#, fuzzy
+#~| msgid "addres"
+#~ msgid "IP address"
+#~ msgstr "כתובת"
+
+#, fuzzy
+#~| msgid "image"
+#~ msgid "Image"
+#~ msgstr "תמונה"
+
+#, fuzzy
+#~| msgid "number"
+#~ msgid "Enter a whole number."
+#~ msgstr "מספר"
+
+#, fuzzy
+#~| msgid "number"
+#~ msgid "Enter a valid date."
+#~ msgstr "מספר"
+
+#, fuzzy
+#~| msgid "number"
+#~ msgid "Enter a valid time."
+#~ msgstr "מספר"
+
+#, fuzzy
+#~| msgid "number"
+#~ msgid "Enter a complete value."
+#~ msgstr "מספר"
+
+#, fuzzy
+#~| msgid "content"
+#~ msgid "Unknown"
+#~ msgstr "תוכן"
+
+#, fuzzy
+#~| msgid "weight"
+#~ msgid "midnight"
+#~ msgstr "משקל"
+
+#, fuzzy
+#~| msgid "number"
+#~ msgid "November"
+#~ msgstr "מספר"
+
+#, fuzzy
+#~| msgid "number"
+#~ msgid "December"
+#~ msgstr "מספר"
+
+#, fuzzy
+#~| msgid "product"
+#~ msgid "oct"
+#~ msgstr "מוצר"
+
+#, fuzzy
+#~| msgid "number"
+#~ msgctxt "alt. month"
+#~ msgid "November"
+#~ msgstr "מספר"
+
+#, fuzzy
+#~| msgid "number"
+#~ msgctxt "alt. month"
+#~ msgid "December"
+#~ msgstr "מספר"
+
+#, fuzzy
+#~| msgid "Welcome to"
+#~ msgid "Welcome,"
+#~ msgstr "ברוך הבא"
+
+#, fuzzy
+#~| msgid "view in website"
+#~ msgid "View site"
+#~ msgstr "צפה באתר"
+
+#, fuzzy
+#~| msgid "Instructions"
+#~ msgid "Documentation"
+#~ msgstr "הוראות"
+
+#, fuzzy
+#~| msgid "view in website"
+#~ msgid "View on site"
+#~ msgstr "צפה באתר"
+
+#, fuzzy
+#~| msgid "view in website"
+#~ msgid "View"
+#~ msgstr "צפה באתר"
+
+#, fuzzy
+#~| msgid "Instructions"
+#~ msgid "Recent actions"
+#~ msgstr "הוראות"
+
+#, fuzzy
+#~| msgid "Instructions"
+#~ msgid "My actions"
+#~ msgstr "הוראות"
+
+#, fuzzy
+#~| msgid "content"
+#~ msgid "Unknown content"
+#~ msgstr "תוכן"
+
+#, fuzzy
+#~| msgid "Time saving"
+#~ msgid "Date/time"
+#~ msgstr "חוסך זמן"
+
+#, fuzzy
+#~| msgid "contact"
+#~ msgid "crontab"
+#~ msgstr "צור קשר"
+
+#, fuzzy
+#~| msgid "contact"
+#~ msgid "crontabs"
+#~ msgstr "צור קשר"
+
+#, fuzzy
+#~| msgid "short description"
+#~ msgid "Short Description For This Task"
+#~ msgstr "תיאור קצר"
+
+#, fuzzy
+#~| msgid "description"
+#~ msgid "Description"
+#~ msgstr "תיאור"
+
+#, fuzzy, python-format
+#~| msgid "size"
+#~ msgid "%s resize"
+#~ msgstr "גודל"
+
+#, fuzzy, python-format
+#~| msgid "weight"
+#~ msgid "%s height"
+#~ msgstr "משקל"
+
+#, fuzzy
+#~| msgid "Some translatable text"
+#~ msgid "Translation"
+#~ msgstr "טקסט שצריך לתרגם"
+
+#, fuzzy
+#~| msgid "Some translatable text"
+#~ msgid "Value field"
+#~ msgstr "טקסט שצריך לתרגם"
+
+#, fuzzy
+#~| msgid "Some translatable text"
+#~ msgid "Translatable field"
+#~ msgstr "טקסט שצריך לתרגם"
+
+#, fuzzy
+#~| msgid "Some translatable text"
+#~ msgid "Translatable fields"
+#~ msgstr "טקסט שצריך לתרגם"
+
+#, fuzzy
+#~| msgid "client name"
+#~ msgid "Field name"
+#~ msgstr "שם לקוח"
+
+#, fuzzy
+#~| msgid "Some translatable text"
+#~ msgid "Name field"
+#~ msgstr "טקסט שצריך לתרגם"
+
+#, fuzzy
+#~| msgid "client name"
+#~ msgid "User field name"
+#~ msgstr "שם לקוח"
+
+#, fuzzy
+#~| msgid "Some translatable text"
+#~ msgid "Name user's field"
+#~ msgstr "טקסט שצריך לתרגם"
+
+#, fuzzy
+#~| msgid "weight"
+#~ msgctxt "law"
+#~ msgid "right"
+#~ msgstr "משקל"
+
+#, fuzzy
+#~| msgid "weight"
+#~ msgctxt "good"
+#~ msgid "right"
+#~ msgstr "משקל"
+
+#~ msgid "Some translatable text"
+#~ msgstr "טקסט שצריך לתרגם"

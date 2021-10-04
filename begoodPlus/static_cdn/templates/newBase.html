@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html>
+
+<head lang="he">
+    {%load static %}
+    {% load bootstrap5 %}
+
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>M.S. Global {% block head_title %}{% endblock %}</title>
+    {% load compress %}
+
+
+    <!--<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
+    -->
+<link rel="preconnect" href="https://fonts.gstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="shortcut icon" type="image/jpg" href="{%static 'assets/base/imgs/logo_ms.png'%}"/>
+    <!--
+    <link rel="preload" href="{%static 'assets/base/fonts/subset-RoundedMplus1c-Bold.woff2'%}" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="{%static 'assets/base/fonts/subset-RoundedMplus1c-Bold.woff'%}" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="{%static 'assets/base/fonts/subset-RoundedMplus1c-Bold.woff2'%}" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="{%static 'assets/base/fonts/subset-RoundedMplus1c-Bold.woff'%}" as="font" type="font/woff2" crossorigin>
+    -->
+    {%block before_css %}
+
+    {%endblock%}
+{% compress css %}
+    <link rel="stylesheet" href="{%static 'assets/css/bootstrap.min.css'%}">
+    <link rel="stylesheet" href="{%static 'assets/css/jquery-ui.css'%}">
+    <link rel="stylesheet" href="{%static 'assets/catalog/css/swiper-bundle.min.css'%}">
+    <link rel="stylesheet" href="{%static 'assets/base/css/style.css'%}">
+{% endcompress %}
+{% compress css %}
+    <!-- BLOCK EXTRA HEAD -->
+    {% block extra_head %}
+    {% endblock %}
+    <!-- ENDBLOCK EXTRA HEAD -->
+{% endcompress %}
+</head>
+
+<body dir="rtl">
+    <!-- BLOCK BODY -->
+    {% block body %}
+
+    <div class="icon-bar">
+        <div class="icon delivery hide">
+            <img src="{%static 'assets/base/imgs/delivery.svg'%}" alt="" srcset="">
+            <div class="inner-icon">
+                משלוח עד הבית
+            </div>
+
+        </div>
+        <div class="icon whatsapp hide">
+            <img src="{%static 'assets/base/imgs/whatsapp.svg' %}" alt="" srcset="">
+            <a target="_blank" href="https://wa.me/+972547919908">
+                <div class="inner-icon">
+                    וואצאפ
+                </div>
+            </a>
+
+        </div>
+        <div class="icon facebook hide">
+            <img src="{%static 'assets/base/imgs/icons8-facebook.svg'%}" alt="" srcset="">
+            <a target="_blank"
+                href="https://www.facebook.com/%D7%91%D7%99%D7%92%D7%95%D7%93-%D7%A4%D7%9C%D7%95%D7%A1-102693374827456/">
+                <div class="inner-icon">
+                    פייסבוק
+                </div>
+            </a>
+        </div>
+        <!--
+        <div class="icon instegram hide">
+            <img src="{%static 'assets/base/imgs/instagram.svg'%}" alt="" srcset="">
+            <a target="_blank" href="https://www.instagram.com/shermakdogs/">
+                <div class="inner-icon">
+                    אינסטגרם
+                </div>
+            </a>
+        </div>
+        -->
+    </div>
+
+    <div class="icon-bar-2">
+        <div class="icon">
+            <div class="text up">
+            בעל עסק?
+        </div>
+            <img class="bissness-owner-img" src="{%static 'assets/base/imgs/entrepreneur.png' %}" alt="" srcset="">
+            <div class="text down">
+            לחץ כאן
+        </div>
+        </div>
+    </div>
+
+    <!--
+    {% if messages %}
+    <div style="padding-top:50px;">
+      <ul class="messages-container">
+        {% for message in messages %}
+        <div class="alert alert-{% if message.tags %}{{ message.tags }}{% endif %} alert-dismissible fade show"
+          role="alert">
+          <strong>{{message}}</strong>
+        </div>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+    -->
+    <nav class="navbar navbar-expand-* navbar-light">
+        <div class="container-fluid">
+            <a class="navbar-logo" href="{%url 'catalogView'%}"><img class="nav-logo"
+                    src="{%static 'assets/base/imgs/logo_ms.png'%}" alt="" ></a>
+<!--
+            <div class="menu-wraper">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                    aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+
+                    <ul class="navbar-nav navbar-menu me-auto mb-2 mb-lg-0">
+                        <li class="nav-item navbar-menu-item">
+                            <a class="nav-link" aria-current="page" href="{%url 'catalogView'%}">
+                                <img class="nav-link-icon" src="{%static 'assets/base/imgs/logo_ms.png'%}"/>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" aria-current="page" href="{%url 'catalogView'%}">
+                                <img class="nav-link-icon" src="{%static 'assets/base/imgs/begood_plus_logo.png'%}"/>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" aria-current="page" href="#">
+                                מי אנחנו?
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+-->
+
+<!--
+<div id="menu" class="menu">
+    <button name="menu-btn" type="button" class="collapsible">
+        <img src="{%static 'assets/base/imgs/icons8-menu.svg' %}" height="40" width="40" alt="menu" srcset="">
+    </button>
+    <div class="content">
+        <ul>
+            <li>
+                <a href="{%url 'catalogView'%}">
+                    <img src="{%static 'assets/base/imgs/logo_ms.png' %}" alt="" srcset="">
+                </a>
+            </li>
+            <li>
+                <a href="{%url 'catalogView'%}">
+                    <img src="{%static 'assets/base/imgs/begood_plus_logo.png' %}"  alt="" srcset="">
+                </a>
+            </li>
+            <li>
+                <div class="who-us" id="who_us_btn">
+                        מי אנחנו?
+                </div>
+            </li>
+        </ul>
+    </div>
+</div>
+-->
+
+
+            <form class="d-flex" id="search_form">
+                <input class="form-control" id="search" autocomplete="on" type="search" placeholder="Search" aria-label="Search">
+                <!-- <button class="btn btn-outline-success" type="submit">Search</button>-->
+                
+            </form>
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <!--
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-home active" aria-current="page" href="#">Home</a>
+                    </li>
+                    -->
+                <!--
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="#">
+                            <img width="25px" src="{%static 'assets/base/imgs/box.svg'%}" alt="" srcset="">
+                        </a>
+                    </li>
+                    -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle show-count" href="#" id="navbarDropdown" role="button"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                        <!--
+                            <img width="25px" src="{%static 'assets/base/imgs/email.svg' %}">
+                            -->
+                    </a>
+                    <ul class="dropdown-menu" id="navbarDropdownList" aria-labelledby="navbarDropdown" data-content="0">
+                        <li><div class="loader"></div></li>
+                    </ul>
+                </li>
+            </ul>
+
+
+            <div onclick="openCart()" id="cart-btn" class="cart">
+                <i style="font-size: 2em;" class="fas fa-shopping-cart"></i>
+                    <div class="cart-counter">-</div>
+            </div>
+            <div id="navbar_filler"class="none">
+                <!--used as a filler in the navbar-->
+            </div>
+
+
+
+
+        </div>
+    </nav>
+
+    
+<div class="modal" id="likedProductsModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header text-center">
+                <img class="header-logo header-logo-r" src="{%static 'assets/base/imgs/logo_ms.png' %}" />
+                <h5 class="modal-title  w-100">מוצרים שאהבתי</h5>
+                <img class="header-logo header-logo-l" src="{%static 'assets/base/imgs/begood_plus_logo.png' %}" />
+
+                <button type="button" class="close close-modal" data-dismiss="likedProductsModal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="likedProductsForm">
+                
+                    {%csrf_token%}
+                    
+                    <!--
+                    <input type="text" name="formUUID" class="form-control" placeholder="FormUUID" title="" required="" id="id2_formUUID">
+                    -->
+                    <div class=" row">
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label class="control-label">שם: </label>
+                                <div>
+                                    <input type="text" class="form-control input-lg" id="id2_name" name="name" value=""
+                                        required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label">אימייל: </label>
+                                <div>
+                                    <input type="email" class="form-control input-lg" id="id2_email" name="email"
+                                        value="" required>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="control-label">פלאפון: </label>
+                                <div>
+                                    <input type="tel" class="form-control input-lg" id="id2_phone" name="phone" value=""
+                                        required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6" class="cart-products-wraper">
+                        <div id="cartProductsList">
+                            <h1>הוסף מוצרים לעגלה</h1>
+                        </div>
+                    </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">שלח</button>
+
+                </form>
+
+            </div>
+            <div class="modal-footer">
+                
+                <!--id="modal-add-btn"-->
+                <button type="button" class="btn btn-secondary close-modal"
+                    data-dismiss="likedProductsModal">סגור</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="modal" id="categoryModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+
+
+            <div class="modal-header text-center">
+                <div class="modal-header-links"> </div>
+                <button type="button" class="close close-modal" data-dismiss="categoryModal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Modal body text goes here.</p>
+            </div>
+            <div class="modal-footer">
+                <img class="header-logo header-logo-r" src="{%static 'assets/base/imgs/logo_ms.png' %}" />
+                <h5 class="modal-title">Category</h5>
+                <img class="header-logo header-logo-l" src="{%static 'assets/base/imgs/begood_plus_logo.png' %}" />
+                <!--<button type="button" class="btn btn-secondary close-modal" data-dismiss="catalogModal">Close</button>-->
+
+                <!--
+                <button id="modal-prev-btn" class="btn btn-secondary"> הקודם </button>
+                <button type="button" id="modal-add-btn" class="btn btn-primary">הוסף להצעת מחיר</button>
+                <button id="modal-next-btn" class="btn btn-secondary" > הבא </button>
+                -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="ImageProductsModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header text-center">
+                <img class="header-logo header-logo-r" src="{%static 'assets/base/imgs/logo_ms.png' %}" />
+                <h5 class="modal-title  w-100">modal title</h5>
+                <img class="header-logo header-logo-l" src="{%static 'assets/base/imgs/begood_plus_logo.png' %}" />
+
+                <button type="button" class="close close-modal" data-dismiss="ImageProductsModal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                modal body
+            </div>
+            <!--
+            <div class="modal-footer">
+                modal footer
+            </div>
+            -->
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+<div class="modal" id="whousModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header text-center">
+                <img class="header-logo header-logo-r" src="{%static 'assets/base/imgs/logo_ms.png' %}" />
+                <h5 class="modal-title  w-100">מי אנחנו</h5>
+                <img class="header-logo header-logo-l" src="{%static 'assets/base/imgs/begood_plus_logo.png' %}" />
+
+                <button type="button" class="close close-modal" data-dismiss="whousModal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                
+                
+
+
+                <div class="carusel-extra">
+                    <div class="hero-description gold-animation">
+                        <h1 class="hero-description-title gold-animation">
+                            אמ אס גלובל
+                        </h1>
+                        מתמחה באספקת בגדי עבודה, מוצרי טקסטיל ואביזרי מיתוג
+                        למוסדות ולחנויות.
+                        <br>
+                        אפשרויות הדפסה ורקמה על מגוון מוצרים. שירותי גרפיקה
+                        מתקדמים.
+                        <br>
+                        מחלקת הייטק המספקת שירותי בניית אתרים, הקמת תוכנה ושיווק
+                        אינטרנטי יעיל לבעלי העסקים.
+                    </div>
+                </div>
+
+
+
+
+
+            </div>
+            <!--
+            <div class="modal-footer">
+                modal footer
+            </div>
+            -->
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+<div class="modal fade" id="catalogModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header text-center">
+                <img class="header-logo header-logo-r" src="{%static 'assets/base/imgs/logo_ms.png' %}" />
+                <h5 class="modal-title  w-100">Category</h5>
+                <img class="header-logo header-logo-l" src="{%static 'assets/base/imgs/begood_plus_logo.png' %}" />
+
+                <button type="button" class="close close-modal" data-dismiss="catalogModal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Products in the category.</p>
+            </div>
+            <div class="modal-footer">
+
+
+
+                <button id="modal-prev-btn" class="btn modal-nav-btn">
+                    <img src="{%static 'assets/catalog/imgs/icons8-arrow-48.png'%}">
+                </button>
+                <div class="like-btn">
+                    <div id="modal-add-btn" class="like-wrapper">
+                        <a name="like-btn">
+                            <span name="like-btn">
+                                <img src="{%static 'assets/catalog/imgs/icons8-plus-48.png'%}"> הוסף
+                            </span>
+                        </a>
+                    </div>
+                </div>
+
+                <button id="modal-next-btn" class="btn modal-nav-btn">
+                    <img src="{%static 'assets/catalog/imgs/icons8-arrow-48.png'%}">
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+    <div class="modal" id="buisnessModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header text-center">
+                    <h5 class="modal-title  w-100">M.S global</h5>
+                    <button type="button" class="close close-modal" data-dismiss="buisnessModal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="contact-form-wraper2">
+                        <div id="contactFormBase" class="contact-form-wraper">
+                            <form id="contact-form"  action="{%url 'form-change'%}" method="post" class="contact-form">
+                                {% csrf_token %}
+                                
+                                <h2 class="form-header">
+                                    לקבלת הצעת מחיר משתלמת <div class="mark-strong">ללא</div> עלות <div class="mark-strong">וללא</div> התחייבות השאירו פרטים ומיד נחזור אליכם
+                                </h2>
+                                {% for field in contactForm %}
+                                    <div class="form-group">
+                                        <input type="{{field.field.widget.input_type}}" class="form-control" placeholder="{{field.field.widget.attrs.placeholder}}" name="{{field.name}}" id="base_{{field.id_for_label}}">
+                                    </div>
+                                    
+                                {% endfor %}
+                                    <button type="submit" class="btn btn-success form-submit">לשליחת טופס לחץ כאן</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <!--
+                <div class="modal-footer">
+                    <button type="button" id="modal-send-products-btn" class="btn btn-primary">שלח</button>
+                    <button type="button" class="btn btn-secondary close-modal" data-dismiss="buisnessModal">Close</button>
+                </div>
+                -->
+            </div>
+        </div>
+    </div>
+
+    <!-- BLOCK CONTENT -->
+    {%block content %} {%endblock content%}
+    <!-- ENDBLOCK CONTENT -->
+
+
+    <footer id="footer">
+        <div class="footer-top">
+            <div class="container">
+
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="copyright">
+                © Copyright <strong>M.S. Global</strong>. All Rights Reserved
+            </div>
+            <div class="credits">
+                Designed by <a href="https://ms-global.co.il/">M.S. Global</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- <script src="{%static 'assets/js/jquery.js'%}"></script> -->
+    {% compress js %}
+        <script src="{%static 'assets/base/js/jquery-3.6.0.min.js'%}"></script>
+        <script src="{%static 'assets/js/jquery-ui.js'%}"></script>
+        <script src="{%static 'assets/base/js/bootstrap.bundle.min.js'%}"></script>
+        <script src="{%static 'assets/base/js/022c0fea0b.js'%}"></script>
+        <script src="{%static 'assets/js/swiper-bundle.js'%}"></script>
+        <script src="{%static 'assets/base/js/marked.min.js'%}"></script>
+        <script src="{%static 'assets/base/js/base.js' %}"></script>
+    {% endcompress %}
+    <!--
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-b5kHyXgcpbZJO/tY9Ul7kGkf1S0CWuKcCD38l8YkeH8z8QjE0GmW1gYU5S9FOnJ0" crossorigin="anonymous">
+    </script>
+    -->
+    <!--
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+        integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-b5kHyXgcpbZJO/tY9Ul7kGkf1S0CWuKcCD38l8YkeH8z8QjE0GmW1gYU5S9FOnJ0" crossorigin="anonymous">
+    </script>
+    <script src="https://kit.fontawesome.com/022c0fea0b.js" crossorigin="anonymous"></script>
+    -->
+    
+    
+    
+    
+    
+    {% compress js %}
+    <script src="{%static 'assets/base/js/lazysizes.min.js' %}" async></script>
+    <script>
+        
+        //var allAlbums = 
+        /*
+        var allAlbums;
+        {%if catalogAlbumData %}
+            allAlbums = {{catalogAlbumData|safe}};
+            myStorage.setItem('msAlbums', JSON.stringify(allAlbums));
+        {%else%}
+            allAlbums = undefined;
+        {%endif%}
+        */
+        var allAlbums;
+
+        function getAllAlbums() {
+            if (allAlbums == undefined) {
+                allAlbums = JSON.parse(myStorage.getItem('msAlbums'));
+                //if (allAlbums == undefined) {
+                    $.ajax({
+                        type: "GET",
+                        url: '/catalog_api',
+                        success: (json) => {
+                            //allAlbums = ;
+                            myStorage.setItem('msAlbums', json.catalogAlbumData);
+                        },
+                        error: (e) => {
+                            console.log('error:', e);
+                        },
+                        dataType: "json"
+                    });
+                //}
+            }
+            console.log('getAllAlbums', allAlbums);
+            return allAlbums;
+        }
+        var search_term_id = -1;
+        function initAutocomplete() {
+            $('#search').autocomplete({
+                    source: function (request, response) {
+                        console.log('request', request);
+                        $.ajax({
+                            url: "/search",
+                            dataType: "json",
+                            data: {
+                                q: request.term
+                            },
+                            success: function (data) {
+                                search_term_id = data.id;
+                                var items = [];
+                                for (var i = 0; i < data.all.length; i++) {
+
+                                    my_item = data.all[i];
+                                    items.push({
+                                        label: data.q,
+                                        value: data.q,
+                                        data: my_item
+                                    });
+                                    // get the first album that is not all products
+                                    var album = undefined;
+                                    for (var k = 0; k < my_item.album.length; k++) {
+                                        if (my_item.album[k].id != 1) {
+                                            album = my_item.album[k]
+                                            break;
+                                        }
+                                    }
+                                    if (album == undefined) {
+                                        album = my_item.album[0];
+                                    }
+                                    //album = my_item.album[1];
+                                    var found_album = false;
+                                    for (var j = 0; j < items.length; j++) {
+                                        if (items[j].data.my_type == album.my_type && items[j].data.id ==
+                                            album.id) {
+                                            found_album = true;
+                                            items[j].data.item_count += 1
+                                            break;
+                                        }
+                                    }
+                                    if (found_album == false) {
+                                        items.unshift({
+                                            label: data.q,
+                                            value: data.q,
+                                            data: {
+                                                id: album.id,
+                                                title: album.title,
+                                                my_type: album.my_type,
+                                                url: album.url,
+                                                item_count: 1,
+                                            }
+                                        });
+                                    }
+                                }
+                                items.sort(function (a, b) {
+                                    if (a.data.item_count > b.data.item_count) {
+                                        return 1;
+                                    } else if (a.data.item_count <= b.data.item_count) {
+                                        return -1
+                                    }
+                                    return 0;
+                                });
+                                //response(data.all);
+                                response(items);
+                            },
+                            error: function (xhr) {
+                                alert('Request Status: ' + xhr.status + ' Status Text: ' + xhr
+                                    .statusText + ' ' + xhr.responseText);
+                            }
+                        });
+                    },
+                    minLength: 2,
+                    select: function (event, ui) {
+                        var item = ui.item.data;
+                        const csrftoken = getCookie('csrftoken');
+                        $.ajax({
+                            url: "/search-click",
+                            dataType: "json",
+                            type: "POST",
+                            headers: {
+                                'X-CSRFToken': csrftoken
+                            },
+                            data: {
+                                id: search_term_id,
+                                value: ui
+                            },
+                            success: function (data) {
+                                console.log(data);
+                            }
+                        });
+
+
+                        if (item.my_type == 'album') {
+                            myStorage.setItem('search_open_category', item.id);
+                        
+                        }
+                        else if (item.my_type == 'product') {
+                            myStorage.setItem('search_open_product', item.id);
+                            //window.location.href = item.url;
+                        }
+
+                        if (window.location.pathname != item.url) {
+                            window.location.href = item.url;
+                        } else {
+                            handleSearchTasks();
+                        }
+                        console.log(ui.item ?
+                            "Selected: " + ui.item.title :
+                            "Nothing selected, input was " + this.value);
+                    },
+                })
+                .autocomplete("instance")._renderItem = function (ul, item) {
+                    var data = item.data;
+                    if (data.my_type == 'album') {
+                        return $(
+                            `<li class="list-category" name="list-category-${data.id}">
+                                <div class="search-item" data-type='album' data-id='${data.id}'>
+                                    ${data.title} (${data.item_count})
+                                    <img class="logo" src="/static/assets/base/imgs/begood_plus_logo.png" alt="M.S. Global">
+                                </div>
+                            </li>`
+                        ).prependTo(ul);
+                    } else if (data.my_type == 'product') {
+                        return $("<li>")
+                            .append(
+                                `<div class="search-item" data-type='product' data-id='${item.data.id}'><img style="height:25px;" src="${item.data.image}" /> 
+                                    <img class="logo" src="/static/assets/base/imgs/begood_plus_logo.png" alt="M.S. Global">
+                                    ${item.data.title}
+                                </div>`
+                            )
+                            .appendTo(ul);
+                    }
+                    else if(data.my_type == 'mylogo_product') {
+                        return $("<li>")
+                            .append(
+                                `<div class="search-item" data-type='product' data-id='${item.data.id}'>
+                                    <img class="logo" src='http://www.my-logo.co.il/images/my_logo_logo.jpg' alt="My Logo">
+                                    <img style="height:25px;" src="${item.data.img}" />
+                                    ${item.data.title}
+                                </div>`
+                            )
+                            .appendTo(ul);
+                    }else if(data.my_type == 'mylogo_album') {
+                        return $(
+                            `<li class="list-category" name="list-category-${data.id}">
+                                <div class="search-item" data-type='mylogo_album' data-id='${data.id}'>
+                                    <img class="logo" src='http://www.my-logo.co.il/images/my_logo_logo.jpg' alt="My Logo">
+                                    
+                                    ${data.title} (${data.item_count})
+                                </div>
+                            </li>`
+                        ).prependTo(ul);
+                    }
+                };
+                
+                $('#search').on( "autocompleteopen", function( event, ui ) {
+                    console.log("AutoComplete Opened",ui);
+                    console.log('event: ', event)
+                    var resultsHolder = $('#ui-id-1');
+                    var serachBar = event.target;
+                    var holderWidth = parseFloat(resultsHolder.css('width').replace('px',''));
+                    if(holderWidth < 550) {
+                        var newWidth = 
+                        resultsHolder.css({'width':window.innerWidth*0.8  + 'px',
+                        'left': window.innerWidth*0.1 + 'px'});
+                    }
+                } );
+                
+            // TODO: why is this here?
+            $('.icon-bar-2').click(()=> {
+                openBuisnessModal();
+            });
+        }
+
+        getAllAlbums();
+        initAutocomplete();
+    </script>
+    <!-- BLOCK EXTRA_BODY -->
+    {% block extra_body %}
+    {% endblock %}
+    <!-- ENDBLOCK EXTRA_BODY -->
+
+    <script>
+        // lazy load images  with the class of lazy */
+        document.addEventListener("DOMContentLoaded", function() {
+            var lazyloadImages = document.querySelectorAll("img.lazy");    
+            var lazyloadThrottleTimeout;
+            
+            function lazyload () {
+                if(lazyloadThrottleTimeout) {
+                clearTimeout(lazyloadThrottleTimeout);
+                }    
+                
+                lazyloadThrottleTimeout = setTimeout(function() {
+                    var scrollTop = window.pageYOffset;
+                    lazyloadImages.forEach(function(img) {
+                        if(img.offsetTop < (window.innerHeight + scrollTop)) {
+                        img.src = img.dataset.src;
+                        img.classList.remove('lazy');
+                        }
+                    });
+                    if(lazyloadImages.length == 0) { 
+                    document.removeEventListener("scroll", lazyload);
+                    window.removeEventListener("resize", lazyload);
+                    window.removeEventListener("orientationChange", lazyload);
+                    }
+                }, 20);
+            }
+            
+            document.addEventListener("scroll", lazyload);
+            window.addEventListener("resize", lazyload);
+            window.addEventListener("orientationChange", lazyload);
+        });
+    </script>
+    {% endcompress %}
+    {%endblock%}
+    <!-- ENDBLOCK BODY -->
+
+</body>
+
+
+</html>
+
+<!-- 
+    <div>Icons made by <a href="https://www.flaticon.com/authors/monkik" title="monkik">monkik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
+-->

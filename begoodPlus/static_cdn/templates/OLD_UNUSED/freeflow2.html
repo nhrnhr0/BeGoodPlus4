@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+{%load static%}
+{% load i18n %}
+{%include 'base.html'%}
+{% get_current_language as LANGUAGE_CODE %}
+<html lang="{{LANGUAGE_CODE}}">
+
+<head>
+    
+
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+    <title>Free Flow Multi plant watering system</title>
+    <meta content="" name="description">
+    <meta content="" name="keywords">
+
+    <!-- Favicons -->
+    <link href="{%static 'assets/freeFlow/assets/img/freeFlowFirstImage.png' %}" rel="icon">
+    <link href="{%static 'assets/freeFlow/assets/img/freeFlowFirstImage.png' %}" rel="apple-touch-icon">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,700,700i|Poppins:300,400,500,700"
+        rel="stylesheet">
+
+    <!-- Vendor CSS Files -->
+<!--<link rel="preload" href="{%static 'assets/freeFlow/assets/vendor/bootstrap/css/bootstrap.min.css' %}" as="style" onload="this.onload=null;this.rel='stylesheet'">-->
+    <link rel="preload" href="{%static 'assets/css/bootstrap.min.css' %}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="{%static 'assets/freeFlow/assets/vendor/font-awesome/css/font-awesome.min.css' %}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+
+
+    <!--<link rel="stylesheet" type="text/css" href="{%static 'assets/freeFlow/assets/css/msdropdown/flags.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{%static 'assets/freeFlow/assets/css/dd.css' %}" />-->
+
+    <!--
+    <link href="{%static 'assets/freeFlow/assets/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{%static 'assets/freeFlow/assets/vendor/font-awesome/css/font-awesome.min.css' %}" rel="stylesheet">
+    -->
+    <!--
+    <link href="{%static 'assets/freeFlow/assets/vendor/boxicons/css/boxicons.min.css' %}" rel="stylesheet">
+    <link href="{%static 'assets/freeFlow/assets/vendor/owl.carousel/assets/owl.carousel.min.css' %}" rel="stylesheet">
+    <link href="{%static 'assets/freeFlow/assets/vendor/venobox/venobox.css' %}" rel="stylesheet">
+    -->
+    
+    <link rel="preload" href="{%static 'assets/freeFlow/assets/vendor/aos/aos.css' %}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <!--<link href="{%static 'assets/freeFlow/assets/vendor/aos/aos.css' %}" rel="stylesheet">-->
+
+    <link href="https://use.fontawesome.com/releases/v5.0.4/css/all.css" rel="stylesheet">
+
+    <!-- Template Main CSS File -->
+    <link href="{%static 'assets/freeFlow/assets/css/style.css' %}" rel="stylesheet">
+
+    <!-- =======================================================
+  * Template Name: Regna - v2.2.0
+  * Template URL: https://bootstrapmade.com/regna-bootstrap-onepage-template/
+  * Author: BootstrapMade.com
+  * License: https://bootstrapmade.com/license/
+  ======================================================== -->
+</head>
+
+<body>
+    
+    <input id="loadedLanguage" type="hidden" value={{LANGUAGE_CODE}}/>
+    <!-- ======= Header ======= -->
+    <header id="header" class="header-transparent">
+        <div class="container">
+            
+           <!--
+            <select id="languages" name="languages">
+                <option value="/freeFlow/he"style="background-image:url(/static/assets/freeFlow/assets/img/israel.png);">U+1F1F1</option>
+                <option value="/freeFlow/en"><img src="{%static 'assets/freeFlow/assets/img/united-kingdom.png' %}"></option>
+            </select>
+        -->
+            <select name="languages" id="languages">
+                <option value="/freeFlow/he" data-image="{%static 'assets/freeFlow/assets/img/israel.png' %}"></option>
+                <option value="/freeFlow/en" data-image="{%static 'assets/freeFlow/assets/img/united-kingdom.png' %}"></option>
+            </select>
+            <div id="logo" class="pull-left">
+                <a href="/freeFlow/{{LANGUAGE_CODE}}"><img src="{%static 'assets/freeFlow/assets/img/freeFlowLogo.png' %}" alt=""></a>
+                <!-- Uncomment below if you prefer to use a text logo -->
+                <!--<h1><a href="#hero">Regna</a></h1>-->
+            </div>
+            
+            <nav id="nav-menu-container">
+                <ul class="nav-menu">
+                    <li class="menu-active"><a href="#hero">{% trans "Home" %}<!--{{content.nav_Home}}--></a></li>
+                    <li><a href="#about">{% trans "About Us"%}</a></li>
+                    <li><a href="#benefits">{% trans "Benefits & Advantages"%}</a></li>
+                    <li><a href="#instructions">{%trans "Instructions" %}</a></li>
+                    <li><a href="#videos">{% trans "videos" %}</a></li>
+                    <!--
+                    <li><a href="#team">Team</a></li>
+                    <li class="menu-has-children"><a href="">Drop Down</a>
+                        <ul>
+                            <li><a href="#">Drop Down 1</a></li>
+                            <li class="menu-has-children"><a href="#">Drop Down 2</a>
+                                <ul>
+                                    <li><a href="#">Deep Drop Down 1</a></li>
+                                    <li><a href="#">Deep Drop Down 2</a></li>
+                                    <li><a href="#">Deep Drop Down 3</a></li>
+                                    <li><a href="#">Deep Drop Down 4</a></li>
+                                    <li><a href="#">Deep Drop Down 5</a></li>
+                                </ul>
+                            </li>
+                            <li><a href="#">Drop Down 3</a></li>
+                            <li><a href="#">Drop Down 4</a></li>
+                            <li><a href="#">Drop Down 5</a></li>
+                        </ul>
+                    </li> -->
+                    <!--<li><a href="#contact">{%trans "contact" %}</a></li>-->
+                </ul>
+                
+            </nav><!-- #nav-menu-container -->
+            
+            <!--
+            
+            -->
+        </div>
+    </header><!-- End Header -->
+
+    <!-- ======= Hero Section ======= -->
+    <section id="hero">
+            
+        <div class="hero-container" data-aos="zoom-in" data-aos-delay="100">
+            <h3>{% trans "Welcome to" %}</h3>
+            <h1>{% trans "FREE FLOW" %}</h1>
+            <h2>{% trans "Tired of watering the pots every day? You must have noticed that growing plants is an action that requires time and effort ... not anymore!" %}</h2>
+            <h2 class="the-perfect-solution">{% trans "we have a solution for you!" %}</h2>
+            <!-- <a href="#about" class="btn-get-started">{{content.heroBtn }}</a>-->
+            <a href="#about" class="btn-get-started">{% trans "The Perfect Solution" %}</a>
+        </div>
+    </section><!-- End Hero Section -->
+
+    <main id="main">
+
+        <!-- ======= About Section ======= -->
+        <section id="about">
+            <div class="container" data-aos="fade-up">
+                <div class="row about-container">
+                    <h4>{%trans "Free Flow: A product designed for irrigating plants in places where there is no pressurized water source." %}</h4>
+                    <div class="col-lg-6 content order-lg-1 order-2">
+                        
+                        <h2 class="title">{% trans "1 to 6 Plants" %}</h2>
+                        <p>
+                            {% trans "The perfect solution for watering the plants on the balcony, on the windowsill, in the office, at home And wherever you want to grow your plants." %}
+                        </p>
+
+                        <div class="icon-box" data-aos="fade-up" data-aos-delay="100">
+                            <div class="icon"><i class="fa fa-shopping-bag"></i></div>
+                            <div class="icon-box-content">
+                                <h4 class="title"><span>{%trans "Use it in the office, at home, or anywhere you want" %}</span></h4>
+                                <p class="description">{%trans "It is so small and compact that you can even use it to put your favorite plant in the office, home, garden or anywhere you see fit" %}</p>
+                            </div>
+                        </div>
+
+                        <div class="icon-box" data-aos="fade-up" data-aos-delay="200">
+                            <div class="icon"><i class="fa fa-tint"></i></div>
+                            <div class="icon-box-content">
+                                <h4 class="title"><span>{%trans "Saves water and time" %}</span></h4>
+                                <p class="description">{%trans "Focused and efficient watering allows you to enjoy the convenience of an automatic irrigation system without wasting water and valuable time!" %}</p>
+                            </div>
+                        </div>
+
+                        <div class="icon-box" data-aos="fade-up" data-aos-delay="300">
+                            <div class="icon"><i class="fas fa-tree"></i></div>
+                            <div class="icon-box-content">
+                                <h4 class="title"><span>{%trans "Eco-friendly system" %}</span></h4>
+                                <p class="description">{%trans "The irrigation system does not consume electricity, and allows recycling and reuse of most standard plastic bottles" %}</p>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="col-lg-6 background order-lg-2 order-1" data-aos="fade-left" data-aos-delay="100"></div>
+                </div>
+
+            </div>
+        </section><!-- End About Section -->
+
+        <!-- ======= Benefits & Advantages Section ======= -->
+        <section id="benefits">
+            <div class="container" data-aos="fade-up">
+                <div class="section-header">
+                    <h3 class="section-title">{%trans "FreeFlow Benefits & Advantages" %}</h3>
+                </div>
+                <div class="row benefits-container">
+                    
+                    <div class="col-lg-12 content aos-init aos-animate" data-aos="fade-left"
+                        data-aos-delay="100">
+                        <div class="container">
+                            <div class="carousel">
+                              <div class="item a">
+                                  <div>
+                                      {%trans "Multi Plants Watering: One Single Plant and Up to Six Plants" %}
+                                  <div class="icon">
+                                        <img style="max-width: 150px;" src="{%static 'assets/freeFlow/assets/img/plants6.png' %}" />
+                                  </div>
+                                </div>
+                            </div>
+                              <div class="item b"><div>{%trans "Gravitational Watering: Non-Pressurized System" %}
+                                <div class="icon">
+                                    <img src="{%static 'assets/freeFlow/assets/img/faucet-solid.svg' %}"/>
+                                </div>
+                              </div>
+                            </div>
+                              <div class="item c">
+                                  <div>
+                                      {%trans "Plug & Play: Watering System, Easy to Use- Just Fill &Go" %}
+                                  </div>
+                                  <div class="icon">
+                                    <img src="{%static 'assets/freeFlow/assets/img/plug-solid.svg' %}"/>
+                                  </div>
+                                </div>
+                              <div class="item d">
+                                    <div>
+                                      {%trans "Eco-Friendly System: Reusing Almost Any Standard Plastic Bottle, without the use of batteries" %}
+                                    </div>
+                                    <div class="icon">
+                                        <img src="{%static 'assets/freeFlow/assets/img/battery-three-quarters-solid.svg' %}"/>
+                                        
+                                    </div>
+                                </div>
+                              <div class="item e">
+                                  <div>
+                                      {%trans "Accurate and efficient watering" %}
+                                    </div>
+                                    <div class="icon">
+                                        <img src="{%static 'assets/freeFlow/assets/img/ruler-solid.svg' %}"/>
+                                    </div>
+                                </div>
+                              <div class="item f">
+                                  <div>
+                                      {%trans "Time saving" %}
+                                    </div>
+                                    <div class="icon">
+                                        <img src="{%static 'assets/freeFlow/assets/img/clock1.svg' %}"/>
+                                    </div>
+                                </div>
+                              <div class="item g">
+                                    <div>
+                                      {%trans "Irrigation without dirt, wet floor or puddles."%}
+                                    </div>
+                                    <div class="icon">
+                                        <img src="{%static 'assets/freeFlow/assets/img/drop.svg' %}"/>
+                                    </div>
+                                </div>
+                              <div class="item h">
+                                    <div>
+                                      {%trans "A system that helps success in growing plants." %}
+                                    </div>
+                                    <div class="icon">
+                                        <img src="{%static 'assets/freeFlow/assets/img/sapling.svg' %}"/>
+                                    </div>
+                                </div>
+                              <div class="item i">
+                                    <div>
+                                      {%trans "Quality time for parents and children - education for sustainability." %}
+                                    </div>
+                                    <div class="icon">
+                                        <img src="{%static 'assets/freeFlow/assets/img/family-icon.png' %}"/>
+                                    </div>
+                                </div>
+                              <div class="item j">
+                                  <div>
+                                      {%trans "Fertilizers can be added to irrigation water." %}
+                                    </div>
+                                    <div class="icon">
+                                        <img src="{%static 'assets/freeFlow/assets/img/fertilizer.svg' %}"/>
+                                    </div>
+                                </div>
+                            </div>
+                          </div>
+                          <div class="next">Next</div>
+                          <div class="prev">Prev</div>
+                          <!--
+                        <ol>
+                            <li>
+                                {%trans "Multi Plants Watering: One Single Plant and Up to Six Plants" %}
+                            </li>
+                            <hr>
+                            <li>
+                                {%trans "Gravitational Watering: Non-Pressurized System" %}
+                            </li>
+                            <hr>
+                            <li>
+                                {%trans "Plug & Play: Watering System, Easy to Use- Just Fill &Go" %}
+                            </li>
+                            <hr>
+                            <li>
+                                {%trans "Eco-Friendly System: Reusing Almost Any Standard Plastic Bottle and without the use of batteries" %}
+                            </li>
+                            <hr>
+                            <li>
+                                {%trans "Accurate and efficient watering" %}
+                            </li>
+                            <hr>
+                            <li>
+                                {%trans "Time saving" %}
+                            </li>
+                            <hr>
+                            <li>
+                                {%trans "Irrigation without dirt and without wet floor and puddles."%}
+                            </li>
+                            <hr>
+                            <li>
+                                {%trans "A system that helps success in growing plants." %}
+                            </li>
+                            <hr>
+                            <li>
+                                {%trans "Quality time for parents and children - education for sustainability." %}
+                            </li>
+                            <hr>
+                            <li>
+                                {%trans "Fertilizers can be added to irrigation water." %}
+                            </li>
+                            <hr>
+                        </ol>
+                        -->
+                    </div>
+
+
+                    <div class="col-lg-12 background order-lg-1 order-2">
+                        <img src="{%static 'assets/freeFlow/assets/img/freeFlowGarden.jpeg' %}"/>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- Benefits & Advantages Section -->
+
+        <!-- ======= END Benefits & Advantages Section ======= -->
+
+        <!-- ======= videos Section ======= -->
+        <section id="instructions">
+            <div class="container" data-aos="fade-up">
+                <div class="section-header">
+                    <h3 class="section-title">{%trans "FreeFlow System Design" %}</h3>
+                </div>
+                <div class="row">
+                    <div class="ff-box col-lg-3 col-md-4 aos-init aos-animate" data-aos="fade-left"
+                    data-aos-delay="100">
+                        <img src="{%static 'assets/freeFlow/assets/img/freeFlowBox.png' %}" alt=""/>
+                    </div>
+                    <div class="ff-items col-lg-9 col-md-8 aos-init aos-animate" data-aos="fade-right"
+                    data-aos-delay="100">
+                        <!--<img src="{%static 'assets/freeFlow/assets/img/freeFlowItems.png' %}" alt=""/>-->
+                    </div>
+                </div>
+            </div>
+
+        </section>
+        <section id="videos">
+            <div class="container" data-aos="fade-up">
+                <div class="section-header">
+                    <!-- <h3 class="section-title">{% trans "Videos & Assembly instructions Manuals" %}</h3>-->
+                </div>
+                <div class="row videos-container-2">
+                    <div class="col-lg-6 content aos-init aos-animate" data-aos="fade-left" data-aos-delay="100">
+                        <h2>{%trans "Free Flow - Single Plant" %}</h2>
+                        <iframe width="100%" height="315" data-src="https://www.youtube.com/embed/RptRb9BZpsE"
+                            frameborder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowfullscreen></iframe>
+                    </div>
+                    <div class="col-lg-6 content order-lg-2 aos-init aos-animate" data-aos="fade-left"
+                        data-aos-delay="100">
+                        <h2>{% trans "Free Flow - Multi Plants" %}</h2>
+                        <iframe width="100%" height="315" data-src="https://www.youtube.com/embed/S7ZeconnOK8"
+                            frameborder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowfullscreen></iframe>
+                    </div>
+                </div>
+                <!--
+                <div class="row videos-container-1">
+                    <div class="col-lg-12 contentaos-init aos-animate" data-aos="fade-left" data-aos-delay="100">
+                        <iframe width="100%" height="415" data-src="https://www.youtube.com/embed/CjILhiynt0c"
+                            frameborder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowfullscreen></iframe>
+                    </div>
+                </div>
+                -->
+                <!--width="560" height="315"-->
+                
+        </section>
+        <!-- ======= END videos Section ======= -->
+        
+        <section id="map_section">
+            <div class="section-header">
+                <h3 class="section-title">{%trans "To view and purchase, enter the map and go to the branch closest to you!" %}</h3>
+            </div>
+            <div class="map_container">
+                <div id="map"></div>
+            </div>
+
+        </section>
+        <!-- ======= contact Section ======= -->
+        <!--
+        <section id="contact">
+            <div class="container" data-aos="fade-up">
+                <div class="section-header">
+                    <h3 class="section-title">We’d love to hear from you</h3>
+                </div>
+                <form action="" method="POST" >
+                    {% csrf_token %}
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="privatePerson" id="id_privatePerson" value="Private" checked>
+                                <label class="form-check-label" for="id_privatePerson">
+                                    Private Prerson
+                                </label>
+                              </div>
+                              <div class="form-check">
+                                <input class="form-check-input" type="radio" name="privatePerson" id="id_notPrivate" value="Wholesaler">
+                                <label class="form-check-label" for="id_notPrivate">
+                                    Wholesaler
+                                </label>
+                              </div>
+                        </div>
+                    </div>  
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="inputName">Name</label>
+                            <input required type="text" name="name" class="form-control" id="inputName" placeholder="Name">
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="inputEmail">Email</label>
+                            <input required type="email" name="email" class="form-control" id="inputEmail" placeholder="Email">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="inputPhone">Phone</label>
+                            <input required type="phone" name="phone" class="form-control" id="inputPhone" placeholder="Phone">
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="inputCountry">Country</label>
+                            <input required type="text" name="country" class="form-control" id="inputCountry" placeholder="Country">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <label for="inputMessage">Message</label>
+                        <textarea required type="text" name="message" class="form-control" id="inputMessage" placeholder="Message" rows=8></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-success">Submit</button>
+                    
+            </div>
+        </section>
+        -->
+        <!-- ======= END contact Section ======= -->
+    </main><!-- End #main -->
+
+    <!-- ======= Footer ======= -->
+    <footer id="footer">
+        <div class="footer-top">
+            <div class="container">
+
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="copyright">
+                &copy; Copyright <strong>Free Flow</strong>. All Rights Reserved
+            </div>
+            <div class="credits">
+                <!--
+        All the links in the footer should remain intact.
+        You can delete the links only if you purchased the pro version.
+        Licensing information: https://bootstrapmade.com/license/
+        Purchase the pro version with working PHP/AJAX contact form: https://bootstrapmade.com/buy/?theme=Regna
+      -->
+                Designed by <a href="https://ms-global.co.il/">M.S. Global</a>
+            </div>
+        </div>
+    </footer><!-- End Footer -->
+
+    <a href="#" class="back-to-top"><i class="fa fa-chevron-up"></i></a>
+
+
+    <!-- Facebook Pixel Code -->
+<script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window, document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', '1201500306913638');
+    fbq('track', 'PageView');
+    fbq('track', ViewContent);
+    </script>
+    <noscript><img height="1" width="1" style="display:none"
+    src="https://www.facebook.com/tr?id=1201500306913638&ev=PageView&noscript=1"
+    /></noscript>
+    <!-- End Facebook Pixel Code -->
+
+    <!-- Vendor JS Files -->
+    <script src="{%static 'assets/freeFlow/assets/vendor/jquery/jquery.min.js' %}"></script>
+    <script src="{%static 'assets/freeFlow/assets/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    <script src="{%static 'assets/freeFlow/assets/vendor/jquery.easing/jquery.easing.min.js' %}"></script>
+    <!--
+    <script src="{%static 'assets/freeFlow/assets/vendor/php-email-form/validate.js' %}"></script>
+    <script src="{%static 'assets/freeFlow/assets/vendor/counterup/counterup.min.js' %}"></script>
+    -->
+    <script src="{%static 'assets/freeFlow/assets/vendor/waypoints/jquery.waypoints.min.js' %}"></script>
+    <script src="{%static 'assets/freeFlow/assets/vendor/isotope-layout/isotope.pkgd.min.js' %}"></script>
+    <script src="{%static 'assets/freeFlow/assets/vendor/superfish/superfish.min.js' %}"></script>
+    <script src="{%static 'assets/freeFlow/assets/vendor/hoverIntent/hoverIntent.js' %}"></script>
+    <!--
+    <script src="{%static 'assets/freeFlow/assets/vendor/owl.carousel/owl.carousel.min.js' %}"></script>
+    <script src="{%static 'assets/freeFlow/assets/vendor/venobox/venobox.min.js' %}"></script>
+    -->
+    <script src="{%static 'assets/freeFlow/assets/vendor/aos/aos.js' %}"></script>
+
+    <!-- Template Main JS File -->
+    <script src="{%static 'assets/freeFlow/assets/js/main.js' %}"></script>
+
+    <script
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCLmOyl1lZ1oOovi60v6HPnp6bY-7A80is&language=he&libraries=places"
+    defer></script>
+
+    <script src="{%static 'assets/freeFlow/assets/js/jquery.dd.min.js' %}"></script>
+    <script type="text/javascript" src="http://3.133.203.236/load-campain/5"></script>	
+</body>
+
+</html>
+
+
+<!--
+    fontawesome
+    One O'clock by Darrin Loeliger from the Noun Project
+
+    <a href="https://www.vecteezy.com/free-vector/water-drop-icon">Water Drop Icon Vectors by Vecteezy</a>
+    <div>Icons made by <a href="https://www.flaticon.com/authors/good-ware" title="Good Ware">Good Ware</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
+    <div>Icons made by <a href="https://www.freepik.com" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
+    <a target="_blank" href="https://icons8.com/icons/set/family">Family icon</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>
+    <div>Icons made by <a href="https://www.flaticon.com/authors/smashicons" title="Smashicons">Smashicons</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
+    <div>Icons made by <a href="https://www.freepik.com" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
+    <div>Icons made by <a href="https://www.freepik.com" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
+-->

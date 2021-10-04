@@ -1,0 +1,267 @@
+<html>
+
+<head>
+    {%load static%}
+    {% include  'base.html'%}
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>ביגוד פלוס - הזמנה</title>
+    <link rel="shortcut icon" href="{%static 'favicon.ico' %}">
+    <link rel="stylesheet" href="{%static 'assets/css/order_styles.css'%}">
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>צור הזמנה</h2>
+        </div>
+
+        <div class="progress-bar">
+            <div class="step">
+                <p>
+                    Name</p>
+                <div class="bullet">
+                    <span>1</span>
+                </div>
+                <div class="check fas fa-check">
+                </div>
+            </div>
+            <div class="step">
+                <p>
+                    Contact</p>
+                <div class="bullet">
+                    <span>2</span>
+                </div>
+                <div class="check fas fa-check">
+                </div>
+            </div>
+            <div class="step">
+                <p>
+                    Birth</p>
+                <div class="bullet">
+                    <span>3</span>
+                </div>
+                <div class="check fas fa-check">
+                </div>
+            </div>
+            <div class="step">
+                <p>
+                    Submit</p>
+                <div class="bullet">
+                    <span>4</span>
+                </div>
+                <div class="check fas fa-check">
+                </div>
+            </div>
+        </div>
+        <div class="form-outer">
+            <form id="form" class="form">
+                <div class="page slidepage">
+                    <div class="title">
+                        פרטי לקוח
+                    </div>
+                    <div class="form-control">
+                        <label for="client_name_inp">שם לקוח</label>
+                        <input type="text" placeholder="שם לקוח" id="client_name_inp" />
+                        <i class="fas fa-check-circle"></i>
+                        <i class="fas fa-exclamation-circle"></i>
+                        <small>Error message</small>
+                    </div>
+                    <div class="form-control">
+                        <label for="private_company_inp">ח.פ.</label>
+                        <input type="text" placeholder="מספר חברה פרטית" id="private_company_inp" />
+                        <i class="fas fa-check-circle"></i>
+                        <i class="fas fa-exclamation-circle"></i>
+                        <small>Error message</small>
+                    </div>
+                    <div class="form-control">
+                        <label for="addres_inp">כתובת</label>
+                        <input type="text" placeholder="הזן כתובת" id="addres_inp" />
+                        <i class="fas fa-check-circle"></i>
+                        <i class="fas fa-exclamation-circle"></i>
+                        <small>Error message</small>
+                    </div>
+                    <div class="form-control">
+                        <label for="tel_inp">טלפון</label>
+                        <input type="tel" placeholder="הזן מספר טלפון" id="tel_inp" />
+                        <i class="fas fa-check-circle"></i>
+                        <i class="fas fa-exclamation-circle"></i>
+                        <small>Error message</small>
+                    </div>
+                    <div class="form-control">
+                        <label for="email_inp">אימייל</label>
+                        <input type="email" placeholder="הזן אימייל" id="email_inp" />
+                        <i class="fas fa-check-circle"></i>
+                        <i class="fas fa-exclamation-circle"></i>
+                        <small>Error message</small>
+                    </div>
+                    <div class="form-control">
+                        <label for="contact_man_inp">איש קשר</label>
+                        <input type="text" placeholder="הזן איש קשר" id="contact_man_inp" />
+                        <i class="fas fa-check-circle"></i>
+                        <i class="fas fa-exclamation-circle"></i>
+                        <small>Error message</small>
+                    </div>
+                    <div class="form-control">
+                        <label for="cell_inp">נייד</label>
+                        <input type="tel" placeholder="הזן מספר נייד" id="cell_inp" />
+                        <i class="fas fa-check-circle"></i>
+                        <i class="fas fa-exclamation-circle"></i>
+                        <small>Error message</small>
+                    </div>
+                    <div class="form-control nextBtn">
+                        <button type="button" class="form-btn">הבא</button>
+                    </div>
+                </div>
+
+
+
+                <div class="page">
+
+                    <div class="form-control">
+                        <label for="client_name_inp">שם לקוח</label>
+                        <input type="text" placeholder="שם לקוח" id="client_name_inp" />
+                        <small>Error message</small>
+                    </div>
+                    <div class="form-control">
+                        <label for="private_company_inp">ח.פ.</label>
+                        <input type="text" placeholder="מספר חברה פרטית" id="private_company_inp" />
+                        <small>Error message</small>
+                    </div>
+                    <div class="form-control">
+                        <label for="addres_inp">כתובת</label>
+                        <input type="text" placeholder="הזן כתובת" id="addres_inp" />
+                        <small>Error message</small>
+                    </div>
+                    <div class="form-control">
+                        <label for="tel_inp">טלפון</label>
+                        <input type="tel" placeholder="הזן מספר טלפון" id="tel_inp" />
+                        <small>Error message</small>
+                    </div>
+                    <div class="form-control">
+                        <label for="email_inp">אימייל</label>
+                        <input type="email" placeholder="הזן אימייל" id="email_inp" />
+                        <small>Error message</small>
+                    </div>
+                    <div class="form-control">
+                        <label for="contact_man_inp">איש קשר</label>
+                        <input type="text" placeholder="הזן איש קשר" id="contact_man_inp" />
+                        <small>Error message</small>
+                    </div>
+                    <div class="form-control">
+                        <label for="cell_inp">נייד</label>
+                        <input type="tel" placeholder="הזן מספר נייד" id="cell_inp" />
+                        <small>Error message</small>
+                    </div>
+
+                    <div class="form-control btns">
+                        <button class="prev-1 prev">הקודם</button>
+                        <button class="next-1 next">הבא</button>
+                    </div>
+                </div>
+
+
+
+                <div class="page">
+
+                    <div class="form-control">
+                        <label for="client_name_inp">שם לקוח</label>
+                        <input type="text" placeholder="שם לקוח" id="client_name_inp" />
+                        <small>Error message</small>
+                    </div>
+                    <div class="form-control">
+                        <label for="private_company_inp">ח.פ.</label>
+                        <input type="text" placeholder="מספר חברה פרטית" id="private_company_inp" />
+                        <small>Error message</small>
+                    </div>
+                    <div class="form-control">
+                        <label for="addres_inp">כתובת</label>
+                        <input type="text" placeholder="הזן כתובת" id="addres_inp" />
+                        <small>Error message</small>
+                    </div>
+                    <div class="form-control">
+                        <label for="tel_inp">טלפון</label>
+                        <input type="tel" placeholder="הזן מספר טלפון" id="tel_inp" />
+                        <small>Error message</small>
+                    </div>
+                    <div class="form-control">
+                        <label for="email_inp">אימייל</label>
+                        <input type="email" placeholder="הזן אימייל" id="email_inp" />
+                        <small>Error message</small>
+                    </div>
+                    <div class="form-control">
+                        <label for="contact_man_inp">איש קשר</label>
+                        <input type="text" placeholder="הזן איש קשר" id="contact_man_inp" />
+                        <small>Error message</small>
+                    </div>
+                    <div class="form-control">
+                        <label for="cell_inp">נייד</label>
+                        <input type="tel" placeholder="הזן מספר נייד" id="cell_inp" />
+                        <small>Error message</small>
+                    </div>
+                    <div class="form-control btns">
+                        <button class="prev-2 prev">הקודם</button>
+                        <button class="next-2 next">הבא</button>
+                    </div>
+
+                </div>
+
+
+
+                <div class="page">
+
+                    <div class="form-control">
+                        <label for="client_name_inp">שם לקוח</label>
+                        <input type="text" placeholder="שם לקוח" id="client_name_inp" />
+                        <small>Error message</small>
+                    </div>
+                    <div class="form-control">
+                        <label for="private_company_inp">ח.פ.</label>
+                        <input type="text" placeholder="מספר חברה פרטית" id="private_company_inp" />
+                        <small>Error message</small>
+                    </div>
+                    <div class="form-control">
+                        <label for="addres_inp">כתובת</label>
+                        <input type="text" placeholder="הזן כתובת" id="addres_inp" />
+                        <small>Error message</small>
+                    </div>
+                    <div class="form-control">
+                        <label for="tel_inp">טלפון</label>
+                        <input type="tel" placeholder="הזן מספר טלפון" id="tel_inp" />
+                        <small>Error message</small>
+                    </div>
+                    <div class="form-control">
+                        <label for="email_inp">אימייל</label>
+                        <input type="email" placeholder="הזן אימייל" id="email_inp" />
+                        <small>Error message</small>
+                    </div>
+                    <div class="form-control">
+                        <label for="contact_man_inp">איש קשר</label>
+                        <input type="text" placeholder="הזן איש קשר" id="contact_man_inp" />
+                        <small>Error message</small>
+                    </div>
+                    <div class="form-control">
+                        <label for="cell_inp">נייד</label>
+                        <input type="tel" placeholder="הזן מספר נייד" id="cell_inp" />
+                        <small>Error message</small>
+                    </div>
+                    <div class="form-control btns">
+                        <button class="prev-3 prev">הקודם</button>
+                        <button class="submit next">הגש</button>
+                    </div>
+
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+</body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" defer></script>
+<script
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCLmOyl1lZ1oOovi60v6HPnp6bY-7A80is&language=he&libraries=places"
+    defer></script>
+<script src="https://kit.fontawesome.com/a076d05399.js" defer></script>
+<script src="{%static 'assets/js/order_script.js' %}" defer></script>
+
+</html>

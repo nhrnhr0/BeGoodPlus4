@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {%load static%}
+    {% include  'base.html'%}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Free Flow Multi plant watering system</title>
+    <link rel="stylesheet" href="{%static 'assets/css/freeflow.css' %}"/>
+
+</head>
+<body>
+	<nav>
+	    <img src="{%static 'freeFlowLogo.webp' %}"/>
+		<ul id="menu">
+			<li>
+				<a href="#">Home</a>
+			</li>
+			<li>
+				<a href="#">About</a>
+			</li>
+			<li>
+				<a href="#">Benefits & Advantages</a>
+			</li>
+			<li>
+				<a href="#">Contact Us</a>
+			</li>
+		</ul>
+		<div class="mobile-bar" onClick="toggleMobileMenu();"> 
+			<span></span>
+			<span></span>
+			<span></span>
+		</div>
+	</nav>
+	<section class="section-1">
+		<img src="{%static 'freeFlowFirstImage.webp' %}"/>
+		<div class="main-content">
+			<div>
+				<h1>1 to 6 Plants</h1>
+				<span>
+					Free Flow is the perfect watering solution for the balcony, the terrace the garden the office, at home and anywhere else where you want to grow your plants
+				</span> 
+		</div>
+			
+		</div>  
+	</section>
+	<script>
+		function toggleMobileMenu(){
+			document.querySelector('#menu').classList.toggle('active')
+			document.querySelector('.mobile-bar').classList.toggle('active')
+		}
+	</script>
+
+
+</body>
+</html>

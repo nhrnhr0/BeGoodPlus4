@@ -1,0 +1,14 @@
+
+
+
+.navbar {
+    background-color: #97c4e2;
+}
+
+.cd-slider-nav a.navbar-brand { 
+    display: inline-block;
+}
+
+.effect-sadie {
+    margin: 0; /* override materialize.min.css*/
+}

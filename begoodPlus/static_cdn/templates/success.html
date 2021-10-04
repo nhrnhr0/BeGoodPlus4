@@ -1,0 +1,30 @@
+{% extends "newBase.html" %}
+
+{% load i18n %}
+{% load static %}
+
+
+{% block head_title %}{% trans "Success" %}{% endblock %}
+{% block extra_head %}
+    <link rel="stylesheet" href="{%static 'assets/success/css/style.css'%}">
+{%endblock%}
+
+{% block content %}
+    <div class="main-content">
+        <div class="inner">
+        <h1>תודה על הגשת הטופס</h1>
+        <h2>נציגנו יצור איתך קשר בקרוב</h2>
+        <h3>לחזרה לעמוד הראשי 
+            <a href="{%url 'catalogView'%}">לחץ כאן</a>
+        </h3>
+        <div class="img-container">
+            <img width="198" height="80" src="{%static 'assets/base/imgs/logo_ms_outline.png' %}" />
+        </div>
+    </div>
+    </div>
+{%endblock%}
+
+{% block extra_body %}
+
+
+{%endblock%}
