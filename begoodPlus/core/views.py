@@ -41,7 +41,7 @@ def saveBaseContactFormView(request,next, *args, **kwargs):
 from django.db.models import Q
 import json
 from catalogAlbum.models import CatalogAlbum, CatalogImage
-from .serializers import SearchCatalogImageSerializer,SearchCatalogAlbumSerializer, UserTasksSerializer
+from .serializers import SearchCatalogImageSerializer,SearchCatalogAlbumSerializer
 from itertools import chain 
 from django.db.models import Value,CharField
 from catalogAlbum.serializers import CatalogAlbumSerializer, CatalogImageSerializer
@@ -61,8 +61,8 @@ def autocompleteModel(request):
         products_qs = CatalogImage.objects.filter(
             Q(title__icontains=q) | 
             Q(description__icontains=q) |  
-            Q(album__title__icontains=q) |
-            Q(album__keywords__icontains=q)
+            Q(albums__title__icontains=q) |
+            Q(albums__keywords__icontains=q)
             ).distinct()
 
         #mylogo_qs = MyLogoProduct.objects.filter(

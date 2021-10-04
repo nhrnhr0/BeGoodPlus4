@@ -37,6 +37,10 @@
   }
 }
 
+input[type='text'].ui-autocomplete-loading {
+  background: url("/icons/loading.gif") no-repeat right center;
+}
+
 /*
 @font-face {
     font-family: 'Rounded Mplus 1c';
@@ -749,9 +753,9 @@ body.waiting * {
   display: -ms-flexbox;
   display: flex;
   width: 100%;
-  -webkit-box-pack: space-evenly;
-      -ms-flex-pack: space-evenly;
-          justify-content: space-evenly;
+  -webkit-box-pack: start;
+      -ms-flex-pack: start;
+          justify-content: flex-start;
   -webkit-box-flex: 1;
       -ms-flex-positive: 1;
           flex-grow: 1;
@@ -766,6 +770,7 @@ body.waiting * {
 
 #catalogModal .inner-body .product-detail .product-properties .product-color .color-box {
   margin: 3px;
+  max-width: 25px;
   -webkit-box-flex: 1;
       -ms-flex: 1;
           flex: 1;
@@ -787,9 +792,9 @@ body.waiting * {
   display: -ms-flexbox;
   display: flex;
   width: 100%;
-  -webkit-box-pack: space-evenly;
-      -ms-flex-pack: space-evenly;
-          justify-content: space-evenly;
+  -webkit-box-pack: start;
+      -ms-flex-pack: start;
+          justify-content: flex-start;
   -webkit-box-flex: 1;
       -ms-flex-positive: 1;
           flex-grow: 1;

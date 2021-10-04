@@ -71,7 +71,7 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 urlpatterns = [
-    path('create_mini_table/<int:id>/',create_mini_table, name='create_mini_table'),
+    #path('create_mini_table/<int:id>/',create_mini_table, name='create_mini_table'),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     

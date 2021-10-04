@@ -37,6 +37,10 @@
   }
 }
 
+input[type='text'].ui-autocomplete-loading {
+  background: url("/icons/loading.gif") no-repeat right center;
+}
+
 /*
 @font-face {
     font-family: 'Rounded Mplus 1c';

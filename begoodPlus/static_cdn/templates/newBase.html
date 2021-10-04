@@ -172,9 +172,10 @@
 
 
             <form class="d-flex" id="search_form">
-                <input class="form-control" id="search" autocomplete="on" type="search" placeholder="Search" aria-label="Search">
+                <input class="form-control" id="search" autocomplete="on" type="search" placeholder="חיפוש..." aria-label="Search">
                 <!-- <button class="btn btn-outline-success" type="submit">Search</button>-->
-                
+                <div class="spiner" style="display: none;"></div>
+
             </form>
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <!--
@@ -568,6 +569,18 @@
         var search_term_id = -1;
         function initAutocomplete() {
             $('#search').autocomplete({
+                
+                search: function(event, ui) { 
+                    console.log('autocompleate search function');
+                    $('#search_form > .spiner').show();
+                },
+                response: function(event, ui) {
+                    console.log('autocompleate response function');
+                    $('#search_form > .spiner').hide();
+                },
+
+
+                autoFocus: true ,
                     source: function (request, response) {
                         console.log('request', request);
                         $.ajax({
@@ -589,7 +602,8 @@
                                     });
                                     // get the first album that is not all products
                                     var album = undefined;
-                                    for (var k = 0; k < my_item.album.length; k++) {
+                                    album = my_item.albums[0];
+                                    /*for (var k = 0; k < my_item.album.length; k++) {
                                         if (my_item.album[k].id != 1) {
                                             album = my_item.album[k]
                                             break;
@@ -597,12 +611,11 @@
                                     }
                                     if (album == undefined) {
                                         album = my_item.album[0];
-                                    }
+                                    }*/
                                     //album = my_item.album[1];
                                     var found_album = false;
                                     for (var j = 0; j < items.length; j++) {
-                                        if (items[j].data.my_type == album.my_type && items[j].data.id ==
-                                            album.id) {
+                                        if (items[j].data.my_type == album.my_type && items[j].data.id == album.id) {
                                             found_album = true;
                                             items[j].data.item_count += 1
                                             break;
@@ -735,7 +748,12 @@
                         'left': window.innerWidth*0.1 + 'px'});
                     }
                 } );
-                
+                $("#search").keydown(function(event){
+    if(event.keyCode == 13) {
+          event.preventDefault();
+          return false;
+    }
+ });
             // TODO: why is this here?
             $('.icon-bar-2').click(()=> {
                 openBuisnessModal();

@@ -10,6 +10,8 @@
   @include bg-gradient;
 }
 
+
+
 /*
 @font-face {
     font-family: 'Rounded Mplus 1c';
@@ -316,6 +318,15 @@ body.waiting * {
     //min-width: 350px;
     width: 80%;
   }
+
+  .spiner {
+    width: 50px;
+    height: 50px;
+    background: url('./../imgs/Spinner-1s-200px.svg');// no-repeat center center;
+    background-size: cover;
+    transform:translateX(200%)
+  }
+
 }
 
 .ui-autocomplete {
