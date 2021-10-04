@@ -552,7 +552,7 @@ function update_category_cart_ui() {
 
 //setCatalogTaskListiner();
 //getUserTasks();
-set_form_change_listener('#catalog-contact-form', 'catalog');
+//set_form_change_listener('#catalog-contact-form', 'catalog');
 
 set_cart_contact_change_listener('#likedProductsForm');
 setInterval(cart_info_updater, 3000);

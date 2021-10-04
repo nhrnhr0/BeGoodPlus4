@@ -2,6 +2,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy  as _
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
+from django.utils.html import mark_safe
 
 import uuid
 # Create your models here.
@@ -14,7 +15,13 @@ class BeseContactInformation(models.Model):
     sumbited = models.BooleanField(default=False)
     created_date = models.DateTimeField(auto_now_add=True, blank=True, null=True)
     formUUID = models.UUIDField(unique=True, default='')
-    
+
+    def owner_display(self):
+        ret = ''
+        for i in self.owner.all():
+            ret += f'<div style="font-weight: bold;">{str(i.device)}</div>'
+        return mark_safe(ret)
+    owner_display.short_description= _('owner')
     class Meta:
         pass
         #unique_together = ('name', 'phone','email','url','sumbited')
@@ -30,8 +37,8 @@ class BeseContactInformation(models.Model):
 import uuid
 from customerCart.models import CustomerCart
 class Customer(models.Model):
-    contact = models.ManyToManyField(to=BeseContactInformation)
-    carts = models.ManyToManyField(to=CustomerCart)
+    contact = models.ManyToManyField(to=BeseContactInformation, related_name='owner')
+    carts = models.ManyToManyField(to=CustomerCart, related_name='owner')
     device = models.CharField(max_length=120, unique=True)
 
     def get_active_cart(self):

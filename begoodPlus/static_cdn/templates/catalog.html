@@ -334,10 +334,9 @@ C24.3,4,4,24.3,4,49.2s20.3,45.2,45.2,45.2s45.2-20.3,45.2-45.2c0-8.6-2.4-16.6-6.5
 
 <div class="contact-form-wraper2">
     <div class="contact-form-wraper">
-        <form id="catalog-contact-form" action="{%url 'form-change'%}" method="post"
+        <form id="catalog-contact-form" method="post"
             class="contact-form">
             {% csrf_token %}
-            <input type="hidden" name="taskName" id="taskName" value="catalog-ec6bb117-c8fa-4a38-989a-ab0e0805e44e">
             <h2 class="form-header">
                 לקבלת הצעת מחיר משתלמת
                 <div class="mark-strong">&nbsp;ללא&nbsp;</div>
@@ -355,9 +354,7 @@ C24.3,4,4,24.3,4,49.2s20.3,45.2,45.2,45.2s45.2-20.3,45.2-45.2c0-8.6-2.4-16.6-6.5
 </div>
 
 
-<form method="POST" id="deleteProductForm" action="tasks/delete-user-liked-product">
-    {%csrf_token%}
-</form>
+
 {%endblock%}
 
 {%block extra_body%}

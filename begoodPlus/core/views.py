@@ -6,6 +6,7 @@ from .models import UserSearchData
 from django.urls import reverse
 
 # Create your views here.
+'''
 def json_user_tasks(customer):
     contacts_qs = customer.contact.filter(sumbited=False)
     contacts_task = UserTasksSerializer(contacts_qs, many=True)
@@ -25,7 +26,7 @@ def admin_subscribe_view(request):
  
 def mainView(request, *args, **kwargs):
     return render(request, 'newMain.html', {})
-
+'''
 from .forms import FormBeseContactInformation
 '''
 def saveBaseContactFormView(request,next, *args, **kwargs):
@@ -56,7 +57,6 @@ def autocompleteModel(request):
     start = time.time()
     if request.is_ajax():
         q = request.GET.get('q', '')
-        # albums_qs = CatalogAlbum.objects.filter(Q(title__icontains=q) & Q(is_public=True))
         
         products_qs = CatalogImage.objects.filter(
             Q(title__icontains=q) | 
@@ -65,24 +65,13 @@ def autocompleteModel(request):
             Q(albums__keywords__icontains=q)
             ).distinct()
 
-        #mylogo_qs = MyLogoProduct.objects.filter(
-        #    Q(title__icontains=q) | 
-        #    Q(description__icontains=q) |  
-        #    Q(album__title__icontains=q)
-        #).distinct()
-        
-        #print(products_qs)
-        #print(mylogo_qs)
 
         ser_context={'request': request}
         products = SearchCatalogImageSerializer(products_qs,context=ser_context, many=True)
-        #mylogos = MyLogoProductSearchSerializer(mylogo_qs, context=ser_context, many=True)
         session = get_session_key(request)
         
         search_history = UserSearchData.objects.create(session=session, term=q, resultCount=len(products.data))#+ len(mylogos.data)
         search_history.save()
-        #save_user_search.delay(session=session, term=q,  resultCount=len(products.data)+ len(mylogos.data))
-
         all = products.data# + mylogos.data
         all = all[0:20]
         context = {'all':all,

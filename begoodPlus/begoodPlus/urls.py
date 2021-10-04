@@ -60,9 +60,8 @@ from packingType.views import api_packing_types
 from productSize.views import api_product_sizes
 from productColor.views import api_product_colors
 
-from core.views import admin_subscribe_view, mainView,autocompleteModel, autocompleteClick, form_changed #saveBaseContactFormView
+from core.views import autocompleteModel, autocompleteClick, success_view#  admin_subscribe_view, mainView,, form_changed #saveBaseContactFormView
 from catalogAlbum.views import catalogView_api, catalogView#,catalog_timer
-from core.views import user_tasks, success_view
 #from customerCart.views import cart_changed
 from customerCart.views import cart_del, cart_add,cart_view,cart_info
 
@@ -89,13 +88,13 @@ urlpatterns = [
     
     path('search',autocompleteModel),
     path('search-click', autocompleteClick),
-    path('form-change', form_changed, name='form-change'),
+    #path('form-change', form_changed, name='form-change'),
 
     path('cart/add', cart_add, name='cart-add'),
     path('cart/del', cart_del, name='cart-del'),
     path('cart/view', cart_view, name='cart-view'),
     path('cart/info', cart_info, name='cart-info'),
-    path('user-tasks', user_tasks, name='user-tasks'),
+    #path('user-tasks', user_tasks, name='user-tasks'),
     path('success/', success_view, name='success'),
     re_path(r'^advanced_filters/', include('advanced_filters.urls')),
 

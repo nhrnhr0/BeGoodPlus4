@@ -9,7 +9,7 @@ admin.site.register(UserSearchData, UserSearchDataAdmin)
 
 from .models import BeseContactInformation
 class BeseContactInformationAdmin(admin.ModelAdmin):
-    list_display = ('id', 'formUUID', 'url', 'created_date', 'name', 'email', 'phone', 'message', 'sumbited')
+    list_display = ('id', 'formUUID', 'url', 'created_date', 'name', 'email', 'phone', 'message', 'sumbited', 'owner_display')
 admin.site.register(BeseContactInformation,BeseContactInformationAdmin)
 
 from .models import Customer

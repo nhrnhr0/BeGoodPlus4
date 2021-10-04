@@ -1,4 +1,5 @@
-from django.shortcuts import render
+from django.shortcuts import redirect, render
+from django.urls.base import reverse
 
 # Create your views here.
 from catalogAlbum.models import CatalogAlbum
@@ -111,8 +112,33 @@ from django.db.models import Max
 
 
 from catalogLogos.models import CatalogLogo
+from core.forms import FormBeseContactInformation
+from core.models import BeseContactInformation, Customer
+import uuid
+
 def catalogView(request, *args, **wkargs):
     print('catalogView start')
+    if request.method == 'POST':
+        print('post to catalogView')
+        name = request.POST.get('name', '')
+        email = request.POST.get('email', '')
+        phone = request.POST.get('phone', '')
+        message = request.POST.get('message', '')
+        url = request.POST.get('url') or 'catalog'
+        sumbited = True
+        formUUID = uuid.uuid4()
+        obj = BeseContactInformation.objects.create(  name=name
+                                                ,phone=phone
+                                                ,email=email
+                                                ,message=message
+                                                ,url=url
+                                                ,sumbited=sumbited
+                                                ,formUUID=formUUID)
+        obj.save()
+        print(obj)
+        customer,customer_created  = Customer.objects.get_or_create(device=request.COOKIES['device'])
+        customer.contact.add(obj)
+        return redirect(reverse('success'))
     albums = CatalogAlbum.objects.prefetch_related('images')
     logos = CatalogLogo.objects.all()
     context = {'albums':albums,

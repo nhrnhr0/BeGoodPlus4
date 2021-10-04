@@ -322,38 +322,36 @@ body.waiting * {
   color: white;
 }
 
+/*
 .icon-bar-2 {
   position: fixed;
   cursor: pointer;
   top: 80%;
   right: 0;
+  //left: 0px;
   -webkit-transform: translateY(-50%);
   transform: translateY(-50%);
   z-index: 10;
-  display: -webkit-box;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-box-orient: vertical;
-  -webkit-box-direction: normal;
-      -ms-flex-direction: column;
-          flex-direction: column;
-}
+  flex-direction: column;
 
-.icon-bar-2 .icon {
-  background-color: rgba(49, 49, 49, 0.7);
-  border-radius: 10px;
-}
+  .icon {
+    background-color: rgba(49, 49, 49, 0.7);
+    border-radius: 10px;
 
-.icon-bar-2 .icon .text {
-  font-size: 1.5em;
-  color: #FFD880;
-  text-align: center;
-}
+    .text {
+      font-size: 1.5em;
+      //color:whitesmoke;
+      color: #FFD880;
+      text-align: center;
+    }
 
-.icon-bar-2 .icon img {
-  width: 100px;
+    img {
+      width: 100px;
+    }
+  }
 }
-
+*/
 #search_form {
   -webkit-box-align: center;
       -ms-flex-align: center;

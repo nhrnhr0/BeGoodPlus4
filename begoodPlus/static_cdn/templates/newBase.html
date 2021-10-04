@@ -61,15 +61,7 @@
             </a>
 
         </div>
-        <div class="icon facebook hide">
-            <img src="{%static 'assets/base/imgs/icons8-facebook.svg'%}" alt="" srcset="">
-            <a target="_blank"
-                href="https://www.facebook.com/%D7%91%D7%99%D7%92%D7%95%D7%93-%D7%A4%D7%9C%D7%95%D7%A1-102693374827456/">
-                <div class="inner-icon">
-                    פייסבוק
-                </div>
-            </a>
-        </div>
+        
         <!--
         <div class="icon instegram hide">
             <img src="{%static 'assets/base/imgs/instagram.svg'%}" alt="" srcset="">
@@ -82,17 +74,6 @@
         -->
     </div>
 
-    <div class="icon-bar-2">
-        <div class="icon">
-            <div class="text up">
-            בעל עסק?
-        </div>
-            <img class="bissness-owner-img" src="{%static 'assets/base/imgs/entrepreneur.png' %}" alt="" srcset="">
-            <div class="text down">
-            לחץ כאן
-        </div>
-        </div>
-    </div>
 
     <!--
     {% if messages %}
@@ -177,31 +158,7 @@
                 <div class="spiner" style="display: none;"></div>
 
             </form>
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <!--
-                    <li class="nav-item">
-                        <a class="nav-link nav-link-home active" aria-current="page" href="#">Home</a>
-                    </li>
-                    -->
-                <!--
-                    <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="#">
-                            <img width="25px" src="{%static 'assets/base/imgs/box.svg'%}" alt="" srcset="">
-                        </a>
-                    </li>
-                    -->
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle show-count" href="#" id="navbarDropdown" role="button"
-                        data-bs-toggle="dropdown" aria-expanded="false">
-                        <!--
-                            <img width="25px" src="{%static 'assets/base/imgs/email.svg' %}">
-                            -->
-                    </a>
-                    <ul class="dropdown-menu" id="navbarDropdownList" aria-labelledby="navbarDropdown" data-content="0">
-                        <li><div class="loader"></div></li>
-                    </ul>
-                </li>
-            </ul>
+            
 
 
             <div onclick="openCart()" id="cart-btn" class="cart">
@@ -438,46 +395,6 @@
         </div>
     </div>
 </div>
-
-
-    <div class="modal" id="buisnessModal" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header text-center">
-                    <h5 class="modal-title  w-100">M.S global</h5>
-                    <button type="button" class="close close-modal" data-dismiss="buisnessModal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="contact-form-wraper2">
-                        <div id="contactFormBase" class="contact-form-wraper">
-                            <form id="contact-form"  action="{%url 'form-change'%}" method="post" class="contact-form">
-                                {% csrf_token %}
-                                
-                                <h2 class="form-header">
-                                    לקבלת הצעת מחיר משתלמת <div class="mark-strong">ללא</div> עלות <div class="mark-strong">וללא</div> התחייבות השאירו פרטים ומיד נחזור אליכם
-                                </h2>
-                                {% for field in contactForm %}
-                                    <div class="form-group">
-                                        <input type="{{field.field.widget.input_type}}" class="form-control" placeholder="{{field.field.widget.attrs.placeholder}}" name="{{field.name}}" id="base_{{field.id_for_label}}">
-                                    </div>
-                                    
-                                {% endfor %}
-                                    <button type="submit" class="btn btn-success form-submit">לשליחת טופס לחץ כאן</button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-                <!--
-                <div class="modal-footer">
-                    <button type="button" id="modal-send-products-btn" class="btn btn-primary">שלח</button>
-                    <button type="button" class="btn btn-secondary close-modal" data-dismiss="buisnessModal">Close</button>
-                </div>
-                -->
-            </div>
-        </div>
-    </div>
 
     <!-- BLOCK CONTENT -->
     {%block content %} {%endblock content%}
@@ -754,10 +671,6 @@
           return false;
     }
  });
-            // TODO: why is this here?
-            $('.icon-bar-2').click(()=> {
-                openBuisnessModal();
-            });
         }
 
         getAllAlbums();

@@ -4,6 +4,6 @@ from django.contrib import admin
 
 from .models import CustomerCart
 class CustomerCartAdmin(admin.ModelAdmin):
-    list_display = ('id', 'formUUID', 'created_date', 'name', 'email', 'phone', 'sumbited')
+    list_display = ('id', 'formUUID', 'created_date', 'name', 'email', 'phone', 'sumbited', 'owner_display')
     filter_horizontal = ('products',)
 admin.site.register(CustomerCart, CustomerCartAdmin)

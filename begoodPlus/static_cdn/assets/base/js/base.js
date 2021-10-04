@@ -164,6 +164,7 @@ function uuidv4() {
 }
 
 //var last_updated_forms = [];
+/*
 function get_last_updated_forms() {
     var forms = myStorage.getItem('last_updated_forms');
     if (forms == undefined)
@@ -314,7 +315,7 @@ function update_contact_to_server(data) {
     });
 }
 
-
+*/
 
 
 
@@ -1171,7 +1172,7 @@ console.log(e);
         window.location.href = '/technology';
     }
 }
-
+/*
 function ajax_user_tasks() {
     $.ajax({
       type: "POST",
@@ -1235,6 +1236,7 @@ function openBuisnessModal() {
         $('#buisnessModal').modal('hide');
     });
 }
+*/
 function iOS() {
 
     return [
@@ -1260,9 +1262,8 @@ function fix_IOS_Layout() {
         console.log('not IOS');
     }
 }
-ajax_user_tasks();
 ajax_refresh_cart();
-set_form_change_listener('#contact-form', 'businessOwner');
-setInterval(contact_form_interval, 10000);
-handle_user_tasks();
+//set_form_change_listener('#contact-form', 'businessOwner');
+//setInterval(contact_form_interval, 10000);
+//handle_user_tasks();
 fix_IOS_Layout();

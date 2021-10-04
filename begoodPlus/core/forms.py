@@ -19,11 +19,13 @@ class FormBeseContactInformation(BaseForm):
     message = forms.CharField(widget=forms.Textarea(attrs={'placeholder': 'הודעה', 'rows':'2'}), label='', )
     url = forms.URLField(widget=forms.HiddenInput())
     formUUID = forms.URLField(widget=forms.HiddenInput())
-    sumbited = forms.BooleanField(widget=forms.HiddenInput())
+    sumbited = forms.BooleanField(widget=forms.HiddenInput(), initial=False)
     def __init__(self, *args, **kwargs):
         super(FormBeseContactInformation, self).__init__(*args, **kwargs)
         self.fields['message'].required = False
         self.fields['email'].required = False
+        self.fields['url'].required = False
+        self.fields['formUUID'].required = False
     class Meta:
         model = BeseContactInformation
         fields = '__all__'
