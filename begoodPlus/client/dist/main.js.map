@@ -1,1 +1,0 @@
-{"version":3,"sources":["webpack://client/./src/index.js"],"names":["console","log"],"mappings":"mBAEAA,QAAQC,IAAI,U","file":"main.js","sourcesContent":["\r\nimport './styles/main.scss';\r\nconsole.log('tes2t');"],"sourceRoot":""}

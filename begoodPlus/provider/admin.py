@@ -12,7 +12,7 @@ class castumProviderAdmin(admin.ModelAdmin):
 
 admin.site.register(Provider, castumProviderAdmin)'''
 
-from stock.models import Stock
+'''
 class StockInline(admin.TabularInline):
     model = Stock
     fields = ('product', 'provider', 'productSize','productColor', 'packingType', 'amount', 'provider_has_stock',)
@@ -24,9 +24,9 @@ class StockInline(admin.TabularInline):
         return super(StockInline, self).get_queryset(request).select_related('product', 'productSize', 'productColor', 'packingType')
     
     pass
-    
+'''    
 class ProviderAdmin(admin.ModelAdmin):
     list_display = ['name', 'code', 'stocks_count',]
-    inlines = [StockInline,]
+    #inlines = [StockInline,]
     pass
 admin.site.register(Provider, ProviderAdmin)

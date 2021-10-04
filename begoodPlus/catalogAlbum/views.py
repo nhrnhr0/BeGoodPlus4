@@ -47,7 +47,6 @@ def dprint(object, stream=None, indent=1, width=80, depth=None):
 import json
 import datetime
 
-from mySettings.models import MySettings
 
 # TODO: solve this
 
