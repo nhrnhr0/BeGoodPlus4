@@ -109,17 +109,7 @@
             -->
         </div>
 
-        <div class="logo-swiper">
-            <div class="swiper-wrapper">
-                {%for logo in logos %}
-                    <div class="swiper-slide my-slick-slide">
-                        <img class="slide-image" height="100px" width="auto"
-                            src="{{logo.img.url}}"/>
-                    </div>
-                {%endfor%}
-
-            </div>
-        </div>
+        
     </div>
 
 
@@ -379,7 +369,16 @@ C24.3,4,4,24.3,4,49.2s20.3,45.2,45.2,45.2s45.2-20.3,45.2-45.2c0-8.6-2.4-16.6-6.5
 
 <script type="text/javascript">
     $(document).ready(function () {
-/*      
+        /*
+        let temp = $('.logo-swiper').multislider({
+            continuous: true,
+            slideAll: true,
+            hoverPause: true,
+            duration: 1500,
+        });
+        console.log('multislider initialize: ', temp)
+*/
+/*
     var logo_swiper = new Swiper(".logo-swiper", {
         //freeMode: true,
         //freeModeFluid: true,

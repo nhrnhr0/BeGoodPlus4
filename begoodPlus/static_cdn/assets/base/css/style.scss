@@ -492,92 +492,15 @@ body.waiting * {
       }
     }
   }
-
-  #navbarDropdown {
-    //position: absolute;
-    padding: 0;
-    font-size: 2em;
-
-    &::before,
-    &::after {
-      color: #fff;
-      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-    }
-
-    &::before {
-      display: block;
-      content: "\f0f3";
-      color: black;
-      font-family: "FontAwesome";
-      transform-origin: top center;
-    }
-
-    &::after {
-      font-size: 0.7em;
-      font-weight: 700;
-      position: absolute;
-      top: -8px;
-      right: -15px;
-      padding: 1px 5px;
-      line-height: 100%;
-      border: 2px #fff solid;
-      border-radius: 60px;
-      background: #3498db;
-      //opacity: 0;
-      //content: attr(data-count);
-      //opacity: 0;
-      transform: scale(0.5);
-      transition: transform, opacity;
-      transition-duration: 0.3s;
-      transition-timing-function: ease-out;
-    }
-
-    &.notify::before {
-      animation: ring 1.5s ease;
-    }
-
-    &.show-count::after {
-      transform: scale(1);
-      opacity: 1;
-      content: attr(data-content);
-    }
-
-
-    @keyframes ring {
-      0% {
-        transform: rotate(35deg);
-      }
-
-      12.5% {
-        transform: rotate(-30deg);
-      }
-
-      25% {
-        transform: rotate(25deg);
-      }
-
-      37.5% {
-        transform: rotate(-20deg);
-      }
-
-      50% {
-        transform: rotate(15deg);
-      }
-
-      62.5% {
-        transform: rotate(-10deg);
-      }
-
-      75% {
-        transform: rotate(5deg);
-      }
-
-      100% {
-        transform: rotate(0deg);
+  
+  #navCategoryList {
+    .dropdown-item  {
+      padding: .25rem 1rem;
+      .btn {
+        width: 100%;
       }
     }
   }
-
   .loader {
     border: 6px solid #f3f3f3;
     /* Light grey */

@@ -79,13 +79,37 @@
   }
 
     .logo-swiper {
+      /*
+      direction: ltr;
       margin-bottom: 75px;
-      .swiper-wrapper {
+      .MS-content{
+        margin: 15px 5%;
+        overflow: hidden;
+        white-space: nowrap;
+        .item { 
+          width: auto; 
+          display: inline-block;
+          //height: 100%;
+          overflow: hidden;
+          position: relative;
+          //vertical-align: bottom;
+          vertical-align: middle;
+          padding-left: 20px;
+          padding-right: 20px;
+          border-right: none;
+          border: 1px solid green;
+          .slide-image {
+            width: 100%;
+            height: auto;
+          }
+        }
+      }*/
+      /*.swiper-wrapper {
           transition-timing-function: linear;
           .swiper-slide {
               flex-shrink: 1;
           }
-      }
+      }*/
   }
 }
 .section-1 {

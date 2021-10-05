@@ -160,6 +160,30 @@
             </form>
             
 
+            <div class="dropdown">
+                <a class="dropdown-toggle" href="#" role="link" id="dropdownLink"
+                    data-bs-toggle="dropdown" aria-expanded="false">
+                    <svg viewBox="0 0 100 80" width="40" height="40">
+                        <rect width="100" height="20"></rect>
+                        <rect y="30" width="100" height="20"></rect>
+                        <rect y="60" width="100" height="20"></rect>
+                    </svg>
+                </a>
+                
+                <ul class="dropdown-menu" id="navCategoryList" aria-labelledby="dropdownLink">
+            <!--
+                  <li class="dropdown-item ">
+                    order.full_name 
+                  </li>
+                  <li class="dropdown-item ">
+                    order.address1 
+                  </li>
+                  <li class="dropdown-item ">
+                    order.address2 
+                  </li>
+                -->
+                </ul>
+              </div>
 
             <div onclick="openCart()" id="cart-btn" class="cart">
                 <i style="font-size: 2em;" class="fas fa-shopping-cart"></i>
@@ -449,7 +473,47 @@
     {% compress js %}
     <script src="{%static 'assets/base/js/lazysizes.min.js' %}" async></script>
     <script>
-        
+        const CATALOG_PATHNAME = '/';
+        function initNavCategoriesList() {
+            albums = getAllAlbums();
+            if(albums == undefined) {
+                console.log('initNavCategoriesList ==> albums is undefined. sleep and try again');
+                setTimeout(initNavCategoriesList, 500);
+                return;
+            }
+            let categoryUl = $('#navCategoryList');
+            if (categoryUl.children().length > 0) {
+                console.log('initNavCategoriesList ==> category ul already set');
+                return;
+            }
+            console.log('initNavCategoriesList ==> filling category ul');
+            let listHtml = '';
+
+            for(let i = 0; i < albums.length;i++) {
+                listHtml += 
+                    `<li class="dropdown-item ">
+                        <button class="btn btn-dark" onclick="navCategoryItemClick(${albums[i].id})">
+                            ${albums[i].title}
+                        </button>
+                    </li>`;
+            }
+            
+            categoryUl.html(listHtml);
+        }
+        function navCategoryItemClick(albumId) {
+            myStorage.setItem('search_open_category', albumId);
+            console.log('navCategoryItemClick: ', window.location.pathname);
+            if(window.location.pathname != CATALOG_PATHNAME) {
+                window.location.href = CATALOG_PATHNAME
+            }else {
+                handleSearchTasks();
+            }
+            /*if (window.location.pathname != item.url) {
+                            window.location.href = item.url;
+                        } else {
+                            handleSearchTasks();
+                        }*/
+        }
         //var allAlbums = 
         /*
         var allAlbums;
@@ -486,7 +550,6 @@
         var search_term_id = -1;
         function initAutocomplete() {
             $('#search').autocomplete({
-                
                 search: function(event, ui) { 
                     console.log('autocompleate search function');
                     $('#search_form > .spiner').show();
@@ -495,8 +558,6 @@
                     console.log('autocompleate response function');
                     $('#search_form > .spiner').hide();
                 },
-
-
                 autoFocus: true ,
                     source: function (request, response) {
                         console.log('request', request);
@@ -666,15 +727,16 @@
                     }
                 } );
                 $("#search").keydown(function(event){
-    if(event.keyCode == 13) {
-          event.preventDefault();
-          return false;
-    }
- });
+                    if(event.keyCode == 13) {
+                        event.preventDefault();
+                        return false;
+                    }
+                });
         }
 
         getAllAlbums();
         initAutocomplete();
+        initNavCategoriesList();
     </script>
     <!-- BLOCK EXTRA_BODY -->
     {% block extra_body %}
