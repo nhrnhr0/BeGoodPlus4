@@ -4,6 +4,8 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy  as _
 from django.urls import reverse
 
+from catalogAlbum.models import ThroughImage
+
 from .models import CatalogImage
 class tabelInline(admin.TabularInline):
     model = CatalogImage.detailTabel.through
@@ -48,11 +50,16 @@ class tabelInline(admin.TabularInline):
         return comp
     dis_recomended_price.short_description = _('recomended price')
     
+class albumsInline(admin.TabularInline):
+    model = ThroughImage
+    #fields = ['id','provider','dis_colors','dis_sizes', 'dis_cost_price', 'dis_client_price', 'dis_recomended_price']
+    #readonly_fields = ['id','provider','dis_colors', 'dis_sizes', 'dis_cost_price', 'dis_client_price', 'dis_recomended_price']
+    extra=1
 # Register your models here.
 class CatalogImageAdmin(AdminAdvancedFiltersMixin, admin.ModelAdmin):
     list_display = ('id', 'render_thumbnail', 'title', 'barcode','cost_price_dis','client_price_dis','recomended_price_dis','get_albums')
     list_display_links = ('title',)
-    inlines = (tabelInline,)
+    inlines = (tabelInline,albumsInline)
     readonly_fields = ('id', 'render_thumbnail', 'render_image',)
     search_fields = ('title','description')
     list_filter = ('albums', 'providers','sizes','colors',)
