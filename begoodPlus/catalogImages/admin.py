@@ -55,7 +55,7 @@ class CatalogImageAdmin(AdminAdvancedFiltersMixin, admin.ModelAdmin):
     inlines = (tabelInline,)
     readonly_fields = ('id', 'render_thumbnail', 'render_image',)
     search_fields = ('title','description')
-    list_filter = ('providers','sizes','colors','albums')
+    list_filter = ('albums', 'providers','sizes','colors',)
     filter_horizontal = ('colors', 'sizes','providers')
     list_per_page = 50
     advanced_filter_fields = (
