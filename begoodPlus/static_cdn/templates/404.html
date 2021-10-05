@@ -1,1 +1,33 @@
-<h1>hey hey 404</h1>
+{% extends "newBase.html" %}
+
+{% load i18n %}
+{% load static %}
+
+
+{% block head_title %}{% trans "Success" %}{% endblock %}
+{% block extra_head %}
+    <link rel="stylesheet" href="{%static 'assets/404/css/style.css'%}">
+{%endblock%}
+
+{% block content %}
+    <div class="main-content">
+        <div class="inner">
+        <h1>    לקוחות יקרים ! 
+        </h1>
+        <h2>
+            התחדשנו באתר חדש מוזמנים להיכנס לבקר
+            <a href="{% url 'catalogView' %}">למעבר לאתר</a>       
+        </h2>
+        <h3>תודה על שיתוף הפעולה
+        </h3>
+        <div class="img-container">
+            <img width="198" height="80" src="{%static 'assets/base/imgs/logo_ms_outline.png' %}" />
+        </div>
+    </div>
+    </div>
+{%endblock%}
+
+{% block extra_body %}
+
+
+{%endblock%}

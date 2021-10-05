@@ -59,7 +59,7 @@ from provider.views import api_providers
 from packingType.views import api_packing_types
 from productSize.views import api_product_sizes
 from productColor.views import api_product_colors
-
+from core.views import handler404
 from core.views import autocompleteModel, autocompleteClick, success_view#  admin_subscribe_view, mainView,, form_changed #saveBaseContactFormView
 from catalogAlbum.views import catalogView_api, catalogView#,catalog_timer
 #from customerCart.views import cart_changed
@@ -97,8 +97,12 @@ urlpatterns = [
     #path('user-tasks', user_tasks, name='user-tasks'),
     path('success/', success_view, name='success'),
     re_path(r'^advanced_filters/', include('advanced_filters.urls')),
-
+    path('404', handler404)
 ]
+
+
+
+
 
 if settings.DEBUG:
     urlpatterns= urlpatterns + static(settings.MEDIA_URL, document_root= settings.MEDIA_ROOT)

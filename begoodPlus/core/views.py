@@ -157,3 +157,12 @@ def form_changed(request):
 
 def success_view(request):
     return HttpResponse(render(request, 'success.html', context={}))
+
+
+
+def handler404(request, *args, **argv):
+    print('handler404')
+    response = render(request, '404.html', {})
+    response.status_code = 404
+    return response
+

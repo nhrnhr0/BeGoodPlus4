@@ -116,7 +116,7 @@ from core.forms import FormBeseContactInformation
 from core.models import BeseContactInformation, Customer
 import uuid
 
-def catalogView(request, *args, **wkargs):
+def catalogView(request, *args, **kwargs):
     print('catalogView start')
     if request.method == 'POST':
         print('post to catalogView')

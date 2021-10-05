@@ -140,43 +140,43 @@
                 class="swiper-container swiper-category slick-slider">
                 <div class="swiper-wrapper">
                     {%for img in album.sorted_image_set%}
-                    <div class="wraper-my-slick-slide swiper-slide">
-                        <div data-album-id="{{album.id}}" data-my-slide-index="{{forloop.counter0}}"
-                            data-prod-id="{{img.id}}" class="my-slick-slide shadow-lg">
-                            <!--<img height="100px" width="100px" class="swiper-lazy" data-src="media/{{img.image_thumbnail}}"
-                            alt="{{img.description}}" />
-                            <div class="swiper-lazy-preloader swiper-lazy-preloader-white"></div>                        
-                        -->
-                            {% if img.can_tag%}
-                            <img class="can-tag" alt=""
-                                src="{%static 'assets/catalog/imgs/can_tag.jpeg'%}" />
-                            {%endif%}
-
-                            {%if img.discount %}
-                            <img class="discount" src="{{img.discount}}" alt="discount" />
-                            {%endif%}
-
-
-                            <img class="product-image" loading="lazy" height="100px" width="100px" src="media/{{img.image_thumbnail}}"
+                        <div class="wraper-my-slick-slide swiper-slide">
+                            <div data-album-id="{{album.id}}" data-my-slide-index="{{forloop.counter0}}"
+                                data-prod-id="{{img.id}}" class="my-slick-slide shadow-lg">
+                                <!--<img height="100px" width="100px" class="swiper-lazy" data-src="media/{{img.image_thumbnail}}"
                                 alt="{{img.description}}" />
+                                <div class="swiper-lazy-preloader swiper-lazy-preloader-white"></div>                        
+                            -->
+                                {% if img.can_tag%}
+                                <img class="can-tag" alt=""
+                                    src="{%static 'assets/catalog/imgs/can_tag.jpeg'%}" />
+                                {%endif%}
+
+                                {%if img.discount %}
+                                <img class="discount" src="{{img.discount}}" alt="discount" />
+                                {%endif%}
 
 
-                            <div class="img-title">{{img.title}}</div>
+                                <img class="product-image" loading="lazy" height="100px" width="100px" src="media/{{img.image_thumbnail}}"
+                                    alt="{{img.description}}" />
 
-                            <!-- product SEO -->
-                            <h5 style="display: none;">{{img.title}}</h5>
-                            <h4 style="display: none;">{{img.description}}</h4>
-                        </div>
-                        <div class="like-btn" name="like-btn">
-                            <div class="like-wrapper" data-prod-id="{{img.id}}">
-                                <a name="like-btn">
-                                    <span name="like-btn">
-                                        <img src="{%static 'assets/catalog/imgs/icons8-plus-48.png'%}"> הוסף
-                                    </span>
-                                </a>
+
+                                <div class="img-title">{{img.title}}</div>
+
+                                <!-- product SEO -->
+                                <h5 style="display: none;">{{img.title}}</h5>
+                                <h4 style="display: none;">{{img.description}}</h4>
+                            </div>
+                            <div class="like-btn" name="like-btn">
+                                <div class="like-wrapper" data-prod-id="{{img.id}}">
+                                    <a name="like-btn">
+                                        <span name="like-btn">
+                                            <img src="{%static 'assets/catalog/imgs/icons8-plus-48.png'%}"> הוסף
+                                        </span>
+                                    </a>
+                                </div>
                             </div>
                         </div>
-                    </div>
                     {%endfor%}
 
                 </div>
