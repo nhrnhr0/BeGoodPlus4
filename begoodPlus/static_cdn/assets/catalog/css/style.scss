@@ -25,7 +25,57 @@
   background: radial-gradient(circle, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 1) 32%, rgba(199, 199, 199, 1) 84%);
 }
 
+.logo-section {
+  overflow: hidden;
+}
+#exampleSlider {
+  position: relative;      /* recommended */
+  
+  & .MS-content {
+    white-space: nowrap;     /* required */
+    overflow: hidden;        /* required */
+    $perent: &;
+    //margin: 0 5%;            /* makes room for L/R arrows */
+  }
+  & .MS-content .item {
+    display: inline-block;   /* required */
+    width: 40%;              /* required * Determines number of visible slides */
+    position: relative;      /* required */
+    vertical-align: top;     /* required */
+    overflow: hidden;        /* required */
+    //height: 100%;            /* recommended */
+    height: 250px;
+    white-space: normal;     /* recommended */
+
+    @media only screen and (max-width: 600px) {
+      width: 80%;
+    }
+    
+    img {
+      height: 250px;
+      width: 100%;
+    }
+    &:hover {
+      overflow: visible;
+      img {
+        transform: scale(1.2);
+      }
+    }
+  }
+}
+#exampleSlider .MS-controls button {
+  position: absolute;      /* recommended */
+  top: 35px;
+}
+#exampleSlider .MS-controls .MS-left {
+  left: 10px;
+}
+#exampleSlider .MS-controls .MS-right {
+  right: 10px;
+}
+
 .swiper-container {}
+
 
 .bg-wraper {
 

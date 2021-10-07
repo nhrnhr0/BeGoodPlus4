@@ -11,8 +11,8 @@ from provider.models import Provider
 from productSize.models import ProductSize
 from packingType.models import PackingType
 from catalogImageDetail.models import CatalogImageDetail
-from django.core.files.uploadedfile import InMemoryUploadedFile
 import sys
+from django.core.files.uploadedfile import InMemoryUploadedFile
 # Create your models here.
 class CatalogImage(models.Model):
     title = models.CharField(max_length=120, verbose_name=_("title"), unique=False)
@@ -26,9 +26,9 @@ class CatalogImage(models.Model):
     image = models.ImageField(verbose_name=_("image"))
     image_thumbnail = models.ImageField(verbose_name=_("image thumbnail"), null=True, blank=True)
 
-    cost_price = models.FloatField(verbose_name=_('cost price'), blank=False, null=False)
-    client_price = models.FloatField(verbose_name=_('store price'),  blank=False, null=False)
-    recomended_price = models.FloatField(verbose_name=_('private client price'),  blank=False, null=False)
+    cost_price = models.FloatField(verbose_name=_('cost price'), blank=False, null=False, default=1)
+    client_price = models.FloatField(verbose_name=_('store price'),  blank=False, null=False, default=1)
+    recomended_price = models.FloatField(verbose_name=_('private client price'),  blank=False, null=False, default=1)
     date_modified = models.DateTimeField(auto_now=True)
 
     packingTypeProvider = models.ForeignKey(to=PackingType,related_name='PTprovider', on_delete=models.CASCADE, default=9, verbose_name=_('packing type from provider'))
