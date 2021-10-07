@@ -57,13 +57,14 @@ class albumsInline(admin.TabularInline):
     extra=1
 # Register your models here.
 class CatalogImageAdmin(AdminAdvancedFiltersMixin, admin.ModelAdmin):
-    list_display = ('id', 'render_thumbnail', 'title', 'barcode','cost_price_dis','client_price_dis','recomended_price_dis','get_albums')
+    list_display = ('id', 'render_thumbnail', 'title', 'barcode','cost_price_dis','client_price_dis','recomended_price_dis','get_albums','cost_price','client_price','recomended_price')
+    list_editable = ('cost_price','client_price','recomended_price')
     list_display_links = ('title',)
     inlines = (tabelInline,albumsInline)
     readonly_fields = ('id', 'render_thumbnail', 'render_image',)
     search_fields = ('title','description')
     list_filter = ('albums', 'providers','sizes','colors',)
-    filter_horizontal = ('colors', 'sizes','providers')
+    filter_horizontal = ('colors', 'sizes','providers', 'detailTabel')
     list_per_page = 50
     advanced_filter_fields = (
         'title', 'description','sizes__size', 'colors__name','provides__name')
