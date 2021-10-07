@@ -7,11 +7,17 @@ from django.urls import reverse
 from catalogAlbum.models import ThroughImage
 
 from .models import CatalogImage
-class tabelInline(admin.TabularInline):
+class tableInline(admin.TabularInline):
     model = CatalogImage.detailTabel.through
-    fields = ['id','provider','dis_colors','dis_sizes', 'dis_cost_price', 'dis_client_price', 'dis_recomended_price']
-    readonly_fields = ['id','provider','dis_colors', 'dis_sizes', 'dis_cost_price', 'dis_client_price', 'dis_recomended_price']
-    extra=0
+    #fields = ['',]
+    #fields = ['id', 'provider']
+    #readonly_fields = ['provider']
+    fields = ['id', 'provider','dis_colors', 'dis_sizes', 'dis_cost_price', 'dis_client_price', 'dis_recomended_price', 'providerMakat']
+    readonly_fields = ['id','provider', 'dis_colors', 'dis_sizes', 'dis_cost_price', 'dis_client_price', 'dis_recomended_price', 'providerMakat']
+    extra=1
+    def providerMakat(self, instance ):
+        print(instance)
+        return instance.catalogimagedetail.providerMakat
 
     def price_component(buy, sell):
         prcent = ((buy / sell) - 1)*100
@@ -41,15 +47,15 @@ class tabelInline(admin.TabularInline):
     dis_cost_price.short_description = _('cost price')
 
     def dis_client_price(self, instance):
-        comp = tabelInline.price_component(instance.catalogimagedetail.client_price, instance.catalogimagedetail.cost_price)
+        comp = tableInline.price_component(instance.catalogimagedetail.client_price, instance.catalogimagedetail.cost_price)
         return comp#instance.catalogimagedetail.client_price
     dis_client_price.short_description = _('client price')
     
     def dis_recomended_price(self, instance):
-        comp = tabelInline.price_component(instance.catalogimagedetail.recomended_price, instance.catalogimagedetail.client_price)
+        comp = tableInline.price_component(instance.catalogimagedetail.recomended_price, instance.catalogimagedetail.client_price)
         return comp
     dis_recomended_price.short_description = _('recomended price')
-    
+
 class albumsInline(admin.TabularInline):
     model = ThroughImage
     #fields = ['id','provider','dis_colors','dis_sizes', 'dis_cost_price', 'dis_client_price', 'dis_recomended_price']
@@ -59,7 +65,7 @@ class albumsInline(admin.TabularInline):
 class CatalogImageAdmin(AdminAdvancedFiltersMixin, admin.ModelAdmin):
     list_display = ('id', 'render_thumbnail', 'title', 'barcode','cost_price_dis','client_price_dis','recomended_price_dis','get_albums')
     list_display_links = ('title',)
-    inlines = (tabelInline,albumsInline)
+    inlines = (albumsInline,tableInline)#
     readonly_fields = ('id', 'render_thumbnail', 'render_image',)
     search_fields = ('title','description')
     list_filter = ('albums', 'providers','sizes','colors',)

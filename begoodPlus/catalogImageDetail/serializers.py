@@ -8,4 +8,4 @@ class CatalogImageDetailApiSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = CatalogImageDetail
-        fields = ('id','provider','colors','sizes','cost_price','client_price','recomended_price', 'parent')
+        fields = ('id','provider','colors','sizes','cost_price','client_price','recomended_price', 'parent', 'providerMakat')

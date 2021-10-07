@@ -1,3 +1,4 @@
+from django.contrib.admin.options import ModelAdmin
 from productSize.models import ProductSize
 from io import open_code
 from color.models import Color
@@ -16,6 +17,11 @@ class CatalogImageDetail(models.Model):
     client_price = models.FloatField(verbose_name=_('store price'),  blank=False, null=False)
     recomended_price = models.FloatField(verbose_name=_('private client price'),  blank=False, null=False)
 
+    providerMakat = models.CharField(verbose_name=_('provider makat'), max_length=75, blank=True, null=True)
+
     def __str__(self):
-        ret = '[' + self.parent.first().title + ' , ' + self.provider.name + ']'
+        try:
+            ret = '[' + self.parent.first().title + ' , ' + self.provider.name + ']'
+        except:
+            ret = '[' + 'no parent product!' + ' , ' + self.provider.name + ']'
         return ret
