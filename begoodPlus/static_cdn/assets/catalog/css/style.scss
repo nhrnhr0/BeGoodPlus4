@@ -27,8 +27,7 @@
 
 .logo-section {
   overflow: hidden;
-}
-#exampleSlider {
+}#exampleSlider {
   position: relative;      /* recommended */
   
   & .MS-content {
@@ -44,7 +43,7 @@
     vertical-align: top;     /* required */
     overflow: hidden;        /* required */
     //height: 100%;            /* recommended */
-    height: 250px;
+    height: 150px;
     white-space: normal;     /* recommended */
 
     @media only screen and (max-width: 600px) {
@@ -52,7 +51,7 @@
     }
     
     img {
-      height: 250px;
+      height: 150px;
       width: 100%;
     }
     &:hover {
@@ -73,9 +72,6 @@
 #exampleSlider .MS-controls .MS-right {
   right: 10px;
 }
-
-.swiper-container {}
-
 
 .bg-wraper {
 

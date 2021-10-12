@@ -26,7 +26,7 @@ class StockInline(admin.TabularInline):
     pass
 '''    
 class ProviderAdmin(admin.ModelAdmin):
-    list_display = ['name', 'code', 'stocks_count',]
+    list_display = ['name', 'code',]
     #inlines = [StockInline,]
     pass
 admin.site.register(Provider, ProviderAdmin)

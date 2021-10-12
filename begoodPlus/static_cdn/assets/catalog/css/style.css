@@ -1392,7 +1392,7 @@ body.waiting * {
   /* required */
   overflow: hidden;
   /* required */
-  height: 250px;
+  height: 150px;
   white-space: normal;
   /* recommended */
 }
@@ -1404,7 +1404,7 @@ body.waiting * {
 }
 
 #exampleSlider .MS-content .item img {
-  height: 250px;
+  height: 150px;
   width: 100%;
 }
 

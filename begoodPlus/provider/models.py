@@ -14,10 +14,6 @@ class Provider(models.Model):
     code = models.CharField(verbose_name=_('code'), max_length=1, default='A')
     #color = models.ForeignKey(Color, on_delete=models.CASCADE)
     #color = ColorField(verbose_name=_('color'))
-    
-    def stocks_count(self):
-        return self.stocks.count()
-    stocks_count.short_description = _("stocks count")
 
     def __str__(self):
         return self.name + ' (' + self.code + ')'
