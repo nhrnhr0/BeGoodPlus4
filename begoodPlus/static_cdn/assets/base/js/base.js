@@ -36,6 +36,7 @@ function set_like_btn(selector, val) {
       }, 0);
   });
   $(document).on('hidden.bs.modal', '.modal', function () {
+      history.pushState('main', null, '/');
       $('.modal:visible').length && $(document.body).addClass('modal-open');
   });
 /*============================================================================================================== */
@@ -346,9 +347,9 @@ function openCart() {
 
 
 
-
+/** TODO: change url */
 function openProductModal(prodId, albumId, delay = 0) {
-
+    history.pushState(prodId, null, `/share-me/product/${prodId}`);
 
     //var isAdded = e.currentTarget.dataset.isAdded;
     console.log('openProductModal', prodId, albumId, delay);
@@ -698,8 +699,10 @@ function render_cart_view(data) {
   update_cart_ui(last_updated_cart);
 }
 
-function openCategoryModal(albumId) {
 
+/**TODO: change url */
+function openCategoryModal(albumId) {
+    history.pushState(albumId, null, `/share-me/category/${albumId}`);
     //updateLikedProductsTask();
     $('#catalogModal .close-modal').click();
     //updateProductsCart();

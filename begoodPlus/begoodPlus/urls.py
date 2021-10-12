@@ -59,7 +59,7 @@ from provider.views import api_providers
 from packingType.views import api_packing_types
 from productSize.views import api_product_sizes
 from productColor.views import api_product_colors
-from core.views import handler404
+from core.views import handler404, shareable_category_view, shareable_product_view
 from core.views import autocompleteModel, autocompleteClick, success_view#  admin_subscribe_view, mainView,, form_changed #saveBaseContactFormView
 from catalogAlbum.views import catalogView_api, catalogView#,catalog_timer
 #from customerCart.views import cart_changed
@@ -97,6 +97,9 @@ urlpatterns = [
     #path('user-tasks', user_tasks, name='user-tasks'),
     path('success/', success_view, name='success'),
     re_path(r'^advanced_filters/', include('advanced_filters.urls')),
+    re_path('share-me/product/(?P<prod_id>\d+)/$', shareable_product_view, name='shareable_product_view'),
+    re_path('share-me/category/(?P<category_id>\d+)/$', shareable_category_view, name='shareable_category_view'),
+
     path('404', handler404)
 ]
 

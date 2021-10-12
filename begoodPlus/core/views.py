@@ -166,3 +166,12 @@ def handler404(request, *args, **argv):
     response.status_code = 404
     return response
 
+
+def shareable_product_view(request, prod_id):
+    obj = CatalogImage.objects.get(pk=prod_id)
+    return render(request, 'share_product.html', context={'obj':obj})
+    
+
+def shareable_category_view(request, category_id):
+    obj = CatalogAlbum.objects.get(pk=category_id)
+    return render(request, 'share_category.html', context={'obj':obj})
