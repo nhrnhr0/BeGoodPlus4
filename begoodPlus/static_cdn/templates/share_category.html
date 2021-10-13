@@ -3,6 +3,7 @@
 <html>
 
 <head lang="he">
+    <meta property="og:url"                content="{{ request.get_full_path }}" />
     <meta property="og:type"               content="website" />
     <meta property="og:title"              content="{{obj.title}}" />
     <meta property="og:description"        content="{{obj.description}}" />
@@ -16,9 +17,7 @@
 </head>
 <body>
     <script>
-        document.addEventListener("DOMContentLoaded", function(event) {
-            window.localStorage.setItem('search_open_category', {{obj.id}});
-            //window.location.href = "/";
-        });
+        window.localStorage.setItem('search_open_category', {{obj.id}});
+        window.location.href = "/";
     </script>
 </body>
