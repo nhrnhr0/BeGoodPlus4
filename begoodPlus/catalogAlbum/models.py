@@ -1,4 +1,5 @@
 from django.db import models
+from django.urls.base import reverse
 # Create your models here.
 from django.utils.translation import gettext_lazy  as _
 
@@ -68,6 +69,14 @@ class CatalogAlbum(MPTTModel):
         unique_together = ('slug', 'parent',)
         #ordering = ['throughimage__image_order'] 
         #ordering = ('throughimage__image_order',)
+
+    def get_absolute_url(self):
+        category_url = reverse('shareable_category_view', args=[self.id])
+        return category_url
+    def link_copy(self):
+        url = self.get_absolute_url()
+        return mark_safe(f'<a href="{url}" target="_blank">{url}</a>')
+    link_copy.short_description = _('copy link')
     def __str__(self):
         return self.title
     '''

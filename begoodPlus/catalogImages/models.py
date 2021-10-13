@@ -5,6 +5,7 @@ from io import BytesIO
 from django.core.files.base import ContentFile
 from django.utils.html import mark_safe
 from django.conf import settings
+from django.urls import reverse
 
 from color.models import Color
 from provider.models import Provider
@@ -70,7 +71,15 @@ class CatalogImage(models.Model):
     def recomended_price_dis(self):
         return CatalogImage.price_component(self.recomended_price, self.client_price)
     recomended_price_dis.short_description= _('private client price (no VAT)')
-    
+
+
+    def get_absolute_url(self):
+        product_url = reverse('shareable_product_view', args=[self.id])
+        return product_url
+    def link_copy(self):
+        url = self.get_absolute_url()
+        return mark_safe(f'<a href="{url}" target="_blank">{url}</a>')
+    link_copy.short_description = _('copy link')
     
     class Meta():
         verbose_name = _('Catalog image')
