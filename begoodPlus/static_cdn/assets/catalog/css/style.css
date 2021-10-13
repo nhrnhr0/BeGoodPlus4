@@ -37,6 +37,14 @@
   }
 }
 
+html {
+  position: relative;
+}
+
+body {
+  position: relative;
+}
+
 /*
 @font-face {
     font-family: 'Rounded Mplus 1c';
@@ -210,6 +218,63 @@ body.waiting * {
   -webkit-transition: all 0.5s linear;
   transition: all 0.5s linear;
   --icon-bar-border-size: 3px;
+  /*
+    &.delivery {
+      ///background-color: #FFD880;
+      border: var(--icon-bar-border-size) solid #FFD880;
+      overflow: hidden;
+
+      .inner-icon {
+        &:focus {
+          outline: 0;
+        }
+
+        &:before {
+          content: '';
+          display: block;
+          position: absolute;
+          background: rgba(255, 255, 255, 0.8);
+          width: 60px;
+          height: 100%;
+          left: 0;
+          top: 0;
+          opacity: .5;
+          filter: blur(30px);
+          transform: translateX(-100px) skewX(-15deg);
+        }
+
+        &:after {
+          content: '';
+          display: block;
+          position: absolute;
+          background: rgba(255, 255, 255, 0.2);
+          width: 30px;
+          height: 100%;
+          left: 30px;
+          top: 0;
+          opacity: 0;
+          filter: blur(5px);
+          transform: translateX(-100px) skewX(-15deg);
+        }
+
+        &:hover {
+          cursor: pointer;
+
+          &:before {
+            transform: translateX(300px) skewX(-15deg);
+            opacity: 0.6;
+            transition: .7s;
+          }
+
+          &:after {
+            transform: translateX(300px) skewX(-15deg);
+            opacity: 1;
+            transition: .7s;
+          }
+        }
+      }
+    }
+    */
   /*&.pick {
             transform: translateX(-90px);
         }*/
@@ -246,67 +311,6 @@ body.waiting * {
   font-size: 0.857em;
   padding: 10px;
   height: 100%;
-}
-
-.icon-bar .icon.delivery {
-  border: var(--icon-bar-border-size) solid #FFD880;
-  overflow: hidden;
-}
-
-.icon-bar .icon.delivery .inner-icon:focus {
-  outline: 0;
-}
-
-.icon-bar .icon.delivery .inner-icon:before {
-  content: '';
-  display: block;
-  position: absolute;
-  background: rgba(255, 255, 255, 0.8);
-  width: 60px;
-  height: 100%;
-  left: 0;
-  top: 0;
-  opacity: .5;
-  -webkit-filter: blur(30px);
-          filter: blur(30px);
-  -webkit-transform: translateX(-100px) skewX(-15deg);
-          transform: translateX(-100px) skewX(-15deg);
-}
-
-.icon-bar .icon.delivery .inner-icon:after {
-  content: '';
-  display: block;
-  position: absolute;
-  background: rgba(255, 255, 255, 0.2);
-  width: 30px;
-  height: 100%;
-  left: 30px;
-  top: 0;
-  opacity: 0;
-  -webkit-filter: blur(5px);
-          filter: blur(5px);
-  -webkit-transform: translateX(-100px) skewX(-15deg);
-          transform: translateX(-100px) skewX(-15deg);
-}
-
-.icon-bar .icon.delivery .inner-icon:hover {
-  cursor: pointer;
-}
-
-.icon-bar .icon.delivery .inner-icon:hover:before {
-  -webkit-transform: translateX(300px) skewX(-15deg);
-          transform: translateX(300px) skewX(-15deg);
-  opacity: 0.6;
-  -webkit-transition: .7s;
-  transition: .7s;
-}
-
-.icon-bar .icon.delivery .inner-icon:hover:after {
-  -webkit-transform: translateX(300px) skewX(-15deg);
-          transform: translateX(300px) skewX(-15deg);
-  opacity: 1;
-  -webkit-transition: .7s;
-  transition: .7s;
 }
 
 .icon-bar .icon.whatsapp {
@@ -1387,7 +1391,7 @@ body.waiting * {
 #exampleSlider .MS-content .item {
   display: inline-block;
   /* required */
-  width: 40%;
+  width: 20%;
   /* required * Determines number of visible slides */
   position: relative;
   /* required */
@@ -1395,19 +1399,16 @@ body.waiting * {
   /* required */
   overflow: hidden;
   /* required */
-  height: 150px;
+  height: 100px;
   white-space: normal;
   /* recommended */
-}
-
-@media only screen and (max-width: 600px) {
-  #exampleSlider .MS-content .item {
-    width: 80%;
-  }
+  /*@media only screen and (max-width: 600px) {
+      width: 80%;
+    }*/
 }
 
 #exampleSlider .MS-content .item img {
-  height: 150px;
+  height: 100px;
   width: 100%;
 }
 

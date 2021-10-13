@@ -39,20 +39,20 @@
   }
   & .MS-content .item {
     display: inline-block;   /* required */
-    width: 40%;              /* required * Determines number of visible slides */
+    width: 20%;              /* required * Determines number of visible slides */
     position: relative;      /* required */
     vertical-align: top;     /* required */
     overflow: hidden;        /* required */
     //height: 100%;            /* recommended */
-    height: 150px;
+    height: 100px;
     white-space: normal;     /* recommended */
 
-    @media only screen and (max-width: 600px) {
+    /*@media only screen and (max-width: 600px) {
       width: 80%;
-    }
+    }*/
     
     img {
-      height: 150px;
+      height: 100px;
       width: 100%;
     }
     &:hover {
