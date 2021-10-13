@@ -1238,7 +1238,7 @@ body.waiting * {
   padding-right: 10px;
   text-align: center;
   width: 100%;
-  overflow: hidden;
+  word-break: break-word;
 }
 
 .contact-form-wraper2 .contact-form-wraper .contact-form .form-header .mark-strong {

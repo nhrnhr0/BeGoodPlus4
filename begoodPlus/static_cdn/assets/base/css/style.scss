@@ -1165,8 +1165,8 @@ body.waiting * {
         //margin-bottom: 80px;
         text-align: center;
         width: 100%;
-        overflow: hidden;
-
+        //overflow: hidden;
+        word-break: break-word;
         .mark-strong {
           display: inline;
           font-weight: 700;
