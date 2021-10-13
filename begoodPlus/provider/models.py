@@ -11,7 +11,7 @@ class Provider(models.Model):
 
     name = models.CharField(max_length=150, verbose_name=_('name'))
     providerId = models.CharField(max_length=150, verbose_name=_('private compeny'), blank=True)
-    code = models.CharField(verbose_name=_('code'), max_length=1, default='A')
+    code = models.CharField(verbose_name=_('code'), max_length=3, default='A')
     #color = models.ForeignKey(Color, on_delete=models.CASCADE)
     #color = ColorField(verbose_name=_('color'))
 
