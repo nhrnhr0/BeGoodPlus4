@@ -19,6 +19,7 @@ class CatalogImage(models.Model):
     title = models.CharField(max_length=120, verbose_name=_("title"), unique=False)
     description = models.TextField(verbose_name=_("description"))
     barcode = models.CharField(verbose_name=_('barcode'),max_length=50, blank=True, null=True)
+    free_text = models.TextField(verbose_name=_('free text'), null=True, blank=True)
     whatsapp_text = models.TextField(verbose_name=_('whatsapp text'), blank=True, null=True)
     def desc(self):
         return self.description[0:30]
