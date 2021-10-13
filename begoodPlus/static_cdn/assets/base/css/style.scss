@@ -10,8 +10,12 @@
   @include bg-gradient;
 }
 
-
-
+html {
+  position: relative;
+}
+body {
+  position: relative;
+}
 /*
 @font-face {
     font-family: 'Rounded Mplus 1c';
@@ -195,6 +199,7 @@ body.waiting * {
 
     --icon-bar-border-size: 3px;
 
+    /*
     &.delivery {
       ///background-color: #FFD880;
       border: var(--icon-bar-border-size) solid #FFD880;
@@ -250,6 +255,7 @@ body.waiting * {
         }
       }
     }
+    */
 
     &.whatsapp {
       //background: linear-gradient(#25D366, #128C7E);
