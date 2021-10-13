@@ -1158,6 +1158,8 @@ body.waiting * {
         padding-right: 10px;
         //margin-bottom: 80px;
         text-align: center;
+        width: 100%;
+        overflow: hidden;
 
         .mark-strong {
           display: inline;

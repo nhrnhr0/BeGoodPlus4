@@ -29,6 +29,7 @@
   overflow: hidden;
 }#exampleSlider {
   position: relative;      /* recommended */
+  direction: ltr;
   
   & .MS-content {
     white-space: nowrap;     /* required */
@@ -575,6 +576,7 @@
 
 .contact-form-wraper2 {
   background-color: #FFD880;
+  overflow: hidden;
 }
 
 @keyframes burst {

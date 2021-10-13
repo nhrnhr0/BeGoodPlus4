@@ -1233,6 +1233,8 @@ body.waiting * {
   border-radius: 20px;
   padding-right: 10px;
   text-align: center;
+  width: 100%;
+  overflow: hidden;
 }
 
 .contact-form-wraper2 .contact-form-wraper .contact-form .form-header .mark-strong {
@@ -1372,6 +1374,7 @@ body.waiting * {
 #exampleSlider {
   position: relative;
   /* recommended */
+  direction: ltr;
 }
 
 #exampleSlider .MS-content {
@@ -1864,6 +1867,7 @@ body.waiting * {
 
 .contact-form-wraper2 {
   background-color: #FFD880;
+  overflow: hidden;
 }
 
 @-webkit-keyframes burst {
