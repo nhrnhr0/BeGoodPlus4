@@ -1324,12 +1324,6 @@ body.waiting * {
   .icon-bar-2 .icon .bissness-owner-img {
     display: none;
   }
-  .navbar .container-fluid .navbar-logo {
-    border: 1px solid red;
-  }
-  .navbar .container-fluid #navbar_filler {
-    border: 1px solid red;
-  }
   #catalogModal .modal-dialog .modal-content .modal-body .inner-body {
     -webkit-box-orient: vertical;
     -webkit-box-direction: reverse;

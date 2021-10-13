@@ -1238,7 +1238,7 @@ body.waiting * {
   padding-right: 10px;
   text-align: center;
   width: 100%;
-  overflow: hidden;
+  word-break: break-word;
 }
 
 .contact-form-wraper2 .contact-form-wraper .contact-form .form-header .mark-strong {
@@ -1323,12 +1323,6 @@ body.waiting * {
   }
   .icon-bar-2 .icon .bissness-owner-img {
     display: none;
-  }
-  .navbar .container-fluid .navbar-logo {
-    border: 1px solid red;
-  }
-  .navbar .container-fluid #navbar_filler {
-    border: 1px solid red;
   }
   #catalogModal .modal-dialog .modal-content .modal-body .inner-body {
     -webkit-box-orient: vertical;
@@ -1598,7 +1592,6 @@ body.waiting * {
 
 /* section-2 */
 /** {
-  border: 1px solid red;
 }*/
 .my-slick-slide.checked + .like-btn:hover .like-wrapper a span img,
 .category-item.checked > div .like-btn:hover .like-wrapper a span img {
@@ -2143,7 +2136,6 @@ body.waiting * {
   }
 
   .images {
-    //border: 1px solid red;
     position: absolute;
     display: flex;
     flex-direction: row;
@@ -2315,7 +2307,6 @@ body.waiting * {
         position: absolute;
         right: 00px;
         bottom: 0px;
-        //border: 1px solid red;
       }
     }
 
@@ -2370,7 +2361,6 @@ body.waiting * {
         position: absolute;
         right: 00px;
         bottom: 0px;
-        //border: 1px solid red;
       }
     }
   }
