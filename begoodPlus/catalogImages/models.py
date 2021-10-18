@@ -27,7 +27,6 @@ class CatalogImage(models.Model):
     
     image = models.ImageField(verbose_name=_("image"))
     image_thumbnail = models.ImageField(verbose_name=_("image thumbnail"), null=True, blank=True)
-
     cost_price = models.FloatField(verbose_name=_('cost price'), blank=False, null=False, default=1)
     client_price = models.FloatField(verbose_name=_('store price'),  blank=False, null=False, default=1)
     recomended_price = models.FloatField(verbose_name=_('private client price'),  blank=False, null=False, default=1)

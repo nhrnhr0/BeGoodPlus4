@@ -68,6 +68,7 @@ INSTALLED_APPS = [
     'advanced_filters',
     'rest_framework_simplejwt',
     'corsheaders',
+    'django_filters',
     #'django_celery_beat',
 
     # own
@@ -310,6 +311,7 @@ SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': datetime.timedelta(minutes=50),
 }
 REST_FRAMEWORK = {
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticatedOrReadOnly',
     ],

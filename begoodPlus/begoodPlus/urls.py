@@ -13,6 +13,8 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from clientApi.views import ImageClientViewSet
+from clientApi.views import AlbumClientViewSet
 from catalogImageDetail.views import SvelteCatalogImageDetailViewSet
 from packingType.views import SvelteApiPackingTypeViewSet
 from color.views import SvelteColorsViewSet
@@ -33,24 +35,24 @@ from catalogAlbum.views import CatalogAlbumViewSet
 from color.views import ColorsViewSet
 from productSize.views import SizesViewSet
 router = routers.DefaultRouter()
-#router.register(r'products', ProductViewSet)
-#router.register(r'categories', CategoryViewSet)
-#router.register(r'productImages', ProductImageViewSet)
 router.register(r'CatalogAlbums', CatalogAlbumViewSet)
 router.register(r'CatalogImages', CatalogImageViewSet)
-
-#router.register(r'freeFlowStores', FfStoreViewSet)
 router.register(r'colors', ColorsViewSet)
 router.register(r'sizes', SizesViewSet)
 
 
-svelteRouter = routers.DefaultRouter()
+'''svelteRouter = routers.DefaultRouter()
 svelteRouter.register(r'colors',SvelteColorsViewSet)
 svelteRouter.register(r'sizes', SvelteApiSizesViewSet)
 svelteRouter.register(r'products', SvelteCatalogImageViewSet)
 svelteRouter.register(r'packing',  SvelteApiPackingTypeViewSet)
 svelteRouter.register(r'providers', SvelteApiProviderViewSet)
 svelteRouter.register(r'productTabel', SvelteCatalogImageDetailViewSet)
+'''
+clientRouter = routers.DefaultRouter()
+clientRouter.register(r'albums', AlbumClientViewSet)
+clientRouter.register(r'images', ImageClientViewSet)
+
 
 
 #router.register(r'stores', StoreList.as_view(),basename='stores')
@@ -78,7 +80,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     
     path('api/', include(router.urls)),
-    path('svelte/api/', include(svelteRouter.urls)),
+    path('client-api/',include(clientRouter.urls)),
+    #path('svelte/api/', include(svelteRouter.urls)),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
 
     path('', catalogView, name="catalogView"),

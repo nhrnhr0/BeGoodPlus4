@@ -84,6 +84,7 @@ INSTALLED_APPS = [
     
     'customerCart',
     'catalogImageDetail',
+    'clientApi',
     
 
 
