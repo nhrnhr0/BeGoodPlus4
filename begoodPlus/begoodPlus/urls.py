@@ -13,7 +13,7 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from clientApi.views import ImageClientViewSet
+from clientApi.views import ImageClientViewSet, get_album_images
 from clientApi.views import AlbumClientViewSet
 from catalogImageDetail.views import SvelteCatalogImageDetailViewSet
 from packingType.views import SvelteApiPackingTypeViewSet
@@ -54,7 +54,6 @@ clientRouter.register(r'albums', AlbumClientViewSet)
 clientRouter.register(r'images', ImageClientViewSet)
 
 
-
 #router.register(r'stores', StoreList.as_view(),basename='stores')
 
 from provider.views import api_providers
@@ -79,8 +78,11 @@ urlpatterns = [
     
     path('admin/', admin.site.urls),
     
-    path('api/', include(router.urls)),
+    #path('api/', include(router.urls)),
+
+    re_path(r'get_album_images/(?P<pk>\d+)',get_album_images),
     path('client-api/',include(clientRouter.urls)),
+    
     #path('svelte/api/', include(svelteRouter.urls)),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
 
@@ -97,11 +99,13 @@ urlpatterns = [
     path('cart/del', cart_del, name='cart-del'),
     path('cart/view', cart_view, name='cart-view'),
     path('cart/info', cart_info, name='cart-info'),
+
+    
     #path('user-tasks', user_tasks, name='user-tasks'),
     path('success/', success_view, name='success'),
     re_path(r'^advanced_filters/', include('advanced_filters.urls')),
-    re_path('share-me/product/(?P<prod_id>\d+)/$', shareable_product_view, name='shareable_product_view'),
-    re_path('share-me/category/(?P<category_id>\d+)/$', shareable_category_view, name='shareable_category_view'),
+    re_path(r'share-me/product/(?P<prod_id>\d+)/$', shareable_product_view, name='shareable_product_view'),
+    re_path(r'share-me/category/(?P<category_id>\d+)/$', shareable_category_view, name='shareable_category_view'),
 
     path('404', handler404)
 ]

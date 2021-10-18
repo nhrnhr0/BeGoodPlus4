@@ -3,6 +3,7 @@ from rest_framework import serializers
 from .models import CatalogAlbum
 from catalogImages.serializers import CatalogImageSerializer
 from color.serializers import ColorSerializer
+
 class CatalogAlbumSerializer(serializers.ModelSerializer):
     images_list = serializers.SerializerMethodField('_get_images')
     def _get_images(self, obj):
@@ -13,3 +14,4 @@ class CatalogAlbumSerializer(serializers.ModelSerializer):
         model = CatalogAlbum
         #fields = '__all__'
         exclude = ('images',)
+        

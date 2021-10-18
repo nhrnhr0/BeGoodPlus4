@@ -9,10 +9,10 @@ from django.http import JsonResponse
 from rest_framework import viewsets
 from rest_framework.renderers import JSONRenderer
 
+
 class CatalogAlbumViewSet(viewsets.ModelViewSet):
     queryset = CatalogAlbum.objects.all()
     serializer_class = CatalogAlbumSerializer
-
 from django.db.models.query import QuerySet
 from pprint import PrettyPrinter
 

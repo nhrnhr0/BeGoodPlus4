@@ -45,7 +45,7 @@ from catalogAlbum.models import CatalogAlbum, CatalogImage
 from .serializers import SearchCatalogImageSerializer,SearchCatalogAlbumSerializer
 from itertools import chain 
 from django.db.models import Value,CharField
-from catalogAlbum.serializers import CatalogAlbumSerializer, CatalogImageSerializer
+from catalogAlbum.serializers import CatalogImageSerializer
 def get_session_key(request):
     if not request.session.session_key:
         request.session.save()
