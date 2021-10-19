@@ -13,7 +13,7 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from clientApi.views import ImageClientViewSet, get_album_images
+from clientApi.views import ColorsClientViewSet, ImageClientViewSet, SizesClientViewSet, get_album_images
 from clientApi.views import AlbumClientViewSet
 from catalogImageDetail.views import SvelteCatalogImageDetailViewSet
 from packingType.views import SvelteApiPackingTypeViewSet
@@ -52,8 +52,8 @@ svelteRouter.register(r'productTabel', SvelteCatalogImageDetailViewSet)
 clientRouter = routers.DefaultRouter()
 clientRouter.register(r'albums', AlbumClientViewSet)
 clientRouter.register(r'images', ImageClientViewSet)
-
-
+clientRouter.register(r'colors',ColorsClientViewSet)
+clientRouter.register(r'sizes', SizesClientViewSet)
 #router.register(r'stores', StoreList.as_view(),basename='stores')
 
 from provider.views import api_providers
