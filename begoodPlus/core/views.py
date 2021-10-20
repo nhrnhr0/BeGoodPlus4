@@ -55,34 +55,34 @@ def get_session_key(request):
 import time
 def autocompleteModel(request):
     start = time.time()
-    if request.is_ajax():
-        q = request.GET.get('q', '')
-        
-        products_qs = CatalogImage.objects.filter(
-            Q(title__icontains=q) | 
-            Q(description__icontains=q) |  
-            Q(albums__title__icontains=q) |
-            Q(albums__keywords__icontains=q)
-            ).distinct()
+    #if request.is_ajax():
+    q = request.GET.get('q', '')
+    
+    products_qs = CatalogImage.objects.filter(
+        Q(title__icontains=q) | 
+        Q(description__icontains=q) |  
+        Q(albums__title__icontains=q) |
+        Q(albums__keywords__icontains=q)
+        ).distinct()
 
 
-        ser_context={'request': request}
-        products = SearchCatalogImageSerializer(products_qs,context=ser_context, many=True)
-        session = get_session_key(request)
-        
-        search_history = UserSearchData.objects.create(session=session, term=q, resultCount=len(products.data))#+ len(mylogos.data)
-        search_history.save()
-        all = products.data# + mylogos.data
-        all = all[0:20]
-        context = {'all':all,
-                    'q':q,
-                    'id': search_history.id}
+    ser_context={'request': request}
+    products = SearchCatalogImageSerializer(products_qs,context=ser_context, many=True)
+    session = get_session_key(request)
+    
+    search_history = UserSearchData.objects.create(session=session, term=q, resultCount=len(products.data))#+ len(mylogos.data)
+    search_history.save()
+    all = products.data# + mylogos.data
+    all = all[0:20]
+    context = {'all':all,
+                'q':q,
+                'id': search_history.id}
 
-        
-        
-        end=time.time() - start
-        print('autocompleteModel: ', start-end)
-        return JsonResponse(context)
+    
+    
+    end=time.time() - start
+    print('autocompleteModel: ', start-end)
+    return JsonResponse(context)
 
 from .models import UserSearchData
 from django.contrib.contenttypes.models import ContentType

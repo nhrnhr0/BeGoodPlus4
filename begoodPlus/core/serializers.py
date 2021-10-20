@@ -5,7 +5,7 @@ from catalogAlbum.models import CatalogAlbum
 from drf_multiple_model.views import ObjectMultipleModelAPIView
 from django.urls import reverse
 
-class SearchCatalogAlbumSerializer(serializers.HyperlinkedModelSerializer):
+class SearchCatalogAlbumSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(read_only=True)
     my_type = serializers.ReadOnlyField(default='album')
     url = serializers.ReadOnlyField(default='/')
@@ -14,7 +14,7 @@ class SearchCatalogAlbumSerializer(serializers.HyperlinkedModelSerializer):
         fields = ('id', 'url', 'title', 'slug', 'is_public', 'my_type',)
         #exclude = ('images',)
 
-class SearchCatalogImageSerializer(serializers.HyperlinkedModelSerializer):
+class SearchCatalogImageSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(read_only=True)
     my_type = serializers.ReadOnlyField(default='product')
     url = serializers.ReadOnlyField(default='/')
