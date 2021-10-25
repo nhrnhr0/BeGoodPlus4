@@ -9,9 +9,10 @@ class SearchCatalogAlbumSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(read_only=True)
     my_type = serializers.ReadOnlyField(default='album')
     url = serializers.ReadOnlyField(default='/')
+    #categoryFotter = serializers.CharField(source='fotter')
     class Meta:
         model = CatalogAlbum
-        fields = ('id', 'url', 'title', 'slug', 'is_public', 'my_type',)
+        fields = ('id', 'url', 'title', 'slug', 'is_public', 'my_type','description','fotter')
         #exclude = ('images',)
 
 class SearchCatalogImageSerializer(serializers.ModelSerializer):

@@ -41,14 +41,14 @@ router.register(r'colors', ColorsViewSet)
 router.register(r'sizes', SizesViewSet)
 
 
-'''svelteRouter = routers.DefaultRouter()
+svelteRouter = routers.DefaultRouter()
 svelteRouter.register(r'colors',SvelteColorsViewSet)
 svelteRouter.register(r'sizes', SvelteApiSizesViewSet)
 svelteRouter.register(r'products', SvelteCatalogImageViewSet)
 svelteRouter.register(r'packing',  SvelteApiPackingTypeViewSet)
 svelteRouter.register(r'providers', SvelteApiProviderViewSet)
 svelteRouter.register(r'productTabel', SvelteCatalogImageDetailViewSet)
-'''
+
 clientRouter = routers.DefaultRouter()
 clientRouter.register(r'albums', AlbumClientViewSet)
 clientRouter.register(r'images', ImageClientViewSet)
@@ -83,7 +83,7 @@ urlpatterns = [
     re_path(r'get_album_images/(?P<pk>\d+)',get_album_images),
     path('client-api/',include(clientRouter.urls)),
     
-    #path('svelte/api/', include(svelteRouter.urls)),
+    path('svelte/api/', include(svelteRouter.urls)),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
 
     path('', catalogView, name="catalogView"),
