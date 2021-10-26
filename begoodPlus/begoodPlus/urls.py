@@ -21,6 +21,7 @@ from color.views import SvelteColorsViewSet
 from catalogImages.views import SvelteCatalogImageViewSet, create_mini_table
 from productSize.views import SvelteApiSizesViewSet
 from django.contrib import admin
+import debug_toolbar
 #from pages.views import order_form, order_form2, order_form3,catalog_view,catalog_page, landing_page_view, my_logo_wrapper_view, catalog_page2
                         
 from django.conf import settings
@@ -109,13 +110,12 @@ urlpatterns = [
 
     path('404', handler404)
 ]
-
+print('settings: ', settings);
 if settings.DEBUG:
     urlpatterns= urlpatterns + static(settings.MEDIA_URL, document_root= settings.MEDIA_ROOT)
     urlpatterns= urlpatterns + static(settings.STATIC_URL, document_root= settings.STATIC_ROOT)
     
 if settings.DEBUG:
-    import debug_toolbar
     urlpatterns = [
         path('__debug__/', include(debug_toolbar.urls)),
     ] + urlpatterns
