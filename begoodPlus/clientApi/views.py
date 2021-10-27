@@ -41,7 +41,7 @@ from rest_framework.renderers import JSONRenderer, TemplateHTMLRenderer
 @renderer_classes((JSONRenderer,))
 def get_album_images(request, pk):
     album = CatalogAlbum.objects.get(id=pk)
-    images = album.images
+    images = album.images.order_by('throughimage__image_order')
     ser = ImageClientApi(images, many=True)
     return Response(ser.data)
 
