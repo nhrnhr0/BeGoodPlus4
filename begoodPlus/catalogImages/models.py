@@ -13,6 +13,10 @@ from productSize.models import ProductSize
 from packingType.models import PackingType
 from catalogImageDetail.models import CatalogImageDetail
 import sys
+from cloudinary.models import CloudinaryField
+#from cloudinary.uploader import upload
+import cloudinary
+
 from django.core.files.uploadedfile import InMemoryUploadedFile
 # Create your models here.
 class CatalogImage(models.Model):
@@ -24,7 +28,7 @@ class CatalogImage(models.Model):
     def desc(self):
         return self.description[0:30]
     desc.short_description= _('short description')
-    
+    cimage = models.URLField(verbose_name=_('cloudinary image url'), null=True, blank=True, max_length=2047)#CloudinaryField('product_image', overwrite=True,resource_type="image",null=True, blank=True)
     image = models.ImageField(verbose_name=_("image"))
     image_thumbnail = models.ImageField(verbose_name=_("image thumbnail"), null=True, blank=True)
     cost_price = models.FloatField(verbose_name=_('cost price'), blank=False, null=False, default=1)
@@ -139,6 +143,12 @@ class CatalogImage(models.Model):
             output2 = CatalogImage.optimize_tubmail(self.image, size=(250,250))
             self.image_thumbnail = InMemoryUploadedFile(output2, 'ImageField', "image_thumbnail_%s.png" % self.image.name.split('.')[0], 'image/PNG',
                                         sys.getsizeof(output2), None)
+        if not self.cimage:
+            res = cloudinary.uploader.upload(self.image.path,
+                folder = "site/products/", 
+                )#public_id = self.title + '_' + str(self.id))
+            self.cimage = res['url']
+            pass
         # if the image is set and and squere image we will generate one
         '''
         im = Image.open(self.image)
