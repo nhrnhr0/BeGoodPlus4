@@ -5,6 +5,7 @@ from django.conf import settings
 import cloudinary
 # Create your models here.
 from adminsortable.models import Sortable
+from pathlib import Path
 
 class CatalogLogo(Sortable):
     title = models.CharField(verbose_name=_('name'),max_length=120)
@@ -17,8 +18,10 @@ class CatalogLogo(Sortable):
     def save(self, *args, **kwargs):
         super(CatalogLogo, self).save(*args,**kwargs)
         if not self.cimg:
+            fname = Path(self.image.file.name).with_suffix('').name
             res = cloudinary.uploader.upload(self.img.path,
                 folder = "site/logos/", 
+                public_id = fname
                 )#public_id = self.title + '_' + str(self.id))
             self.cimg = res['url']
             self.save()

@@ -16,7 +16,7 @@ import sys
 from cloudinary.models import CloudinaryField
 #from cloudinary.uploader import upload
 import cloudinary
-
+from pathlib import Path
 from django.core.files.uploadedfile import InMemoryUploadedFile
 # Create your models here.
 class CatalogImage(models.Model):
@@ -136,6 +136,7 @@ class CatalogImage(models.Model):
         return output 
     
     def save(self, *args, **kwargs):
+        
         if self.image:
             output = CatalogImage.optimize_image(self.image, size=(923, 715))
             self.image = InMemoryUploadedFile(output, 'ImageField', "%s.png" % self.image.name.split('.')[0], 'image/PNG',
@@ -143,11 +144,16 @@ class CatalogImage(models.Model):
             output2 = CatalogImage.optimize_tubmail(self.image, size=(250,250))
             self.image_thumbnail = InMemoryUploadedFile(output2, 'ImageField', "image_thumbnail_%s.png" % self.image.name.split('.')[0], 'image/PNG',
                                         sys.getsizeof(output2), None)
+        super(CatalogImage, self).save(*args,**kwargs)
         if not self.cimage:
-            res = cloudinary.uploader.upload(self.image.path,
+            fname = Path(self.image.file.name).with_suffix('').name
+            #fname = fname.substring(0, fname.lastIndexOf('.'))
+            res = cloudinary.uploader.upload(self.image.file,
                 folder = "site/products/", 
+                public_id = fname
                 )#public_id = self.title + '_' + str(self.id))
             self.cimage = res['url']
+            self.save()
             pass
         # if the image is set and and squere image we will generate one
         '''
@@ -190,7 +196,7 @@ class CatalogImage(models.Model):
                 f.close()
         '''
         
-        super(CatalogImage, self).save(*args,**kwargs)
+        
         
 
         
