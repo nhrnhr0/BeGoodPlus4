@@ -18,8 +18,8 @@ class CatalogLogo(Sortable):
     def save(self, *args, **kwargs):
         super(CatalogLogo, self).save(*args,**kwargs)
         if not self.cimg:
-            fname = Path(self.image.file.name).with_suffix('').name
-            res = cloudinary.uploader.upload(self.img.path,
+            fname = Path(self.img.file.name).with_suffix('').name
+            res = cloudinary.uploader.upload(self.img.file,
                 folder = "site/logos/", 
                 public_id = fname
                 )#public_id = self.title + '_' + str(self.id))
