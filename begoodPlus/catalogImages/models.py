@@ -28,7 +28,7 @@ class CatalogImage(models.Model):
     def desc(self):
         return self.description[0:30]
     desc.short_description= _('short description')
-    cimage = models.URLField(verbose_name=_('cloudinary image url'), null=True, blank=True, max_length=2047)#CloudinaryField('product_image', overwrite=True,resource_type="image",null=True, blank=True)
+    cimage = models.CharField(verbose_name=_('cloudinary image url'), null=True, blank=True, max_length=2047)#CloudinaryField('product_image', overwrite=True,resource_type="image",null=True, blank=True)
     image = models.ImageField(verbose_name=_("image"))
     image_thumbnail = models.ImageField(verbose_name=_("image thumbnail"), null=True, blank=True)
     cost_price = models.FloatField(verbose_name=_('cost price'), blank=False, null=False, default=1)
@@ -152,7 +152,7 @@ class CatalogImage(models.Model):
                 folder = "site/products/", 
                 public_id = fname
                 )#public_id = self.title + '_' + str(self.id))
-            self.cimage = res['url']
+            self.cimage = 'v' + str(res['version']) +'/'+ res['public_id']
             self.save()
             pass
         # if the image is set and and squere image we will generate one

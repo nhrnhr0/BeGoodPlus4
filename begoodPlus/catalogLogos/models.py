@@ -10,7 +10,7 @@ from pathlib import Path
 class CatalogLogo(Sortable):
     title = models.CharField(verbose_name=_('name'),max_length=120)
     img = models.ImageField(verbose_name=_('image'), upload_to='logos/')
-    cimg = models.URLField(verbose_name=_('claudinary url'), max_length=2047, null=True, blank=True)
+    cimg = models.CharField(verbose_name=_('claudinary url'), max_length=2047, null=True, blank=True)
     image_order = models.PositiveIntegerField(default=0, editable=False, db_index=True)
     class Meta(Sortable.Meta):
         ordering = ['image_order']
@@ -19,11 +19,17 @@ class CatalogLogo(Sortable):
         super(CatalogLogo, self).save(*args,**kwargs)
         if not self.cimg:
             fname = Path(self.img.file.name).with_suffix('').name
-            res = cloudinary.uploader.upload(self.img.file,
-                folder = "site/logos/", 
-                public_id = fname
-                )#public_id = self.title + '_' + str(self.id))
-            self.cimg = res['url']
+            try:
+                res = cloudinary.uploader.upload(self.img.file,
+                    folder = "site/logos/", 
+                    public_id = fname
+                    )#public_id = self.title + '_' + str(self.id))
+            except:
+                res = cloudinary.uploader.upload(self.img.path,
+                    folder = "site/logos/", 
+                    public_id = fname
+                    )#public_id = self.title + '_' + str(self.id))
+            self.cimg = 'v' + str(res['version']) +'/'+ res['public_id']
             self.save()
         
     def render_image(self, *args, **kwargs):
