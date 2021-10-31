@@ -40,11 +40,17 @@ class SizesClientViewSet(viewsets.ModelViewSet):
     
 from rest_framework.decorators import api_view, renderer_classes
 from rest_framework.renderers import JSONRenderer, TemplateHTMLRenderer
+from django.views.decorators.cache import cache_page
+import functools
+
 @api_view(('GET',))
 @renderer_classes((JSONRenderer,))
 def get_album_images(request, pk):
+    data = expensive_get_album_images(pk)
+    return Response(data)
+
+def expensive_get_album_images(pk):
     album = CatalogAlbum.objects.get(id=pk)
     images = album.images.order_by('throughimage__image_order')
     ser = ImageClientApi(images, many=True)
-    return Response(ser.data)
-
+    return ser.data
