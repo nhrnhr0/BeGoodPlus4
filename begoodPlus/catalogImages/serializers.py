@@ -50,9 +50,9 @@ class CatalogImageApiSerializer(serializers.ModelSerializer):
         ret = super().to_internal_value(data)
         return ret'''
         
-    def to_representation(self, instance):
-        print('to_representation: ', instance)
-        return super().to_representation(instance)
+    #def to_representation(self, instance):
+        #print('to_representation: ', instance)
+    #    return super().to_representation(instance)
     
 class CatalogImageSerializer(serializers.HyperlinkedModelSerializer):
     colors_list = serializers.SerializerMethodField('_get_colors')

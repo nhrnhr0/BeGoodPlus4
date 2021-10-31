@@ -3,15 +3,18 @@ from django.http.response import JsonResponse
 from django.shortcuts import render
 from catalogImages.models import CatalogImage
 from clientApi.serializers import ColorClientApi, ImageClientApi, SizeClientApi
-from clientApi.serializers import AlbumClientApi
+from clientApi.serializers import AlbumClientApi, LogoClientApi
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from catalogAlbum.models import CatalogAlbum
 from rest_framework.renderers import JSONRenderer
-
+from catalogLogos.models import CatalogLogo
 from productColor.models import ProductColor
 from productSize.models import ProductSize
-
+class LogoClientViewSet(viewsets.ModelViewSet):
+    queryset = CatalogLogo.objects.all()
+    serializer_class = LogoClientApi
+    permission_classes = [IsAuthenticatedOrReadOnly]
 # Create your views here.
 class AlbumClientViewSet(viewsets.ModelViewSet):
     queryset = CatalogAlbum.objects.all()
@@ -19,7 +22,7 @@ class AlbumClientViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticatedOrReadOnly]
     
 class ImageClientViewSet(viewsets.ModelViewSet):
-    queryset = CatalogImage.objects.all()
+    queryset = CatalogImage.objects.all()#.prefetch_related('colors','sizes','providers','detailTabel')
     serializer_class = ImageClientApi
     permission_classes = [IsAuthenticatedOrReadOnly]
 

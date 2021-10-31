@@ -9,7 +9,12 @@ from django_filters.rest_framework import DjangoFilterBackend
 
 from productColor.models import ProductColor
 from productSize.models import ProductSize
+from catalogLogos.models import CatalogLogo
 
+class LogoClientApi(serializers.ModelSerializer):
+    class Meta:
+        model = CatalogLogo
+        fields = ('id', 'title', 'cimg')
 
 class AlbumClientApi(serializers.ModelSerializer):
     class Meta:
