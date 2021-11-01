@@ -5,6 +5,8 @@ from django.contrib.contenttypes.models import ContentType
 from django.utils.html import mark_safe
 
 import uuid
+
+from catalogImages.models import CatalogImage
 # Create your models here.
 class BeseContactInformation(models.Model):
     name = models.CharField(verbose_name=_('name'), max_length=50, null=True,blank=True)
@@ -54,3 +56,33 @@ class UserSearchData(models.Model):
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True, blank=True)
     object_id = models.PositiveIntegerField(null=True, blank=True)
     content_object = GenericForeignKey('content_type', 'object_id')
+
+from django.utils.html import mark_safe
+
+from colorhash import ColorHash
+class SvelteContactFormModal(models.Model):
+    device = models.CharField(verbose_name=_('device'), max_length=250)
+    uid = models.UUIDField(verbose_name=_('uuid'), null=True, blank=True)
+    name = models.CharField(verbose_name=_('name'), max_length=120)
+    phone = models.CharField(verbose_name=_('phone'), max_length=120)
+    email = models.EmailField(verbose_name=_('email'), max_length=120)
+    message = models.TextField(verbose_name=_('message'))
+    created_date = models.DateTimeField(auto_now_add=True, blank=True, null=True)
+    def uniqe_color(self):
+        ret = f'<div width="25px" height="25px" style="color:black;background-color: {str(self.uid)}">{ColorHash(str(self.uid)).hex}</div>'
+        return mark_safe(ret)
+class SvelteCartModal(models.Model):
+    device = models.CharField(verbose_name=_('device'), max_length=250)
+    uid = models.UUIDField(verbose_name=_('uuid'), null=True, blank=True)
+    name = models.CharField(verbose_name=_('name'), max_length=120)
+    phone = models.CharField(verbose_name=_('phone'), max_length=120)
+    email = models.EmailField(verbose_name=_('email'), max_length=120)
+    products = models.ManyToManyField(to=CatalogImage, blank=True, null=True)
+    created_date = models.DateTimeField(auto_now_add=True, blank=True, null=True)
+    
+    
+    def uniqe_color(self):
+        ret = f'<div width="25px" height="25px" style="color:black;background-color: {ColorHash(str(self.uid)).hex}">{str(self.uid)}</div>'
+        return mark_safe(ret)
+    
+    

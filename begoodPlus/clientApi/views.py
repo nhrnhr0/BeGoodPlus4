@@ -9,6 +9,7 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from catalogAlbum.models import CatalogAlbum
 from rest_framework.renderers import JSONRenderer
 from catalogLogos.models import CatalogLogo
+from core.views import get_session_key
 from productColor.models import ProductColor
 from productSize.models import ProductSize
 class LogoClientViewSet(viewsets.ModelViewSet):
@@ -49,6 +50,7 @@ def get_album_images(request, pk):
     data = expensive_get_album_images(pk)
     return Response(data)
 
+@functools.lru_cache(maxsize=256)
 def expensive_get_album_images(pk):
     album = CatalogAlbum.objects.get(id=pk)
     images = album.images.order_by('throughimage__image_order')

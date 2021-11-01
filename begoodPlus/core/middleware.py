@@ -22,9 +22,9 @@ class BaseMiddleware:
             device = request.COOKIES['device']
         else:
             ip = self.get_client_ip(request)
-            uniqe_str = str(uuid.uuid1())
+            #uniqe_str = str(uuid.uuid1())
             
-            device = ip + '_'+ uniqe_str
+            device = ip #+ '_'+ uniqe_str
             request.COOKIES['device']=device
 
         response = self.get_response(request)
@@ -32,7 +32,7 @@ class BaseMiddleware:
         # the view is called.
 
         if response.cookies.get('device') == None:
-            response.set_cookie('device', device)
+            response.set_cookie('device', device,max_age=30)
 
 
 

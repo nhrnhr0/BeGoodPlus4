@@ -2,7 +2,7 @@ from django.shortcuts import render,redirect, HttpResponse
 from django.http import JsonResponse
 from django.db.models.functions import Greatest
 from django.contrib.postgres.search import TrigramSimilarity
-from .models import UserSearchData
+from .models import SvelteCartModal, SvelteContactFormModal, UserSearchData
 from django.urls import reverse
 
 # Create your views here.
@@ -46,6 +46,71 @@ from .serializers import SearchCatalogImageSerializer,SearchCatalogAlbumSerializ
 from itertools import chain 
 from django.db.models import Value,CharField
 from catalogAlbum.serializers import CatalogImageSerializer
+from django.views.decorators.csrf import ensure_csrf_cookie
+import uuid
+@ensure_csrf_cookie
+def set_csrf_token(request, factory_id=None):
+    print('factory_id: ', factory_id)
+    print('device: ', request.COOKIES.get('device'))
+    """
+    This will be `/api/set-csrf-cookie/` on `urls.py`
+    """
+    if factory_id:
+        uid = str(factory_id)
+    else:
+        uid = uuid.uuid4()
+    return JsonResponse({"details": "CSRF cookie set",
+                         'uid': uid})
+
+def svelte_contact_form(request):
+    if request.method == "POST":
+        try:
+            body_unicode = request.body.decode('utf-8')
+            device = request.COOKIES.get('device')
+            body = json.loads(body_unicode)
+            name = body['name']  or ''
+            email = body['email']  or ''
+            phone = body['phone']  or ''
+            message = body['message']  or ''
+            uuid = body['uuid'] or ''
+            data = SvelteContactFormModal.objects.create(device=device,uid=uuid, name=name, phone=phone, email=email,message=message)
+            data.save()
+            return JsonResponse({
+                'status':'success',
+                'detail':'form sent successfuly'
+                })
+        except Exception as e:
+            return JsonResponse({
+                'status': 'warning',
+                'detail': str(e),
+            })
+
+
+def svelte_cart_form(request):
+    if request.method == "POST":
+        try:
+            body_unicode = request.body.decode('utf-8')
+            device = request.COOKIES.get('device')
+            body = json.loads(body_unicode)
+            name = body['name']  or ''
+            email = body['email']  or ''
+            phone = body['phone']  or ''
+            uuid = body['uuid'] or ''
+            products = body['products'] or ''
+            data = SvelteCartModal.objects.create(device=device,uid=uuid, name=name, phone=phone, email=email)
+            data.products.set(products)
+            data.save()
+            return JsonResponse({
+                'status':'success',
+                'detail':'form sent successfuly'
+                })
+        except Exception as e:
+            return JsonResponse({
+                'status': 'warning',
+                'detail': str(e),
+            })
+
+
 def get_session_key(request):
     if not request.session.session_key:
         request.session.save()

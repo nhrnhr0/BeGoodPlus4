@@ -62,7 +62,7 @@ from provider.views import api_providers
 from packingType.views import api_packing_types
 from productSize.views import api_product_sizes
 from productColor.views import api_product_colors
-from core.views import handler404, shareable_category_view, shareable_product_view
+from core.views import handler404, shareable_category_view, shareable_product_view,svelte_contact_form, set_csrf_token, svelte_cart_form
 from core.views import autocompleteModel, autocompleteClick, success_view#  admin_subscribe_view, mainView,, form_changed #saveBaseContactFormView
 from catalogAlbum.views import catalogView_api, catalogView#,catalog_timer
 #from customerCart.views import cart_changed
@@ -95,6 +95,10 @@ urlpatterns = [
     
     path('search',autocompleteModel),
     path('search-click', autocompleteClick),
+    path('contact-form', svelte_contact_form, name='contact-form'),
+    path('cart-form', svelte_cart_form, name='svelte-cart-form'),
+    path('api/set_csrf_token/<uuid:factory_id>', set_csrf_token, name='set_csrf_token'),
+    path('api/set_csrf_token/', set_csrf_token, name='set_csrf_token'),
     #path('form-change', form_changed, name='form-change'),
 
     path('cart/add', cart_add, name='cart-add'),
