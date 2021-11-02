@@ -7,9 +7,17 @@ CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOWED_ORIGINS = [
     'https://nhrnhr0.github.io',
-    
+    'https://main.ms-global.co.il'
+]
+CSRF_TRUSTED_ORIGINS = [
+    'https://nhrnhr0.github.io',
+    'https://main.ms-global.co.il'
 ]
 
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SAMESITE = 'lax'
+SESSION_COOKIE_SAMESITE = 'lax'
 
 '''
 CORS_ALLOW_CREDENTIALS = True
