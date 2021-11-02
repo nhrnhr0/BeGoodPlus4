@@ -14,9 +14,8 @@ CSRF_TRUSTED_ORIGINS = [
     'https://test2.ms-global.co.il'
 ]
 
-'''
+
 CSRF_COOKIE_SECURE = False
 SESSION_COOKIE_SECURE = False
 CSRF_COOKIE_SAMESITE = 'lax'
-SESSION_COOKIE_SAMESITE = 'lax'
-'''
+SESSION_COOKIE_SAMESITE = None
