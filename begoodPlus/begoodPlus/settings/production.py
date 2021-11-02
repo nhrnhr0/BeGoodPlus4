@@ -6,7 +6,7 @@ DEBUG=False
 CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOWED_ORIGINS = [
-    'https://nhrnhr0.github.io',
+    #'https://nhrnhr0.github.io',
     
 ]
 
