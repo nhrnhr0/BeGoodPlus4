@@ -3,6 +3,7 @@ from django.utils.translation import gettext_lazy  as _
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.utils.html import mark_safe
+from django.conf import settings
 
 import uuid
 
@@ -61,6 +62,7 @@ from django.utils.html import mark_safe
 
 from colorhash import ColorHash
 class SvelteContactFormModal(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, null=True, blank=True)
     device = models.CharField(verbose_name=_('device'), max_length=250)
     uid = models.UUIDField(verbose_name=_('uuid'), null=True, blank=True)
     name = models.CharField(verbose_name=_('name'), max_length=120)
@@ -72,6 +74,7 @@ class SvelteContactFormModal(models.Model):
         ret = f'<div width="25px" height="25px" style="color:black;background-color: {ColorHash(str(self.uid)).hex}">{str(self.uid)}</div>'
         return mark_safe(ret)
 class SvelteCartModal(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, null=True, blank=True)
     device = models.CharField(verbose_name=_('device'), max_length=250)
     uid = models.UUIDField(verbose_name=_('uuid'), null=True, blank=True)
     name = models.CharField(verbose_name=_('name'), max_length=120)

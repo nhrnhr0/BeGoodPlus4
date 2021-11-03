@@ -89,7 +89,7 @@ INSTALLED_APPS = [
     'customerCart',
     'catalogImageDetail',
     'clientApi',
-    
+    'client',
 
 
     'django.contrib.admin',
@@ -304,7 +304,9 @@ EMAIL_HOST_PASSWORD =  secrects.EMAIL_HOST_PASSWORD
 import datetime
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': datetime.timedelta(minutes=50),
+    'ACCESS_TOKEN_LIFETIME': datetime.timedelta(minutes=1),
+    'REFRESH_TOKEN_LIFETIME': datetime.timedelta(days=1),
+    'UPDATE_LAST_LOGIN': True,
 }
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [

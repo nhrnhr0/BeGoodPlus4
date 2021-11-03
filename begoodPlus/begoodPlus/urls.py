@@ -32,7 +32,7 @@ from rest_framework import routers
 
 from catalogImages.views import CatalogImageViewSet
 from catalogAlbum.views import CatalogAlbumViewSet
-
+from client.views import whoAmI
 from color.views import ColorsViewSet
 from productSize.views import SizesViewSet
 router = routers.DefaultRouter()
@@ -87,6 +87,7 @@ urlpatterns = [
     
     path('svelte/api/', include(svelteRouter.urls)),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+    path('api/who-am-i/', whoAmI),
 
     path('', catalogView, name="catalogView"),
     

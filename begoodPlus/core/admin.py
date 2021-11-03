@@ -21,10 +21,10 @@ admin.site.register(Customer, CustomerAdmin)
 
 from .models import SvelteContactFormModal
 class ContactFormModalAdmin(admin.ModelAdmin):
-    list_display = ('uniqe_color','device', 'name', 'email', 'phone','message', 'created_date')
+    list_display = ('user', 'uniqe_color','device', 'name', 'email', 'phone','message', 'created_date')
 admin.site.register(SvelteContactFormModal, ContactFormModalAdmin)
 
 class SvelteCartModalAdmin(admin.ModelAdmin):
-    list_display = ('uniqe_color','device','name','phone','email','created_date')
+    list_display = ('user', 'uniqe_color','device','name','phone','email','created_date')
     filter_horizontal = ('products',)
 admin.site.register(SvelteCartModal, SvelteCartModalAdmin)
