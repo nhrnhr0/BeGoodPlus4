@@ -29,6 +29,7 @@ from django.conf.urls.static import static
 from django.urls import path, include, re_path
 from provider.views import SvelteApiProviderViewSet
 from rest_framework import routers
+from django.contrib.auth.models import User
 
 from catalogImages.views import CatalogImageViewSet
 from catalogAlbum.views import CatalogAlbumViewSet
@@ -62,20 +63,19 @@ from provider.views import api_providers
 from packingType.views import api_packing_types
 from productSize.views import api_product_sizes
 from productColor.views import api_product_colors
-from core.views import handler404, shareable_category_view, shareable_product_view,svelte_contact_form, set_csrf_token, svelte_cart_form
+from core.views import handler404, api_logout, shareable_category_view, shareable_product_view,svelte_contact_form, set_csrf_token, svelte_cart_form
 from core.views import autocompleteModel, autocompleteClick, success_view#  admin_subscribe_view, mainView,, form_changed #saveBaseContactFormView
 from catalogAlbum.views import catalogView_api, catalogView#,catalog_timer
 #from customerCart.views import cart_changed
 from customerCart.views import cart_del, cart_add,cart_view,cart_info
-
-from rest_framework_simplejwt.views import (
-    TokenObtainPairView,
-    TokenRefreshView,
-)
+from rest_framework.authtoken.views import obtain_auth_token
+#from rest_framework_simplejwt.views import (TokenObtainPairView,TokenRefreshView,)
 urlpatterns = [
     path('create_mini_table/<int:id>/',create_mini_table, name='create_mini_table'),
-    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    
+    #path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    #path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('api/get-token/', obtain_auth_token),
     
     
     path('admin/', admin.site.urls),
@@ -88,6 +88,7 @@ urlpatterns = [
     path('svelte/api/', include(svelteRouter.urls)),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('api/who-am-i/', whoAmI),
+    path('api/logout/', api_logout),
 
     path('', catalogView, name="catalogView"),
     

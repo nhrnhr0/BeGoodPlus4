@@ -7,6 +7,20 @@ from django.conf import settings
 
 import uuid
 
+from django.conf import settings
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from rest_framework.authtoken.models import Token
+
+
+
+
+# generate auth token for every new saved user
+@receiver(post_save, sender=settings.AUTH_USER_MODEL)
+def create_auth_token(sender, instance=None, created=False, **kwargs):
+    if created:
+        Token.objects.create(user=instance)
+
 from catalogImages.models import CatalogImage
 # Create your models here.
 class BeseContactInformation(models.Model):
@@ -37,7 +51,7 @@ class BeseContactInformation(models.Model):
         return url + ' | '  + name + ' | ' +phone + ' | ' + email
     
         
-import uuid
+
 from customerCart.models import CustomerCart
 class Customer(models.Model):
     contact = models.ManyToManyField(to=BeseContactInformation, related_name='owner')
@@ -62,7 +76,7 @@ from django.utils.html import mark_safe
 
 from colorhash import ColorHash
 class SvelteContactFormModal(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, null=True, blank=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
     device = models.CharField(verbose_name=_('device'), max_length=250)
     uid = models.UUIDField(verbose_name=_('uuid'), null=True, blank=True)
     name = models.CharField(verbose_name=_('name'), max_length=120)
@@ -73,6 +87,7 @@ class SvelteContactFormModal(models.Model):
     def uniqe_color(self):
         ret = f'<div width="25px" height="25px" style="color:black;background-color: {ColorHash(str(self.uid)).hex}">{str(self.uid)}</div>'
         return mark_safe(ret)
+
 class SvelteCartModal(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, null=True, blank=True)
     device = models.CharField(verbose_name=_('device'), max_length=250)
@@ -88,4 +103,13 @@ class SvelteCartModal(models.Model):
         ret = f'<div width="25px" height="25px" style="color:black;background-color: {ColorHash(str(self.uid)).hex}">{str(self.uid)}</div>'
         return mark_safe(ret)
     
+    
+class UserLogEntry(models.Model):
+    user = models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,null=True, blank=True)
+    uid = models.UUIDField(verbose_name=_('uuid'), null=True, blank=True)
+    action = models.CharField(max_length=255)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    extra = models.JSONField(default=dict)
+    def __str__(self):
+        return self.user.username + self.action
     

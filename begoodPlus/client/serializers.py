@@ -5,4 +5,5 @@ class SvelteClientSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Client
         fields = ('user', 'name',)
-        
+    
+    

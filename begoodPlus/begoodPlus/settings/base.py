@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'django_crontab',
     'colorfield',
     'rest_framework',
+    'rest_framework.authtoken',
     'django_user_agents',
     'django_extensions',
     'django_admin_index',
@@ -69,7 +70,7 @@ INSTALLED_APPS = [
     'drf_multiple_model',
     'compressor',
     'advanced_filters',
-    'rest_framework_simplejwt',
+    #'rest_framework_simplejwt',
     'corsheaders',
     'cloudinary',
     #'django_celery_beat',
@@ -313,8 +314,9 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticatedOrReadOnly',
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
         'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
     )
 }
 
