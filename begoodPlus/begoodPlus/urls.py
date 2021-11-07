@@ -33,7 +33,7 @@ from django.contrib.auth.models import User
 
 from catalogImages.views import CatalogImageViewSet
 from catalogAlbum.views import CatalogAlbumViewSet
-from client.views import whoAmI
+from client.views import whoAmI, userLogEntryView
 from color.views import ColorsViewSet
 from productSize.views import SizesViewSet
 router = routers.DefaultRouter()
@@ -88,6 +88,7 @@ urlpatterns = [
     path('svelte/api/', include(svelteRouter.urls)),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('api/who-am-i/', whoAmI),
+    path('api/logs/', userLogEntryView),
     path('api/logout/', api_logout),
 
     path('', catalogView, name="catalogView"),

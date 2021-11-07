@@ -111,12 +111,5 @@ class SvelteCartModal(models.Model):
         return mark_safe(ret)
     
     
-class UserLogEntry(models.Model):
-    user = models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,null=True, blank=True)
-    uid = models.UUIDField(verbose_name=_('uuid'), null=True, blank=True)
-    action = models.CharField(max_length=255)
-    timestamp = models.DateTimeField(auto_now_add=True)
-    extra = models.JSONField(default=dict)
-    def __str__(self):
-        return self.user.username + self.action
+
     
