@@ -35,7 +35,8 @@ class Client(models.Model):
         on_delete=models.CASCADE,
         primary_key=True,
         verbose_name=_('user'))
-    name = models.CharField(verbose_name=_('business name '), max_length=120)
+    businessName = models.CharField(verbose_name=_('business name '), max_length=120)
+    email = models.EmailField(verbose_name=_('email'), max_length=120)
     extraName = models.CharField(verbose_name=_('extra name'), max_length=120, null=True,blank=True)
     storeType = models.ForeignKey( verbose_name=_('store type'), to=ClientType,on_delete=models.SET_NULL, null=True)
     categorys = models.ManyToManyField(verbose_name=_('categories'), to=CatalogAlbum, blank=True)

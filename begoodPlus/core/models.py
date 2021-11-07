@@ -12,7 +12,14 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
 
+from base64 import urlsafe_b64decode, urlsafe_b64encode
+from uuid import UUID
 
+def uuid2slug(uuidstring):
+    return urlsafe_b64encode(uuidstring.bytes).rstrip(b'=').decode('ascii')
+
+def slug2uuid(slug):
+    return str(UUID(bytes=urlsafe_b64decode(slug + '==')))
 
 
 # generate auth token for every new saved user
@@ -85,7 +92,7 @@ class SvelteContactFormModal(models.Model):
     message = models.TextField(verbose_name=_('message'))
     created_date = models.DateTimeField(auto_now_add=True, blank=True, null=True)
     def uniqe_color(self):
-        ret = f'<div width="25px" height="25px" style="color:black;background-color: {ColorHash(str(self.uid)).hex}">{str(self.uid)}</div>'
+        ret = f'<span width="25px" height="25px" style="color:black;background-color: {ColorHash(str(self.uid)).hex}">{uuid2slug(self.uid)}</span>'
         return mark_safe(ret)
 
 class SvelteCartModal(models.Model):
@@ -100,7 +107,7 @@ class SvelteCartModal(models.Model):
     
     
     def uniqe_color(self):
-        ret = f'<div width="25px" height="25px" style="color:black;background-color: {ColorHash(str(self.uid)).hex}">{str(self.uid)}</div>'
+        ret = f'<span width="25px" height="25px" style="color:black;background-color: {ColorHash(str(self.uid)).hex}">{uuid2slug(self.uid)}</span>'
         return mark_safe(ret)
     
     

@@ -15,8 +15,7 @@ def whoAmI(request):
 
         if request.method == 'POST':
             username = request.data.get('username', None)
-            first_name = request.data.get('first_name', '')
-            last_name = request.data.get('last_name', '')
+            
             old_password = request.data.get('old_password', None)
             new_password = request.data.get('new_password', None)
             messages = ''
@@ -39,8 +38,9 @@ def whoAmI(request):
                         'status':'warning',
                         'detail':'Username already exists'
                     })
-            request.user.first_name = first_name
-            request.user.last_name = last_name
+            #request.user.first_name = first_name
+            #request.user.last_name = last_name
+            
             request.user.username = username
             try :
                 request.user.save()
@@ -54,9 +54,12 @@ def whoAmI(request):
             pass
         return JsonResponse({
             'status':'success',
-            'first_name': request.user.first_name,
-            'last_name':request.user.last_name,
+            #'first_name': request.user.first_name,
+            #'last_name':request.user.last_name,
             'username':request.user.username,
+            'email' :request.user.client.email,
+            'privateCompany': request.user.client.privateCompany,
+            'businessName': request.user.client.businessName,
         })
         
     return JsonResponse({'status':'error', 'detail':'user not loged in'})
