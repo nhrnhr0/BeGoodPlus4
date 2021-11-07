@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'django_crontab',
     'colorfield',
     'rest_framework',
+    'rest_framework.authtoken',
     'django_user_agents',
     'django_extensions',
     'django_admin_index',
@@ -69,7 +70,7 @@ INSTALLED_APPS = [
     'drf_multiple_model',
     'compressor',
     'advanced_filters',
-    'rest_framework_simplejwt',
+    #'rest_framework_simplejwt',
     'corsheaders',
     'cloudinary',
     #'django_celery_beat',
@@ -89,7 +90,7 @@ INSTALLED_APPS = [
     'customerCart',
     'catalogImageDetail',
     'clientApi',
-    
+    'client',
 
 
     'django.contrib.admin',
@@ -304,15 +305,18 @@ EMAIL_HOST_PASSWORD =  secrects.EMAIL_HOST_PASSWORD
 import datetime
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': datetime.timedelta(minutes=50),
+    'ACCESS_TOKEN_LIFETIME': datetime.timedelta(minutes=1),
+    'REFRESH_TOKEN_LIFETIME': datetime.timedelta(days=1),
+    'UPDATE_LAST_LOGIN': True,
 }
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticatedOrReadOnly',
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
         'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
     )
 }
 

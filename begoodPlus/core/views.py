@@ -2,6 +2,7 @@ from django.shortcuts import render,redirect, HttpResponse
 from django.http import JsonResponse
 from django.db.models.functions import Greatest
 from django.contrib.postgres.search import TrigramSimilarity
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from .models import SvelteCartModal, SvelteContactFormModal, UserSearchData
 from django.urls import reverse
 
@@ -38,6 +39,7 @@ def saveBaseContactFormView(request,next, *args, **kwargs):
 
     return redirect(next)
 '''
+from django.contrib.auth import logout
 
 from django.db.models import Q
 import json
@@ -48,6 +50,9 @@ from django.db.models import Value,CharField
 from catalogAlbum.serializers import CatalogImageSerializer
 from django.views.decorators.csrf import ensure_csrf_cookie
 import uuid
+
+from rest_framework.decorators import api_view, permission_classes
+
 @ensure_csrf_cookie
 def set_csrf_token(request, factory_id=None):
     print('factory_id: ', factory_id)
@@ -61,19 +66,25 @@ def set_csrf_token(request, factory_id=None):
         uid = uuid.uuid4()
     return JsonResponse({"details": "CSRF cookie set",
                          'uid': uid})
-
+@api_view(['POST'])
+@permission_classes((AllowAny,))
 def svelte_contact_form(request):
     if request.method == "POST":
         try:
-            body_unicode = request.body.decode('utf-8')
+            print(request.user)
+            body_unicode = request.data#.decode('utf-8')
             device = request.COOKIES.get('device')
-            body = json.loads(body_unicode)
+            body = body_unicode #json.loads(body_unicode)
             name = body['name']  or ''
             email = body['email']  or ''
             phone = body['phone']  or ''
             message = body['message']  or ''
             uuid = body['uuid'] or ''
-            data = SvelteContactFormModal.objects.create(device=device,uid=uuid, name=name, phone=phone, email=email,message=message)
+            if(request.user.is_anonymous):
+                user = None
+            else:
+                user = request.user
+            data = SvelteContactFormModal.objects.create(user=user, device=device,uid=uuid, name=name, phone=phone, email=email,message=message)
             data.save()
             return JsonResponse({
                 'status':'success',
@@ -85,19 +96,24 @@ def svelte_contact_form(request):
                 'detail': str(e),
             })
 
-
+@api_view(['POST'])
+@permission_classes((AllowAny,))
 def svelte_cart_form(request):
     if request.method == "POST":
         try:
-            body_unicode = request.body.decode('utf-8')
+            body_unicode = request.data #body.decode('utf-8')
             device = request.COOKIES.get('device')
-            body = json.loads(body_unicode)
+            body = body_unicode #json.loads(body_unicode)
             name = body['name']  or ''
             email = body['email']  or ''
             phone = body['phone']  or ''
             uuid = body['uuid'] or ''
             products = body['products'] or ''
-            data = SvelteCartModal.objects.create(device=device,uid=uuid, name=name, phone=phone, email=email)
+            if(request.user.is_anonymous):
+                user = None
+            else:
+                user = request.user
+            data = SvelteCartModal.objects.create(user=user, device=device,uid=uuid, name=name, phone=phone, email=email)
             data.products.set(products)
             data.save()
             return JsonResponse({
@@ -109,6 +125,32 @@ def svelte_cart_form(request):
                 'status': 'warning',
                 'detail': str(e),
             })
+
+
+
+@api_view(['GET'])
+@permission_classes((IsAuthenticated,))
+def api_logout(request):
+    if request.user.is_anonymous:
+        return JsonResponse({
+            'status': 'warning',
+            'detail': 'User is not authenticated',
+        })
+    logout(request)
+    
+    request.session.flush()
+    return JsonResponse({
+        'status':'success',
+        'detail':'logout successfuly'
+        })
+
+
+
+
+
+
+
+
 
 
 def get_session_key(request):
