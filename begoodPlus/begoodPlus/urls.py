@@ -13,6 +13,7 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from catalogImages.views import all_images_ids
 from clientApi.views import ColorsClientViewSet, ImageClientViewSet, SizesClientViewSet,LogoClientViewSet, get_album_images
 from clientApi.views import AlbumClientViewSet
 from catalogImageDetail.views import SvelteCatalogImageDetailViewSet
@@ -90,6 +91,7 @@ urlpatterns = [
     path('api/who-am-i/', whoAmI),
     path('api/logs/', userLogEntryView),
     path('api/logout/', api_logout),
+    path('api/all-image-ids/', all_images_ids),
 
     path('', catalogView, name="catalogView"),
     
