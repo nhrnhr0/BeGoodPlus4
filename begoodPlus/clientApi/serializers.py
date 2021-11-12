@@ -2,6 +2,7 @@
 
 
 from django.db import models
+from catalogImages.serializers import CatalogImageSerializer
 from catalogImages.models import CatalogImage
 from catalogAlbum.models import CatalogAlbum
 from rest_framework import serializers
@@ -16,10 +17,20 @@ class LogoClientApi(serializers.ModelSerializer):
         model = CatalogLogo
         fields = ('id', 'title', 'cimg')
 
+class FirstImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CatalogImage
+        fields = ('id','title', 'cimage')
+
 class AlbumClientApi(serializers.ModelSerializer):
+    first_image = serializers.SerializerMethodField('_get_first_image')
+    def _get_first_image(self, obj):
+        serializer = FirstImageSerializer(obj.images.order_by("throughimage__image_order").first(),context=self.context,)
+        return serializer.data
+    
     class Meta:
         model = CatalogAlbum
-        fields = ('id', 'title','slug','description','fotter','is_public')
+        fields = ('id', 'title','slug','description','fotter','is_public', 'first_image')
 
 class ImageClientApi(serializers.ModelSerializer):
     class Meta:

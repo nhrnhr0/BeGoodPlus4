@@ -2,8 +2,10 @@ from django.contrib.auth.models import User
 from django.shortcuts import render
 from django.http.response import JsonResponse
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
+
+from client.models import UserLogEntry
 
 
 
@@ -63,3 +65,28 @@ def whoAmI(request):
         })
         
     return JsonResponse({'status':'error', 'detail':'user not loged in'})
+
+
+@api_view(['POST'])
+@permission_classes((AllowAny, ))
+def userLogEntryView(request):
+    
+    if request.method == 'POST':
+        affected_rows = []
+        device=request.COOKIES['device']
+        data = request.data
+        i = 0
+        uid = data.get('uid', None)
+        
+        for d in data['logs']:
+            entry = UserLogEntry.objects.create(
+                user=request.user,
+                device=device,
+                uid=uid,
+                action=d['a'],
+                extra=d,
+                timestamp=d['timestemp']
+            )
+            affected_rows.append([entry.id, entry.action, entry.timestamp])
+        return JsonResponse({'status':'success'
+                             ,'rows':affected_rows})

@@ -8,6 +8,12 @@ from .serializers import CatalogImageSerializer, CatalogImageApiSerializer
 from rest_framework.request import Request
 from catalogImageDetail.models import CatalogImageDetail
 
+def all_images_ids(request):
+    ret = {}
+    if request.method == "GET":
+        ret ={ 'ids':  list(CatalogImage.objects.all().values_list('id', flat=True))}
+    return JsonResponse(ret)
+
 def create_mini_table(request, id):
     ret = {'actions':[]}
     if request.method == "POST":

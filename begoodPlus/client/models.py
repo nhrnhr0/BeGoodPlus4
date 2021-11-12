@@ -1,11 +1,29 @@
+import uuid
+from django.utils.safestring import mark_safe
+from colorhash import ColorHash
 from django.db import models
+from core.models import uuid2slug
 from django.db.models.fields.related import OneToOneField
 from django.utils.translation import gettext_lazy  as _
+from django.conf import settings
 
 from catalogAlbum.models import CatalogAlbum
 from django.contrib.auth.models import User
 
 # Create your models here.
+class UserLogEntry(models.Model):
+    user = models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,null=True, blank=True)
+    uid = models.UUIDField(verbose_name=_('uuid'), null=True, blank=True,default=uuid.uuid4)
+    device = models.CharField(verbose_name=_('device'), max_length=100, null=True, blank=True)
+    action = models.CharField(max_length=255)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    extra = models.JSONField(default=dict)
+    def __str__(self):
+        return self.user.username + self.action
+    
+    def uniqe_color(self):
+        ret = f'<span width="25px" height="25px" style="color:black;background-color: {ColorHash(str(self.uid)).hex}">{uuid2slug(self.uid)}</span>'
+        return mark_safe(ret)
 
 class ClientType(models.Model):
     name = models.CharField(verbose_name=_('name'), max_length=120)
