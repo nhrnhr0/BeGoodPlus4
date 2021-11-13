@@ -1,3 +1,4 @@
+import celery
 from django.shortcuts import render,redirect, HttpResponse
 from django.http import JsonResponse
 from django.db.models.functions import Greatest
@@ -151,7 +152,13 @@ def api_logout(request):
 
 
 
+from .tasks import test
 
+def test_celery_view(request):
+    print('test_celery_view start')
+    ret = test.delay(1,2)
+    print('celery done')
+    return JsonResponse({'status':'ok'})
 
 def get_session_key(request):
     if not request.session.session_key:

@@ -18,10 +18,14 @@ admin.site.register(PaymantWay, OnlyNameAdmin)
 admin.site.register(PaymentTime, OnlyNameAdmin)
 admin.site.register(ClientOrganizations, OnlyNameAdmin)
 
+from .models import UserSessionLogger
 
+class UserSessionLoggerAdmin(admin.ModelAdmin):
+    list_display = ('user', 'device', 'uniqe_color','is_active','session_start_timestemp','session_end_timestemp',)
+admin.site.register(UserSessionLogger, UserSessionLoggerAdmin)
 
 class UserLogEntryAdmin(admin.ModelAdmin):
     
-    list_display=('id', 'user','uniqe_color','device','action','timestamp','extra',)
+    list_display=('action','timestamp','extra',)
     pass
 admin.site.register(UserLogEntry, UserLogEntryAdmin)

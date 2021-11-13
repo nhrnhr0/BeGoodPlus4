@@ -13,6 +13,7 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from core.views import test_celery_view
 from catalogImages.views import all_images_ids
 from clientApi.views import ColorsClientViewSet, ImageClientViewSet, SizesClientViewSet,LogoClientViewSet, get_album_images
 from clientApi.views import AlbumClientViewSet
@@ -72,6 +73,7 @@ from customerCart.views import cart_del, cart_add,cart_view,cart_info
 from rest_framework.authtoken.views import obtain_auth_token
 #from rest_framework_simplejwt.views import (TokenObtainPairView,TokenRefreshView,)
 urlpatterns = [
+    path('test', test_celery_view),
     path('create_mini_table/<int:id>/',create_mini_table, name='create_mini_table'),
     
     #path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),

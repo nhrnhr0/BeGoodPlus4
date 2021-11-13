@@ -5,7 +5,7 @@ run windows:
 celery -A begoodPlus beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler
 flower -A begoodPlus --port=5555
 celery -A begoodPlus worker -l info --pool=solo
-
+celery -A begoodPlus beat -l INFO
 
 
 

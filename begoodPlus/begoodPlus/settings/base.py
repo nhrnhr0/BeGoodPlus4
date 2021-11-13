@@ -22,12 +22,14 @@ import cloudinary.api
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
 #SECRET_KEY = '#r*r40h()nfz(8duh2%98n2=2y$!7hd6law4t#_mkht3xafe(c'
 SECRET_KEY = secrects.SECRET_KEY
+#SECRET_KEY = '123456frtt5'
 # SECURITY WARNING: don't run with debug turned on in production!
 
 ALLOWED_HOSTS = ['*']
@@ -73,7 +75,8 @@ INSTALLED_APPS = [
     #'rest_framework_simplejwt',
     'corsheaders',
     'cloudinary',
-    #'django_celery_beat',
+    'celery',
+    'django_celery_beat',
 
     # own
     'core',
@@ -103,14 +106,18 @@ INSTALLED_APPS = [
     #'debug_toolbar', # TODO: remove in production
 ]
 
-'''
+CELERY_IMPORTS = [
+    'core.tasks',
+]
+
+
 CELERY_BEAT_SCHEDULE = {
     "scheduled_task": {
-        "task": "catalogAlbum.tasks.update_catalogAlbum_timers",
+        "task": "core.tasks.close_inactive_user_sessions",
         "schedule": 5.0,
     }
 }
-'''
+
 
 
 # django-dbbackup

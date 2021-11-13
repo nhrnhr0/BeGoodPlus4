@@ -4,6 +4,7 @@ from django.http.response import JsonResponse
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
+from client.models import UserSessionLogger
 
 from client.models import UserLogEntry
 
@@ -77,16 +78,20 @@ def userLogEntryView(request):
         data = request.data
         i = 0
         uid = data.get('uid', None)
-        
+        session_logger = get_active_session_logger(uid, device, request.user)
         for d in data['logs']:
             entry = UserLogEntry.objects.create(
-                user=request.user,
-                device=device,
-                uid=uid,
                 action=d['a'],
                 extra=d,
                 timestamp=d['timestemp']
             )
+            session_logger.logs.add(entry)
             affected_rows.append([entry.id, entry.action, entry.timestamp])
         return JsonResponse({'status':'success'
                              ,'rows':affected_rows})
+        
+        
+def get_active_session_logger(uid, device, user):
+    ret , created= UserSessionLogger.objects.get_or_create(uid=uid, device=device, user_id=user.id, is_active=True)
+    print('get_active_session_logger: ', ret,' created: ', created)
+    return ret

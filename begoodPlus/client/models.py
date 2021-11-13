@@ -12,18 +12,32 @@ from django.contrib.auth.models import User
 
 # Create your models here.
 class UserLogEntry(models.Model):
-    user = models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,null=True, blank=True)
-    uid = models.UUIDField(verbose_name=_('uuid'), null=True, blank=True,default=uuid.uuid4)
-    device = models.CharField(verbose_name=_('device'), max_length=100, null=True, blank=True)
+    #user = models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,null=True, blank=True)
+    #uid = models.UUIDField(verbose_name=_('uuid'), null=True, blank=True,default=uuid.uuid4)
+    #device = models.CharField(verbose_name=_('device'), max_length=100, null=True, blank=True)
     action = models.CharField(max_length=255)
     timestamp = models.DateTimeField(auto_now_add=True)
     extra = models.JSONField(default=dict)
     def __str__(self):
-        return self.user.username + self.action
+        return self.action
     
+
+    
+class UserSessionLogger(models.Model):
+    user = models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,null=True, blank=True)
+    uid = models.UUIDField(verbose_name=_('uuid'), null=True, blank=True,default=uuid.uuid4)
+    device = models.CharField(verbose_name=_('device'), max_length=100, null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+    session_start_timestemp = models.DateTimeField(auto_now_add=True)
+    session_end_timestemp = models.DateTimeField(null=True, blank=True)
+    logs = models.ManyToManyField(to=UserLogEntry,blank=True, related_name='logs')
     def uniqe_color(self):
         ret = f'<span width="25px" height="25px" style="color:black;background-color: {ColorHash(str(self.uid)).hex}">{uuid2slug(self.uid)}</span>'
         return mark_safe(ret)
+
+
+
+
 
 class ClientType(models.Model):
     name = models.CharField(verbose_name=_('name'), max_length=120)

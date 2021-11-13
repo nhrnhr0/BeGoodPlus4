@@ -3,17 +3,11 @@ from begoodPlus.celery import app
 #from begoodPlus.celery import shered_task
 from celery import shared_task
 
-
-
-@shared_task
-def test(a,b):
-    print('hey')
-    return a+b
     
 
 import datetime
 import pytz
-
+'''
 from catalogAlbum.models import CatalogAlbum
 @shared_task
 def update_catalogAlbum_timers():
@@ -38,3 +32,4 @@ def update_catalogAlbum_timers():
             album.timer = utc.localize(timer)
             album.save()
     return updated
+'''
