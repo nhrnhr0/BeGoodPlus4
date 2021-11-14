@@ -21,7 +21,8 @@ admin.site.register(ClientOrganizations, OnlyNameAdmin)
 from .models import UserSessionLogger
 
 class UserSessionLoggerAdmin(admin.ModelAdmin):
-    list_display = ('user', 'device', 'uniqe_color','is_active','session_start_timestemp','session_end_timestemp',)
+    list_display = ('user', 'device', 'uniqe_color','is_active','session_start_timestemp','session_end_timestemp','session_duration',)
+    filter_horizontal = ('logs',)
 admin.site.register(UserSessionLogger, UserSessionLoggerAdmin)
 
 class UserLogEntryAdmin(admin.ModelAdmin):

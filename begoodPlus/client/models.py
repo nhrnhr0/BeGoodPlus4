@@ -19,7 +19,10 @@ class UserLogEntry(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     extra = models.JSONField(default=dict)
     def __str__(self):
-        return self.action
+        newExtra = self.extra
+        del newExtra['a']
+        del newExtra['timestemp']
+        return self.timestamp.strftime("%d/%m/%Y, %H:%M:%S.%f")[:-3] + ' || ' + self.action + ' || ' + str(self.extra)
     
 
     
@@ -35,6 +38,13 @@ class UserSessionLogger(models.Model):
         ret = f'<span width="25px" height="25px" style="color:black;background-color: {ColorHash(str(self.uid)).hex}">{uuid2slug(self.uid)}</span>'
         return mark_safe(ret)
 
+    
+    def session_duration(self):
+        if self.session_end_timestemp:
+            return str(self.session_end_timestemp - self.session_start_timestemp)[:-3]
+        else:
+            return '-'
+    session_duration.short_description = _('session duration')
 
 
 
