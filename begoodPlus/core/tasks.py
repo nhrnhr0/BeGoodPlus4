@@ -1,3 +1,7 @@
+from __future__ import absolute_import, unicode_literals
+
+from begoodPlus.celery import app
+
 from celery import shared_task
 
 
@@ -13,7 +17,7 @@ def test(a,b):
     return a+b
 import datetime
 from django.utils import timezone
-@shared_task(name="close-inactive-user-sessions")
+@shared_task
 def close_inactive_user_sessions():
     print('=================== close_inactive_user_sessions is running ==========================')
     active_sessions = UserSessionLogger.objects.filter(is_active=True)
