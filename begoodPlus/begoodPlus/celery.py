@@ -7,7 +7,7 @@ from celery import Celery
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', DJANGO_SETTINGS_MODULE)
 
-app = Celery('begoodPlus')
+app = Celery('begoodPlus', broker='amqp://'+BROKER_USER + ':' + BROKER_PASSWORD + '@localhost//')
 
 app.config_from_object('django.conf:settings', namespace='CELERY')
 from celery.schedules import crontab

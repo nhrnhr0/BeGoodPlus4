@@ -23,6 +23,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fil
 
 
 
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
@@ -332,3 +333,8 @@ WEBPUSH_SETTINGS = {
     "VAPID_PRIVATE_KEY":secrects.VAPID_PRIVATE_KEY,
     "VAPID_ADMIN_EMAIL": "computer-support@ms-global.co.il"
 }
+
+
+
+BROKER_USER = secrects.BROKER_USER
+BROKER_PASSWOD = secrects.BROKER_PASSWORD
