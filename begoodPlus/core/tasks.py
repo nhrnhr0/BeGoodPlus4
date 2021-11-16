@@ -25,7 +25,7 @@ def close_inactive_user_sessions():
     for session in active_sessions:
         last_log = session.logs.last()
         # set session_expiry_time to 5 minutes
-        session_expiry_time = datetime.timedelta(minutes=5)
+        session_expiry_time = datetime.timedelta(hours=1)
         now = timezone.now()
         if last_log.timestamp < now - session_expiry_time:
             session.is_active = False

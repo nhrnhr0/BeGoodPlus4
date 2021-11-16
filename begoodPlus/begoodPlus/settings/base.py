@@ -111,11 +111,11 @@ CELERY_IMPORTS = [
     'core.tasks',
 ]
 
-
+# run close_inactive_user_sessions every half and hour
 CELERY_BEAT_SCHEDULE = {
     "scheduled_task": {
         "task": "core.tasks.close_inactive_user_sessions",
-        "schedule": 5.0,
+        "schedule": 60 * 30,
     }
 }
 
