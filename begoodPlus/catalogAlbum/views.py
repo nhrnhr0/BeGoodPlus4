@@ -115,7 +115,7 @@ from catalogLogos.models import CatalogLogo
 from core.forms import FormBeseContactInformation
 from core.models import BeseContactInformation, Customer
 import uuid
-
+'''
 def catalogView(request, *args, **kwargs):
     print('catalogView start')
     if request.method == 'POST':
@@ -145,3 +145,4 @@ def catalogView(request, *args, **kwargs):
                'logos': logos}
     print('catalogView end')
     return render(request, 'catalog.html', context=context)
+'''

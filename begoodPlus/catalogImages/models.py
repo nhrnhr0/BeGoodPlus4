@@ -138,12 +138,31 @@ class CatalogImage(models.Model):
     def save(self, *args, **kwargs):
         
         if self.image:
-            output = CatalogImage.optimize_image(self.image, size=(923, 715))
-            self.image = InMemoryUploadedFile(output, 'ImageField', "%s.png" % self.image.name.split('.')[0], 'image/PNG',
-                                        sys.getsizeof(output), None)
-            output2 = CatalogImage.optimize_tubmail(self.image, size=(250,250))
-            self.image_thumbnail = InMemoryUploadedFile(output2, 'ImageField', "image_thumbnail_%s.png" % self.image.name.split('.')[0], 'image/PNG',
-                                        sys.getsizeof(output2), None)
+            # fails if your don't upload an image, so don't upload image to cloudinary
+            try:
+                fname = Path(self.image.file.name).with_suffix('').name
+                #fname = fname.substring(0, fname.lastIndexOf('.'))
+                res = cloudinary.uploader.upload(self.image.file,
+                    folder = "site/products/", 
+                    public_id = fname
+                    )#public_id = self.title + '_' + str(self.id))
+                self.cimage = 'v' + str(res['version']) +'/'+ res['public_id']
+                #self.save()
+                pass
+            except Exception as e:
+                print(e)
+        super(CatalogImage, self).save(*args,**kwargs)
+        '''
+            try:
+                output = CatalogImage.optimize_image(self.image, size=(923, 715))
+                self.image = InMemoryUploadedFile(output, 'ImageField', "%s.png" % self.image.name.split('.')[0], 'image/PNG',
+                                            sys.getsizeof(output), None)
+                output2 = CatalogImage.optimize_tubmail(self.image, size=(250,250))
+                self.image_thumbnail = InMemoryUploadedFile(output2, 'ImageField', "image_thumbnail_%s.png" % self.image.name.split('.')[0], 'image/PNG',
+                                            sys.getsizeof(output2), None)
+            except:
+                pass
+            
         super(CatalogImage, self).save(*args,**kwargs)
         if not self.cimage:
             fname = Path(self.image.file.name).with_suffix('').name
@@ -155,6 +174,7 @@ class CatalogImage(models.Model):
             self.cimage = 'v' + str(res['version']) +'/'+ res['public_id']
             self.save()
             pass
+            '''
         # if the image is set and and squere image we will generate one
         '''
         im = Image.open(self.image)
@@ -203,7 +223,7 @@ class CatalogImage(models.Model):
     def render_thumbnail(self, *args, **kwargs):
         ret = ''
         if self.image_thumbnail:
-            ret += '<img width="50px" height="50px" src="%s" />' % (settings.MEDIA_URL + self.image_thumbnail.name) 
+            ret += '<img width="50px" height="50px" src="%s" />' % ("https://res.cloudinary.com/ms-global/image/upload/" + self.cimage)
         return mark_safe(ret)
     render_thumbnail.short_description = _("thumbnail")
     

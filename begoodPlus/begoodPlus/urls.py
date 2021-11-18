@@ -67,7 +67,7 @@ from productSize.views import api_product_sizes
 from productColor.views import api_product_colors
 from core.views import handler404, api_logout, shareable_category_view, shareable_product_view,svelte_contact_form, set_csrf_token, svelte_cart_form
 from core.views import autocompleteModel, autocompleteClick, success_view#  admin_subscribe_view, mainView,, form_changed #saveBaseContactFormView
-from catalogAlbum.views import catalogView_api, catalogView#,catalog_timer
+from catalogAlbum.views import catalogView_api#,catalog_timer
 #from customerCart.views import cart_changed
 from customerCart.views import cart_del, cart_add,cart_view,cart_info
 from rest_framework.authtoken.views import obtain_auth_token
@@ -95,7 +95,7 @@ urlpatterns = [
     path('api/logout/', api_logout),
     path('api/all-image-ids/', all_images_ids),
 
-    path('', catalogView, name="catalogView"),
+    #path('', catalogView, name="catalogView"),
     
     path('catalog_api', catalogView_api, name="catalog-view-api"),
     
