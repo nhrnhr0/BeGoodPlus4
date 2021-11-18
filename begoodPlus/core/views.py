@@ -117,6 +117,7 @@ def svelte_cart_form(request):
             data = SvelteCartModal.objects.create(user=user, device=device,uid=uuid, name=name, phone=phone, email=email)
             data.products.set(products)
             data.save()
+            send_cart_email.delay(data.id)
             return JsonResponse({
                 'status':'success',
                 'detail':'form sent successfuly'
@@ -152,7 +153,7 @@ def api_logout(request):
 
 
 
-from .tasks import test
+from .tasks import send_cart_email, test
 
 def test_celery_view(request):
     print('test_celery_view start')

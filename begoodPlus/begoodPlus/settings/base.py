@@ -308,6 +308,7 @@ EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
 EMAIL_HOST_USER = secrects.EMAIL_HOST_USER
 EMAIL_HOST_PASSWORD =  secrects.EMAIL_HOST_PASSWORD
+MAIN_EMAIL_RECEIVER = secrects.MAIN_EMAIL_RECEIVER
 # from django.core.mail import send_mail
 # send_mail(subject='hey', message='message', from_email='bot@ms-global.co.il', recipient_list=['nhrnhr0@gmail.com'])
 import datetime

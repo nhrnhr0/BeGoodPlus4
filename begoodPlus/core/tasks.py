@@ -8,6 +8,7 @@ from celery import shared_task
 import time
 
 from client.models import UserSessionLogger
+from core.models import SvelteCartModal
 
 
 @shared_task
@@ -35,6 +36,23 @@ def close_inactive_user_sessions():
         else:
             ret.append({session, False})
     return ret
+
+from django.template.loader import render_to_string
+from django.core import mail
+from django.utils.html import strip_tags
+from django.conf import settings
+@shared_task
+def send_cart_email(cart_id):
+    print('=================== send_cart_email is running ==========================')
+    cart = SvelteCartModal.objects.get(id=cart_id)
+    # subject = to the current date and time if the cart
+    subject = ' עגלת קניות (' + str(cart.id) + ') נשלחה בהצלחה'
+    html_message = render_to_string('emails/cart_template.html', {'cart': cart})
+    plain_message = strip_tags(html_message)
+    from_email = 'עגלת קניות <Main@ms-global.co.il>'
+    to = settings.MAIN_EMAIL_RECEIVER
+    mail.send_mail(subject, plain_message, from_email, [to], html_message=html_message)
+    print('=================== send_cart_email is done ==========================')
 
 '''from __future__ import absolute_import, unicode_literals
 
