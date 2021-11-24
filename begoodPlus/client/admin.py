@@ -4,7 +4,7 @@ from django.contrib import admin
 from .models import Client, ClientOrganizations, PaymentTime, PaymantWay, ClientType, UserLogEntry
 
 class ClientAdmin(admin.ModelAdmin):
-    list_display = ('user', 'businessName', 'extraName')
+    list_display = ('created_at', 'user', 'businessName', 'extraName')
     filter_horizontal = ('categorys',)
     pass
 admin.site.register(Client, ClientAdmin)

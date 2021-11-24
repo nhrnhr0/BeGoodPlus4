@@ -72,6 +72,8 @@ class PaymentTime(models.Model):
 
 
 class Client(models.Model):
+    # שדה תאריך ושעה של יצירת החשבון במערכת
+    created_at = models.DateTimeField(auto_now_add=True)
     
     user = OneToOneField(to=User,
         on_delete=models.CASCADE,
