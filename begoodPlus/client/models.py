@@ -96,7 +96,16 @@ class Client(models.Model):
     howPay = models.ForeignKey(verbose_name=_('payment way'), to=PaymantWay, on_delete=models.PROTECT)
     whenPay = models.ForeignKey(verbose_name=_('payment time'), to=PaymentTime, on_delete=models.PROTECT)
     isWithholdingTax = models.BooleanField(verbose_name=_('IsWithholdingTax'), default=False)
-    availabilityHours = models.TextField(verbose_name=_('availability hours'), blank=True)
-    availabilityDays = models.TextField(verbose_name=_('availability days'), blank=True)
+    #availabilityHours = models.TextField(verbose_name=_('availability hours'), blank=True)
+    #availabilityDays = models.TextField(verbose_name=_('availability days'), blank=True)
+    
+    sunday = models.CharField(verbose_name=_('sunday'), max_length=100, blank=True, null=True)
+    monday = models.CharField(verbose_name=_('monday'), max_length=100, blank=True, null=True)
+    tuesday = models.CharField(verbose_name=_('tuesday'), max_length=100, blank=True, null=True)
+    wednesday = models.CharField(verbose_name=_('wednesday'), max_length=100, blank=True, null=True)
+    thursday = models.CharField(verbose_name=_('thursday'), max_length=100, blank=True, null=True)
+    friday = models.CharField(verbose_name=_('friday'), max_length=100, blank=True, null=True)
+    saturday = models.CharField(verbose_name=_('saturday'), max_length=100, blank=True, null=True)
+    
     comment = models.TextField(verbose_name=_('comments'), blank=True, null=True)
     
