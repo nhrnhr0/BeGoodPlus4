@@ -16,7 +16,10 @@ from base64 import urlsafe_b64decode, urlsafe_b64encode
 from uuid import UUID
 
 def uuid2slug(uuidstring):
-    return urlsafe_b64encode(uuidstring.bytes).rstrip(b'=').decode('ascii')
+    if uuidstring:
+        return urlsafe_b64encode(uuidstring.bytes).rstrip(b'=').decode('ascii')
+    else:
+        return '<error>'
 
 def slug2uuid(slug):
     return str(UUID(bytes=urlsafe_b64decode(slug + '==')))

@@ -1,6 +1,7 @@
 begoodPlus/begoodPlus/secrects.py
 
 begoodPlus/db.sqlite3
+begoodPlus/db_old.sqlite3
 begoodPlus/static/**
 begoodPlus/backups/**
 .vscode/**
