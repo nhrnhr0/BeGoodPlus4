@@ -46,7 +46,11 @@ def send_cart_email(cart_id):
     print('=================== send_cart_email is running ==========================')
     cart = SvelteCartModal.objects.get(id=cart_id)
     # subject = to the current date and time if the cart
-    subject = ' עגלת קניות (' + str(cart.id) + ') נשלחה בהצלחה'
+    if cart.user is not None and cart.user.is_anonymous == False:
+        s = str(cart.user.client.businessName)
+    else:
+        s = str(cart.name)
+    subject = str(cart.id) + ') ' + s
     html_message = render_to_string('emails/cart_template.html', {'cart': cart})
     plain_message = strip_tags(html_message)
     from_email = 'עגלת קניות <Main@ms-global.co.il>'

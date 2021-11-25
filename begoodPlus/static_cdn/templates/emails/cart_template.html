@@ -7,13 +7,7 @@
     <title>Document</title>
 </head>
 <body dir="rtl">
-    <div class="content">
-        <a href="https://catalog.ms-global.co.il/admin/core/sveltecartmodal/{{cart.id}}/change/">
-            למעבר לעגלת קניות באדמין
-        </a>
-    </div>
-        
-    </div>
+    
     <table border="1">
         <tr>
             <td>
@@ -96,6 +90,7 @@
             <th>מוצר</th>
             <th>id</th>
             <th>תמונה</th>
+            <th>ספקים</th>
         </tr>
         {% for item in cart.products.all %}
             <tr>
@@ -106,16 +101,36 @@
                     <p>{{item.title}}</p>
                 </td>
                 <td>
-                    <p>{{item.id}}</p>
+                    <p><a href="https://catalog.ms-global.co.il/admin/catalogImages/catalogimage/{{item.id}}/change/">{{item.id}}</a> </p>
                 </td>
                 <td style="background: rgb(97, 97, 97)">
                     <p>
                         <img alt="{item.title}" style="height:50px;" src="https://res.cloudinary.com/ms-global/image/upload/f_auto,w_auto/{{item.cimage}}" />
                     </p>
                 </td>
+                <td>
+                    <p>
+                        <ul>
+                        {% for p in item.providers.all %}
+                            <li>
+                                {{p.name}}
+                            </li>
+                        {% endfor %}
+                        </ul>
+                    </p>
+                </td>
             </tr>
         {% endfor %}
     </table>
+
+
+    <div class="content">
+        <a href="https://catalog.ms-global.co.il/admin/core/sveltecartmodal/{{cart.id}}/change/">
+            למעבר לעגלת קניות באדמין
+        </a>
+    </div>
+
+
     <style>
         table {
             border-collapse: collapse;
