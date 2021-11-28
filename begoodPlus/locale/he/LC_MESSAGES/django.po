@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-11-24 10:01+0200\n"
+"POT-Creation-Date: 2021-11-28 03:55+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -19,2956 +19,885 @@ msgstr ""
 "Plural-Forms: nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n == 2 && n % "
 "1 == 0) ? 1: (n % 10 == 0 && n % 1 == 0 && n > 10) ? 2 : 3;\n"
 
-#: .\begoodPlus\catalogAlbum\admin.py:34
+#: .\catalogAlbum\admin.py:34
 msgid "Mark selected albums as public"
 msgstr "הפוך אלבומים מסומנים פומביים"
 
-#: .\begoodPlus\catalogAlbum\admin.py:37
+#: .\catalogAlbum\admin.py:37
 msgid "Mark selected albums as private"
 msgstr "הפוך אלבומים מסומנים כפרטיים"
 
-#: .\begoodPlus\catalogAlbum\models.py:48
-#: .\begoodPlus\catalogImages\models.py:23
+#: .\catalogAlbum\models.py:48 .\catalogImages\models.py:23
 msgid "title"
 msgstr "כותרת"
 
-#: .\begoodPlus\catalogAlbum\models.py:49
-#: .\env\Lib\site-packages\django_admin_index\models.py:140
+#: .\catalogAlbum\models.py:49
 msgid "slug"
 msgstr "סלאג"
 
-#: .\begoodPlus\catalogAlbum\models.py:50
-#: .\begoodPlus\catalogImages\models.py:24
+#: .\catalogAlbum\models.py:50 .\catalogImages\models.py:24
 msgid "description"
 msgstr "תיאור"
 
-#: .\begoodPlus\catalogAlbum\models.py:51
+#: .\catalogAlbum\models.py:51
 msgid "fotter"
 msgstr ""
 
-#: .\begoodPlus\catalogAlbum\models.py:52
+#: .\catalogAlbum\models.py:52
 msgid "keyworks"
 msgstr "מילות מפתח"
 
-#: .\begoodPlus\catalogAlbum\models.py:53
+#: .\catalogAlbum\models.py:53
 msgid "album list"
 msgstr "רשימת אלבומים"
 
-#: .\begoodPlus\catalogAlbum\models.py:55
+#: .\catalogAlbum\models.py:55
 msgid "is public"
 msgstr "האם פומבי"
 
-#: .\begoodPlus\catalogAlbum\models.py:79
-#: .\begoodPlus\catalogImages\models.py:86
+#: .\catalogAlbum\models.py:79 .\catalogImages\models.py:86
 msgid "copy link"
 msgstr "העתק לינק"
 
-#: .\begoodPlus\catalogAlbum\models.py:107
+#: .\catalogAlbum\models.py:107
 #, fuzzy
 #| msgid "Catalog image"
 msgid "catalog image"
 msgstr "תמונת קטלוג"
 
-#: .\begoodPlus\catalogAlbum\models.py:108
+#: .\catalogAlbum\models.py:108
 #, fuzzy
 #| msgid "Catalog image"
 msgid "catalog album"
 msgstr "תמונת קטלוג"
 
-#: .\begoodPlus\catalogImageDetail\admin.py:20
+#: .\catalogImageDetail\admin.py:20
 msgid "product"
 msgstr "מוצר"
 
-#: .\begoodPlus\catalogImageDetail\models.py:14
-#: .\begoodPlus\catalogImages\admin.py:39
-#: .\begoodPlus\catalogImages\models.py:41
+#: .\catalogImageDetail\models.py:14 .\catalogImages\admin.py:39
+#: .\catalogImages\models.py:41
 msgid "colors"
 msgstr "צבעים"
 
-#: .\begoodPlus\catalogImageDetail\models.py:15
-#: .\begoodPlus\catalogImages\admin.py:48
-#: .\begoodPlus\catalogImages\models.py:42
+#: .\catalogImageDetail\models.py:15 .\catalogImages\admin.py:48
+#: .\catalogImages\models.py:42
 msgid "sizes"
 msgstr "גדלים"
 
-#: .\begoodPlus\catalogImageDetail\models.py:17
-#: .\begoodPlus\catalogImages\admin.py:53
-#: .\begoodPlus\catalogImages\models.py:34
+#: .\catalogImageDetail\models.py:17 .\catalogImages\admin.py:53
+#: .\catalogImages\models.py:34
 msgid "cost price"
 msgstr "מחיר עלות"
 
-#: .\begoodPlus\catalogImageDetail\models.py:18
-#: .\begoodPlus\catalogImages\models.py:35
+#: .\catalogImageDetail\models.py:18 .\catalogImages\models.py:35
 msgid "store price"
 msgstr "מחיר חנות"
 
-#: .\begoodPlus\catalogImageDetail\models.py:19
-#: .\begoodPlus\catalogImages\models.py:36
+#: .\catalogImageDetail\models.py:19 .\catalogImages\models.py:36
 msgid "private client price"
 msgstr "מחיר לקוח פרטי"
 
-#: .\begoodPlus\catalogImageDetail\models.py:21
+#: .\catalogImageDetail\models.py:21
 msgid "provider makat"
 msgstr "מק\"ט של הספק"
 
-#: .\begoodPlus\catalogImages\admin.py:31
+#: .\catalogImages\admin.py:31
 #, fuzzy
 #| msgid "providers"
 msgid "provider"
 msgstr "ספקים"
 
-#: .\begoodPlus\catalogImages\admin.py:59
+#: .\catalogImages\admin.py:59
 #, fuzzy
 #| msgid "private client price"
 msgid "client price"
 msgstr "מחיר לקוח פרטי"
 
-#: .\begoodPlus\catalogImages\admin.py:65
+#: .\catalogImages\admin.py:65
 #, fuzzy
 #| msgid "cost price"
 msgid "recomended price"
 msgstr "מחיר עלות"
 
-#: .\begoodPlus\catalogImages\models.py:25
+#: .\catalogImages\models.py:25
 #, fuzzy
 #| msgid "code"
 msgid "barcode"
 msgstr "קוד"
 
-#: .\begoodPlus\catalogImages\models.py:26
+#: .\catalogImages\models.py:26
 msgid "free text"
 msgstr "טקסט חופשי"
 
-#: .\begoodPlus\catalogImages\models.py:27
+#: .\catalogImages\models.py:27
 msgid "whatsapp text"
 msgstr "טקסט לוואצאפ"
 
-#: .\begoodPlus\catalogImages\models.py:30
+#: .\catalogImages\models.py:30
 msgid "short description"
 msgstr "תיאור קצר"
 
-#: .\begoodPlus\catalogImages\models.py:31
+#: .\catalogImages\models.py:31
 msgid "cloudinary image url"
 msgstr "קישור תמונה לאחסון תמונות"
 
-#: .\begoodPlus\catalogImages\models.py:32
-#: .\begoodPlus\catalogImages\models.py:234
-#: .\begoodPlus\catalogLogos\models.py:12
-#: .\begoodPlus\catalogLogos\models.py:39
+#: .\catalogImages\models.py:32 .\catalogImages\models.py:234
+#: .\catalogLogos\models.py:12 .\catalogLogos\models.py:39
 msgid "image"
 msgstr "תמונה"
 
-#: .\begoodPlus\catalogImages\models.py:33
+#: .\catalogImages\models.py:33
 msgid "image thumbnail"
 msgstr "תמונה ריבוע"
 
-#: .\begoodPlus\catalogImages\models.py:39
+#: .\catalogImages\models.py:39
 msgid "packing type from provider"
 msgstr "שיטת אריזה מהספק"
 
-#: .\begoodPlus\catalogImages\models.py:40
+#: .\catalogImages\models.py:40
 msgid "packing type for client"
 msgstr "שיטת אריזה ללקוח"
 
-#: .\begoodPlus\catalogImages\models.py:43
+#: .\catalogImages\models.py:43
 msgid "providers"
 msgstr "ספקים"
 
-#: .\begoodPlus\catalogImages\models.py:45
+#: .\catalogImages\models.py:45
 msgid "mini-tabel"
 msgstr ""
 
-#: .\begoodPlus\catalogImages\models.py:47
+#: .\catalogImages\models.py:47
 msgid "can tag"
 msgstr "ניתן למיתוג"
 
-#: .\begoodPlus\catalogImages\models.py:70
+#: .\catalogImages\models.py:70
 msgid "cost price (no VAT)"
 msgstr "מחיר עלות (ללא מע'מ)"
 
-#: .\begoodPlus\catalogImages\models.py:74
+#: .\catalogImages\models.py:74
 msgid "store price  (no VAT)"
 msgstr "מחיר חנות (ללא מע'מ)"
 
-#: .\begoodPlus\catalogImages\models.py:77
+#: .\catalogImages\models.py:77
 msgid "private client price (no VAT)"
 msgstr "מחיר לקוח פרטי (ללא מע'מ)"
 
-#: .\begoodPlus\catalogImages\models.py:89
+#: .\catalogImages\models.py:89
 msgid "Catalog image"
 msgstr "תמונת קטלוג"
 
-#: .\begoodPlus\catalogImages\models.py:90
+#: .\catalogImages\models.py:90
 msgid "Catalog images"
 msgstr "תמונות קטלוג"
 
-#: .\begoodPlus\catalogImages\models.py:228
+#: .\catalogImages\models.py:228
 msgid "thumbnail"
 msgstr "תמונה קטנה"
 
-#: .\begoodPlus\catalogLogos\models.py:11 .\begoodPlus\client\models.py:53
-#: .\begoodPlus\client\models.py:59 .\begoodPlus\client\models.py:64
-#: .\begoodPlus\client\models.py:69 .\begoodPlus\core\models.py:37
-#: .\begoodPlus\core\models.py:92 .\begoodPlus\core\models.py:105
-#: .\begoodPlus\customerCart\models.py:11 .\begoodPlus\provider\models.py:12
-#: .\env\Lib\site-packages\django_admin_index\models.py:139
+#: .\catalogLogos\models.py:11 .\client\models.py:53 .\client\models.py:59
+#: .\client\models.py:64 .\client\models.py:69 .\core\models.py:37
+#: .\core\models.py:92 .\core\models.py:105 .\customerCart\models.py:11
+#: .\provider\models.py:12
 msgid "name"
 msgstr "שם"
 
-#: .\begoodPlus\catalogLogos\models.py:13
+#: .\catalogLogos\models.py:13
 msgid "claudinary url"
 msgstr "קישור קלאודינרי"
 
-#: .\begoodPlus\client\models.py:31 .\begoodPlus\core\models.py:91
-#: .\begoodPlus\core\models.py:104
+#: .\client\models.py:31 .\core\models.py:91 .\core\models.py:104
 msgid "uuid"
 msgstr ""
 
-#: .\begoodPlus\client\models.py:32 .\begoodPlus\core\models.py:90
-#: .\begoodPlus\core\models.py:103
+#: .\client\models.py:32 .\core\models.py:90 .\core\models.py:103
 msgid "device"
 msgstr "IP"
 
-#: .\begoodPlus\client\models.py:47
+#: .\client\models.py:47
 msgid "session duration"
 msgstr "זמן התחברות"
 
-#: .\begoodPlus\client\models.py:79
+#: .\client\models.py:81
 msgid "user"
 msgstr "משתמש"
 
-#: .\begoodPlus\client\models.py:80
+#: .\client\models.py:82
 msgid "business name "
 msgstr "שם העסק"
 
-#: .\begoodPlus\client\models.py:81 .\begoodPlus\core\models.py:39
-#: .\begoodPlus\core\models.py:94 .\begoodPlus\core\models.py:107
-#: .\begoodPlus\customerCart\models.py:13
+#: .\client\models.py:83 .\core\models.py:39 .\core\models.py:94
+#: .\core\models.py:107 .\customerCart\models.py:13
 msgid "email"
 msgstr "אימייל"
 
-#: .\begoodPlus\client\models.py:82
+#: .\client\models.py:84
 msgid "extra name"
 msgstr "שם נוסף"
 
-#: .\begoodPlus\client\models.py:83
+#: .\client\models.py:85
 msgid "store type"
 msgstr "סוג חנות"
 
-#: .\begoodPlus\client\models.py:84
+#: .\client\models.py:86
 msgid "categories"
 msgstr "קטגוריות"
 
-#: .\begoodPlus\client\models.py:85
+#: .\client\models.py:87
 msgid "tariff (%)"
 msgstr "סוג מחירון"
 
-#: .\begoodPlus\client\models.py:86
+#: .\client\models.py:88
 msgid "P.C."
 msgstr "ח.פ."
 
-#: .\begoodPlus\client\models.py:87
+#: .\client\models.py:89
 msgid "address"
 msgstr "כתובת"
 
-#: .\begoodPlus\client\models.py:88
+#: .\client\models.py:90
 msgid "contact man"
 msgstr "איש קשר"
 
-#: .\begoodPlus\client\models.py:89
+#: .\client\models.py:91
 msgid "contact man position"
 msgstr "תפקיד איש קשר"
 
-#: .\begoodPlus\client\models.py:90
+#: .\client\models.py:92
 msgid "contact man phone"
 msgstr "טלפון איש קשר"
 
-#: .\begoodPlus\client\models.py:91
+#: .\client\models.py:93
 msgid "contact man 2"
 msgstr "איש קשר 2"
 
-#: .\begoodPlus\client\models.py:92
+#: .\client\models.py:94
 msgid "contact man 2 phone"
 msgstr "טלפון איש קשר 2"
 
-#: .\begoodPlus\client\models.py:93
+#: .\client\models.py:95
 msgid "office phone"
 msgstr "טלפון במשרד"
 
-#: .\begoodPlus\client\models.py:94
+#: .\client\models.py:96
 msgid "extra email"
 msgstr "אימייל נוסף"
 
-#: .\begoodPlus\client\models.py:95
+#: .\client\models.py:97
 msgid "organization"
 msgstr "ארגון"
 
-#: .\begoodPlus\client\models.py:96
+#: .\client\models.py:98
 msgid "payment way"
 msgstr "דרך תשלום"
 
-#: .\begoodPlus\client\models.py:97
+#: .\client\models.py:99
 msgid "payment time"
 msgstr "זמן תשלום"
 
-#: .\begoodPlus\client\models.py:98
+#: .\client\models.py:100
 msgid "IsWithholdingTax"
 msgstr "ניכוי מס במקור"
 
-#: .\begoodPlus\client\models.py:102
+#: .\client\models.py:104
 msgid "sunday"
 msgstr "יום ראשון"
 
-#: .\begoodPlus\client\models.py:103
+#: .\client\models.py:105
 msgid "monday"
 msgstr "יום שני"
 
-#: .\begoodPlus\client\models.py:104
+#: .\client\models.py:106
 msgid "tuesday"
 msgstr "יום שלישי"
 
-#: .\begoodPlus\client\models.py:105
+#: .\client\models.py:107
 msgid "wednesday"
 msgstr "יום רביעי"
 
-#: .\begoodPlus\client\models.py:106
+#: .\client\models.py:108
 msgid "thursday"
 msgstr "יום חמישי"
 
-#: .\begoodPlus\client\models.py:107
+#: .\client\models.py:109
 msgid "friday"
 msgstr "יום שישי"
 
-#: .\begoodPlus\client\models.py:108
+#: .\client\models.py:110
 msgid "saturday"
 msgstr "יום שבת"
 
-#: .\begoodPlus\client\models.py:110
+#: .\client\models.py:112
 msgid "comments"
 msgstr "הערות"
 
-#: .\begoodPlus\color\models.py:9
+#: .\color\models.py:9
 #, fuzzy
 #| msgid "color"
 msgid "Color"
 msgstr "צבע"
 
-#: .\begoodPlus\color\models.py:10
+#: .\color\models.py:10
 msgid "Colors"
 msgstr "צבע"
 
-#: .\begoodPlus\color\models.py:12
+#: .\color\models.py:12
 msgid "color name"
 msgstr "צבע"
 
-#: .\begoodPlus\color\models.py:13
+#: .\color\models.py:13
 msgid "color"
 msgstr "צבע"
 
-#: .\begoodPlus\core\models.py:38 .\begoodPlus\core\models.py:93
-#: .\begoodPlus\core\models.py:106 .\begoodPlus\customerCart\models.py:12
+#: .\core\admin.py:42
+msgid "resend selected carts email"
+msgstr "שלח מחדש עגלות מסומנות למייל"
+
+#: .\core\admin.py:98
+msgid "download selected carts excel"
+msgstr "הורד עגלות מסומנות לאקסל"
+
+#: .\core\models.py:38 .\core\models.py:93 .\core\models.py:106
+#: .\customerCart\models.py:12
 #, fuzzy
 #| msgid "telephone"
 msgid "phone"
 msgstr "טלפון"
 
-#: .\begoodPlus\core\models.py:40 .\begoodPlus\core\models.py:95
+#: .\core\models.py:40 .\core\models.py:95
 msgid "message"
 msgstr "הודעה"
 
-#: .\begoodPlus\core\models.py:51 .\begoodPlus\customerCart\models.py:23
+#: .\core\models.py:51 .\customerCart\models.py:23
 msgid "owner"
 msgstr "בעלים"
 
-#: .\begoodPlus\core\models.py:79
+#: .\core\models.py:79
 msgid "number of results"
 msgstr "מספר תוצאות"
 
-#: .\begoodPlus\packingType\models.py:7
+#: .\packingType\models.py:7
 msgid "Packing type"
 msgstr "שיטת אריזה"
 
-#: .\begoodPlus\packingType\models.py:8
+#: .\packingType\models.py:8
 msgid "Packing types"
 msgstr "שיטות אריזה"
 
-#: .\begoodPlus\productColor\models.py:10
+#: .\productColor\models.py:10
 msgid "product color"
 msgstr "צבע מוצר"
 
-#: .\begoodPlus\productColor\models.py:11
+#: .\productColor\models.py:11
 msgid "product colors"
 msgstr "צבעי מוצר"
 
-#: .\begoodPlus\productColor\models.py:15 .\begoodPlus\productSize\models.py:14
-#: .\begoodPlus\provider\models.py:14
+#: .\productColor\models.py:15 .\productSize\models.py:14
+#: .\provider\models.py:14
 msgid "code"
 msgstr "קוד"
 
-#: .\begoodPlus\productColor\models.py:22
+#: .\productColor\models.py:22
 msgid "color representation"
 msgstr "ייצוג צבע"
 
-#: .\begoodPlus\productSize\models.py:8
+#: .\productSize\models.py:8
 msgid "Product size"
 msgstr "גודל מוצר"
 
-#: .\begoodPlus\productSize\models.py:9
+#: .\productSize\models.py:9
 msgid "Product sizes"
 msgstr "גדלי מוצרים"
 
-#: .\begoodPlus\productSize\models.py:13
+#: .\productSize\models.py:13
 msgid "size"
 msgstr "גודל"
 
-#: .\begoodPlus\provider\models.py:8
+#: .\provider\models.py:8
 msgid "Provider"
 msgstr "ספק"
 
-#: .\begoodPlus\provider\models.py:9
+#: .\provider\models.py:9
 msgid "Providers"
 msgstr "ספקים"
 
-#: .\begoodPlus\provider\models.py:13
+#: .\provider\models.py:13
 msgid "private compeny"
 msgstr "חברה פרטית"
 
-#: .\begoodPlus\static_cdn\templates\404.html:7
-#: .\begoodPlus\static_cdn\templates\success.html:7
+#: .\static_cdn\templates\404.html:7 .\static_cdn\templates\success.html:7
 msgid "Success"
 msgstr ""
 
-#: .\begoodPlus\static_cdn\templates\admin\change_list.html:32
-#: .\env\Lib\site-packages\django_admin_index\templates\admin\base.html:92
-#: .\env\Lib\site-packages\django_admin_index\templates\admin\change_form.html:18
-#: .\env\Lib\site-packages\django_admin_index\templates\admin\change_list.html:31
-#: .\env\Lib\site-packages\django_admin_index\templates\admin\delete_confirmation.html:15
-#: .\env\Lib\site-packages\django_admin_index\templates\admin\delete_selected_confirmation.html:15
-#: .\env\Lib\site-packages\django_admin_index\templates\admin\object_history.html:6
+#: .\static_cdn\templates\admin\change_list.html:32
 msgid "Home"
 msgstr "בית"
 
-#: .\begoodPlus\static_cdn\templates\admin\change_list.html:52
-#: .\env\Lib\site-packages\django_admin_index\templates\admin\change_form.html:53
-#: .\env\Lib\site-packages\django_admin_index\templates\admin\change_list.html:64
+#: .\static_cdn\templates\admin\change_list.html:52
 msgid "Please correct the error below."
 msgstr ""
 
-#: .\begoodPlus\static_cdn\templates\admin\change_list.html:52
-#: .\env\Lib\site-packages\django_admin_index\templates\admin\change_form.html:53
-#: .\env\Lib\site-packages\django_admin_index\templates\admin\change_list.html:64
+#: .\static_cdn\templates\admin\change_list.html:52
 msgid "Please correct the errors below."
 msgstr ""
 
-#: .\begoodPlus\static_cdn\templates\admin\change_list.html:63
-#: .\env\Lib\site-packages\django_admin_index\templates\admin\change_list.html:75
+#: .\static_cdn\templates\admin\change_list.html:63
 msgid "Filter"
 msgstr ""
 
-#: .\begoodPlus\static_cdn\templates\catalog.html:7
+#: .\static_cdn\templates\catalog.html:7
 #, fuzzy
 #| msgid "Catalog image"
 msgid "Catalog"
 msgstr "תמונת קטלוג"
 
-#: .\env\Lib\site-packages\admin_adv_search_builder\filters.py:7
-msgid "Custom Search"
-msgstr ""
-
-#: .\env\Lib\site-packages\admin_adv_search_builder\filters.py:39
-msgid "Search filter {} failed: {}"
-msgstr ""
-
-#: .\env\Lib\site-packages\admin_adv_search_builder\templates\filters\custom_search.html:86
-msgid "delete"
-msgstr ""
-
-#: .\env\Lib\site-packages\admin_adv_search_builder\templates\filters\custom_search.html:99
 #, fuzzy
-#| msgid "create date"
-msgid "Advanced Search"
-msgstr "תאריך יצירה"
+#~| msgid "create date"
+#~ msgid "Advanced Search"
+#~ msgstr "תאריך יצירה"
 
-#: .\env\Lib\site-packages\admin_adv_search_builder\templates\filters\custom_search.html:125
 #, fuzzy
-#| msgid "Some translatable text"
-msgid "value"
-msgstr "טקסט שצריך לתרגם"
+#~| msgid "Some translatable text"
+#~ msgid "value"
+#~ msgstr "טקסט שצריך לתרגם"
 
-#: .\env\Lib\site-packages\admin_adv_search_builder\templates\filters\custom_search.html:130
-#: .\env\Lib\site-packages\django_admin_index\templates\admin\index.html:39
-#: .\env\Lib\site-packages\tof\templates\tof\multiwidget.html:17
-msgid "Add"
-msgstr ""
-
-#: .\env\Lib\site-packages\admin_adv_search_builder\templates\filters\custom_search.html:131
-msgid "Search"
-msgstr ""
-
-#: .\env\Lib\site-packages\admin_numeric_filter\forms.py:11
-#: .\env\Lib\site-packages\advanced_filters\forms.py:71
-#: .\env\Lib\site-packages\tof\models.py:44
 #, fuzzy
-#| msgid "Some translatable text"
-msgid "Value"
-msgstr "טקסט שצריך לתרגם"
+#~| msgid "Some translatable text"
+#~ msgid "Value"
+#~ msgstr "טקסט שצריך לתרגם"
 
-#: .\env\Lib\site-packages\admin_numeric_filter\forms.py:29
-msgid "From"
-msgstr "מ"
+#~ msgid "From"
+#~ msgstr "מ"
 
-#: .\env\Lib\site-packages\admin_numeric_filter\forms.py:31
-msgid "To"
-msgstr "ל"
+#~ msgid "To"
+#~ msgstr "ל"
 
-#: .\env\Lib\site-packages\admin_numeric_filter\templates\admin\filter_numeric_range.html:11
-#: .\env\Lib\site-packages\admin_numeric_filter\templates\admin\filter_numeric_single.html:11
-#: .\env\Lib\site-packages\admin_numeric_filter\templates\admin\filter_numeric_slider.html:11
-#, python-format
-msgid "By %(filter_title)s"
-msgstr ""
-
-#: .\env\Lib\site-packages\admin_numeric_filter\templates\admin\filter_numeric_range.html:17
-#: .\env\Lib\site-packages\admin_numeric_filter\templates\admin\filter_numeric_single.html:15
-#: .\env\Lib\site-packages\admin_numeric_filter\templates\admin\filter_numeric_slider.html:26
-msgid "Apply"
-msgstr ""
-
-#: .\env\Lib\site-packages\admin_numeric_filter\templates\admin\filter_numeric_slider.html:30
-msgid "No enough data."
-msgstr ""
-
-#: .\env\Lib\site-packages\advanced_filters\admin.py:19
 #, fuzzy
-#| msgid "create date"
-msgid "Advanced filters"
-msgstr "תאריך יצירה"
+#~| msgid "create date"
+#~ msgid "Advanced filters"
+#~ msgstr "תאריך יצירה"
 
-#: .\env\Lib\site-packages\advanced_filters\admin.py:70
 #, fuzzy
-#| msgid "create date"
-msgid "Advanced filter added successfully."
-msgstr "תאריך יצירה"
+#~| msgid "create date"
+#~ msgid "Advanced filter added successfully."
+#~ msgstr "תאריך יצירה"
 
-#: .\env\Lib\site-packages\advanced_filters\forms.py:47
-msgid "Equals"
-msgstr ""
-
-#: .\env\Lib\site-packages\advanced_filters\forms.py:48
 #, fuzzy
-#| msgid "contact"
-msgid "Contains"
-msgstr "צור קשר"
+#~| msgid "contact"
+#~ msgid "Contains"
+#~ msgstr "צור קשר"
 
-#: .\env\Lib\site-packages\advanced_filters\forms.py:49
-msgid "One of"
-msgstr ""
-
-#: .\env\Lib\site-packages\advanced_filters\forms.py:50
 #, fuzzy
-#| msgid "Time saving"
-msgid "DateTime Range"
-msgstr "חוסך זמן"
+#~| msgid "Time saving"
+#~ msgid "DateTime Range"
+#~ msgstr "חוסך זמן"
 
-#: .\env\Lib\site-packages\advanced_filters\forms.py:51
-msgid "Is NULL"
-msgstr ""
-
-#: .\env\Lib\site-packages\advanced_filters\forms.py:52
-msgid "Is TRUE"
-msgstr ""
-
-#: .\env\Lib\site-packages\advanced_filters\forms.py:53
-msgid "Is FALSE"
-msgstr ""
-
-#: .\env\Lib\site-packages\advanced_filters\forms.py:54
-msgid "Less Than"
-msgstr ""
-
-#: .\env\Lib\site-packages\advanced_filters\forms.py:55
 #, fuzzy
-#| msgid "create date"
-msgid "Greater Than"
-msgstr "תאריך יצירה"
+#~| msgid "create date"
+#~ msgid "Greater Than"
+#~ msgstr "תאריך יצירה"
 
-#: .\env\Lib\site-packages\advanced_filters\forms.py:56
 #, fuzzy
-#| msgid "create date"
-msgid "Less Than or Equal To"
-msgstr "תאריך יצירה"
+#~| msgid "create date"
+#~ msgid "Less Than or Equal To"
+#~ msgstr "תאריך יצירה"
 
-#: .\env\Lib\site-packages\advanced_filters\forms.py:57
 #, fuzzy
-#| msgid "create date"
-msgid "Greater Than or Equal To"
-msgstr "תאריך יצירה"
+#~| msgid "create date"
+#~ msgid "Greater Than or Equal To"
+#~ msgstr "תאריך יצירה"
 
-#: .\env\Lib\site-packages\advanced_filters\forms.py:61
-msgid "Or (mark an or between blocks)"
-msgstr ""
-
-#: .\env\Lib\site-packages\advanced_filters\forms.py:65
 #, fuzzy
-#| msgid "client name"
-msgid "Field"
-msgstr "שם לקוח"
+#~| msgid "client name"
+#~ msgid "Field"
+#~ msgstr "שם לקוח"
 
-#: .\env\Lib\site-packages\advanced_filters\forms.py:67
-msgid "Operator"
-msgstr ""
-
-#: .\env\Lib\site-packages\advanced_filters\forms.py:76
-msgid "Negate"
-msgstr ""
-
-#: .\env\Lib\site-packages\advanced_filters\models.py:18
-#: .\env\Lib\site-packages\advanced_filters\templates\admin\advanced_filters.html:14
 #, fuzzy
-#| msgid "create date"
-msgid "Advanced Filter"
-msgstr "תאריך יצירה"
+#~| msgid "create date"
+#~ msgid "Advanced Filter"
+#~ msgstr "תאריך יצירה"
 
-#: .\env\Lib\site-packages\advanced_filters\models.py:19
 #, fuzzy
-#| msgid "create date"
-msgid "Advanced Filters"
-msgstr "תאריך יצירה"
+#~| msgid "create date"
+#~ msgid "Advanced Filters"
+#~ msgstr "תאריך יצירה"
 
-#: .\env\Lib\site-packages\advanced_filters\models.py:21
 #, fuzzy
-#| msgid "title"
-msgid "Title"
-msgstr "כותרת"
+#~| msgid "title"
+#~ msgid "Title"
+#~ msgstr "כותרת"
 
-#: .\env\Lib\site-packages\advanced_filters\models.py:25
 #, fuzzy
-#| msgid "create date"
-msgid "Created by"
-msgstr "תאריך יצירה"
+#~| msgid "create date"
+#~ msgid "Created by"
+#~ msgstr "תאריך יצירה"
 
-#: .\env\Lib\site-packages\advanced_filters\models.py:28
 #, fuzzy
-#| msgid "create date"
-msgid "Created at"
-msgstr "תאריך יצירה"
+#~| msgid "create date"
+#~ msgid "Created at"
+#~ msgstr "תאריך יצירה"
 
-#: .\env\Lib\site-packages\advanced_filters\models.py:29
-#: .\env\Lib\site-packages\django\db\models\fields\__init__.py:2214
-msgid "URL"
-msgstr ""
-
-#: .\env\Lib\site-packages\advanced_filters\models.py:30
-msgid "Users"
-msgstr ""
-
-#: .\env\Lib\site-packages\advanced_filters\models.py:31
-msgid "Groups"
-msgstr ""
-
-#: .\env\Lib\site-packages\advanced_filters\templates\admin\advanced_filters.html:14
-msgid "Edit"
-msgstr ""
-
-#: .\env\Lib\site-packages\advanced_filters\templates\admin\advanced_filters.html:26
 #, fuzzy
-#| msgid "create date"
-msgid "Create advanced filter"
-msgstr "תאריך יצירה"
+#~| msgid "create date"
+#~ msgid "Create advanced filter"
+#~ msgstr "תאריך יצירה"
 
-#: .\env\Lib\site-packages\advanced_filters\templates\admin\advanced_filters.html:64
-msgid "Save"
-msgstr ""
-
-#: .\env\Lib\site-packages\advanced_filters\templates\admin\advanced_filters.html:65
-#: .\env\Lib\site-packages\advanced_filters\templates\admin\advanced_filters\change_form.html:50
-msgid "Save & Filter Now!"
-msgstr ""
-
-#: .\env\Lib\site-packages\advanced_filters\templates\admin\advanced_filters.html:66
-msgid "Cancel"
-msgstr ""
-
-#: .\env\Lib\site-packages\advanced_filters\templates\admin\advanced_filters\change_form.html:14
 #, fuzzy
-#| msgid "create date"
-msgid "Change advanced filter"
-msgstr "תאריך יצירה"
+#~| msgid "create date"
+#~ msgid "Change advanced filter"
+#~ msgstr "תאריך יצירה"
 
-#: .\env\Lib\site-packages\advanced_filters\templates\admin\common_js_init.html:14
 #, fuzzy
-#| msgid "create date"
-msgid "Add another filter"
-msgstr "תאריך יצירה"
+#~| msgid "create date"
+#~ msgid "Add another filter"
+#~ msgstr "תאריך יצירה"
 
-#: .\env\Lib\site-packages\advanced_filters\templates\admin\common_js_init.html:15
-msgid "Remove"
-msgstr ""
-
-#: .\env\Lib\site-packages\bootstrap5\components.py:17
-#: .\env\Lib\site-packages\bootstrap5\templates\bootstrap5\form_errors.html:3
-#: .\env\Lib\site-packages\bootstrap5\templates\bootstrap5\messages.html:4
-msgid "close"
-msgstr ""
-
-#: .\env\Lib\site-packages\cloudinary\forms.py:55
-#: .\env\Lib\site-packages\cloudinary\forms.py:124
-msgid "No file selected!"
-msgstr ""
-
-#: .\env\Lib\site-packages\colorfield\fields.py:17
 #, fuzzy
-#| msgid "number"
-msgid "Enter a valid color."
-msgstr "מספר"
+#~| msgid "number"
+#~ msgid "Enter a valid color."
+#~ msgstr "מספר"
 
-#: .\env\Lib\site-packages\dbbackup\apps.py:12
-msgid "Backup and restore"
-msgstr ""
+#~ msgid "Messages"
+#~ msgstr "הודעה"
 
-#: .\env\Lib\site-packages\django\contrib\messages\apps.py:7
-msgid "Messages"
-msgstr "הודעה"
-
-#: .\env\Lib\site-packages\django\contrib\sitemaps\apps.py:7
-msgid "Site Maps"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\contrib\staticfiles\apps.py:9
-msgid "Static Files"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\contrib\syndication\apps.py:7
 #, fuzzy
-#| msgid "organization"
-msgid "Syndication"
-msgstr "ארגון"
+#~| msgid "organization"
+#~ msgid "Syndication"
+#~ msgstr "ארגון"
 
-#: .\env\Lib\site-packages\django\core\paginator.py:48
-msgid "That page number is not an integer"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\core\paginator.py:50
-msgid "That page number is less than 1"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\core\paginator.py:55
-msgid "That page contains no results"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\core\validators.py:20
 #, fuzzy
-#| msgid "number"
-msgid "Enter a valid value."
-msgstr "מספר"
+#~| msgid "number"
+#~ msgid "Enter a valid value."
+#~ msgstr "מספר"
 
-#: .\env\Lib\site-packages\django\core\validators.py:91
-#: .\env\Lib\site-packages\django\forms\fields.py:671
 #, fuzzy
-#| msgid "number"
-msgid "Enter a valid URL."
-msgstr "מספר"
+#~| msgid "number"
+#~ msgid "Enter a valid URL."
+#~ msgstr "מספר"
 
-#: .\env\Lib\site-packages\django\core\validators.py:145
 #, fuzzy
-#| msgid "number"
-msgid "Enter a valid integer."
-msgstr "מספר"
+#~| msgid "number"
+#~ msgid "Enter a valid integer."
+#~ msgstr "מספר"
 
-#: .\env\Lib\site-packages\django\core\validators.py:156
 #, fuzzy
-#| msgid "addres"
-msgid "Enter a valid email address."
-msgstr "כתובת"
+#~| msgid "addres"
+#~ msgid "Enter a valid email address."
+#~ msgstr "כתובת"
 
-#. Translators: "letters" means latin letters: a-z and A-Z.
-#: .\env\Lib\site-packages\django\core\validators.py:230
-msgid ""
-"Enter a valid “slug” consisting of letters, numbers, underscores or hyphens."
-msgstr ""
-
-#: .\env\Lib\site-packages\django\core\validators.py:237
-msgid ""
-"Enter a valid “slug” consisting of Unicode letters, numbers, underscores, or "
-"hyphens."
-msgstr ""
-
-#: .\env\Lib\site-packages\django\core\validators.py:246
-#: .\env\Lib\site-packages\django\core\validators.py:266
 #, fuzzy
-#| msgid "addres"
-msgid "Enter a valid IPv4 address."
-msgstr "כתובת"
+#~| msgid "addres"
+#~ msgid "Enter a valid IPv4 address."
+#~ msgstr "כתובת"
 
-#: .\env\Lib\site-packages\django\core\validators.py:251
-#: .\env\Lib\site-packages\django\core\validators.py:267
 #, fuzzy
-#| msgid "addres"
-msgid "Enter a valid IPv6 address."
-msgstr "כתובת"
+#~| msgid "addres"
+#~ msgid "Enter a valid IPv6 address."
+#~ msgstr "כתובת"
 
-#: .\env\Lib\site-packages\django\core\validators.py:261
-#: .\env\Lib\site-packages\django\core\validators.py:265
 #, fuzzy
-#| msgid "addres"
-msgid "Enter a valid IPv4 or IPv6 address."
-msgstr "כתובת"
+#~| msgid "addres"
+#~ msgid "Enter a valid IPv4 or IPv6 address."
+#~ msgstr "כתובת"
 
-#: .\env\Lib\site-packages\django\core\validators.py:295
-msgid "Enter only digits separated by commas."
-msgstr ""
-
-#: .\env\Lib\site-packages\django\core\validators.py:301
-#, python-format
-msgid "Ensure this value is %(limit_value)s (it is %(show_value)s)."
-msgstr ""
-
-#: .\env\Lib\site-packages\django\core\validators.py:334
-#, python-format
-msgid "Ensure this value is less than or equal to %(limit_value)s."
-msgstr ""
-
-#: .\env\Lib\site-packages\django\core\validators.py:343
-#, python-format
-msgid "Ensure this value is greater than or equal to %(limit_value)s."
-msgstr ""
-
-#: .\env\Lib\site-packages\django\core\validators.py:353
-#, python-format
-msgid ""
-"Ensure this value has at least %(limit_value)d character (it has "
-"%(show_value)d)."
-msgid_plural ""
-"Ensure this value has at least %(limit_value)d characters (it has "
-"%(show_value)d)."
-msgstr[0] ""
-msgstr[1] ""
-msgstr[2] ""
-msgstr[3] ""
-
-#: .\env\Lib\site-packages\django\core\validators.py:368
-#, python-format
-msgid ""
-"Ensure this value has at most %(limit_value)d character (it has "
-"%(show_value)d)."
-msgid_plural ""
-"Ensure this value has at most %(limit_value)d characters (it has "
-"%(show_value)d)."
-msgstr[0] ""
-msgstr[1] ""
-msgstr[2] ""
-msgstr[3] ""
-
-#: .\env\Lib\site-packages\django\core\validators.py:387
-#: .\env\Lib\site-packages\django\forms\fields.py:292
-#: .\env\Lib\site-packages\django\forms\fields.py:327
 #, fuzzy
-#| msgid "number"
-msgid "Enter a number."
-msgstr "מספר"
+#~| msgid "number"
+#~ msgid "Enter a number."
+#~ msgstr "מספר"
 
-#: .\env\Lib\site-packages\django\core\validators.py:389
-#, python-format
-msgid "Ensure that there are no more than %(max)s digit in total."
-msgid_plural "Ensure that there are no more than %(max)s digits in total."
-msgstr[0] ""
-msgstr[1] ""
-msgstr[2] ""
-msgstr[3] ""
-
-#: .\env\Lib\site-packages\django\core\validators.py:394
-#, python-format
-msgid "Ensure that there are no more than %(max)s decimal place."
-msgid_plural "Ensure that there are no more than %(max)s decimal places."
-msgstr[0] ""
-msgstr[1] ""
-msgstr[2] ""
-msgstr[3] ""
-
-#: .\env\Lib\site-packages\django\core\validators.py:399
-#, python-format
-msgid ""
-"Ensure that there are no more than %(max)s digit before the decimal point."
-msgid_plural ""
-"Ensure that there are no more than %(max)s digits before the decimal point."
-msgstr[0] ""
-msgstr[1] ""
-msgstr[2] ""
-msgstr[3] ""
-
-#: .\env\Lib\site-packages\django\core\validators.py:461
-#, python-format
-msgid ""
-"File extension “%(extension)s” is not allowed. Allowed extensions are: "
-"%(allowed_extensions)s."
-msgstr ""
-
-#: .\env\Lib\site-packages\django\core\validators.py:513
-msgid "Null characters are not allowed."
-msgstr ""
-
-#: .\env\Lib\site-packages\django\db\models\base.py:1187
-#: .\env\Lib\site-packages\django\forms\models.py:760
-msgid "and"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\db\models\base.py:1189
-#, python-format
-msgid "%(model_name)s with this %(field_labels)s already exists."
-msgstr ""
-
-#: .\env\Lib\site-packages\django\db\models\fields\__init__.py:100
-#, python-format
-msgid "Value %(value)r is not a valid choice."
-msgstr ""
-
-#: .\env\Lib\site-packages\django\db\models\fields\__init__.py:101
-msgid "This field cannot be null."
-msgstr ""
-
-#: .\env\Lib\site-packages\django\db\models\fields\__init__.py:102
-msgid "This field cannot be blank."
-msgstr ""
-
-#: .\env\Lib\site-packages\django\db\models\fields\__init__.py:103
-#, python-format
-msgid "%(model_name)s with this %(field_label)s already exists."
-msgstr ""
-
-#. Translators: The 'lookup_type' is one of 'date', 'year' or 'month'.
-#. Eg: "Title must be unique for pub_date year"
-#: .\env\Lib\site-packages\django\db\models\fields\__init__.py:107
-#, python-format
-msgid ""
-"%(field_label)s must be unique for %(date_field_label)s %(lookup_type)s."
-msgstr ""
-
-#: .\env\Lib\site-packages\django\db\models\fields\__init__.py:126
-#, python-format
-msgid "Field of type: %(field_type)s"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\db\models\fields\__init__.py:939
-#, python-format
-msgid "“%(value)s” value must be either True or False."
-msgstr ""
-
-#: .\env\Lib\site-packages\django\db\models\fields\__init__.py:940
-#, python-format
-msgid "“%(value)s” value must be either True, False, or None."
-msgstr ""
-
-#: .\env\Lib\site-packages\django\db\models\fields\__init__.py:942
-msgid "Boolean (Either True or False)"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\db\models\fields\__init__.py:983
-#, python-format
-msgid "String (up to %(max_length)s)"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\db\models\fields\__init__.py:1047
-msgid "Comma-separated integers"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\db\models\fields\__init__.py:1096
-#, python-format
-msgid ""
-"“%(value)s” value has an invalid date format. It must be in YYYY-MM-DD "
-"format."
-msgstr ""
-
-#: .\env\Lib\site-packages\django\db\models\fields\__init__.py:1098
-#: .\env\Lib\site-packages\django\db\models\fields\__init__.py:1241
-#, python-format
-msgid ""
-"“%(value)s” value has the correct format (YYYY-MM-DD) but it is an invalid "
-"date."
-msgstr ""
-
-#: .\env\Lib\site-packages\django\db\models\fields\__init__.py:1101
-msgid "Date (without time)"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\db\models\fields\__init__.py:1239
-#, python-format
-msgid ""
-"“%(value)s” value has an invalid format. It must be in YYYY-MM-DD HH:MM[:ss[."
-"uuuuuu]][TZ] format."
-msgstr ""
-
-#: .\env\Lib\site-packages\django\db\models\fields\__init__.py:1243
-#, python-format
-msgid ""
-"“%(value)s” value has the correct format (YYYY-MM-DD HH:MM[:ss[.uuuuuu]]"
-"[TZ]) but it is an invalid date/time."
-msgstr ""
-
-#: .\env\Lib\site-packages\django\db\models\fields\__init__.py:1247
 #, fuzzy
-#| msgid "Time saving"
-msgid "Date (with time)"
-msgstr "חוסך זמן"
+#~| msgid "Time saving"
+#~ msgid "Date (with time)"
+#~ msgstr "חוסך זמן"
 
-#: .\env\Lib\site-packages\django\db\models\fields\__init__.py:1395
-#, python-format
-msgid "“%(value)s” value must be a decimal number."
-msgstr ""
-
-#: .\env\Lib\site-packages\django\db\models\fields\__init__.py:1397
 #, fuzzy
-#| msgid "number"
-msgid "Decimal number"
-msgstr "מספר"
+#~| msgid "number"
+#~ msgid "Decimal number"
+#~ msgstr "מספר"
 
-#: .\env\Lib\site-packages\django\db\models\fields\__init__.py:1536
-#, python-format
-msgid ""
-"“%(value)s” value has an invalid format. It must be in [DD] [[HH:]MM:]ss[."
-"uuuuuu] format."
-msgstr ""
-
-#: .\env\Lib\site-packages\django\db\models\fields\__init__.py:1539
 #, fuzzy
-#| msgid "Some translatable text"
-msgid "Duration"
-msgstr "טקסט שצריך לתרגם"
+#~| msgid "Some translatable text"
+#~ msgid "Duration"
+#~ msgstr "טקסט שצריך לתרגם"
 
-#: .\env\Lib\site-packages\django\db\models\fields\__init__.py:1589
-msgid "Email address"
-msgstr "כתובת"
+#~ msgid "Email address"
+#~ msgstr "כתובת"
 
-#: .\env\Lib\site-packages\django\db\models\fields\__init__.py:1612
-msgid "File path"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\db\models\fields\__init__.py:1678
-#, python-format
-msgid "“%(value)s” value must be a float."
-msgstr ""
-
-#: .\env\Lib\site-packages\django\db\models\fields\__init__.py:1680
 #, fuzzy
-#| msgid "number"
-msgid "Floating point number"
-msgstr "מספר"
+#~| msgid "number"
+#~ msgid "Floating point number"
+#~ msgstr "מספר"
 
-#: .\env\Lib\site-packages\django\db\models\fields\__init__.py:1718
-#, python-format
-msgid "“%(value)s” value must be an integer."
-msgstr ""
+#~ msgid "IPv4 address"
+#~ msgstr "כתובת"
 
-#: .\env\Lib\site-packages\django\db\models\fields\__init__.py:1720
-msgid "Integer"
-msgstr ""
+#~ msgid "IP address"
+#~ msgstr "כתובת"
 
-#: .\env\Lib\site-packages\django\db\models\fields\__init__.py:1803
-msgid "Big (8 byte) integer"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\db\models\fields\__init__.py:1819
-msgid "IPv4 address"
-msgstr "כתובת"
-
-#: .\env\Lib\site-packages\django\db\models\fields\__init__.py:1850
-msgid "IP address"
-msgstr "כתובת"
-
-#: .\env\Lib\site-packages\django\db\models\fields\__init__.py:1930
-#: .\env\Lib\site-packages\django\db\models\fields\__init__.py:1931
-#, python-format
-msgid "“%(value)s” value must be either None, True or False."
-msgstr ""
-
-#: .\env\Lib\site-packages\django\db\models\fields\__init__.py:1933
-msgid "Boolean (Either True, False or None)"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\db\models\fields\__init__.py:1976
-msgid "Positive big integer"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\db\models\fields\__init__.py:1989
-msgid "Positive integer"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\db\models\fields\__init__.py:2002
-msgid "Positive small integer"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\db\models\fields\__init__.py:2016
-#, python-format
-msgid "Slug (up to %(max_length)s)"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\db\models\fields\__init__.py:2048
-msgid "Small integer"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\db\models\fields\__init__.py:2055
-msgid "Text"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\db\models\fields\__init__.py:2083
-#, python-format
-msgid ""
-"“%(value)s” value has an invalid format. It must be in HH:MM[:ss[.uuuuuu]] "
-"format."
-msgstr ""
-
-#: .\env\Lib\site-packages\django\db\models\fields\__init__.py:2085
-#, python-format
-msgid ""
-"“%(value)s” value has the correct format (HH:MM[:ss[.uuuuuu]]) but it is an "
-"invalid time."
-msgstr ""
-
-#: .\env\Lib\site-packages\django\db\models\fields\__init__.py:2088
-msgid "Time"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\db\models\fields\__init__.py:2236
-msgid "Raw binary data"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\db\models\fields\__init__.py:2301
-#, python-format
-msgid "“%(value)s” is not a valid UUID."
-msgstr ""
-
-#: .\env\Lib\site-packages\django\db\models\fields\__init__.py:2303
-msgid "Universally unique identifier"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\db\models\fields\files.py:231
-msgid "File"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\db\models\fields\files.py:377
 #, fuzzy
-#| msgid "image"
-msgid "Image"
-msgstr "תמונה"
+#~| msgid "image"
+#~ msgid "Image"
+#~ msgstr "תמונה"
 
-#: .\env\Lib\site-packages\django\db\models\fields\json.py:18
-msgid "A JSON object"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\db\models\fields\json.py:20
-msgid "Value must be valid JSON."
-msgstr ""
-
-#: .\env\Lib\site-packages\django\db\models\fields\related.py:790
-#, python-format
-msgid "%(model)s instance with %(field)s %(value)r does not exist."
-msgstr ""
-
-#: .\env\Lib\site-packages\django\db\models\fields\related.py:792
-msgid "Foreign Key (type determined by related field)"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\db\models\fields\related.py:1045
-msgid "One-to-one relationship"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\db\models\fields\related.py:1099
-#, python-format
-msgid "%(from)s-%(to)s relationship"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\db\models\fields\related.py:1100
-#, python-format
-msgid "%(from)s-%(to)s relationships"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\db\models\fields\related.py:1142
-msgid "Many-to-many relationship"
-msgstr ""
-
-#. Translators: If found as last label character, these punctuation
-#. characters will prevent the default label_suffix to be appended to the label
-#: .\env\Lib\site-packages\django\forms\boundfield.py:150
-msgid ":?.!"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\forms\fields.py:54
-msgid "This field is required."
-msgstr ""
-
-#: .\env\Lib\site-packages\django\forms\fields.py:247
 #, fuzzy
-#| msgid "number"
-msgid "Enter a whole number."
-msgstr "מספר"
+#~| msgid "number"
+#~ msgid "Enter a whole number."
+#~ msgstr "מספר"
 
-#: .\env\Lib\site-packages\django\forms\fields.py:398
-#: .\env\Lib\site-packages\django\forms\fields.py:1139
 #, fuzzy
-#| msgid "number"
-msgid "Enter a valid date."
-msgstr "מספר"
+#~| msgid "number"
+#~ msgid "Enter a valid date."
+#~ msgstr "מספר"
 
-#: .\env\Lib\site-packages\django\forms\fields.py:422
-#: .\env\Lib\site-packages\django\forms\fields.py:1140
 #, fuzzy
-#| msgid "number"
-msgid "Enter a valid time."
-msgstr "מספר"
+#~| msgid "number"
+#~ msgid "Enter a valid time."
+#~ msgstr "מספר"
 
-#: .\env\Lib\site-packages\django\forms\fields.py:450
 #, fuzzy
-#| msgid "number"
-msgid "Enter a valid date/time."
-msgstr "מספר"
+#~| msgid "number"
+#~ msgid "Enter a valid date/time."
+#~ msgstr "מספר"
 
-#: .\env\Lib\site-packages\django\forms\fields.py:484
 #, fuzzy
-#| msgid "number"
-msgid "Enter a valid duration."
-msgstr "מספר"
+#~| msgid "number"
+#~ msgid "Enter a valid duration."
+#~ msgstr "מספר"
 
-#: .\env\Lib\site-packages\django\forms\fields.py:485
-#, python-brace-format
-msgid "The number of days must be between {min_days} and {max_days}."
-msgstr ""
-
-#: .\env\Lib\site-packages\django\forms\fields.py:545
-msgid "No file was submitted. Check the encoding type on the form."
-msgstr ""
-
-#: .\env\Lib\site-packages\django\forms\fields.py:546
-msgid "No file was submitted."
-msgstr ""
-
-#: .\env\Lib\site-packages\django\forms\fields.py:547
-msgid "The submitted file is empty."
-msgstr ""
-
-#: .\env\Lib\site-packages\django\forms\fields.py:549
-#, python-format
-msgid "Ensure this filename has at most %(max)d character (it has %(length)d)."
-msgid_plural ""
-"Ensure this filename has at most %(max)d characters (it has %(length)d)."
-msgstr[0] ""
-msgstr[1] ""
-msgstr[2] ""
-msgstr[3] ""
-
-#: .\env\Lib\site-packages\django\forms\fields.py:552
-msgid "Please either submit a file or check the clear checkbox, not both."
-msgstr ""
-
-#: .\env\Lib\site-packages\django\forms\fields.py:613
-msgid ""
-"Upload a valid image. The file you uploaded was either not an image or a "
-"corrupted image."
-msgstr ""
-
-#: .\env\Lib\site-packages\django\forms\fields.py:775
-#: .\env\Lib\site-packages\django\forms\fields.py:865
-#: .\env\Lib\site-packages\django\forms\models.py:1296
-#, python-format
-msgid "Select a valid choice. %(value)s is not one of the available choices."
-msgstr ""
-
-#: .\env\Lib\site-packages\django\forms\fields.py:866
-#: .\env\Lib\site-packages\django\forms\fields.py:981
-#: .\env\Lib\site-packages\django\forms\models.py:1295
 #, fuzzy
-#| msgid "number"
-msgid "Enter a list of values."
-msgstr "מספר"
+#~| msgid "number"
+#~ msgid "Enter a list of values."
+#~ msgstr "מספר"
 
-#: .\env\Lib\site-packages\django\forms\fields.py:982
 #, fuzzy
-#| msgid "number"
-msgid "Enter a complete value."
-msgstr "מספר"
+#~| msgid "number"
+#~ msgid "Enter a complete value."
+#~ msgstr "מספר"
 
-#: .\env\Lib\site-packages\django\forms\fields.py:1198
 #, fuzzy
-#| msgid "number"
-msgid "Enter a valid UUID."
-msgstr "מספר"
+#~| msgid "number"
+#~ msgid "Enter a valid UUID."
+#~ msgstr "מספר"
 
-#: .\env\Lib\site-packages\django\forms\fields.py:1228
 #, fuzzy
-#| msgid "number"
-msgid "Enter a valid JSON."
-msgstr "מספר"
+#~| msgid "number"
+#~ msgid "Enter a valid JSON."
+#~ msgstr "מספר"
 
-#. Translators: This is the default suffix added to form field labels
-#: .\env\Lib\site-packages\django\forms\forms.py:78
-msgid ":"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\forms\forms.py:205
-#, python-format
-msgid "(Hidden field %(name)s) %(error)s"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\forms\formsets.py:93
-msgid "ManagementForm data is missing or has been tampered with"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\forms\formsets.py:345
-#, python-format
-msgid "Please submit %d or fewer forms."
-msgid_plural "Please submit %d or fewer forms."
-msgstr[0] ""
-msgstr[1] ""
-msgstr[2] ""
-msgstr[3] ""
-
-#: .\env\Lib\site-packages\django\forms\formsets.py:352
-#, python-format
-msgid "Please submit %d or more forms."
-msgid_plural "Please submit %d or more forms."
-msgstr[0] ""
-msgstr[1] ""
-msgstr[2] ""
-msgstr[3] ""
-
-#: .\env\Lib\site-packages\django\forms\formsets.py:379
-#: .\env\Lib\site-packages\django\forms\formsets.py:386
 #, fuzzy
-#| msgid "Orders"
-msgid "Order"
-msgstr "הזמנות"
+#~| msgid "Orders"
+#~ msgid "Order"
+#~ msgstr "הזמנות"
 
-#: .\env\Lib\site-packages\django\forms\formsets.py:391
-#: .\env\Lib\site-packages\django_admin_index\templates\admin\delete_confirmation.html:23
-msgid "Delete"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\forms\models.py:755
-#, python-format
-msgid "Please correct the duplicate data for %(field)s."
-msgstr ""
-
-#: .\env\Lib\site-packages\django\forms\models.py:759
-#, python-format
-msgid "Please correct the duplicate data for %(field)s, which must be unique."
-msgstr ""
-
-#: .\env\Lib\site-packages\django\forms\models.py:765
-#, python-format
-msgid ""
-"Please correct the duplicate data for %(field_name)s which must be unique "
-"for the %(lookup)s in %(date_field)s."
-msgstr ""
-
-#: .\env\Lib\site-packages\django\forms\models.py:774
-msgid "Please correct the duplicate values below."
-msgstr ""
-
-#: .\env\Lib\site-packages\django\forms\models.py:1096
-msgid "The inline value did not match the parent instance."
-msgstr ""
-
-#: .\env\Lib\site-packages\django\forms\models.py:1180
-msgid "Select a valid choice. That choice is not one of the available choices."
-msgstr ""
-
-#: .\env\Lib\site-packages\django\forms\models.py:1298
 #, fuzzy, python-format
-#| msgid "number"
-msgid "“%(pk)s” is not a valid value."
-msgstr "מספר"
+#~| msgid "number"
+#~ msgid "“%(pk)s” is not a valid value."
+#~ msgstr "מספר"
 
-#: .\env\Lib\site-packages\django\forms\utils.py:167
-#, python-format
-msgid ""
-"%(datetime)s couldn’t be interpreted in time zone %(current_timezone)s; it "
-"may be ambiguous or it may not exist."
-msgstr ""
-
-#: .\env\Lib\site-packages\django\forms\widgets.py:398
-msgid "Clear"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\forms\widgets.py:399
-msgid "Currently"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\forms\widgets.py:400
-#: .\env\Lib\site-packages\django_admin_index\templates\admin\index.html:48
-msgid "Change"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\forms\widgets.py:709
 #, fuzzy
-#| msgid "content"
-msgid "Unknown"
-msgstr "תוכן"
+#~| msgid "content"
+#~ msgid "Unknown"
+#~ msgstr "תוכן"
 
-#: .\env\Lib\site-packages\django\forms\widgets.py:710
-msgid "Yes"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\forms\widgets.py:711
-msgid "No"
-msgstr ""
-
-#. Translators: Please do not add spaces around commas.
-#: .\env\Lib\site-packages\django\template\defaultfilters.py:790
-msgid "yes,no,maybe"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\template\defaultfilters.py:819
-#: .\env\Lib\site-packages\django\template\defaultfilters.py:836
-#, python-format
-msgid "%(size)d byte"
-msgid_plural "%(size)d bytes"
-msgstr[0] ""
-msgstr[1] ""
-msgstr[2] ""
-msgstr[3] ""
-
-#: .\env\Lib\site-packages\django\template\defaultfilters.py:838
-#, python-format
-msgid "%s KB"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\template\defaultfilters.py:840
-#, python-format
-msgid "%s MB"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\template\defaultfilters.py:842
-#, python-format
-msgid "%s GB"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\template\defaultfilters.py:844
-#, python-format
-msgid "%s TB"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\template\defaultfilters.py:846
-#, python-format
-msgid "%s PB"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\utils\dateformat.py:65
-msgid "p.m."
-msgstr ""
-
-#: .\env\Lib\site-packages\django\utils\dateformat.py:66
-msgid "a.m."
-msgstr ""
-
-#: .\env\Lib\site-packages\django\utils\dateformat.py:71
-msgid "PM"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\utils\dateformat.py:72
-msgid "AM"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\utils\dateformat.py:149
 #, fuzzy
-#| msgid "weight"
-msgid "midnight"
-msgstr "משקל"
+#~| msgid "weight"
+#~ msgid "midnight"
+#~ msgstr "משקל"
 
-#: .\env\Lib\site-packages\django\utils\dateformat.py:151
-msgid "noon"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\utils\dates.py:6
-#: .\env\Lib\site-packages\tornado\locale.py:295
-msgid "Monday"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\utils\dates.py:6
-#: .\env\Lib\site-packages\tornado\locale.py:296
-msgid "Tuesday"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\utils\dates.py:6
-#: .\env\Lib\site-packages\tornado\locale.py:297
-msgid "Wednesday"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\utils\dates.py:6
-#: .\env\Lib\site-packages\tornado\locale.py:298
-msgid "Thursday"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\utils\dates.py:6
-#: .\env\Lib\site-packages\tornado\locale.py:299
-msgid "Friday"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\utils\dates.py:7
-#: .\env\Lib\site-packages\tornado\locale.py:300
-msgid "Saturday"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\utils\dates.py:7
-#: .\env\Lib\site-packages\tornado\locale.py:301
-msgid "Sunday"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\utils\dates.py:10
-msgid "Mon"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\utils\dates.py:10
-msgid "Tue"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\utils\dates.py:10
-msgid "Wed"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\utils\dates.py:10
-msgid "Thu"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\utils\dates.py:10
-msgid "Fri"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\utils\dates.py:11
-msgid "Sat"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\utils\dates.py:11
-msgid "Sun"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\utils\dates.py:14
-#: .\env\Lib\site-packages\tornado\locale.py:281
-msgid "January"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\utils\dates.py:14
-#: .\env\Lib\site-packages\tornado\locale.py:282
-msgid "February"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\utils\dates.py:14
-#: .\env\Lib\site-packages\tornado\locale.py:283
-msgid "March"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\utils\dates.py:14
-#: .\env\Lib\site-packages\tornado\locale.py:284
-msgid "April"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\utils\dates.py:14
-#: .\env\Lib\site-packages\tornado\locale.py:285
-msgid "May"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\utils\dates.py:14
-#: .\env\Lib\site-packages\tornado\locale.py:286
-msgid "June"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\utils\dates.py:15
-#: .\env\Lib\site-packages\tornado\locale.py:287
-msgid "July"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\utils\dates.py:15
-#: .\env\Lib\site-packages\tornado\locale.py:288
-msgid "August"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\utils\dates.py:15
-#: .\env\Lib\site-packages\tornado\locale.py:289
 #, fuzzy
-#| msgid "number"
-msgid "September"
-msgstr "מספר"
+#~| msgid "number"
+#~ msgid "September"
+#~ msgstr "מספר"
 
-#: .\env\Lib\site-packages\django\utils\dates.py:15
-#: .\env\Lib\site-packages\tornado\locale.py:290
-msgid "October"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\utils\dates.py:15
-#: .\env\Lib\site-packages\tornado\locale.py:291
 #, fuzzy
-#| msgid "number"
-msgid "November"
-msgstr "מספר"
+#~| msgid "number"
+#~ msgid "November"
+#~ msgstr "מספר"
 
-#: .\env\Lib\site-packages\django\utils\dates.py:16
-#: .\env\Lib\site-packages\tornado\locale.py:292
 #, fuzzy
-#| msgid "number"
-msgid "December"
-msgstr "מספר"
+#~| msgid "number"
+#~ msgid "December"
+#~ msgstr "מספר"
 
-#: .\env\Lib\site-packages\django\utils\dates.py:19
-msgid "jan"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\utils\dates.py:19
-msgid "feb"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\utils\dates.py:19
-msgid "mar"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\utils\dates.py:19
-msgid "apr"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\utils\dates.py:19
-msgid "may"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\utils\dates.py:19
-msgid "jun"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\utils\dates.py:20
-msgid "jul"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\utils\dates.py:20
-msgid "aug"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\utils\dates.py:20
-msgid "sep"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\utils\dates.py:20
 #, fuzzy
-#| msgid "product"
-msgid "oct"
-msgstr "מוצר"
+#~| msgid "product"
+#~ msgid "oct"
+#~ msgstr "מוצר"
 
-#: .\env\Lib\site-packages\django\utils\dates.py:20
-msgid "nov"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\utils\dates.py:20
-msgid "dec"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\utils\dates.py:23
-msgctxt "abbrev. month"
-msgid "Jan."
-msgstr ""
-
-#: .\env\Lib\site-packages\django\utils\dates.py:24
-msgctxt "abbrev. month"
-msgid "Feb."
-msgstr ""
-
-#: .\env\Lib\site-packages\django\utils\dates.py:25
-msgctxt "abbrev. month"
-msgid "March"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\utils\dates.py:26
-msgctxt "abbrev. month"
-msgid "April"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\utils\dates.py:27
-msgctxt "abbrev. month"
-msgid "May"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\utils\dates.py:28
-msgctxt "abbrev. month"
-msgid "June"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\utils\dates.py:29
-msgctxt "abbrev. month"
-msgid "July"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\utils\dates.py:30
-msgctxt "abbrev. month"
-msgid "Aug."
-msgstr ""
-
-#: .\env\Lib\site-packages\django\utils\dates.py:31
-msgctxt "abbrev. month"
-msgid "Sept."
-msgstr ""
-
-#: .\env\Lib\site-packages\django\utils\dates.py:32
-msgctxt "abbrev. month"
-msgid "Oct."
-msgstr ""
-
-#: .\env\Lib\site-packages\django\utils\dates.py:33
-msgctxt "abbrev. month"
-msgid "Nov."
-msgstr ""
-
-#: .\env\Lib\site-packages\django\utils\dates.py:34
-msgctxt "abbrev. month"
-msgid "Dec."
-msgstr ""
-
-#: .\env\Lib\site-packages\django\utils\dates.py:37
-msgctxt "alt. month"
-msgid "January"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\utils\dates.py:38
-msgctxt "alt. month"
-msgid "February"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\utils\dates.py:39
-msgctxt "alt. month"
-msgid "March"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\utils\dates.py:40
-msgctxt "alt. month"
-msgid "April"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\utils\dates.py:41
-msgctxt "alt. month"
-msgid "May"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\utils\dates.py:42
-msgctxt "alt. month"
-msgid "June"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\utils\dates.py:43
-msgctxt "alt. month"
-msgid "July"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\utils\dates.py:44
-msgctxt "alt. month"
-msgid "August"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\utils\dates.py:45
 #, fuzzy
-#| msgid "number"
-msgctxt "alt. month"
-msgid "September"
-msgstr "מספר"
+#~| msgid "number"
+#~ msgctxt "alt. month"
+#~ msgid "September"
+#~ msgstr "מספר"
 
-#: .\env\Lib\site-packages\django\utils\dates.py:46
-msgctxt "alt. month"
-msgid "October"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\utils\dates.py:47
 #, fuzzy
-#| msgid "number"
-msgctxt "alt. month"
-msgid "November"
-msgstr "מספר"
+#~| msgid "number"
+#~ msgctxt "alt. month"
+#~ msgid "November"
+#~ msgstr "מספר"
 
-#: .\env\Lib\site-packages\django\utils\dates.py:48
 #, fuzzy
-#| msgid "number"
-msgctxt "alt. month"
-msgid "December"
-msgstr "מספר"
+#~| msgid "number"
+#~ msgctxt "alt. month"
+#~ msgid "December"
+#~ msgstr "מספר"
 
-#: .\env\Lib\site-packages\django\utils\ipv6.py:8
 #, fuzzy
-#| msgid "addres"
-msgid "This is not a valid IPv6 address."
-msgstr "כתובת"
+#~| msgid "addres"
+#~ msgid "This is not a valid IPv6 address."
+#~ msgstr "כתובת"
 
-#: .\env\Lib\site-packages\django\utils\text.py:70
-#, python-format
-msgctxt "String to return when truncating text"
-msgid "%(truncated_text)s…"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\utils\text.py:236
-msgid "or"
-msgstr ""
-
-#. Translators: This string is used as a separator between list elements
-#: .\env\Lib\site-packages\django\utils\text.py:255
-#: .\env\Lib\site-packages\django\utils\timesince.py:83
-msgid ", "
-msgstr ""
-
-#: .\env\Lib\site-packages\django\utils\timesince.py:9
-#, python-format
-msgid "%d year"
-msgid_plural "%d years"
-msgstr[0] ""
-msgstr[1] ""
-msgstr[2] ""
-msgstr[3] ""
-
-#: .\env\Lib\site-packages\django\utils\timesince.py:10
-#, python-format
-msgid "%d month"
-msgid_plural "%d months"
-msgstr[0] ""
-msgstr[1] ""
-msgstr[2] ""
-msgstr[3] ""
-
-#: .\env\Lib\site-packages\django\utils\timesince.py:11
-#, python-format
-msgid "%d week"
-msgid_plural "%d weeks"
-msgstr[0] ""
-msgstr[1] ""
-msgstr[2] ""
-msgstr[3] ""
-
-#: .\env\Lib\site-packages\django\utils\timesince.py:12
-#, python-format
-msgid "%d day"
-msgid_plural "%d days"
-msgstr[0] ""
-msgstr[1] ""
-msgstr[2] ""
-msgstr[3] ""
-
-#: .\env\Lib\site-packages\django\utils\timesince.py:13
-#, python-format
-msgid "%d hour"
-msgid_plural "%d hours"
-msgstr[0] ""
-msgstr[1] ""
-msgstr[2] ""
-msgstr[3] ""
-
-#: .\env\Lib\site-packages\django\utils\timesince.py:14
-#, python-format
-msgid "%d minute"
-msgid_plural "%d minutes"
-msgstr[0] ""
-msgstr[1] ""
-msgstr[2] ""
-msgstr[3] ""
-
-#: .\env\Lib\site-packages\django\views\csrf.py:110
-msgid "Forbidden"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\views\csrf.py:111
-msgid "CSRF verification failed. Request aborted."
-msgstr ""
-
-#: .\env\Lib\site-packages\django\views\csrf.py:115
-msgid ""
-"You are seeing this message because this HTTPS site requires a “Referer "
-"header” to be sent by your Web browser, but none was sent. This header is "
-"required for security reasons, to ensure that your browser is not being "
-"hijacked by third parties."
-msgstr ""
-
-#: .\env\Lib\site-packages\django\views\csrf.py:120
-msgid ""
-"If you have configured your browser to disable “Referer” headers, please re-"
-"enable them, at least for this site, or for HTTPS connections, or for “same-"
-"origin” requests."
-msgstr ""
-
-#: .\env\Lib\site-packages\django\views\csrf.py:124
-msgid ""
-"If you are using the <meta name=\"referrer\" content=\"no-referrer\"> tag or "
-"including the “Referrer-Policy: no-referrer” header, please remove them. The "
-"CSRF protection requires the “Referer” header to do strict referer checking. "
-"If you’re concerned about privacy, use alternatives like <a rel=\"noreferrer"
-"\" …> for links to third-party sites."
-msgstr ""
-
-#: .\env\Lib\site-packages\django\views\csrf.py:132
-msgid ""
-"You are seeing this message because this site requires a CSRF cookie when "
-"submitting forms. This cookie is required for security reasons, to ensure "
-"that your browser is not being hijacked by third parties."
-msgstr ""
-
-#: .\env\Lib\site-packages\django\views\csrf.py:137
-msgid ""
-"If you have configured your browser to disable cookies, please re-enable "
-"them, at least for this site, or for “same-origin” requests."
-msgstr ""
-
-#: .\env\Lib\site-packages\django\views\csrf.py:142
-msgid "More information is available with DEBUG=True."
-msgstr ""
-
-#: .\env\Lib\site-packages\django\views\generic\dates.py:41
-msgid "No year specified"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\views\generic\dates.py:61
-#: .\env\Lib\site-packages\django\views\generic\dates.py:111
-#: .\env\Lib\site-packages\django\views\generic\dates.py:208
-msgid "Date out of range"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\views\generic\dates.py:90
-msgid "No month specified"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\views\generic\dates.py:142
-msgid "No day specified"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\views\generic\dates.py:188
-msgid "No week specified"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\views\generic\dates.py:338
-#: .\env\Lib\site-packages\django\views\generic\dates.py:367
-#, python-format
-msgid "No %(verbose_name_plural)s available"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\views\generic\dates.py:589
-#, python-format
-msgid ""
-"Future %(verbose_name_plural)s not available because %(class_name)s."
-"allow_future is False."
-msgstr ""
-
-#: .\env\Lib\site-packages\django\views\generic\dates.py:623
-#, python-format
-msgid "Invalid date string “%(datestr)s” given format “%(format)s”"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\views\generic\detail.py:54
-#, python-format
-msgid "No %(verbose_name)s found matching the query"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\views\generic\list.py:67
-msgid "Page is not “last”, nor can it be converted to an int."
-msgstr ""
-
-#: .\env\Lib\site-packages\django\views\generic\list.py:72
-#, python-format
-msgid "Invalid page (%(page_number)s): %(message)s"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\views\generic\list.py:154
-#, python-format
-msgid "Empty list and “%(class_name)s.allow_empty” is False."
-msgstr ""
-
-#: .\env\Lib\site-packages\django\views\static.py:40
-msgid "Directory indexes are not allowed here."
-msgstr ""
-
-#: .\env\Lib\site-packages\django\views\static.py:42
-#, python-format
-msgid "“%(path)s” does not exist"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\views\static.py:80
-#, python-format
-msgid "Index of %(directory)s"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\views\templates\default_urlconf.html:7
-msgid "Django: the Web framework for perfectionists with deadlines."
-msgstr ""
-
-#: .\env\Lib\site-packages\django\views\templates\default_urlconf.html:346
-#, python-format
-msgid ""
-"View <a href=\"https://docs.djangoproject.com/en/%(version)s/releases/\" "
-"target=\"_blank\" rel=\"noopener\">release notes</a> for Django %(version)s"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\views\templates\default_urlconf.html:368
-msgid "The install worked successfully! Congratulations!"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\views\templates\default_urlconf.html:369
-#, python-format
-msgid ""
-"You are seeing this page because <a href=\"https://docs.djangoproject.com/en/"
-"%(version)s/ref/settings/#debug\" target=\"_blank\" rel=\"noopener"
-"\">DEBUG=True</a> is in your settings file and you have not configured any "
-"URLs."
-msgstr ""
-
-#: .\env\Lib\site-packages\django\views\templates\default_urlconf.html:384
 #, fuzzy
-#| msgid "Instructions"
-msgid "Django Documentation"
-msgstr "הוראות"
+#~| msgid "Instructions"
+#~ msgid "Django Documentation"
+#~ msgstr "הוראות"
 
-#: .\env\Lib\site-packages\django\views\templates\default_urlconf.html:385
-msgid "Topics, references, &amp; how-to’s"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\views\templates\default_urlconf.html:396
-msgid "Tutorial: A Polling App"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\views\templates\default_urlconf.html:397
-msgid "Get started with Django"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\views\templates\default_urlconf.html:408
-msgid "Django Community"
-msgstr ""
-
-#: .\env\Lib\site-packages\django\views\templates\default_urlconf.html:409
-msgid "Connect, get help, or contribute"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_admin_index\apps.py:15
-msgid "Admin Index"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_admin_index\models.py:114
-msgid "Miscellaneous"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_admin_index\models.py:146
-msgid "application group"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_admin_index\models.py:147
-msgid "application groups"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_admin_index\models.py:164
-msgid "application link"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_admin_index\models.py:165
-msgid "application links"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_admin_index\templates\admin\base.html:37
 #, fuzzy
-#| msgid "Welcome to"
-msgid "Welcome,"
-msgstr "ברוך הבא"
+#~| msgid "Welcome to"
+#~ msgid "Welcome,"
+#~ msgstr "ברוך הבא"
 
-#: .\env\Lib\site-packages\django_admin_index\templates\admin\base.html:42
 #, fuzzy
-#| msgid "view in website"
-msgid "View site"
-msgstr "צפה באתר"
+#~| msgid "view in website"
+#~ msgid "View site"
+#~ msgstr "צפה באתר"
 
-#: .\env\Lib\site-packages\django_admin_index\templates\admin\base.html:47
 #, fuzzy
-#| msgid "Instructions"
-msgid "Documentation"
-msgstr "הוראות"
+#~| msgid "Instructions"
+#~ msgid "Documentation"
+#~ msgstr "הוראות"
 
-#: .\env\Lib\site-packages\django_admin_index\templates\admin\base.html:51
-msgid "Change password"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_admin_index\templates\admin\base.html:53
-msgid "Log out"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_admin_index\templates\admin\base.html:70
-msgid "Dashboard"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_admin_index\templates\admin\change_form.html:25
-#: .\env\Lib\site-packages\django_admin_index\templates\admin\change_list.html:55
-#, python-format
-msgid "Add %(name)s"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_admin_index\templates\admin\change_form.html:39
-#: .\env\Lib\site-packages\django_admin_index\templates\admin\object_history.html:14
-msgid "History"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_admin_index\templates\admin\change_form.html:41
 #, fuzzy
-#| msgid "view in website"
-msgid "View on site"
-msgstr "צפה באתר"
+#~| msgid "view in website"
+#~ msgid "View on site"
+#~ msgstr "צפה באתר"
 
-#: .\env\Lib\site-packages\django_admin_index\templates\admin\delete_confirmation.html:29
-#, python-format
-msgid ""
-"Deleting the %(object_name)s '%(escaped_object)s' would result in deleting "
-"related objects, but your account doesn't have permission to delete the "
-"following types of objects:"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_admin_index\templates\admin\delete_confirmation.html:36
-#, python-format
-msgid ""
-"Deleting the %(object_name)s '%(escaped_object)s' would require deleting the "
-"following protected related objects:"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_admin_index\templates\admin\delete_confirmation.html:43
-#, python-format
-msgid ""
-"Are you sure you want to delete the %(object_name)s \"%(escaped_object)s\"? "
-"All of the following related items will be deleted:"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_admin_index\templates\admin\delete_confirmation.html:45
-#: .\env\Lib\site-packages\django_admin_index\templates\admin\delete_selected_confirmation.html:44
-msgid "Objects"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_admin_index\templates\admin\delete_confirmation.html:52
-#: .\env\Lib\site-packages\django_admin_index\templates\admin\delete_selected_confirmation.html:55
-msgid "Yes, I'm sure"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_admin_index\templates\admin\delete_confirmation.html:53
-#: .\env\Lib\site-packages\django_admin_index\templates\admin\delete_selected_confirmation.html:56
-msgid "No, take me back"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_admin_index\templates\admin\delete_selected_confirmation.html:22
-msgid "Delete multiple objects"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_admin_index\templates\admin\delete_selected_confirmation.html:28
-#, python-format
-msgid ""
-"Deleting the selected %(objects_name)s would result in deleting related "
-"objects, but your account doesn't have permission to delete the following "
-"types of objects:"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_admin_index\templates\admin\delete_selected_confirmation.html:35
-#, python-format
-msgid ""
-"Deleting the selected %(objects_name)s would require deleting the following "
-"protected related objects:"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_admin_index\templates\admin\delete_selected_confirmation.html:42
-#, python-format
-msgid ""
-"Are you sure you want to delete the selected %(objects_name)s? All of the "
-"following objects and their related items will be deleted:"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_admin_index\templates\admin\index.html:27
-#, python-format
-msgid "Models in the %(name)s application"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_admin_index\templates\admin\index.html:46
 #, fuzzy
-#| msgid "view in website"
-msgid "View"
-msgstr "צפה באתר"
+#~| msgid "view in website"
+#~ msgid "View"
+#~ msgstr "צפה באתר"
 
-#: .\env\Lib\site-packages\django_admin_index\templates\admin\index.html:59
-msgid "You don't have permission to view or edit anything."
-msgstr ""
-
-#: .\env\Lib\site-packages\django_admin_index\templates\admin\index.html:67
 #, fuzzy
-#| msgid "Instructions"
-msgid "Recent actions"
-msgstr "הוראות"
+#~| msgid "Instructions"
+#~ msgid "Recent actions"
+#~ msgstr "הוראות"
 
-#: .\env\Lib\site-packages\django_admin_index\templates\admin\index.html:68
 #, fuzzy
-#| msgid "Instructions"
-msgid "My actions"
-msgstr "הוראות"
+#~| msgid "Instructions"
+#~ msgid "My actions"
+#~ msgstr "הוראות"
 
-#: .\env\Lib\site-packages\django_admin_index\templates\admin\index.html:72
-msgid "None available"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_admin_index\templates\admin\index.html:86
 #, fuzzy
-#| msgid "content"
-msgid "Unknown content"
-msgstr "תוכן"
+#~| msgid "content"
+#~ msgid "Unknown content"
+#~ msgstr "תוכן"
 
-#: .\env\Lib\site-packages\django_admin_index\templates\admin\object_history.html:26
 #, fuzzy
-#| msgid "Time saving"
-msgid "Date/time"
-msgstr "חוסך זמן"
+#~| msgid "Time saving"
+#~ msgid "Date/time"
+#~ msgstr "חוסך זמן"
 
-#: .\env\Lib\site-packages\django_admin_index\templates\admin\object_history.html:27
-msgid "User"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_admin_index\templates\admin\object_history.html:28
 #, fuzzy
-#| msgid "Instructions"
-msgid "Action"
-msgstr "הוראות"
+#~| msgid "Instructions"
+#~ msgid "Action"
+#~ msgstr "הוראות"
 
-#: .\env\Lib\site-packages\django_admin_index\templates\admin\object_history.html:42
-msgid ""
-"This object doesn't have a change history. It probably wasn't added via this "
-"admin site."
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\admin.py:64
-msgid "Task (registered)"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\admin.py:68
-msgid "Task (custom)"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\admin.py:85
-msgid "Need name of task"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\admin.py:91
-#: .\env\Lib\site-packages\django_celery_beat\models.py:589
-msgid "Only one can be set, in expires and expire_seconds"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\admin.py:101
-#, python-format
-msgid "Unable to parse JSON: %s"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\admin.py:167
-#, python-brace-format
-msgid "{0} task{1} {2} successfully {3}"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\admin.py:170
-#: .\env\Lib\site-packages\django_celery_beat\admin.py:232
-msgid "was,were"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\admin.py:179
-msgid "Enable selected tasks"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\admin.py:185
-msgid "Disable selected tasks"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\admin.py:197
-msgid "Toggle activity of selected tasks"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\admin.py:217
-#, python-brace-format
-msgid "task \"{0}\" not found"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\admin.py:229
-#, python-brace-format
-msgid "{0} task{1} {2} successfully run"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\admin.py:235
-msgid "Run selected tasks"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\apps.py:13
-msgid "Periodic Tasks"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:26
-msgid "Days"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:27
-msgid "Hours"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:28
-msgid "Minutes"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:29
-msgid "Seconds"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:30
-msgid "Microseconds"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:34
-msgid "Day"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:35
-msgid "Hour"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:36
-msgid "Minute"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:37
-msgid "Second"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:38
-msgid "Microsecond"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:42
-msgid "Astronomical dawn"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:43
-msgid "Civil dawn"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:44
-msgid "Nautical dawn"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:45
-msgid "Astronomical dusk"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:46
-msgid "Civil dusk"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:47
-msgid "Nautical dusk"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:48
-msgid "Solar noon"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:49
-msgid "Sunrise"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:50
-msgid "Sunset"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:84
-msgid "Solar Event"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:85
-msgid "The type of solar event when the job should run"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:89
-msgid "Latitude"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:90
-msgid "Run the task when the event happens at this latitude"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:95
-msgid "Longitude"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:96
-msgid "Run the task when the event happens at this longitude"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:103
-msgid "solar event"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:104
-msgid "solar events"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:153
-msgid "Number of Periods"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:154
-msgid "Number of interval periods to wait before running the task again"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:160
-msgid "Interval Period"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:161
-msgid "The type of period between task runs (Example: days)"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:167
-msgid "interval"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:168
-msgid "intervals"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:196
-msgid "every {}"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:201
-msgid "every {} {}"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:212
-msgid "Clock Time"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:213
-msgid "Run the task at clocked time"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:219
-#: .\env\Lib\site-packages\django_celery_beat\models.py:220
-msgid "clocked"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:260
-msgid "Minute(s)"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:262
-msgid "Cron Minutes to Run. Use \"*\" for \"all\". (Example: \"0,30\")"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:267
-msgid "Hour(s)"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:269
-msgid "Cron Hours to Run. Use \"*\" for \"all\". (Example: \"8,20\")"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:274
-msgid "Day(s) Of The Week"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:276
-msgid "Cron Days Of The Week to Run. Use \"*\" for \"all\". (Example: \"0,5\")"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:282
-msgid "Day(s) Of The Month"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:284
-msgid ""
-"Cron Days Of The Month to Run. Use \"*\" for \"all\". (Example: \"1,15\")"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:290
-msgid "Month(s) Of The Year"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:292
-msgid ""
-"Cron Months Of The Year to Run. Use \"*\" for \"all\". (Example: \"0,6\")"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:299
-msgid "Cron Timezone"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:301
-msgid "Timezone to Run the Cron Schedule on. Default is UTC."
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:307
 #, fuzzy
-#| msgid "contact"
-msgid "crontab"
-msgstr "צור קשר"
+#~| msgid "contact"
+#~ msgid "crontab"
+#~ msgstr "צור קשר"
 
-#: .\env\Lib\site-packages\django_celery_beat\models.py:308
 #, fuzzy
-#| msgid "contact"
-msgid "crontabs"
-msgstr "צור קשר"
+#~| msgid "contact"
+#~ msgid "crontabs"
+#~ msgstr "צור קשר"
 
-#: .\env\Lib\site-packages\django_celery_beat\models.py:393
-msgid "Name"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:394
 #, fuzzy
-#| msgid "short description"
-msgid "Short Description For This Task"
-msgstr "תיאור קצר"
+#~| msgid "short description"
+#~ msgid "Short Description For This Task"
+#~ msgstr "תיאור קצר"
 
-#: .\env\Lib\site-packages\django_celery_beat\models.py:399
-msgid ""
-"The Name of the Celery Task that Should be Run.  (Example: \"proj.tasks."
-"import_contacts\")"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:407
-msgid "Interval Schedule"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:408
-msgid ""
-"Interval Schedule to run the task on.  Set only one schedule type, leave the "
-"others null."
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:413
-msgid "Crontab Schedule"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:414
-msgid ""
-"Crontab Schedule to run the task on.  Set only one schedule type, leave the "
-"others null."
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:419
-msgid "Solar Schedule"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:420
-msgid ""
-"Solar Schedule to run the task on.  Set only one schedule type, leave the "
-"others null."
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:425
-msgid "Clocked Schedule"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:426
-msgid ""
-"Clocked Schedule to run the task on.  Set only one schedule type, leave the "
-"others null."
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:432
-msgid "Positional Arguments"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:434
-msgid "JSON encoded positional arguments (Example: [\"arg1\", \"arg2\"])"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:439
-msgid "Keyword Arguments"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:441
-msgid "JSON encoded keyword arguments (Example: {\"argument\": \"value\"})"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:447
-msgid "Queue Override"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:449
-msgid "Queue defined in CELERY_TASK_QUEUES. Leave None for default queuing."
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:458
-msgid "Exchange"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:459
-msgid "Override Exchange for low-level AMQP routing"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:463
-msgid "Routing Key"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:464
-msgid "Override Routing Key for low-level AMQP routing"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:468
-msgid "AMQP Message Headers"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:469
-msgid "JSON encoded message headers for the AMQP message."
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:475
-msgid "Priority"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:477
-msgid ""
-"Priority Number between 0 and 255. Supported by: RabbitMQ, Redis (priority "
-"reversed, 0 is highest)."
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:482
 #, fuzzy
-#| msgid "Time saving"
-msgid "Expires Datetime"
-msgstr "חוסך זמן"
+#~| msgid "Time saving"
+#~ msgid "Expires Datetime"
+#~ msgstr "חוסך זמן"
 
-#: .\env\Lib\site-packages\django_celery_beat\models.py:484
-msgid ""
-"Datetime after which the schedule will no longer trigger the task to run"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:489
-msgid "Expires timedelta with seconds"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:491
-msgid ""
-"Timedelta with seconds which the schedule will no longer trigger the task to "
-"run"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:497
-msgid "One-off Task"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:499
-msgid "If True, the schedule will only run the task a single time"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:503
 #, fuzzy
-#| msgid "Time saving"
-msgid "Start Datetime"
-msgstr "חוסך זמן"
+#~| msgid "Time saving"
+#~ msgid "Start Datetime"
+#~ msgstr "חוסך זמן"
 
-#: .\env\Lib\site-packages\django_celery_beat\models.py:505
-msgid "Datetime when the schedule should begin triggering the task to run"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:510
-msgid "Enabled"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:511
-msgid "Set to False to disable the schedule"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:516
 #, fuzzy
-#| msgid "Time saving"
-msgid "Last Run Datetime"
-msgstr "חוסך זמן"
+#~| msgid "Time saving"
+#~ msgid "Last Run Datetime"
+#~ msgstr "חוסך זמן"
 
-#: .\env\Lib\site-packages\django_celery_beat\models.py:518
-msgid ""
-"Datetime that the schedule last triggered the task to run. Reset to None if "
-"enabled is set to False."
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:523
-msgid "Total Run Count"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:525
-msgid "Running count of how many times the schedule has triggered the task"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:530
-msgid "Last Modified"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:531
-msgid "Datetime that this PeriodicTask was last modified"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:535
 #, fuzzy
-#| msgid "description"
-msgid "Description"
-msgstr "תיאור"
+#~| msgid "description"
+#~ msgid "Description"
+#~ msgstr "תיאור"
 
-#: .\env\Lib\site-packages\django_celery_beat\models.py:537
-msgid "Detailed description about the details of this Periodic Task"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:546
-msgid "periodic task"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_celery_beat\models.py:547
-msgid "periodic tasks"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_image_compressor\mixins.py:30
-#, python-format
-msgid "%s reduce memory"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_image_compressor\mixins.py:31
-msgid "It will reduce only the memory of the image"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_image_compressor\mixins.py:35
 #, fuzzy, python-format
-#| msgid "size"
-msgid "%s resize"
-msgstr "גודל"
+#~| msgid "size"
+#~ msgid "%s resize"
+#~ msgstr "גודל"
 
-#: .\env\Lib\site-packages\django_image_compressor\mixins.py:37
-msgid "It will reduce both the memory and the size of the image"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_image_compressor\mixins.py:42
-#, python-format
-msgid "%s width"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_image_compressor\mixins.py:45
-msgid ""
-"Set custom width. If custom width is not defined, it will be reduced twice"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_image_compressor\mixins.py:51
 #, fuzzy, python-format
-#| msgid "weight"
-msgid "%s height"
-msgstr "משקל"
+#~| msgid "weight"
+#~ msgid "%s height"
+#~ msgstr "משקל"
 
-#: .\env\Lib\site-packages\django_image_compressor\mixins.py:54
-msgid ""
-"Set custom height. If custom height is not defined, it will be reduced twice"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_image_compressor\mixins.py:103
-#, python-format
-msgid "Image [%s] compression is started..."
-msgstr ""
-
-#: .\env\Lib\site-packages\django_image_compressor\mixins.py:137
-#, python-format
-msgid "Image quality has been set to %s"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_image_compressor\mixins.py:155
-#, python-format
-msgid "Image [%s] compression is completed."
-msgstr ""
-
-#: .\env\Lib\site-packages\django_image_compressor\mixins.py:178
-msgid "Image width and height have been set to {} and {}"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_image_compressor\mixins.py:192
-#, python-brace-format
-msgid ""
-"Input {size} either is not defined or is greater than original {size}.Value "
-"is ignored."
-msgstr ""
-
-#: .\env\Lib\site-packages\django_image_compressor\utils.py:20
-#, python-format
-msgid "%s - directory is created"
-msgstr ""
-
-#: .\env\Lib\site-packages\django_image_compressor\utils.py:31
-#, python-format
-msgid "%s - directory is removed with its files and folders"
-msgstr ""
-
-#: .\env\Lib\site-packages\kombu\transport\qpid.py:1301
-#, python-format
-msgid "Attempting to connect to qpid with SASL mechanism %s"
-msgstr ""
-
-#: .\env\Lib\site-packages\kombu\transport\qpid.py:1306
-#, python-format
-msgid "Connected to qpid with SASL mechanism %s"
-msgstr ""
-
-#: .\env\Lib\site-packages\kombu\transport\qpid.py:1324
-#, python-format
-msgid "Unable to connect to qpid with SASL mechanism %s"
-msgstr ""
-
-#: .\env\Lib\site-packages\timezone_field\rest_framework.py:9
-msgid "A valid timezone is required."
-msgstr ""
-
-#: .\env\Lib\site-packages\tof\admin.py:103
-#: .\env\Lib\site-packages\tof\admin.py:149
-msgid "You choose wrong content type"
-msgstr ""
-
-#: .\env\Lib\site-packages\tof\models.py:23
-#: .\env\Lib\site-packages\tof\models.py:24
-#: .\env\Lib\site-packages\tof\models.py:54
 #, fuzzy
-#| msgid "organization"
-msgid "Translation"
-msgstr "ארגון"
+#~| msgid "organization"
+#~ msgid "Translation"
+#~ msgstr "ארגון"
 
-#: .\env\Lib\site-packages\tof\models.py:33
-msgid "First set the field"
-msgstr ""
-
-#: .\env\Lib\site-packages\tof\models.py:44
 #, fuzzy
-#| msgid "Some translatable text"
-msgid "Value field"
-msgstr "טקסט שצריך לתרגם"
+#~| msgid "Some translatable text"
+#~ msgid "Value field"
+#~ msgstr "טקסט שצריך לתרגם"
 
-#: .\env\Lib\site-packages\tof\models.py:83
 #, fuzzy
-#| msgid "Some translatable text"
-msgid "Translatable field"
-msgstr "טקסט שצריך לתרגם"
+#~| msgid "Some translatable text"
+#~ msgid "Translatable field"
+#~ msgstr "טקסט שצריך לתרגם"
 
-#: .\env\Lib\site-packages\tof\models.py:84
 #, fuzzy
-#| msgid "Some translatable text"
-msgid "Translatable fields"
-msgstr "טקסט שצריך לתרגם"
+#~| msgid "Some translatable text"
+#~ msgid "Translatable fields"
+#~ msgstr "טקסט שצריך לתרגם"
 
-#: .\env\Lib\site-packages\tof\models.py:88
 #, fuzzy
-#| msgid "client name"
-msgid "Field name"
-msgstr "שם לקוח"
+#~| msgid "client name"
+#~ msgid "Field name"
+#~ msgstr "שם לקוח"
 
-#: .\env\Lib\site-packages\tof\models.py:88
 #, fuzzy
-#| msgid "Some translatable text"
-msgid "Name field"
-msgstr "טקסט שצריך לתרגם"
+#~| msgid "Some translatable text"
+#~ msgid "Name field"
+#~ msgstr "טקסט שצריך לתרגם"
 
-#: .\env\Lib\site-packages\tof\models.py:89
 #, fuzzy
-#| msgid "client name"
-msgid "User field name"
-msgstr "שם לקוח"
+#~| msgid "client name"
+#~ msgid "User field name"
+#~ msgstr "שם לקוח"
 
-#: .\env\Lib\site-packages\tof\models.py:89
 #, fuzzy
-#| msgid "Some translatable text"
-msgid "Name user's field"
-msgstr "טקסט שצריך לתרגם"
+#~| msgid "Some translatable text"
+#~ msgid "Name user's field"
+#~ msgstr "טקסט שצריך לתרגם"
 
-#: .\env\Lib\site-packages\tof\models.py:173
-msgid "Language"
-msgstr ""
-
-#: .\env\Lib\site-packages\tof\models.py:174
-msgid "Languages"
-msgstr ""
-
-#: .\env\Lib\site-packages\tof\models.py:178
-msgid "Active"
-msgstr ""
-
-#: .\env\Lib\site-packages\tof\templates\tof\multiwidget.html:15
-#: .\env\Lib\site-packages\tof\templates\tof\multiwidget.html:16
-msgid "Add another Language"
-msgstr ""
-
-#: .\env\Lib\site-packages\tornado\locale.py:371
-msgid "1 second ago"
-msgstr ""
-
-#: .\env\Lib\site-packages\tornado\locale.py:377
-msgid "1 minute ago"
-msgstr ""
-
-#: .\env\Lib\site-packages\tornado\locale.py:382
-msgid "1 hour ago"
-msgstr ""
-
-#: .\env\Lib\site-packages\tornado\locale.py:385
-#, python-format
-msgid "%(time)s"
-msgstr ""
-
-#: .\env\Lib\site-packages\tornado\locale.py:387
-msgid "yesterday"
-msgstr ""
-
-#: .\env\Lib\site-packages\tornado\locale.py:387
-#, python-format
-msgid "yesterday at %(time)s"
-msgstr ""
-
-#: .\env\Lib\site-packages\tornado\locale.py:389
-#, python-format
-msgid "%(weekday)s"
-msgstr ""
-
-#: .\env\Lib\site-packages\tornado\locale.py:389
-#, python-format
-msgid "%(weekday)s at %(time)s"
-msgstr ""
-
-#: .\env\Lib\site-packages\tornado\locale.py:392
-#: .\env\Lib\site-packages\tornado\locale.py:445
-#, python-format
-msgid "%(month_name)s %(day)s"
-msgstr ""
-
-#: .\env\Lib\site-packages\tornado\locale.py:394
-#, python-format
-msgid "%(month_name)s %(day)s at %(time)s"
-msgstr ""
-
-#: .\env\Lib\site-packages\tornado\locale.py:399
-#, python-format
-msgid "%(month_name)s %(day)s, %(year)s"
-msgstr ""
-
-#: .\env\Lib\site-packages\tornado\locale.py:401
-#, python-format
-msgid "%(month_name)s %(day)s, %(year)s at %(time)s"
-msgstr ""
-
-#: .\env\Lib\site-packages\tornado\locale.py:439
-#, python-format
-msgid "%(weekday)s, %(month_name)s %(day)s"
-msgstr ""
-
-#: .\env\Lib\site-packages\tornado\locale.py:462
-#, python-format
-msgid "%(commas)s and %(last)s"
-msgstr ""
-
-#: .\env\Lib\site-packages\tornado\test\locale_test.py:68
 #, fuzzy
-#| msgid "weight"
-msgctxt "law"
-msgid "right"
-msgstr "משקל"
+#~| msgid "weight"
+#~ msgctxt "law"
+#~ msgid "right"
+#~ msgstr "משקל"
 
-#: .\env\Lib\site-packages\tornado\test\locale_test.py:69
 #, fuzzy
-#| msgid "weight"
-msgctxt "good"
-msgid "right"
-msgstr "משקל"
-
-#: .\env\Lib\site-packages\tornado\test\locale_test.py:71
-#: .\env\Lib\site-packages\tornado\test\locale_test.py:74
-msgctxt "organization"
-msgid "club"
-msgstr ""
-
-#: .\env\Lib\site-packages\tornado\test\locale_test.py:76
-#: .\env\Lib\site-packages\tornado\test\locale_test.py:77
-msgctxt "stick"
-msgid "club"
-msgstr ""
+#~| msgid "weight"
+#~ msgctxt "good"
+#~ msgid "right"
+#~ msgstr "משקל"
 
 #~ msgid "availability hours"
 #~ msgstr "שעות פעילות"
