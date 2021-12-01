@@ -17,6 +17,10 @@ import json
 from datetime import datetime
 import pandas as pd
 import matplotlib.pyplot as plt
+import numpy as np
+from PIL import Image
+from io import BytesIO
+
 # Create your models here.
 class UserLogEntry(models.Model):
     #user = models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,null=True, blank=True)
@@ -65,33 +69,34 @@ class UserSessionLogger(models.Model):
         #user_table.add_row(['שם משתמש', data['user']['username']])
         #user_table.add_row(['שם העסק', data['user']['business_name']])
         #user_table.add_row(['IP', data['user']['device']])
-        ret = '\r\n\r\n\r\n'
-        ret += '<b>תאריך:</b> ' + data['session']['t_start'].strftime("%d/%m/%Y, %H:%M:%S") + '\r\n'
-        ret += '<b>זמן באתר:</b> ' + data['session']['duration'] + '\r\n'
-        ret += '\r\n'
+        message = '\r\n\r\n\r\n'
+        message += '<b>תאריך:</b> ' + data['session']['t_start'].strftime("%d/%m/%Y, %H:%M:%S") + '\r\n'
+        message += '<b>זמן באתר:</b> ' + data['session']['duration'] + '\r\n'
+        message += '\r\n'
         
-        ret += '<b>שם משתמש: </b> ' + data['user']['username'] + '\r\n'
-        ret += '<b>שם עסק: </b> ' + data['user']['business_name'] + '\r\n'
-        ret += '\r\n'
+        message += '<b>שם משתמש: </b> ' + data['user']['username'] + '\r\n'
+        message += '<b>שם עסק: </b> ' + data['user']['business_name'] + '\r\n'
+        message += '\r\n'
         
-        ret += '<b> כתובת:</b> ' + data['user']['device'] + '\r\n'
-        ret += '<b>כמות פעולות:</b> ' + str(data['session']['logs_count']) + '\r\n'
+        message += '<b> כתובת:</b> ' + data['user']['device'] + '\r\n'
+        message += '<b>כמות פעולות:</b> ' + str(data['session']['logs_count']) + '\r\n'
         cart = data['last_cart']
-        ret += '\r\n'
+        message += '\r\n'
         
         
         #cartTable = pt.PrettyTable(['עגלה שלא נשלחה'])
         if(cart != None and len(cart) > 0):
-            ret += '<b>עגלה שלא נשלחה:</b>' + '\r\n'
-            ret += '<b>כמות פריטים:</b>' + str(cart.items.count()) + '\r\n'
+            message += '<b>עגלה שלא נשלחה:</b>' + '\r\n'
+            cart_len = len(cart)
+            message += '<b>כמות פריטים:</b>' + str(cart_len) + '\r\n'
             for id in cart:
                 product = cart[id]
                 #cartTable.add_row([product['ti']])
-                ret += product['ti'] + '\r\n'
+                message += product['ti'] + '\r\n'
         else:
-            ret += 'אין עגלה שלא נשלחה'
+            message += 'אין עגלה שלא נשלחה'
 
-        ret += '\r\n\r\n\r\n'
+        message += '\r\n\r\n\r\n'
         
         sum_products_watch_time = {}
         logs = data['session']['logs']
@@ -124,19 +129,21 @@ class UserSessionLogger(models.Model):
         tableStr = str(sumTable)
         tableStr = tableStr.replace('---+', '---+ת')
         
-        ret += 'התעניינויות:' + "\r\n"
-        ret += f'<code>{tableStr}</code>'
+        #ret += f'<code>{tableStr}</code>'
         chart = self.get_pie_cart(chart_data)
+        # 
         
-        
-        
+        ret = {
+            'message': message,
+            'chart': chart,
+        }
         return ret
     def get_pie_cart(self,data):
         df = pd.DataFrame(data)
         from bidi.algorithm import get_display
         import arabic_reshaper
-        print(df.head())
-        plt.figure(figsize=(19,14))
+        #plt.figure(figsize=(19,14))
+        plt.figure(figsize=(12,12))
         # nested pie chart of the product's categories, value and name:
         
         names = df.iloc[:,0]
@@ -156,22 +163,54 @@ class UserSessionLogger(models.Model):
             heb_categories.append(artext)
         df['heb_names'] = heb_names
         df['heb_categories'] = heb_categories
-        plt.pie(df['value'], labels=df.iloc[:,3],colors=colors, autopct='%1.1f%%', shadow=False, startangle=90, radius=1)
-        #inner pie chart of the product's categories:
-        plt.pie(df['value'], labels=df.iloc[:,4], colors=colors, autopct='%1.1f%%', shadow=False, startangle=90, radius=0.75)
-        #plt.legend(loc='0', bbox_to_anchor=(1.5, 0.5), fontsize=20)
-        plt.show()
         
-        plt.title('התעניינות במוצרים')
+        
+        #df['category_prc'] = df['value'].sum()/df['value'].sum()
+        def inner_pie_display(pct, df):
+            v = df.groupby('heb_categories',sort=False)['value'].sum()
+            names = df.groupby('heb_categories',sort=False)['heb_categories']
+            cat_sum = v.sum()
+            for i in range(len(v)):
+                if abs(v[i]/cat_sum*100 - pct)<0.05:
+                    return list(names.indices.keys())[i] + '\n' + \
+                            ' (' + str(df.groupby('heb_categories',sort=False).groups[list(df.groupby('heb_categories',sort=False).groups.keys())[i]].values.size) + ')\n' + \
+                            "{:.1f}%".format(pct)
+            #absolute = int(np.round(pct/100.*np.sum(data)))
+            #return "{:.1f}%\n({:d} g)".format(pct, absolute)
+            #abs = int(np.round(pct/100.*np.sum(df['value'])))
+            #print('cat prc: ' + df['category_prc'].to_string())
+            #print('asb: ', abs, )
+            
+            return 'h' 
+        # iterate the df and extract heb_categories and value
+        heb_labels = df.groupby('heb_categories',sort=False)['heb_categories']
+        plt.pie(df['value'], labels=df.iloc[:,3],colors=colors, autopct='%1.1f%%', shadow=False, startangle=90, radius=1.5)
+        #inner pie chart of the product's categories: df.groupby('heb_categories',sort=False)['heb_categories'],
+        plt.pie(df.groupby('heb_categories',sort=False)['value'].sum(), colors=colors, autopct=lambda pct: inner_pie_display(pct, df), shadow=False, startangle=90, radius=0.75)
+        #plt.legend(loc='0', bbox_to_anchor=(1.5, 0.5), fontsize=20)
+        
+        
         plt.tight_layout()
+        #plt.show()
         return plt
+    
     def send_telegram_message(self):
+        def fig2img(fig):
+            """Convert a Matplotlib figure to a PIL Image and return it"""
+            import io
+            buf = io.BytesIO()
+            fig.savefig(buf, format='jpg',dpi=100, bbox_inches='tight', pad_inches=1)
+            buf.seek(0)
+            return buf
         # UserSessionLogger.objects.get(id=85).send_telegram_message()
         bot = telegram.Bot(token=TELEGRAM_BOT_TOKEN)
         #for chat_id in self.chat_ids:
-        message = self.generate_telegram_message()
+        messageObj = self.generate_telegram_message()
         chat_id = '354783543'
-        print(bot.send_message(chat_id=chat_id, text=message, parse_mode='HTML'))
+        buff = fig2img(messageObj['chart'])
+        print('sending photo')
+        print(bot.send_document(chat_id=chat_id, document=buff, caption=messageObj['message'], parse_mode='HTML'))
+        #print(bot.send_message(chat_id=chat_id, text=messageObj['message'], parse_mode='HTML'))
     
     def analyze_user_session(self):
         # UserSessionLogger.objects.first().analyze_user_session()
@@ -220,7 +259,6 @@ class UserSessionLogger(models.Model):
                 print(e)
                 pass
         
-        print(cart)
         
         ret['all_add_to_cart'] = all_cart
         ret['last_cart'] = cart
