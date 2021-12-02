@@ -1,4 +1,6 @@
 from django.contrib import admin
+from rest_framework.decorators import action
+from django.utils.translation import gettext_lazy  as _
 
 # Register your models here.
 from .models import Client, ClientOrganizations, PaymentTime, PaymantWay, ClientType, UserLogEntry
@@ -30,9 +32,15 @@ class UserSessionLoggerAdmin(admin.ModelAdmin):
     exclude = ('logs',)
     #readonly_fields = ('uniqe_color','admin_display_logs',)
     #inlines = [UserLogEntryInline]
+    actions=('send_telegram_action',)
     def get_queryset(self, request):
         return super(UserSessionLoggerAdmin, self).get_queryset(request).select_related(
             'user').prefetch_related('logs')
+        
+    def send_telegram_action(modeladmin, request, queryset):
+        for o in queryset:
+            o.send_telegram_message()
+    send_telegram_action.short_description = _('Send telegram message')
 admin.site.register(UserSessionLogger, UserSessionLoggerAdmin)
 
 class UserLogEntryAdmin(admin.ModelAdmin):

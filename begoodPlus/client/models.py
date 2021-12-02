@@ -3,6 +3,7 @@ from django.db.models.fields import json
 from django.utils.safestring import mark_safe
 from colorhash import ColorHash
 from django.db import models
+from matplotlib.colors import rgb2hex
 from catalogImages.models import CatalogImage
 from core.models import uuid2slug
 from django.db.models.fields.related import OneToOneField
@@ -20,7 +21,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from PIL import Image
 from io import BytesIO
-
+import colorsys
 # Create your models here.
 class UserLogEntry(models.Model):
     #user = models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,null=True, blank=True)
@@ -64,7 +65,7 @@ class UserSessionLogger(models.Model):
     def generate_telegram_message(self):
         # UserSessionLogger.objects.first().generate_telegram_message()
         data = self.analyze_user_session()
-        main_table = pt.PrettyTable([])
+        #main_table = pt.PrettyTable([])
         #user_table = pt.PrettyTable([])
         #user_table.add_row(['שם משתמש', data['user']['username']])
         #user_table.add_row(['שם העסק', data['user']['business_name']])
@@ -139,6 +140,8 @@ class UserSessionLogger(models.Model):
         }
         return ret
     def get_pie_cart(self,data):
+        if(len(data) == 0):
+            return None
         df = pd.DataFrame(data)
         from bidi.algorithm import get_display
         import arabic_reshaper
@@ -151,7 +154,13 @@ class UserSessionLogger(models.Model):
         heb_names = []
         heb_categories = []
         category_sums = []
-        colors = ['yellowgreen', 'gold', 'lightskyblue', 'lightcoral', 'red', 'blue', 'green', 'orange', 'pink', 'purple', 'brown', 'grey', 'olive', 'teal', 'navy', 'maroon', 'lime', 'fuchsia', 'tan', 'aqua', 'silver', 'indigo', 'violet', 'black', 'white']
+        
+        main_colors = [colorsys.hls_to_rgb(h, 0.5, 1) for h in np.linspace(0, 1, len(categories))]
+        main_colors_hex = [rgb2hex(color) for color in main_colors]
+        
+        
+        #hex_clr = rgbToHex(int(clr[0]*255), int(clr[1]*255), int(clr[2]*255))
+        #colors = ['gold', 'lightskyblue', 'lightcoral', 'red', 'blue', 'green', 'orange', 'pink', 'purple', 'brown', 'grey', 'olive', 'teal', 'navy', 'maroon', 'lime', 'fuchsia', 'tan', 'aqua', 'silver', 'indigo', 'violet', 'black', 'white']
         
         for n in names:
             reshaped_text = arabic_reshaper.reshape(n)
@@ -163,8 +172,18 @@ class UserSessionLogger(models.Model):
             heb_categories.append(artext)
         df['heb_names'] = heb_names
         df['heb_categories'] = heb_categories
-        
-        
+        gb_categories = df.groupby('heb_categories')
+        outer_colors = []
+        for i, (name, group) in enumerate(gb_categories):
+            print(name)
+            print(group)
+            products_n_in_category = len(group.value)
+            # generate lighter colors based on the main colors * the number of products in the category
+            base_category_color = main_colors[i]
+            cat_hsl = colorsys.rgb_to_hls(*base_category_color)
+            category_colors = [colorsys.hls_to_rgb(cat_hsl[0], cat_hsl[1],h) for h in np.linspace(0.5, 1, products_n_in_category)]
+            outer_colors.extend(category_colors)
+        outer_colors_hex = [rgb2hex(color) for color in outer_colors]
         #df['category_prc'] = df['value'].sum()/df['value'].sum()
         def inner_pie_display(pct, df):
             v = df.groupby('heb_categories',sort=False)['value'].sum()
@@ -175,21 +194,21 @@ class UserSessionLogger(models.Model):
                     return list(names.indices.keys())[i] + '\n' + \
                             ' (' + str(df.groupby('heb_categories',sort=False).groups[list(df.groupby('heb_categories',sort=False).groups.keys())[i]].values.size) + ')\n' + \
                             "{:.1f}%".format(pct)
-            #absolute = int(np.round(pct/100.*np.sum(data)))
-            #return "{:.1f}%\n({:d} g)".format(pct, absolute)
-            #abs = int(np.round(pct/100.*np.sum(df['value'])))
-            #print('cat prc: ' + df['category_prc'].to_string())
-            #print('asb: ', abs, )
-            
-            return 'h' 
         # iterate the df and extract heb_categories and value
-        heb_labels = df.groupby('heb_categories',sort=False)['heb_categories']
-        plt.pie(df['value'], labels=df.iloc[:,3],colors=colors, autopct='%1.1f%%', shadow=False, startangle=90, radius=1.5)
+        #heb_labels = df.UserSessionLogger.objects.get(id=85).send_telegram_message()roupby('heb_categories',sort=False)['heb_categories']
+        
+        #explode1 = [0.1 for i in range(len(df))]
+        border = 0.1
+        #explode2 = [0.2 for i in range(len(df.groupby('heb_categories',sort=False)['value'].sum()))]
+        # filter from df values lover then 0.1% of the total sum
+        df = df[df.value > 0.1]
+        wedgeprops={"edgecolor":"k",'linewidth': 0.2, 'linestyle': 'solid', 'antialiased': True}
+        plt.pie(df['value'],wedgeprops=wedgeprops,labels=df.iloc[:,3],colors=outer_colors_hex, autopct='%1.1f%%', shadow=False, startangle=90, radius=1.5)
         #inner pie chart of the product's categories: df.groupby('heb_categories',sort=False)['heb_categories'],
-        plt.pie(df.groupby('heb_categories',sort=False)['value'].sum(), colors=colors, autopct=lambda pct: inner_pie_display(pct, df), shadow=False, startangle=90, radius=0.75)
+        wedgeprops={"edgecolor":"k",'linewidth': 0.5, 'linestyle': 'solid', 'antialiased': True}
+        plt.pie(df.groupby('heb_categories',sort=False)['value'].sum(),wedgeprops=wedgeprops,colors=main_colors_hex, autopct=lambda pct: inner_pie_display(pct, df), shadow=False, startangle=90, radius=0.75)
         #plt.legend(loc='0', bbox_to_anchor=(1.5, 0.5), fontsize=20)
-        
-        
+        plt.legend(loc='center left', bbox_to_anchor=(1, 0.5), fontsize=20)
         plt.tight_layout()
         #plt.show()
         return plt
@@ -207,9 +226,12 @@ class UserSessionLogger(models.Model):
         #for chat_id in self.chat_ids:
         messageObj = self.generate_telegram_message()
         chat_id = '354783543'
-        buff = fig2img(messageObj['chart'])
-        print('sending photo')
-        print(bot.send_document(chat_id=chat_id, document=buff, caption=messageObj['message'], parse_mode='HTML'))
+        if(messageObj['chart']):
+            buff = fig2img(messageObj['chart'])
+            print('sending photo')
+            print(bot.send_document(chat_id=chat_id, document=buff, caption=messageObj['message'], parse_mode='HTML'))
+        else:
+            print(bot.send_message(chat_id=chat_id, text=messageObj['message'], parse_mode='HTML'))
         #print(bot.send_message(chat_id=chat_id, text=messageObj['message'], parse_mode='HTML'))
     
     def analyze_user_session(self):
