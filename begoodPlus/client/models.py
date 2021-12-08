@@ -1,15 +1,27 @@
 import uuid
+from django.db.models.fields import json
 from django.utils.safestring import mark_safe
 from colorhash import ColorHash
 from django.db import models
+from matplotlib.colors import rgb2hex
+from catalogImages.models import CatalogImage
 from core.models import uuid2slug
 from django.db.models.fields.related import OneToOneField
 from django.utils.translation import gettext_lazy  as _
 from django.conf import settings
-
+import prettytable as pt
+import telegram
+from begoodPlus.secrects import TELEGRAM_BOT_TOKEN
 from catalogAlbum.models import CatalogAlbum
 from django.contrib.auth.models import User
-
+import json
+from datetime import datetime
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
+from PIL import Image
+from io import BytesIO
+import colorsys
 # Create your models here.
 class UserLogEntry(models.Model):
     #user = models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,null=True, blank=True)
@@ -18,11 +30,15 @@ class UserLogEntry(models.Model):
     action = models.CharField(max_length=255)
     timestamp = models.DateTimeField(auto_now_add=True)
     extra = models.JSONField(default=dict)
-    def __str__(self):
-        newExtra = self.extra
-        del newExtra['a']
-        del newExtra['timestemp']
-        return self.timestamp.strftime("%d/%m/%Y, %H:%M:%S.%f")[:-3] + ' || ' + self.action + ' || ' + str(self.extra)
+    def __str__(self) -> str:
+        return self.action
+    
+    def admin_description(self):
+        return str(self.id) + ')\t \t' + self.timestamp.strftime("%H:%M:%S.%f")[:-3] + "\t - \t" + self.action
+        #newExtra = self.extra
+        #del newExtra['a']
+        #del newExtra['timestemp']
+        #return self.timestamp.strftime("%d/%m/%Y, %H:%M:%S.%f")[:-3] + ' || ' + self.action + ' || ' + str(self.extra)
     
 
     
@@ -45,6 +61,239 @@ class UserSessionLogger(models.Model):
         else:
             return '-'
     session_duration.short_description = _('session duration')
+    
+    def generate_telegram_message(self):
+        # UserSessionLogger.objects.first().generate_telegram_message()
+        data = self.analyze_user_session()
+        #main_table = pt.PrettyTable([])
+        #user_table = pt.PrettyTable([])
+        #user_table.add_row(['שם משתמש', data['user']['username']])
+        #user_table.add_row(['שם העסק', data['user']['business_name']])
+        #user_table.add_row(['IP', data['user']['device']])
+        message = '\r\n\r\n\r\n'
+        message += '<b>תאריך:</b> ' + data['session']['t_start'].strftime("%d/%m/%Y, %H:%M:%S") + '\r\n'
+        message += '<b>זמן באתר:</b> ' + data['session']['duration'] + '\r\n'
+        message += '\r\n'
+        
+        message += '<b>שם משתמש: </b> ' + data['user']['username'] + '\r\n'
+        message += '<b>שם עסק: </b> ' + data['user']['business_name'] + '\r\n'
+        message += '\r\n'
+        
+        message += '<b> כתובת:</b> ' + data['user']['device'] + '\r\n'
+        message += '<b>כמות פעולות:</b> ' + str(data['session']['logs_count']) + '\r\n'
+        cart = data['last_cart']
+        message += '\r\n'
+        
+        
+        #cartTable = pt.PrettyTable(['עגלה שלא נשלחה'])
+        if(cart != None and len(cart) > 0):
+            message += '<b>עגלה שלא נשלחה:</b>' + '\r\n'
+            cart_len = len(cart)
+            message += '<b>כמות פריטים:</b>' + str(cart_len) + '\r\n'
+            for id in cart:
+                product = cart[id]
+                #cartTable.add_row([product['ti']])
+                message += product['ti'] + '\r\n'
+        else:
+            message += 'אין עגלה שלא נשלחה'
+
+        message += '\r\n\r\n\r\n'
+        
+        sum_products_watch_time = {}
+        logs = data['session']['logs']
+        for idx, log  in enumerate(logs):
+            try:
+                if log['data']['t'] == 'open product':
+                    if(idx < logs.__len__() - 1):
+                        s_time = datetime.strptime(logs[idx+1]['data']['timestemp'],'%Y-%m-%dT%H:%M:%S.%fZ')
+                        e_time = datetime.strptime(log['data']['timestemp'],'%Y-%m-%dT%H:%M:%S.%fZ')
+                        duration = s_time-e_time#logs[idx+1]['data']['timestemp'] - 
+                        product_id = log['data']['w']['id']
+                        if product_id in sum_products_watch_time:
+                            sum_products_watch_time[product_id] += duration
+                        else:
+                            sum_products_watch_time[product_id] = duration
+            except:
+                pass
+        #ret += f'<code>{cartTable}</code>'
+        
+        sumTable = pt.PrettyTable(['שם המוצר','זמן','קטגוריה'])
+        sumTable.align = 'l'
+        sumTable.align['זמן'] = 'c'
+        chart_data = []
+        for id in sum_products_watch_time:
+            ducation = sum_products_watch_time[id]
+            product = CatalogImage.objects.get(id=id)
+            
+            sumTable.add_row([product.title[0:15], str(ducation)[:-3], product.albums.first().title])
+            chart_data.append({'name':product.title, 'value':ducation.total_seconds(), 'category':product.albums.first().title})
+        tableStr = str(sumTable)
+        tableStr = tableStr.replace('---+', '---+ת')
+        
+        #ret += f'<code>{tableStr}</code>'
+        chart = self.get_pie_cart(chart_data)
+        # 
+        
+        ret = {
+            'message': message,
+            'chart': chart,
+        }
+        return ret
+    def get_pie_cart(self,data):
+        if(len(data) == 0):
+            return None
+        df = pd.DataFrame(data)
+        from bidi.algorithm import get_display
+        import arabic_reshaper
+        #plt.figure(figsize=(19,14))
+        plt.figure(figsize=(12,12))
+        # nested pie chart of the product's categories, value and name:
+        
+        names = df.iloc[:,0]
+        categories = df.iloc[:,2]
+        heb_names = []
+        heb_categories = []
+        category_sums = []
+        
+        main_colors = [colorsys.hls_to_rgb(h, 0.5, 1) for h in np.linspace(0, 1, len(categories))]
+        main_colors_hex = [rgb2hex(color) for color in main_colors]
+        
+        
+        #hex_clr = rgbToHex(int(clr[0]*255), int(clr[1]*255), int(clr[2]*255))
+        #colors = ['gold', 'lightskyblue', 'lightcoral', 'red', 'blue', 'green', 'orange', 'pink', 'purple', 'brown', 'grey', 'olive', 'teal', 'navy', 'maroon', 'lime', 'fuchsia', 'tan', 'aqua', 'silver', 'indigo', 'violet', 'black', 'white']
+        
+        for n in names:
+            reshaped_text = arabic_reshaper.reshape(n)
+            artext = get_display(reshaped_text)
+            heb_names.append(artext)
+        for c in categories:
+            reshaped_text = arabic_reshaper.reshape(c)
+            artext = get_display(reshaped_text)
+            heb_categories.append(artext)
+        df['heb_names'] = heb_names
+        df['heb_categories'] = heb_categories
+        gb_categories = df.groupby('heb_categories')
+        outer_colors = []
+        for i, (name, group) in enumerate(gb_categories):
+            print(name)
+            print(group)
+            products_n_in_category = len(group.value)
+            # generate lighter colors based on the main colors * the number of products in the category
+            base_category_color = main_colors[i]
+            cat_hsl = colorsys.rgb_to_hls(*base_category_color)
+            category_colors = [colorsys.hls_to_rgb(cat_hsl[0], cat_hsl[1],h) for h in np.linspace(0.5, 1, products_n_in_category)]
+            outer_colors.extend(category_colors)
+        outer_colors_hex = [rgb2hex(color) for color in outer_colors]
+        #df['category_prc'] = df['value'].sum()/df['value'].sum()
+        def inner_pie_display(pct, df):
+            v = df.groupby('heb_categories',sort=False)['value'].sum()
+            names = df.groupby('heb_categories',sort=False)['heb_categories']
+            cat_sum = v.sum()
+            for i in range(len(v)):
+                if abs(v[i]/cat_sum*100 - pct)<0.05:
+                    return list(names.indices.keys())[i] + '\n' + \
+                            ' (' + str(df.groupby('heb_categories',sort=False).groups[list(df.groupby('heb_categories',sort=False).groups.keys())[i]].values.size) + ')\n' + \
+                            "{:.1f}%".format(pct)
+        # iterate the df and extract heb_categories and value
+        #heb_labels = df.UserSessionLogger.objects.get(id=85).send_telegram_message()roupby('heb_categories',sort=False)['heb_categories']
+        
+        #explode1 = [0.1 for i in range(len(df))]
+        border = 0.1
+        #explode2 = [0.2 for i in range(len(df.groupby('heb_categories',sort=False)['value'].sum()))]
+        # filter from df values lover then 0.1% of the total sum
+        df = df[df.value > 0.1]
+        wedgeprops={"edgecolor":"k",'linewidth': 0.2, 'linestyle': 'solid', 'antialiased': True}
+        plt.pie(df['value'],wedgeprops=wedgeprops,labels=df.iloc[:,3],colors=outer_colors_hex, autopct='%1.1f%%', shadow=False, startangle=90, radius=1.5)
+        #inner pie chart of the product's categories: df.groupby('heb_categories',sort=False)['heb_categories'],
+        wedgeprops={"edgecolor":"k",'linewidth': 0.5, 'linestyle': 'solid', 'antialiased': True}
+        plt.pie(df.groupby('heb_categories',sort=False)['value'].sum(),wedgeprops=wedgeprops,colors=main_colors_hex, autopct=lambda pct: inner_pie_display(pct, df), shadow=False, startangle=90, radius=0.75)
+        #plt.legend(loc='0', bbox_to_anchor=(1.5, 0.5), fontsize=20)
+        plt.legend(loc='center left', bbox_to_anchor=(1, 0.5), fontsize=20)
+        plt.tight_layout()
+        #plt.show()
+        return plt
+    
+    def send_telegram_message(self):
+        def fig2img(fig):
+            """Convert a Matplotlib figure to a PIL Image and return it"""
+            import io
+            buf = io.BytesIO()
+            fig.savefig(buf, format='jpg',dpi=100, bbox_inches='tight', pad_inches=1)
+            buf.seek(0)
+            return buf
+        # UserSessionLogger.objects.get(id=85).send_telegram_message()
+        bot = telegram.Bot(token=TELEGRAM_BOT_TOKEN)
+        #for chat_id in self.chat_ids:
+        messageObj = self.generate_telegram_message()
+        chat_id = '354783543'
+        if(messageObj['chart']):
+            buff = fig2img(messageObj['chart'])
+            print('sending photo')
+            print(bot.send_document(chat_id=chat_id, document=buff, caption=messageObj['message'], parse_mode='HTML'))
+        else:
+            print(bot.send_message(chat_id=chat_id, text=messageObj['message'], parse_mode='HTML'))
+        #print(bot.send_message(chat_id=chat_id, text=messageObj['message'], parse_mode='HTML'))
+    
+    def analyze_user_session(self):
+        # UserSessionLogger.objects.first().analyze_user_session()
+        username = None
+        business_name = None
+        if self.user and not self.user.is_anonymous:
+            username = self.user.username
+            business_name = self.user.client.businessName
+        if username is None:
+            username = '-'
+            business_name = '-'
+        ret = {
+            'user': {
+                'username': username,
+                'business_name': business_name,
+                'uid': self.uid,
+                'device': self.device,
+            },
+            'session': {
+                'id': self.id,
+                't_start': self.session_start_timestemp,
+                't_end': self.session_end_timestemp,
+                'duration': self.session_duration(),
+                'logs_count': self.logs.count(),
+                'logs': [],
+            }
+        }
+        cart = {}
+        all_cart = {}
+        for log in self.logs.all():
+            ret['session']['logs'].append({
+                'id': log.id,
+                'data': log.extra,
+                'timestemp': log.timestamp,
+            })
+            try:
+                if(log.extra['t'] == 'add to cart'):
+                    cart[log.extra['w']['id']] = log.extra['w']
+                    all_cart[log.extra['w']['id']] = log.extra['w']
+                if(log.extra['t'] == 'remove from cart'):
+                    del cart[log.extra['w']['id']]
+                    
+                if(log.extra['t'] ==  'submit order'):
+                    cart = {}
+            except Exception as e:
+                print(e)
+                pass
+        
+        
+        ret['all_add_to_cart'] = all_cart
+        ret['last_cart'] = cart
+        return ret
+    
+    def admin_display_logs(self):
+        ret ='<div style="border:1px solid black"><ul>' +  '<li style="border-top:1px solid blue;">'.join([str(log.admin_description())+'</li>' for log in self.logs.all()])
+        ret += '</ul></div>'
+        return mark_safe(ret)
+        
+    
+    def get_logs(self):
+        return self.logs.all()
 
 
 

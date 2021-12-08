@@ -1,4 +1,6 @@
 from django.contrib import admin
+from rest_framework.decorators import action
+from django.utils.translation import gettext_lazy  as _
 
 # Register your models here.
 from .models import Client, ClientOrganizations, PaymentTime, PaymantWay, ClientType, UserLogEntry
@@ -19,10 +21,26 @@ admin.site.register(PaymentTime, OnlyNameAdmin)
 admin.site.register(ClientOrganizations, OnlyNameAdmin)
 
 from .models import UserSessionLogger
+'''class UserLogEntryInline(admin.TabularInline):
+    model = UserSessionLogger.logs.through
+    extra = 0'''
 
 class UserSessionLoggerAdmin(admin.ModelAdmin):
     list_display = ('user', 'device', 'uniqe_color','is_active','session_start_timestemp','session_end_timestemp','session_duration',)
-    filter_horizontal = ('logs',)
+    readonly_fields = ('uid', 'user', 'device', 'uniqe_color','is_active','session_start_timestemp','session_end_timestemp','session_duration','admin_display_logs')
+    #filter_horizontal = ('logs',)
+    exclude = ('logs',)
+    #readonly_fields = ('uniqe_color','admin_display_logs',)
+    #inlines = [UserLogEntryInline]
+    actions=('send_telegram_action',)
+    def get_queryset(self, request):
+        return super(UserSessionLoggerAdmin, self).get_queryset(request).select_related(
+            'user').prefetch_related('logs')
+        
+    def send_telegram_action(modeladmin, request, queryset):
+        for o in queryset:
+            o.send_telegram_message()
+    send_telegram_action.short_description = _('Send telegram message')
 admin.site.register(UserSessionLogger, UserSessionLoggerAdmin)
 
 class UserLogEntryAdmin(admin.ModelAdmin):
