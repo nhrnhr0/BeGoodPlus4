@@ -52,7 +52,7 @@ INSTALLED_APPS = [
 
 
     # 3rd party
-    'django_crontab',
+    #'django_crontab',
     'colorfield',
     'rest_framework',
     'rest_framework.authtoken',
@@ -66,12 +66,12 @@ INSTALLED_APPS = [
     'adminsortable',
     'admin_numeric_filter',
     #'jet',
-    'dbbackup',
-    'webpush',
-    'tof',
+    #'dbbackup',
+    #'webpush',
+    #'tof',
     'bootstrap5',
     'drf_multiple_model',
-    'compressor',
+    #'compressor',
     'advanced_filters',
     #'rest_framework_simplejwt',
     'corsheaders',
@@ -149,15 +149,15 @@ STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 
     # Add this
-    'compressor.finders.CompressorFinder',
+    #'compressor.finders.CompressorFinder',
 )
 
 MIDDLEWARE = [
     #'debug_toolbar.middleware.DebugToolbarMiddleware', # TODO: remove in production
     #django-compressor
     'django.middleware.gzip.GZipMiddleware',
-    'htmlmin.middleware.HtmlMinifyMiddleware',
-    'htmlmin.middleware.MarkRequestMiddleware',
+    #'htmlmin.middleware.HtmlMinifyMiddleware',
+    #'htmlmin.middleware.MarkRequestMiddleware',
     
     
     'django.middleware.security.SecurityMiddleware',
@@ -171,7 +171,7 @@ MIDDLEWARE = [
 
     # own
     #'django.middleware.locale.LocaleMiddleware',
-    'django_user_agents.middleware.UserAgentMiddleware',
+    #'django_user_agents.middleware.UserAgentMiddleware',
     'core.middleware.BaseMiddleware',
 ]
 
@@ -228,7 +228,7 @@ WSGI_APPLICATION = 'begoodPlus.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'NAME': os.path.join(BASE_DIR, 'db3.sqlite3'),
         'OPTIONS': {
             'timeout': 20, 
         }
