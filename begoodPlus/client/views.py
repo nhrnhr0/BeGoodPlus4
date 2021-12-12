@@ -91,7 +91,9 @@ def userLogEntryView(request):
                              ,'rows':affected_rows})
         
         
+import uuid
 def get_active_session_logger(uid, device, user):
-    ret , created= UserSessionLogger.objects.get_or_create(uid=uid, device=device, user_id=user.id, is_active=True)
+    my_uid=  str(uuid.UUID(uid))
+    ret , created= UserSessionLogger.objects.get_or_create(uid=my_uid, device=device, user_id=user.id, is_active=True)
     print('get_active_session_logger: ', ret,' created: ', created)
     return ret

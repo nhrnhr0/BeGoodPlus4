@@ -227,11 +227,12 @@ WSGI_APPLICATION = 'begoodPlus.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db3.sqlite3'),
-        'OPTIONS': {
-            'timeout': 20, 
-        }
+        'ENGINE': secrects.DB_ENGINE,
+        'NAME': secrects.DB_NAME,
+        'USER': secrects.DB_USER,
+        'PASSWORD': secrects.DB_PASSWORD,
+        'HOST': secrects.DB_HOST,
+        'PORT': secrects.DB_PORT,
     }
 }
 
