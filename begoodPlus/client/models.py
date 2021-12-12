@@ -44,7 +44,8 @@ class UserLogEntry(models.Model):
     
 class UserSessionLogger(models.Model):
     user = models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,null=True, blank=True)
-    uid = models.UUIDField(verbose_name=_('uuid'), null=True, blank=True,default=uuid.uuid4)
+    #uid = models.UUIDField(verbose_name=_('uuid'), null=True, blank=True,default=uuid.uuid4)
+    uid = models.CharField(verbose_name=_('uuid'),max_length=150, null=True, blank=True,default=uuid.uuid4)
     device = models.CharField(verbose_name=_('device'), max_length=100, null=True, blank=True)
     is_active = models.BooleanField(default=True)
     session_start_timestemp = models.DateTimeField(auto_now_add=True)

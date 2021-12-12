@@ -17,7 +17,13 @@ from uuid import UUID
 
 def uuid2slug(uuidstring):
     if uuidstring:
-        return urlsafe_b64encode(uuidstring.bytes).rstrip(b'=').decode('ascii')
+        if isinstance(uuidstring, str):
+            try:
+                return urlsafe_b64encode(bytearray.fromhex(uuidstring)).rstrip(b'=').decode('ascii')            
+            except:
+                return urlsafe_b64encode(str.encode(uuidstring)).rstrip(b'=').decode('ascii')            
+        else:
+            return urlsafe_b64encode(uuidstring.bytes).rstrip(b'=').decode('ascii')
     else:
         return '<error>'
 

@@ -10,7 +10,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', DJANGO_SETTINGS_MODULE)
 app = Celery('begoodPlus', broker='amqp://'+BROKER_USER + ':' + BROKER_PASSWORD + '@localhost//')
 
 app.config_from_object('django.conf:settings', namespace='CELERY')
-from celery.schedules import crontab
+#from celery.schedules import crontab
 
 app.autodiscover_tasks()
 #app.conf.broker_url = BASE_REDIS_URL

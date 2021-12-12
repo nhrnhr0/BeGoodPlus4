@@ -64,7 +64,7 @@ def set_csrf_token(request, factory_id=None):
     if factory_id:
         uid = str(factory_id)
     else:
-        uid = uuid.uuid4()
+        uid = str(uuid.uuid4().hex)
     return JsonResponse({"details": "CSRF cookie set",
                          'uid': uid})
 @api_view(['POST'])

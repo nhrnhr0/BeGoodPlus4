@@ -26,7 +26,7 @@ from .models import UserSessionLogger
     extra = 0'''
 
 class UserSessionLoggerAdmin(admin.ModelAdmin):
-    list_display = ('user', 'device', 'uniqe_color','is_active','session_start_timestemp','session_end_timestemp','session_duration',)
+    list_display = ('id', 'user', 'device', 'uniqe_color','is_active','session_start_timestemp','session_end_timestemp','session_duration',)
     readonly_fields = ('uid', 'user', 'device', 'uniqe_color','is_active','session_start_timestemp','session_end_timestemp','session_duration','admin_display_logs')
     #filter_horizontal = ('logs',)
     exclude = ('logs',)
