@@ -71,14 +71,14 @@ class UserSessionLogger(models.Model):
         #user_table.add_row(['שם משתמש', data['user']['username']])
         #user_table.add_row(['שם העסק', data['user']['business_name']])
         #user_table.add_row(['IP', data['user']['device']])
-        message = '\r\n\r\n\r\n'
+        message = '==========\r\n\r\n\r\n=========='
         message += '<b>תאריך:</b> ' + data['session']['t_start'].strftime("%d/%m/%Y, %H:%M:%S") + '\r\n'
         message += '<b>זמן באתר:</b> ' + data['session']['duration'] + '\r\n'
-        message += '\r\n'
+        #message += '\r\n'
         
         message += '<b>שם משתמש: </b> ' + data['user']['username'] + '\r\n'
         message += '<b>שם עסק: </b> ' + data['user']['business_name'] + '\r\n'
-        message += '\r\n'
+        #message += '\r\n'
         
         message += '<b> כתובת:</b> ' + data['user']['device'] + '\r\n'
         message += '<b>כמות פעולות:</b> ' + str(data['session']['logs_count']) + '\r\n'
@@ -102,14 +102,18 @@ class UserSessionLogger(models.Model):
         
         sum_products_watch_time = {}
         logs = data['session']['logs']
-        for idx, log  in enumerate(logs):
+        for idx, logStr  in enumerate(logs):
             try:
-                if log['data']['t'] == 'open product':
-                    if(idx < logs.__len__() - 1):
-                        s_time = datetime.strptime(logs[idx+1]['data']['timestemp'],'%Y-%m-%dT%H:%M:%S.%fZ')
-                        e_time = datetime.strptime(log['data']['timestemp'],'%Y-%m-%dT%H:%M:%S.%fZ')
-                        duration = s_time-e_time#logs[idx+1]['data']['timestemp'] - 
-                        product_id = log['data']['w']['id']
+                
+                #log_data = json.loads(logStr['data'])
+                log_data = logStr['data']
+                if log_data['t'] == 'open product':
+                    if(idx < logs.__len__() - 1 and idx > 0):
+                        last_log_data = logs[idx-1]['data']
+                        s_time = datetime.strptime(last_log_data['timestemp'],'%Y-%m-%dT%H:%M:%S.%fZ')
+                        e_time = datetime.strptime(log_data['timestemp'],'%Y-%m-%dT%H:%M:%S.%fZ')
+                        duration = e_time - s_time#logs[idx+1]['data']['timestemp'] - 
+                        product_id = log_data['w']['id']
                         if product_id in sum_products_watch_time:
                             sum_products_watch_time[product_id] += duration
                         else:
@@ -118,23 +122,26 @@ class UserSessionLogger(models.Model):
                 pass
         #ret += f'<code>{cartTable}</code>'
         
-        sumTable = pt.PrettyTable(['שם המוצר','זמן','קטגוריה'])
-        sumTable.align = 'l'
-        sumTable.align['זמן'] = 'c'
+        #sumTable = pt.PrettyTable(['שם המוצר','זמן','קטגוריה'])
+        #sumTable.align = 'l'
+        #sumTable.align['זמן'] = 'c'
         chart_data = []
         for id in sum_products_watch_time:
             ducation = sum_products_watch_time[id]
             product = CatalogImage.objects.get(id=id)
             
-            sumTable.add_row([product.title[0:15], str(ducation)[:-3], product.albums.first().title])
+            #sumTable.add_row([product.title[0:15], str(ducation)[:-3], product.albums.first().title])
             chart_data.append({'name':product.title, 'value':ducation.total_seconds(), 'category':product.albums.first().title})
-        tableStr = str(sumTable)
-        tableStr = tableStr.replace('---+', '---+ת')
+        #tableStr = str(sumTable)
+        #tableStr = tableStr.replace('---+', '---+ת')
         
         #ret += f'<code>{tableStr}</code>'
         chart = self.get_pie_cart(chart_data)
-        # 
         
+        user_story = self.get_user_story(data['session']['logs'])
+        message += 'סיפור משתמש: \r\n' + user_story
+        # 
+        message += '\r\n==========\r\n==========\r\n'
         ret = {
             'message': message,
             'chart': chart,
@@ -202,18 +209,86 @@ class UserSessionLogger(models.Model):
         border = 0.1
         #explode2 = [0.2 for i in range(len(df.groupby('heb_categories',sort=False)['value'].sum()))]
         # filter from df values lover then 0.1% of the total sum
-        df = df[df.value > 0.1]
+        #df = df[df.value > 0.1]
         wedgeprops={"edgecolor":"k",'linewidth': 0.2, 'linestyle': 'solid', 'antialiased': True}
-        plt.pie(df['value'],wedgeprops=wedgeprops,labels=df.iloc[:,3],colors=outer_colors_hex, autopct='%1.1f%%', shadow=False, startangle=90, radius=1.5)
+        product_patches = plt.pie(df['value'],wedgeprops=wedgeprops,labels=df.iloc[:,3],colors=outer_colors_hex, autopct='%1.1f%%', shadow=False, startangle=90, radius=1.5)
         #inner pie chart of the product's categories: df.groupby('heb_categories',sort=False)['heb_categories'],
         wedgeprops={"edgecolor":"k",'linewidth': 0.5, 'linestyle': 'solid', 'antialiased': True}
-        plt.pie(df.groupby('heb_categories',sort=False)['value'].sum(),wedgeprops=wedgeprops,colors=main_colors_hex, autopct=lambda pct: inner_pie_display(pct, df), shadow=False, startangle=90, radius=0.75)
+        category_patches = plt.pie(df.groupby('heb_categories',sort=False)['value'].sum(),wedgeprops=wedgeprops,colors=main_colors_hex, autopct=lambda pct: inner_pie_display(pct, df), shadow=False, startangle=90, radius=0.75)
         #plt.legend(loc='0', bbox_to_anchor=(1.5, 0.5), fontsize=20)
-        plt.legend(loc='center left', bbox_to_anchor=(1, 0.5), fontsize=20)
+        # product_labels the text of the slices and the % of each slice
+        #for i, p in enumerate(product_patches):
+            # product labels = iloc[:,3] and the % of each slice = df.value
+        product_precents = df.value / df.value.sum() * 100
+        
+        # product labels = iloc[:,3] and the % of each slice = product_precents and the value of each slice = df.value:
+        product_labels = [str(df.iloc[:,3][i]) + " - " + str(df.value[i]) + "s " + " ({:.1f}%)".format(product_precents[i]) for i in range(len(df.iloc[:,3]))]
+        
+        MAX_PER_COL = 15
+        ncols = 1
+        if len(product_labels) > MAX_PER_COL:
+            ncols = int(len(product_labels)/MAX_PER_COL) + 1
+        
+        # order product_labels by the value of the slices
+        product_labels = [product_labels[i] for i in np.argsort(df.value)[::-1]]
+        plt.legend(product_labels, loc='best', bbox_to_anchor=(0, 0), ncol=ncols)
         plt.tight_layout()
         #plt.show()
         return plt
-    
+    def get_user_story(self, logs):
+        ret = []
+        last_timestemp = logs[0]['timestemp']
+        for idx,log in enumerate(logs):
+            log_entry = ''
+            log_entry += '<b>' + str(idx + 1) + ') ' 
+            data = log['data']
+            time_from_last_log = log['timestemp'] - last_timestemp
+            # log_entry += time from last log in format: '{:.2f}'.format(time_from_last_log)
+            log_entry += '({:.5f}) </b>'.format(time_from_last_log.total_seconds())
+            try:
+                if data['t'] == 's':
+                    from_id = data['f']['id']
+                    to_id = data['w']['id']
+                    from_obj = CatalogImage.objects.get(id=from_id)
+                    to_obj = CatalogImage.objects.get(id=to_id)
+                    msg = 'גלילה מ ' + \
+                        '<b> ' + from_obj.title + ' </b>' + \
+                        ' ל' + \
+                        '<b> ' + to_obj.title + ' </b>'
+                    
+                elif data['t'] == 'open product':
+                    msg = data['a']
+                    msg += ' <b> ' + data['f']['ti'] + ' </b> '
+                    msg += '> <b> ' + data['w']['ti'] + ' </b> '
+                    
+                elif data['t'] == 'open category':
+                    if data['f']['type'] == 'navbar':
+                        msg = 'פתיחת קטגוריה מנאבר'
+                        msg += '<b>' + data['w']['ti'] + ' </b>'
+                elif data['t'] == 'add to cart':
+                    msg = data['a']
+                    msg += ' <b> ' + data['f']['ti'] + ' </b> '
+                    msg += '> <b> ' + data['w']['ti'] + ' </b> '
+                elif data['t'] == 'submit order':
+                    
+                    # 'timestemp':'2021-12-12T23:09:36.016Z'
+                    # 'w':{'type': 'order', 'data': {'name': 'roni Segal', 'email': 'ronionsegal@gmail.com', 'phone': '', 'uuid': '79f441ed-6c3b-443a-8...3df75738aa', 'products': [...]}}
+                    # 'f':{'type': 'cart'}
+                    # 't':'submit order'
+                    # 'a':'שליחת הזמנה'
+                    msg += data['a'] + ' ' + json.dumps(data['w']['data'])
+                else:
+                    print(data)
+                    msg = 'לא ידוע'
+                log_entry += msg
+            except:
+                #log_entry += 'לא קריא: ' + str(data)
+                log_entry += 'שגיאה בקריאת הנתונים'
+                
+            ret.append(log_entry)
+            last_timestemp = log['timestemp']
+        return '\n\r'.join(ret)
+        
     def send_telegram_message(self):
         def fig2img(fig):
             """Convert a Matplotlib figure to a PIL Image and return it"""
@@ -229,10 +304,16 @@ class UserSessionLogger(models.Model):
         chat_id = '354783543'
         if(messageObj['chart']):
             buff = fig2img(messageObj['chart'])
-            print('sending photo')
-            print(bot.send_document(chat_id=chat_id, document=buff, caption=messageObj['message'], parse_mode='HTML'))
+            print(bot.send_document(chat_id=chat_id, document=buff, parse_mode='HTML'))
+            #print(bot.send_message(chat_id=chat_id, text=messageObj['message'], parse_mode='HTML'))
+        #else:
+            #print(bot.send_message(chat_id=chat_id, text=messageObj['message'], parse_mode='HTML'))
+        info = messageObj['message']
+        if len(info) > 4096:
+            for x in range(0, len(info), 4096):
+                bot.send_message(chat_id, info[x:x+4096], parse_mode='HTML')
         else:
-            print(bot.send_message(chat_id=chat_id, text=messageObj['message'], parse_mode='HTML'))
+            bot.send_message(chat_id, info, parse_mode='HTML')
         #print(bot.send_message(chat_id=chat_id, text=messageObj['message'], parse_mode='HTML'))
     
     def analyze_user_session(self):
@@ -264,19 +345,20 @@ class UserSessionLogger(models.Model):
         cart = {}
         all_cart = {}
         for log in self.logs.all():
+            log_data = json.loads(log.extra)
             ret['session']['logs'].append({
                 'id': log.id,
-                'data': log.extra,
+                'data': log_data,
                 'timestemp': log.timestamp,
             })
             try:
-                if(log.extra['t'] == 'add to cart'):
-                    cart[log.extra['w']['id']] = log.extra['w']
-                    all_cart[log.extra['w']['id']] = log.extra['w']
-                if(log.extra['t'] == 'remove from cart'):
-                    del cart[log.extra['w']['id']]
+                if(log_data['t'] == 'add to cart'):
+                    cart[log_data['w']['id']] = log_data['w']
+                    all_cart[log_data['w']['id']] = log_data['w']
+                if(log_data['t'] == 'remove from cart'):
+                    del cart[log_data['w']['id']]
                     
-                if(log.extra['t'] ==  'submit order'):
+                if(log_data['t'] ==  'submit order'):
                     cart = {}
             except Exception as e:
                 print(e)
