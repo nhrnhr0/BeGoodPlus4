@@ -10,6 +10,9 @@ from django.http import FileResponse
 from xlwt.Style import XFStyle
 from catalogAlbum.models import ThroughImage
 import xlwt
+from PIL import Image
+import requests
+from io import BytesIO
 
 from .models import CatalogImage
 class tableInline(admin.TabularInline):
@@ -124,6 +127,15 @@ class CatalogImageAdmin(AdminAdvancedFiltersMixin, admin.ModelAdmin):
             ws.write(i, 3, vals[3],title_style)
             ws.write(i, 4, vals[4],title_style)
             ws.write(i, 5, vals[5],title_style)
+            '''
+            url = vals[3]
+            response = requests.get(url)
+            img = Image.open(BytesIO(response.content))
+            r, g, b, a = img.split()
+            img = Image.merge("RGB", (r, g, b))
+            img.save('imagetoadd.bmp')
+            ws.insert_bitmap('imagetoadd.bmp', i, 6)
+            '''
             i += 1
         wb.save(buffer)
         buffer.seek(0)
