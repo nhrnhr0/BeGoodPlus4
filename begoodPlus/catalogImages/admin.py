@@ -1,10 +1,15 @@
 from django.contrib import admin
 from advanced_filters.admin import AdminAdvancedFiltersMixin
+from django.http.response import HttpResponse
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy  as _
 from django.urls import reverse
-
+import csv
+import io
+from django.http import FileResponse
+from xlwt.Style import XFStyle
 from catalogAlbum.models import ThroughImage
+import xlwt
 
 from .models import CatalogImage
 class tableInline(admin.TabularInline):
@@ -74,6 +79,7 @@ class CatalogImageAdmin(AdminAdvancedFiltersMixin, admin.ModelAdmin):
     list_display = ('id', 'render_thumbnail', 'link_copy','title', 'barcode','cost_price_dis','client_price_dis','recomended_price_dis','get_albums','cost_price','client_price','recomended_price')
     list_editable = ('cost_price','client_price','recomended_price')
     list_display_links = ('title',)
+    actions = ['download_images_csv',]
     inlines = (albumsInline, tableInline)#
     readonly_fields = ('id', 'render_thumbnail', 'render_image',)
     search_fields = ('title','description', 'barcode', 'detailTabel__providerMakat')
@@ -89,6 +95,42 @@ class CatalogImageAdmin(AdminAdvancedFiltersMixin, admin.ModelAdmin):
         return qs.prefetch_related('albums', 'detailTabel')
         
 
+    def download_images_csv(modeladmin, request, queryset):
+        buffer = io.BytesIO()
+        wb = xlwt.Workbook()
+        file_name='data'
+        ws = wb.add_sheet('sheet1',cell_overwrite_ok=True)
+        ws.cols_right_to_left = True
+        title_style = XFStyle()
+        alignment_center = xlwt.Alignment()
+        alignment_center.horz = xlwt.Alignment.HORZ_CENTER
+        alignment_center.vert = xlwt.Alignment.VERT_CENTER
+        title_style.alignment = alignment_center
+        
+        title_style.font.bold = True
+        #writer.writerow(['id', 'title', 'description', 'cimage', 'cost_price', 'packingTypeClient'])
+        i = 1
+        ws.write(0, 0, 'id',title_style)
+        ws.write(0, 1, 'title',title_style)
+        ws.write(0, 2, 'description',title_style)
+        ws.write(0, 3, 'cimage',title_style)
+        ws.write(0, 4, 'cost_price',title_style)
+        ws.write(0, 5, 'packingTypeClient',title_style)
+        for value in queryset:
+            vals = [value.id, value.title, value.description, 'https://res.cloudinary.com/ms-global/image/upload/' + value.cimage, value.cost_price, str(queryset.all().first().packingTypeClient)]
+            ws.write(i, 0, vals[0],title_style)
+            ws.write(i, 1, vals[1],title_style)
+            ws.write(i, 2, vals[2],title_style)
+            ws.write(i, 3, vals[3],title_style)
+            ws.write(i, 4, vals[4],title_style)
+            ws.write(i, 5, vals[5],title_style)
+            i += 1
+        wb.save(buffer)
+        buffer.seek(0)
+        return FileResponse(buffer, as_attachment=True, filename=file_name + '.xls')
+        
+    
+    
     def get_albums(self, obj):
         ret = '<ul style="background-color:#ddd;">'
         for a in obj.albums.all():
