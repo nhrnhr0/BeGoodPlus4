@@ -54,9 +54,9 @@ class CatalogAlbum(MPTTModel):
     parent = TreeForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='children')
     is_public = models.BooleanField(verbose_name=_('is public'), default=True)
     
-    renew_for = models.DurationField(null=True, blank=True, default=datetime.timedelta(days=3))
-    renew_after = models.DurationField(null=True, blank=True, default=datetime.timedelta(days=1))
-    timer = models.DateTimeField(null=True, blank=True)
+    #renew_for = models.DurationField(null=True, blank=True, default=datetime.timedelta(days=3))
+    #renew_after = models.DurationField(null=True, blank=True, default=datetime.timedelta(days=1))
+    #timer = models.DateTimeField(null=True, blank=True)
 
     @property
     def sorted_image_set(self):

@@ -222,7 +222,7 @@ class CatalogImage(models.Model):
         
     def render_thumbnail(self, *args, **kwargs):
         ret = ''
-        if self.image_thumbnail:
+        if self.cimage:
             ret += '<img width="50px" height="50px" src="%s" />' % ("https://res.cloudinary.com/ms-global/image/upload/" + self.cimage)
         return mark_safe(ret)
     render_thumbnail.short_description = _("thumbnail")
