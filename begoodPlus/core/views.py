@@ -4,7 +4,7 @@ from django.http import JsonResponse
 from django.db.models.functions import Greatest
 from django.contrib.postgres.search import TrigramSimilarity
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from .models import SvelteCartModal, SvelteContactFormModal, UserSearchData
+from .models import SvelteCartModal, SvelteCartProductEntery, SvelteContactFormModal, UserSearchData
 from django.urls import reverse
 
 # Create your views here.
@@ -109,13 +109,17 @@ def svelte_cart_form(request):
             email = body['email']  or ''
             phone = body['phone']  or ''
             uuid = body['uuid'] or ''
+            message = body['message']  or ''
             products = body['products'] or ''
+            
             if(request.user.is_anonymous):
                 user = None
             else:
                 user = request.user
-            data = SvelteCartModal.objects.create(user=user, device=device,uid=uuid, name=name, phone=phone, email=email)
-            data.products.set(products)
+            data = SvelteCartModal.objects.create(user=user, device=device,uid=uuid, name=name, phone=phone, email=email, message=message)
+            #data.products.set(products)
+            products_objs = SvelteCartProductEntery.objects.bulk_create([SvelteCartProductEntery(product_id=p['id'],amount=p['amount']) for p in products])
+            data.productEntries.set(products_objs)
             data.save()
             send_cart_email.delay(data.id)
             return JsonResponse({

@@ -103,7 +103,18 @@ class SvelteContactFormModal(models.Model):
     def uniqe_color(self):
         ret = f'<span width="25px" height="25px" style="color:black;background-color: {ColorHash(str(self.uid)).hex}">{uuid2slug(self.uid)}</span>'
         return mark_safe(ret)
-
+    
+# through model for many to many relationship between SvelteCartModal and CatalogImage including amount
+class SvelteCartProductEntery(models.Model):
+    product = models.ForeignKey(to=CatalogImage, on_delete=models.CASCADE)
+    amount = models.IntegerField(verbose_name=_('amount'), default=1)
+    def __str__(self):
+        return str(self.amount) + ' - ' + self.product.title
+    class Meta:
+        pass
+        #unique_together = ('cart', 'product')
+    
+    
 class SvelteCartModal(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, null=True, blank=True)
     device = models.CharField(verbose_name=_('device'), max_length=250)
@@ -112,6 +123,8 @@ class SvelteCartModal(models.Model):
     phone = models.CharField(verbose_name=_('phone'), max_length=120)
     email = models.EmailField(verbose_name=_('email'), max_length=120)
     products = models.ManyToManyField(to=CatalogImage, blank=True)
+    productEntries = models.ManyToManyField(to=SvelteCartProductEntery, blank=True)
+    message = models.TextField(verbose_name=_('message'), blank=True, null=True)
     created_date = models.DateTimeField(auto_now_add=True, blank=True, null=True)
     
     

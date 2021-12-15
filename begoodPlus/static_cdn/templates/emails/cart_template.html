@@ -77,6 +77,14 @@
                 <p>{{cart.email}}</p>
             </td>
         </tr>
+        <tr>
+            <td>
+                <div>הודעה</div>
+            </td>
+            <td>
+                <p>{{cart.message}}</p>
+            </td>
+        </tr>
         </tr>
         <tr>
         </tr>
@@ -88,30 +96,33 @@
         <tr>
             <th>מס</th>
             <th>מוצר</th>
+            <th>כמות</th>
             <th>id</th>
             <th>תמונה</th>
             <th>ספקים</th>
         </tr>
-        {% for item in cart.products.all %}
+        {% for item in cart.productEntries.all %}
             <tr>
                 <td>
                     <p>{{forloop.counter}}</p>
                 </td>
                 <td>
-                    <p>{{item.title}}</p>
+                    <p>{{item.product.title}}</p>
                 </td>
                 <td>
-                    <p><a href="https://catalog.ms-global.co.il/admin/catalogImages/catalogimage/{{item.id}}/change/">{{item.id}}</a> </p>
+                    <p>{{item.amount}}</p>
+                <td>
+                    <p><a href="https://catalog.ms-global.co.il/admin/catalogImages/catalogimage/{{item.product.id}}/change/">{{item.product.id}}</a> </p>
                 </td>
                 <td style="background: rgb(97, 97, 97)">
                     <p>
-                        <img alt="{item.title}" style="height:50px;" src="https://res.cloudinary.com/ms-global/image/upload/f_auto,w_auto/{{item.cimage}}" />
+                        <img alt="{item.product.title}" style="height:50px;" src="https://res.cloudinary.com/ms-global/image/upload/f_auto,w_auto/{{item.product.cimage}}" />
                     </p>
                 </td>
                 <td>
                     <p>
                         <ul>
-                        {% for p in item.providers.all %}
+                        {% for p in item.product.providers.all %}
                             <li>
                                 {{p.name}}
                             </li>
