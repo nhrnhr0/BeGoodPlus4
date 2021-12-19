@@ -34,7 +34,9 @@ import xlwt
 from core.tasks import send_cart_email
 class SvelteCartModalAdmin(admin.ModelAdmin):
     list_display = ('id', 'user', 'uniqe_color','device','name','phone','email','created_date')
-    filter_horizontal = ('products',)
+    #filter_horizontal = ('products',)
+    exclude = ('products','productEntries')
+    readonly_fields =('products_amount_display',)
     actions = ['resend_email_action','download_cart_excel',]
     def resend_email_action(modeladmin, request, queryset):
         for obj in queryset:

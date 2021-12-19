@@ -127,6 +127,12 @@ class SvelteCartModal(models.Model):
     message = models.TextField(verbose_name=_('message'), blank=True, null=True)
     created_date = models.DateTimeField(auto_now_add=True, blank=True, null=True)
     
+    def products_amount_display(self):
+        ret = '<ul>'
+        for i in self.productEntries.all():
+            ret += f'<li><div style="font-weight: bold;">{str(i.amount)} - {str(i.product)}</div></li>'
+        ret+= '</ul>'
+        return mark_safe(ret)
     
     def uniqe_color(self):
         ret = f'<span width="25px" height="25px" style="color:black;background-color: {ColorHash(str(self.uid)).hex}">{uuid2slug(self.uid)}</span>'
