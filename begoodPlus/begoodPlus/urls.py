@@ -104,7 +104,7 @@ urlpatterns = [
     path('search-click', autocompleteClick),
     path('contact-form', svelte_contact_form, name='contact-form'),
     path('cart-form', svelte_cart_form, name='svelte-cart-form'),
-    path('api/set_csrf_token/(?P<factory_id>.+)', set_csrf_token, name='set_csrf_token'),
+    re_path('api/set_csrf_token/(?P<factory_id>.+)/$', set_csrf_token, name='set_csrf_token'),
     path('api/set_csrf_token/', set_csrf_token, name='set_csrf_token'),
     #path('form-change', form_changed, name='form-change'),
 
