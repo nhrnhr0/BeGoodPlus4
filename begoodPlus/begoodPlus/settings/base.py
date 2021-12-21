@@ -96,7 +96,17 @@ INSTALLED_APPS = [
     'clientApi',
     'client',
     'campains',
-
+    
+    #### old unused modals ####
+    'clientLikedImages',
+    'myUserTasks',
+    'product',
+    'category',
+    'productImages',
+    'stock',
+    'glofa_types',
+    
+    ### django modals ###
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

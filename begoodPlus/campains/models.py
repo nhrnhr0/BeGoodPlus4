@@ -24,6 +24,9 @@ class PriceTable(models.Model):
 class CampainProduct(models.Model):
     product = models.ForeignKey(verbose_name=_('product'), to=CatalogImage, on_delete=models.CASCADE)
     priceTable = models.ForeignKey(verbose_name=_('price table'), to=PriceTable, on_delete=models.CASCADE)
+    my_order = models.PositiveIntegerField(default=0, blank=False, null=False)
+    class Meta(object):
+        ordering = ['my_order']
     def __str__(self):
         return str(self.product) + ' | ' + str(self.priceTable)
 class MonthCampain(models.Model):
