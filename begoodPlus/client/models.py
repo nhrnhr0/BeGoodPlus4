@@ -411,6 +411,8 @@ class Client(models.Model):
         on_delete=models.CASCADE,
         primary_key=True,
         verbose_name=_('user'))
+    def __str__(self):
+        return self.businessName
     businessName = models.CharField(verbose_name=_('business name '), max_length=120)
     email = models.EmailField(verbose_name=_('email'), max_length=120)
     extraName = models.CharField(verbose_name=_('extra name'), max_length=120, null=True,blank=True)

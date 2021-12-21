@@ -95,7 +95,7 @@ INSTALLED_APPS = [
     'catalogImageDetail',
     'clientApi',
     'client',
-
+    'campains',
 
     'django.contrib.admin',
     'django.contrib.auth',
