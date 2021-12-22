@@ -118,7 +118,7 @@ def svelte_cart_form(request):
                 user = request.user
             data = SvelteCartModal.objects.create(user=user, device=device,uid=uuid, name=name, phone=phone, email=email, message=message)
             #data.products.set(products)
-            products_objs = SvelteCartProductEntery.objects.bulk_create([SvelteCartProductEntery(product_id=p['id'],amount=p['amount']) for p in products])
+            products_objs = SvelteCartProductEntery.objects.bulk_create([SvelteCartProductEntery(product_id=p['id'],amount=p['amount'] or 1) for p in products])
             data.productEntries.set(products_objs)
             data.save()
             send_cart_email.delay(data.id)
