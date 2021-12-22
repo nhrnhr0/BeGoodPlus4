@@ -13,6 +13,7 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from campains.views import admin_get_all_campains
 from core.views import test_celery_view
 from catalogImages.views import all_images_ids
 from clientApi.views import ColorsClientViewSet, ImageClientViewSet, SizesClientViewSet,LogoClientViewSet, get_album_images
@@ -73,6 +74,7 @@ from customerCart.views import cart_del, cart_add,cart_view,cart_info
 from rest_framework.authtoken.views import obtain_auth_token
 #from rest_framework_simplejwt.views import (TokenObtainPairView,TokenRefreshView,)
 urlpatterns = [
+    path('admin-api/get-all-campaigns/', admin_get_all_campains),
     path('test', test_celery_view),
     path('create_mini_table/<int:id>/',create_mini_table, name='create_mini_table'),
     
@@ -104,7 +106,7 @@ urlpatterns = [
     path('search-click', autocompleteClick),
     path('contact-form', svelte_contact_form, name='contact-form'),
     path('cart-form', svelte_cart_form, name='svelte-cart-form'),
-    path('api/set_csrf_token/<uuid:factory_id>', set_csrf_token, name='set_csrf_token'),
+    re_path('api/set_csrf_token/(?P<factory_id>.+)/$', set_csrf_token, name='set_csrf_token'),
     path('api/set_csrf_token/', set_csrf_token, name='set_csrf_token'),
     #path('form-change', form_changed, name='form-change'),
 

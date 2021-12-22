@@ -63,6 +63,7 @@ def whoAmI(request):
             'email' :request.user.client.email,
             'privateCompany': request.user.client.privateCompany,
             'businessName': request.user.client.businessName,
+            'is_superuser': request.user.is_superuser,
         })
         
     return JsonResponse({'status':'error', 'detail':'user not loged in'})
