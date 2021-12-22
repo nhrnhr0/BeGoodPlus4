@@ -1,19 +1,24 @@
 from django.contrib import admin
-
+from adminsortable.admin import SortableAdmin, SortableTabularInline
 # Register your models here.
 from .models import MonthCampain, CampainProduct, PriceTable, AmountBrakepoint, PaymantType
-
+class ProductInline(admin.TabularInline):
+    model = MonthCampain.products.through
+    filter_horizontal = ('priceTable',)
+    extra = 1
+    
 class MonthCampainAdmin(admin.ModelAdmin):
+    inlines = [ProductInline]
     filter_horizontal = ('users','products',)
-    autocomplete_fields = ('products',)
+    #autocomplete_fields = ('catalogImage',)
 admin.site.register(MonthCampain, MonthCampainAdmin)
 
 class CampainProductAdmin(admin.ModelAdmin):
-    autocomplete_fields = ('product','priceTable',)
-    search_fields = ('product__title', 'priceTable__price', 
-                    'priceTable__paymentType__text', 
-                    'priceTable__amountBrakepoint__text',
-                    'priceTable__amountBrakepoint__number',)
+    #autocomplete_fields = ('catalogImage','priceTable',)
+    #search_fields = ('catalogImage__title', 'priceTable__price', 
+    #                'priceTable__paymentType__text', 
+    #                'priceTable__amountBrakepoint__text',
+    #                'priceTable__amountBrakepoint__number',)
     pass
 admin.site.register(CampainProduct, CampainProductAdmin)
 
