@@ -7,10 +7,10 @@ from adminsortable.models import Sortable
 
 # Create your models here.
 class AmountBrakepoint(models.Model):
-    text = models.CharField(verbose_name=_('text'), max_length=100)
+    #text = models.CharField(verbose_name=_('text'), max_length=100)
     number = models.FloatField(verbose_name=_('number'))
     def __str__(self):
-        return str(self.number) + ' ' + self.text
+        return str(self.number)# + ' ' + self.text
     
 class PaymantType(models.Model):
     text = models.CharField(verbose_name=_('text'), max_length=100)
@@ -18,11 +18,19 @@ class PaymantType(models.Model):
         return self.text
 
 class PriceTable(models.Model):
-    paymentType  = models.ForeignKey(verbose_name=_('payment type'), to=PaymantType, on_delete=models.SET_NULL, null=True,blank=True)
-    amountBrakepoint = models.ForeignKey(verbose_name=_('amount brakepoint'), to=AmountBrakepoint, on_delete=models.SET_NULL, null=True,blank=True)
-    price = models.FloatField(verbose_name=_('price'), default=0)
+    #paymentType  = models.ForeignKey(verbose_name=_('payment type'), to=PaymantType, on_delete=models.SET_NULL, null=True,blank=True)
+    #amountBrakepoint = models.ForeignKey(verbose_name=_('amount brakepoint'), to=AmountBrakepoint, on_delete=models.SET_NULL, null=True,blank=True)
+    #paymentType = models.CharField(verbose_name=_('payment type'), max_length=10, null=True,blank=True, choices=[('מזומן','מזומן'),('שוטף','שוטף'),('אחר','אחר')])
+    amount = models.FloatField(verbose_name=_('amount'), null=True,blank=True, default=1)
+    
+    cach_price = models.FloatField(verbose_name=_('cach price'), default=0)
+    credit_price = models.FloatField(verbose_name=_('credit price'), default=0)
+    class Meta():
+        verbose_name = _('price table')
+        verbose_name_plural = _('price tables')
+        unique_together = ('amount','cach_price','credit_price')
     def __str__(self):
-        return str(self.paymentType) + ' | ' + str(self.amountBrakepoint) + ' | ' + str(self.price) + '₪'
+        return str(self.amount) + ' | ' + str(self.cach_price) + '₪' + ' | ' + str(self.credit_price) + '₪'
 
 
 class CampainProduct(models.Model):
