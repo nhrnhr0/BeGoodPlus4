@@ -10,6 +10,12 @@ class ProductInline(admin.TabularInline):
 class MonthCampainAdmin(admin.ModelAdmin):
     inlines = [ProductInline]
     filter_horizontal = ('users','products',)
+    def change_view(self, request, object_id, form_url='', extra_context=None):
+        extra_context = extra_context or {}
+        extra_context['my_data'] = {'object_id':object_id, 'name':'test'}
+        return super(MonthCampainAdmin, self).change_view(
+            request, object_id, form_url, extra_context=extra_context,
+        )
     #autocomplete_fields = ('catalogImage',)
 admin.site.register(MonthCampain, MonthCampainAdmin)
 

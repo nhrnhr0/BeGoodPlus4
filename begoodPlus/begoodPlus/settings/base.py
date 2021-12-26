@@ -78,6 +78,7 @@ INSTALLED_APPS = [
     'cloudinary',
     'celery',
     'django_celery_beat',
+    'django_svelte',
 
     # own
     'core',
@@ -292,12 +293,13 @@ USE_TZ = True
 LOCALE_PATHS = [
     os.path.join(BASE_DIR, 'locale')
 ]
-
+from pathlib import Path
 
 STATIC_ROOT= os.path.join(BASE_DIR, "static") # when changed, change allso templates location
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static_cdn"),
+    Path(BASE_DIR).parent / "svelte" / "public" / "build",
 ]
 
 MEDIA_URL= '/media/'

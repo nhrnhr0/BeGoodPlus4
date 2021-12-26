@@ -20,3 +20,8 @@ celerybeat.pid
 begoodPlus/env2
 frontend/my-svelte-project/public/**
 env2
+
+/node_modules/
+/public/build/
+
+.DS_Store
