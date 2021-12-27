@@ -4,7 +4,6 @@ import resolve from '@rollup/plugin-node-resolve';
 import livereload from 'rollup-plugin-livereload';
 import { terser } from 'rollup-plugin-terser';
 import css from 'rollup-plugin-css-only';
-import replace from '@rollup/plugin-replace';
 
 const production = process.env.VITE_IS_PRODUCTION;
 console.log('========================================');
@@ -41,17 +40,6 @@ function componentExportDetails(componentName) {
     file: `public/build/${componentName}.js`,
 		},
 		plugins: [
-			replace({
-				preventAssignment: true,
-				// 2 level deep object should be stringify
-				serverBaseUrl: production ? "https://boost-pop.com" : "http://localhost:8000",
-				process: JSON.stringify({
-					env: {
-						isProd: production,
-						
-					},
-				}),
-			}),
 			svelte({
 				compilerOptions: {
 					// enable run-time checks when not in production
