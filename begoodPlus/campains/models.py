@@ -46,10 +46,12 @@ class CampainProduct(models.Model):
     def __str__(self):
         return str(self.catalogImage)# + ' | ' + str(len(self.priceTable.all()))
     
-    
+from datetime import datetime
 class MonthCampain(models.Model):
     is_shown = models.BooleanField(verbose_name=_('is shown'), default=False)
     name = models.CharField(max_length=254, verbose_name=_('name'))
-    users = models.ManyToManyField(to=Client, verbose_name=_('users'))
+    users = models.ManyToManyField(to=Client, verbose_name=_('users'), blank=True)
+    startTime = models.DateTimeField(verbose_name=_('start time'), default=datetime.now, blank=True)
+    endTime = models.DateTimeField(verbose_name=_('end time'), default=datetime.now, blank=True)
     #products = models.ManyToManyField(to=CampainProduct, verbose_name=_('products'))
     products = models.ManyToManyField(to=CatalogImage, verbose_name=_('products'), through='CampainProduct')

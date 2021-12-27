@@ -1,7 +1,8 @@
 from django.shortcuts import render
 from catalogImages.models import CatalogImage
 from catalogImages.serializers import CatalogImageApiSerializer
-from campains.serializers import AdminProductCampainSerilizer
+from campains.serializers import AdminProductCampainSerilizer, ClientMonthCampainSerializer
+from rest_framework.decorators import api_view, permission_classes
 
 from campains.models import MonthCampain, CampainProduct, PriceTable
 from campains.serializers import AdminMonthCampainSerializer
@@ -9,7 +10,28 @@ from django.http import JsonResponse
 import json
 from io import StringIO
 from rest_framework.parsers import JSONParser
+from rest_framework.permissions import AllowAny, IsAuthenticated
+
 # Create your views here.
+# api view to get all the active campains of a user
+@api_view(['GET'])
+@permission_classes((IsAuthenticated,))
+def get_user_campains(request):
+    if request.method == 'GET':
+        if request.user.is_authenticated:
+            campains = MonthCampain.objects.filter(is_shown=True, users__in=[request.user.client])
+            serializer = ClientMonthCampainSerializer(campains, many=True)
+            return JsonResponse(serializer.data, safe=False)
+        else:
+            return JsonResponse({
+                'status':'fail',
+                'detail':'You are not authorized to perform this action'
+            })
+    else:
+        return JsonResponse({
+                'status':'fail',
+                'detail':'Only GET requests are allowed'
+            })
 
 # api get request to get all the campains as json with serializer
 # fail if the user is not logged in and not superuser
