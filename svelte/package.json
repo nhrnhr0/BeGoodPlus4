@@ -10,14 +10,19 @@
     }
   },
   "scripts": {
-    "watch": "npm-watch",
-    "build": "rollup -c",
-    "dev": "rollup -c -w",
-    "start": "sirv public"
+    "watch": "env-cmd -f ./env_local_config.env npm-watch",
+    "build": "env-cmd -f ./env_local_config.env rollup -c",
+    "dev": "env-cmd -f ./env_local_config.env rollup -c -w",
+    "start": "env-cmd -f ./env_local_config.env sirv public",
+    "server_watch": "env-cmd -f ./env_server_config.env npm-watch",
+    "server_build": "env-cmd -f ./env_server_config.env rollup -c",
+    "server_dev": "env-cmd -f ./env_server_config.env rollup -c -w",
+    "server_start": "env-cmd -f ./env_server_config.env sirv public"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^16.0.0",
     "@rollup/plugin-node-resolve": "^10.0.0",
+    "@rollup/plugin-replace": "^3.0.0",
     "rollup": "^2.3.4",
     "rollup-plugin-css-only": "^3.1.0",
     "rollup-plugin-livereload": "^2.0.0",
