@@ -25,3 +25,4 @@ env2
 /public/build/
 
 .DS_Store
+svelte/src/config.js

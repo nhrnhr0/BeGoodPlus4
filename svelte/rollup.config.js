@@ -44,10 +44,11 @@ function componentExportDetails(componentName) {
 			replace({
 				preventAssignment: true,
 				// 2 level deep object should be stringify
+				serverBaseUrl: production ? "https://boost-pop.com" : "http://localhost:8000",
 				process: JSON.stringify({
 					env: {
 						isProd: production,
-						serverBaseUrl: process.env.VITE_SERVER_LOCATION
+						
 					},
 				}),
 			}),
