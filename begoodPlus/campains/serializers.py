@@ -2,6 +2,7 @@
 from django.db import models
 from django.db.models import fields
 from catalogImages.serializers import CatalogImageApiSerializer
+from clientApi.serializers import ImageClientApi
 from .models import CampainProduct, MonthCampain, PriceTable
 from rest_framework.serializers import ModelSerializer
 from rest_framework import serializers
@@ -14,13 +15,13 @@ class priceTableSerializer(ModelSerializer):
         fields = ('id', 'cach_price', 'credit_price','amount',)
 
 class ClientProductCampainSerilizer(ModelSerializer):
-    #catalogImage = CatalogImageApiSerializer('catalogImage')
+    catalogImage = ImageClientApi('catalogImage') # 
     priceTable = priceTableSerializer(many=True)
     #cimg = serializers.CharField(source='catalogImage.cimage')
     #title = serializers.CharField(source='catalogImage.title')
     class Meta:
         model = CampainProduct
-        fields = ('id', 'priceTable',)
+        fields = ('id', 'priceTable','catalogImage')
 
 class ClientMonthCampainSerializer(ModelSerializer):
     #priceTable = ClientProductCampainSerilizer(many=True)
