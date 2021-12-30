@@ -8,6 +8,8 @@ class ProductInline(admin.TabularInline):
     extra = 1
     
 class MonthCampainAdmin(admin.ModelAdmin):
+    #is_shown,name,users,startTime,endTime,products,album
+    list_display = ('name', 'is_shown', 'startTime', 'endTime', 'show_users', 'album', 'show_products')
     inlines = [ProductInline]
     filter_horizontal = ('users','products',)
     def change_view(self, request, object_id, form_url='', extra_context=None):

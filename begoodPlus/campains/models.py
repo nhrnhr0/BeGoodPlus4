@@ -58,6 +58,12 @@ class MonthCampain(models.Model):
     products = models.ManyToManyField(to=CatalogImage, verbose_name=_('products'), through='CampainProduct')
     album = models.ForeignKey(to=CatalogAlbum, verbose_name=_('album'), on_delete=models.SET_NULL, null=True,blank=True)
     
+    def show_users(self):
+        return ', '.join([str(user) for user in self.users.all()])
+    
+    def show_products(self):
+        return ', '.join([str(product) for product in self.products.all()])
+    
     def save(self, *args, **kwargs):
         if self.album == None:
             #title,slug,description,fotter,keywords,images,parent,is_public 
@@ -65,7 +71,7 @@ class MonthCampain(models.Model):
         print(self.album.images.count())
         self.album.images.clear()
         print(self.album.images.count())
-        if self.products:
+        if self.id != None:
             for product in self.products.all():
                 print(product, self.album,product.campainproduct_set.all()[0].order)
                 img, is_created = ThroughImage.objects.get_or_create(catalogImage=product, catalogAlbum=self.album,image_order=product.campainproduct_set.all()[0].order)
