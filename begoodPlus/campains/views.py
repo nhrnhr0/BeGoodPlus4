@@ -11,7 +11,7 @@ import json
 from io import StringIO
 from rest_framework.parsers import JSONParser
 from rest_framework.permissions import AllowAny, IsAuthenticated
-
+from django.utils import timezone
 # Create your views here.
 # api view to get all the active campains of a user
 @api_view(['GET'])
@@ -19,7 +19,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 def get_user_campains(request):
     if request.method == 'GET':
         if request.user.is_authenticated:
-            campains = MonthCampain.objects.filter(is_shown=True, users__in=[request.user.client])
+            campains = MonthCampain.objects.filter(is_shown=True, users__in=[request.user.client], endTime__gte=timezone.now())
             serializer = ClientMonthCampainSerializer(campains, many=True)
             return JsonResponse(serializer.data, safe=False)
         else:
