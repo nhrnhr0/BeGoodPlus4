@@ -138,8 +138,8 @@ import {deepEqual} from './utils/utils.js'
 						<thead>
 							<tr>
 								<th>כמות</th>
-								<th>מזומן</th>
-								<th>שוטף</th>
+								<th>מחיר</th>
+								<th>מחיר לצרכן</th>
 								<th>פעולות</th>
 							</tr>
 						</thead>
