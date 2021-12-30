@@ -46,7 +46,9 @@ class CampainProduct(models.Model):
         pass
     def __str__(self):
         return str(self.catalogImage)# + ' | ' + str(len(self.priceTable.all()))
-    
+
+from django.utils.html import mark_safe
+
 from datetime import datetime
 class MonthCampain(models.Model):
     is_shown = models.BooleanField(verbose_name=_('is shown'), default=False)
@@ -62,7 +64,10 @@ class MonthCampain(models.Model):
         return ', '.join([str(user) for user in self.users.all()])
     
     def show_products(self):
-        return ', '.join([str(product) for product in self.products.all()])
+        ret = '<ul>'
+        ret += ''.join(['<li>' + str(product) + '</li>' for product in self.products.all()])
+        ret += '</ul>'
+        return mark_safe(ret)
     
     def save(self, *args, **kwargs):
         if self.album == None:
