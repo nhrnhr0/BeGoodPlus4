@@ -1,10 +1,11 @@
 from enum import unique
 from django.db import models
+from catalogAlbum.models import ThroughImage
 from catalogImages.models import CatalogImage
 from client.models import Client
 from django.utils.translation import gettext_lazy  as _
 from adminsortable.models import Sortable
-
+from catalogAlbum.models import CatalogAlbum
 # Create your models here.
 class AmountBrakepoint(models.Model):
     #text = models.CharField(verbose_name=_('text'), max_length=100)
@@ -55,3 +56,23 @@ class MonthCampain(models.Model):
     endTime = models.DateTimeField(verbose_name=_('end time'), default=datetime.now, blank=True)
     #products = models.ManyToManyField(to=CampainProduct, verbose_name=_('products'))
     products = models.ManyToManyField(to=CatalogImage, verbose_name=_('products'), through='CampainProduct')
+    album = models.ForeignKey(to=CatalogAlbum, verbose_name=_('album'), on_delete=models.SET_NULL, null=True,blank=True)
+    
+    def save(self, *args, **kwargs):
+        if self.album == None:
+            #title,slug,description,fotter,keywords,images,parent,is_public 
+            self.album = CatalogAlbum.objects.create(title=self.name,slug='campain_'+self.name, description='', fotter='',keywords='',parent=None, is_public=False)
+        print(self.album.images.count())
+        self.album.images.clear()
+        print(self.album.images.count())
+        for product in self.products.all():
+            print(product, self.album,product.campainproduct_set.all()[0].order)
+            img, is_created = ThroughImage.objects.get_or_create(catalogImage=product, catalogAlbum=self.album,image_order=product.campainproduct_set.all()[0].order)
+            img.image_order = product.campainproduct_set.all()[0].order
+            img.save()
+            #self.album.images.add(product)
+            print(img, is_created)
+        self.album.move_to(None, position='first-child')
+        super(MonthCampain, self).save(*args, **kwargs)
+        #[a[0] for a in list(self.products.values_list('id'))]
+#catalogImage,catalogAlbum,image_order

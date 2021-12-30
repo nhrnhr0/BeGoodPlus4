@@ -7,24 +7,24 @@ from django.urls import reverse
 
 class SearchCatalogAlbumSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(read_only=True)
-    my_type = serializers.ReadOnlyField(default='album')
+    #my_type = serializers.ReadOnlyField(default='album')
     url = serializers.ReadOnlyField(default='/')
     #categoryFotter = serializers.CharField(source='fotter')
     class Meta:
         model = CatalogAlbum
-        fields = ('id', 'url', 'title', 'slug', 'is_public', 'my_type','description','fotter')
+        fields = ('id', 'url', 'title', 'slug', 'is_public','is_campain','description','fotter')
         #exclude = ('images',)
 
 class SearchCatalogImageSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(read_only=True)
-    my_type = serializers.ReadOnlyField(default='product')
+    #my_type = serializers.ReadOnlyField(default='product')
     url = serializers.ReadOnlyField(default='/')
     albums = SearchCatalogAlbumSerializer('albums', many=True)
     class Meta:
         model = CatalogImage
         #fields = '__all__'
         #exclude = ('colors','sizes')
-        fields = ('id','url','title', 'albums','description', 'cimage','image_thumbnail', 'my_type',)
+        fields = ('id','url','title', 'albums','description', 'cimage','image_thumbnail',)
 '''
 from .models import BeseContactInformation
 class UserTasksSerializer(serializers.ModelSerializer):

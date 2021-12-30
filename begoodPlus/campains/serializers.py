@@ -1,6 +1,7 @@
 
 from django.db import models
 from django.db.models import fields
+from clientApi.serializers import AlbumClientApi
 from catalogImages.serializers import CatalogImageApiSerializer
 from clientApi.serializers import ImageClientApi
 from .models import CampainProduct, MonthCampain, PriceTable
@@ -26,9 +27,10 @@ class ClientProductCampainSerilizer(ModelSerializer):
 class ClientMonthCampainSerializer(ModelSerializer):
     #priceTable = ClientProductCampainSerilizer(many=True)
     products = ClientProductCampainSerilizer(many=True, source='campainproduct_set')
+    album = AlbumClientApi()
     class Meta:
         model = MonthCampain
-        fields = ('id', 'name', 'is_shown', 'products',)
+        fields = ('id', 'name', 'is_shown', 'products','album')
         
 
 class AdminMonthCampainSerializer(ModelSerializer):

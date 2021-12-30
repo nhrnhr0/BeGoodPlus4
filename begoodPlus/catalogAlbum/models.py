@@ -53,6 +53,7 @@ class CatalogAlbum(MPTTModel):
     images = models.ManyToManyField(to=CatalogImage, related_name='albums', blank=True, through='ThroughImage', verbose_name=_('album list'))
     parent = TreeForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='children')
     is_public = models.BooleanField(verbose_name=_('is public'), default=True)
+    is_campain = models.BooleanField(verbose_name=_('is campain'), default=False)
     
     #renew_for = models.DurationField(null=True, blank=True, default=datetime.timedelta(days=3))
     #renew_after = models.DurationField(null=True, blank=True, default=datetime.timedelta(days=1))

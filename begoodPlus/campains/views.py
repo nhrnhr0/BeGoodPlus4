@@ -88,6 +88,7 @@ def admin_get_campain_products(request, campain_id):
                 print(is_created, data)
                 new_products.append(data)
             #serializer = AdminProductCampainSerilizer(data, many=True)
+            campain.save()
             serializer = AdminProductCampainSerilizer(new_products, many=True)
             print(serializer.data)
             return JsonResponse(serializer.data, safe=False)
