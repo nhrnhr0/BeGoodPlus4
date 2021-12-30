@@ -65,14 +65,14 @@ class MonthCampain(models.Model):
         print(self.album.images.count())
         self.album.images.clear()
         print(self.album.images.count())
-        for product in self.products.all():
-            print(product, self.album,product.campainproduct_set.all()[0].order)
-            img, is_created = ThroughImage.objects.get_or_create(catalogImage=product, catalogAlbum=self.album,image_order=product.campainproduct_set.all()[0].order)
-            img.image_order = product.campainproduct_set.all()[0].order
-            img.save()
-            #self.album.images.add(product)
-            print(img, is_created)
-        self.album.move_to(None, position='first-child')
+        if self.products:
+            for product in self.products.all():
+                print(product, self.album,product.campainproduct_set.all()[0].order)
+                img, is_created = ThroughImage.objects.get_or_create(catalogImage=product, catalogAlbum=self.album,image_order=product.campainproduct_set.all()[0].order)
+                img.image_order = product.campainproduct_set.all()[0].order
+                img.save()
+                #self.album.images.add(product)
+                print(img, is_created)
         super(MonthCampain, self).save(*args, **kwargs)
         #[a[0] for a in list(self.products.values_list('id'))]
 #catalogImage,catalogAlbum,image_order
