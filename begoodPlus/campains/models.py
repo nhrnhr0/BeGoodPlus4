@@ -61,7 +61,7 @@ class MonthCampain(models.Model):
     def save(self, *args, **kwargs):
         if self.album == None:
             #title,slug,description,fotter,keywords,images,parent,is_public 
-            self.album = CatalogAlbum.objects.create(title=self.name,slug='campain_'+self.name, description='', fotter='',keywords='',parent=None, is_public=False)
+            self.album = CatalogAlbum.objects.create(title=self.name,slug='campain_'+self.name, description='', fotter='',keywords='',parent=None, is_public=False, is_campain=True)
         print(self.album.images.count())
         self.album.images.clear()
         print(self.album.images.count())

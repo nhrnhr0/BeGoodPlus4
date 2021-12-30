@@ -30,7 +30,7 @@ class ClientMonthCampainSerializer(ModelSerializer):
     album = AlbumClientApi()
     class Meta:
         model = MonthCampain
-        fields = ('id', 'name', 'is_shown', 'products','album')
+        fields = ('id', 'name', 'is_shown', 'products','album', 'endTime')
         
 
 class AdminMonthCampainSerializer(ModelSerializer):
