@@ -55,19 +55,23 @@ def whoAmI(request):
                 })
         elif request.method == 'GET':
             pass
-        return JsonResponse({
-            'status':'success',
-            #'first_name': request.user.first_name,
-            #'last_name':request.user.last_name,
-            'username':request.user.username,
-            'email' :request.user.client.email,
-            'privateCompany': request.user.client.privateCompany,
-            'businessName': request.user.client.businessName,
-            'is_superuser': request.user.is_superuser,
-        })
+        return JsonResponse(get_user_info(request.user), safe=False)
         
     return JsonResponse({'status':'error', 'detail':'user not loged in'})
 
+def get_user_info(user):
+    if user.id != None:
+        return {
+            'status':'success',
+            #'first_name': request.user.first_name,
+            #'last_name':request.user.last_name,
+            'username':user.username,
+            'email' :user.client.email,
+            'privateCompany': user.client.privateCompany,
+            'businessName': user.client.businessName,
+            'is_superuser': user.is_superuser,
+        }
+    return {}
 
 @api_view(['POST'])
 @permission_classes((AllowAny, ))

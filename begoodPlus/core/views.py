@@ -4,6 +4,9 @@ from django.http import JsonResponse
 from django.db.models.functions import Greatest
 from django.contrib.postgres.search import TrigramSimilarity
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from campains.views import get_user_campains_serializer
+
+from client.views import get_user_info
 from .models import SvelteCartModal, SvelteCartProductEntery, SvelteContactFormModal, UserSearchData
 from django.urls import reverse
 
@@ -53,7 +56,7 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 import uuid
 
 from rest_framework.decorators import api_view, permission_classes
-
+@api_view(['POST', 'GET'])
 @ensure_csrf_cookie
 def set_csrf_token(request, factory_id=None):
     print('factory_id: ', factory_id)
@@ -66,7 +69,9 @@ def set_csrf_token(request, factory_id=None):
     else:
         uid = str(uuid.uuid4().hex)
     return JsonResponse({"details": "CSRF cookie set",
-                         'uid': uid})
+                         'uid': uid,
+                         'whoAmI': get_user_info(request.user),
+                         'campains': get_user_campains_serializer(request.user).data,}, safe=False)
 @api_view(['POST'])
 @permission_classes((AllowAny,))
 def svelte_contact_form(request):

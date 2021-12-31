@@ -14,14 +14,20 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.utils import timezone
 # Create your views here.
 # api view to get all the active campains of a user
+
+def get_user_campains_serializer(user):
+    campains = MonthCampain.objects.filter(is_shown=True, users__in=[user.client], endTime__gte=timezone.now())
+    serializer = ClientMonthCampainSerializer(campains, many=True)
+    return serializer
+
 @api_view(['GET'])
 @permission_classes((IsAuthenticated,))
 def get_user_campains(request):
     if request.method == 'GET':
         if request.user.is_authenticated:
-            campains = MonthCampain.objects.filter(is_shown=True, users__in=[request.user.client], endTime__gte=timezone.now())
-            serializer = ClientMonthCampainSerializer(campains, many=True)
-            return JsonResponse(serializer.data, safe=False)
+            
+            
+            return JsonResponse(get_user_campains_serializer(request.user).data, safe=False)
         else:
             return JsonResponse({
                 'status':'fail',
