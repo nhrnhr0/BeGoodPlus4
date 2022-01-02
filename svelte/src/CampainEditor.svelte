@@ -95,9 +95,6 @@ import {deepEqual} from './utils/utils.js'
 
 {#if object_id}
 <main>
-	<h1>object_id: {object_id}</h1>
-	
-
 	<!-- 
 		table of products with collumns:
 			order
@@ -149,8 +146,8 @@ import {deepEqual} from './utils/utils.js'
 						<thead>
 							<tr>
 								<th>כמות</th>
-								<th>מחיר</th>
-								<th>מחיר לצרכן</th>
+								<th>מחיר ליח' (לפני מע"מ)</th>
+								<th>מחיר מומלץ לצרכן (כולל מע"מ)</th>
 								<th>פעולות</th>
 							</tr>
 						</thead>
@@ -170,7 +167,7 @@ import {deepEqual} from './utils/utils.js'
 									<td>
 										<input type="number" name="" id="" bind:value={price.credit_price}>
 										<div class="price-diff">
-											{((((price.credit_price*0.83 / price.cach_price) - 1)*100)).toFixed(2)} %
+											{((((price.credit_price/1.17 / price.cach_price) - 1)*100)).toFixed(2)} %
 										</div>
 									</td>
 									<td>
