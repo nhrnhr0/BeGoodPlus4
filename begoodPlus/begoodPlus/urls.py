@@ -15,7 +15,7 @@ Including another URLconf
 """
 from campains.views import admin_get_all_campains, admin_get_campain_products, get_user_campains
 from core.views import test_celery_view
-from catalogImages.views import all_images_ids
+from catalogImages.views import admin_api_get_product_cost_price, all_images_ids
 from clientApi.views import ColorsClientViewSet, ImageClientViewSet, SizesClientViewSet,LogoClientViewSet, get_album_images
 from clientApi.views import AlbumClientViewSet
 from catalogImageDetail.views import SvelteCatalogImageDetailViewSet
@@ -76,6 +76,7 @@ from rest_framework.authtoken.views import obtain_auth_token
 urlpatterns = [
     path('admin-api/get-all-campaigns/', admin_get_all_campains),
     path('admin-api/get-campaign-products/<int:campain_id>', admin_get_campain_products),
+    path('admin-api/get_product_cost_price/<int:product_id>', admin_api_get_product_cost_price),
     path('test', test_celery_view),
     path('create_mini_table/<int:id>/',create_mini_table, name='create_mini_table'),
     

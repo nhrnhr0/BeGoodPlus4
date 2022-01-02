@@ -54,7 +54,7 @@ class CatalogAlbum(MPTTModel):
     parent = TreeForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='children')
     is_public = models.BooleanField(verbose_name=_('is public'), default=True)
     is_campain = models.BooleanField(verbose_name=_('is campain'), default=False)
-    
+    #campain = models.ForeignKey('MonthCampain', on_delete=models.CASCADE, null=True, blank=True, related_name='album')
     #renew_for = models.DurationField(null=True, blank=True, default=datetime.timedelta(days=3))
     #renew_after = models.DurationField(null=True, blank=True, default=datetime.timedelta(days=1))
     #timer = models.DateTimeField(null=True, blank=True)

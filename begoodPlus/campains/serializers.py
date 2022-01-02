@@ -46,6 +46,7 @@ class AdminProductCampainSerilizer(ModelSerializer):
     priceTable = priceTableSerializer(many=True)
     cimg = serializers.CharField(source='catalogImage.cimage')
     title = serializers.CharField(source='catalogImage.title')
+    cost_price = serializers.CharField(source='catalogImage.cost_price')
     class Meta:
         model = CampainProduct
-        fields = ('id','order', 'cimg','title', 'catalogImage', 'monthCampain', 'priceTable',)
+        fields = ('id','order', 'cimg','title', 'catalogImage', 'monthCampain', 'priceTable', 'cost_price')

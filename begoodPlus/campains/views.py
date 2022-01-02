@@ -16,9 +16,11 @@ from django.utils import timezone
 # api view to get all the active campains of a user
 
 def get_user_campains_serializer(user):
-    campains = MonthCampain.objects.filter(is_shown=True, users__in=[user.client], endTime__gte=timezone.now())
+    if(user.is_anonymous):
+        return {}
+    campains = MonthCampain.objects.filter(is_shown=True, users__in=[user.client], endTime__gte=timezone.now(), startTime__lte=timezone.now())
     serializer = ClientMonthCampainSerializer(campains, many=True)
-    return serializer
+    return serializer.data
 
 @api_view(['GET'])
 @permission_classes((IsAuthenticated,))
@@ -27,7 +29,7 @@ def get_user_campains(request):
         if request.user.is_authenticated:
             
             
-            return JsonResponse(get_user_campains_serializer(request.user).data, safe=False)
+            return JsonResponse(get_user_campains_serializer(request.user), safe=False)
         else:
             return JsonResponse({
                 'status':'fail',
@@ -75,6 +77,10 @@ def admin_get_campain_products(request, campain_id):
             
 
             products = CampainProduct.objects.filter(monthCampain=campain)
+            for p in products:
+                p.priceTable.all().delete()
+                #prices = PriceTable.objects.filter(campainProduct=p)
+                #prices.delete()
             products.delete()
             new_products = []
             for prod in data:
@@ -87,8 +93,7 @@ def admin_get_campain_products(request, campain_id):
                 
                 prices = []
                 for price in priceTable:
-                    pri, is_created = PriceTable.objects.get_or_create(**price)
-                    print(pri, is_created)
+                    pri = PriceTable.objects.create(**price)
                     prices.append(pri)
                 data.priceTable.set(prices)
                 print(is_created, data)

@@ -9,8 +9,9 @@ class ProductInline(admin.TabularInline):
     
 class MonthCampainAdmin(admin.ModelAdmin):
     #is_shown,name,users,startTime,endTime,products,album
-    list_display = ('name', 'is_shown', 'startTime', 'endTime', 'show_users', 'album', 'show_products')
+    list_display = ('name', 'can_users_see_campain','is_shown', 'startTime', 'endTime', 'show_users', 'album', 'show_products')
     #inlines = [ProductInline]
+    actions = ['copy_to_empty_campain']
     filter_horizontal = ('users',)#'products',)
     def change_view(self, request, object_id, form_url='', extra_context=None):
         extra_context = extra_context or {}
@@ -18,6 +19,11 @@ class MonthCampainAdmin(admin.ModelAdmin):
         return super(MonthCampainAdmin, self).change_view(
             request, object_id, form_url, extra_context=extra_context,
         )
+    def copy_to_empty_campain(self, request, queryset):
+        for campain in queryset:
+            campain.copy_to_empty_campain()
+        self.message_user(request, 'Campains copied')
+    copy_to_empty_campain.short_description = 'Copy to empty campain'
     #autocomplete_fields = ('catalogImage',)
 admin.site.register(MonthCampain, MonthCampainAdmin)
 

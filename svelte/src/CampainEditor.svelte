@@ -6,7 +6,7 @@ import {apiSearchProducts, fetch_wraper} from './api/api.js';
 import { Jumper } from 'svelte-loading-spinners'
 
 import {deepEqual} from './utils/utils.js'
-	import {GET_CAMPAIN_PRODUCTS_URL,CLOUDINARY_BASE_URL} from './consts/consts'
+	import {GET_CAMPAIN_PRODUCTS_URL,CLOUDINARY_BASE_URL,GET_PRODUCT_COST_PRICE_URL} from './consts/consts'
 	export let object_id;
 	let need_update = false;
 	let data;
@@ -20,7 +20,7 @@ import {deepEqual} from './utils/utils.js'
 			.then(data => data);
 		data = JSON.parse(JSON.stringify(resp));
 		server_data = JSON.parse(JSON.stringify(resp));
-		setInterval(check_server_updates, 5000);
+		setInterval(check_server_updates, 500);
 	});
 	
 
@@ -36,7 +36,12 @@ import {deepEqual} from './utils/utils.js'
 			need_update = true;
 		}
 	}
-
+	
+	function admin_api_get_cost_price(prudct_id) {
+		let url = GET_PRODUCT_COST_PRICE_URL + prudct_id;
+		return fetch(url)
+			.then(response => response.json())
+	}
 
 	function update_data_to_server() {
 		// post the data to the server and the same api point as GET_CAMPAIN_PRODUCTS_URL
@@ -45,6 +50,7 @@ import {deepEqual} from './utils/utils.js'
 			method: 'POST',
 			body: JSON.stringify(data)
 		});
+
 		console.log('response:', response);
 		response.then(resp => {
 			console.log('resp:', resp);
@@ -57,21 +63,24 @@ import {deepEqual} from './utils/utils.js'
 
 	function autocompleteItemSelected(item) {
 		if(data) {
-		console.log(data);
-		console.log(item);
-		let newProduct = {
-			order: data.length,
-			cimg: item.cimage,
-			title: item.title,
-			catalogImage: item.id,
-			priceTable: [],
-		}
-		
-			data.push(newProduct);
 			console.log(data);
-			data = data;
+			console.log(item);
+			let const_price = admin_api_get_cost_price(item.id).then((resp)=>{
+				console.log('const_price:', resp);
+				item.cost_price  = resp['cost_price']
+				let newProduct = {
+					order: data.length,
+					cimg: item.cimage,
+					title: item.title,
+					catalogImage: item.id,
+					priceTable: [],
+					cost_price: item.cost_price,
+				};
+				data.push(newProduct);
+				console.log(data);
+				data = data;			
+			});
 		}
-
 	}
 
 
@@ -87,9 +96,7 @@ import {deepEqual} from './utils/utils.js'
 {#if object_id}
 <main>
 	<h1>object_id: {object_id}</h1>
-	<h2>{GET_CAMPAIN_PRODUCTS_URL}</h2>
-	<h3>DATA: {JSON.stringify(data)}</h3>
-	<h3>server_data: {JSON.stringify(server_data)}</h3>
+	
 
 	<!-- 
 		table of products with collumns:
@@ -103,6 +110,7 @@ import {deepEqual} from './utils/utils.js'
 				<th>פעולות</th>
 				<th>סדר</th>
 				<th>תמונה</th>
+				<th>מחיר עלות</th>
 				<th>מחירים</th>
 			</tr>
 		</thead>
@@ -134,6 +142,9 @@ import {deepEqual} from './utils/utils.js'
 					-->
 				</td>
 				<td>
+					{product.cost_price} ₪
+				</td>
+				<td>
 					<table>
 						<thead>
 							<tr>
@@ -152,16 +163,22 @@ import {deepEqual} from './utils/utils.js'
 									</td>
 									<td>
 										<input type="number" name="" id="" bind:value={price.cach_price}>
+										<div class="price-diff">
+											<!-- מחיר מכירה  =( הרווח הרצוי – 1 ) / עלות רכישה מהספק. -->
+											{(((product.cost_price - price.cach_price)/(-1*price.cach_price))*100).toFixed(2)}%
+										</div>
 									</td>
 									<td>
 										<input type="number" name="" id="" bind:value={price.credit_price}>
+										<div class="price-diff">
+											{(((price.cach_price - price.credit_price)/(-1*price.credit_price))*100).toFixed(2)}%
+										</div>
 									</td>
 									<td>
 										<button on:click|preventDefault={(e)=> {
 											
 											// product.priceTable[i];
 											//product.priceTable = product.priceTable;
-											debugger;
 											product.priceTable.splice(i, 1);
 											product.priceTable = product.priceTable;
 											
@@ -172,7 +189,7 @@ import {deepEqual} from './utils/utils.js'
 							<tr>
 								<td>
 									<button on:click|preventDefault={()=> {
-											product.priceTable.push({'amount': 1, 'cach_price':1, 'credit_price':1});
+											product.priceTable.push({'amount': 1, 'cach_price':product.cost_price * 2, 'credit_price':product.cost_price * 2 *2});
 											product.priceTable = product.priceTable;
 										}
 									}>הוסף מחיר</button>
@@ -218,6 +235,10 @@ import {deepEqual} from './utils/utils.js'
 		</button>
 	{/if}
 	
+<!--
+	<h3>DATA: {JSON.stringify(data)}</h3>
+	<h3>server_data: {JSON.stringify(server_data)}</h3>
+-->
 </main>
 
 {/if} <!-- end of if object_id -->

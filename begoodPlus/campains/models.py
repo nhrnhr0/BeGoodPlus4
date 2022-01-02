@@ -6,6 +6,7 @@ from client.models import Client
 from django.utils.translation import gettext_lazy  as _
 from adminsortable.models import Sortable
 from catalogAlbum.models import CatalogAlbum
+from django.utils.text import slugify
 # Create your models here.
 class AmountBrakepoint(models.Model):
     #text = models.CharField(verbose_name=_('text'), max_length=100)
@@ -29,7 +30,7 @@ class PriceTable(models.Model):
     class Meta():
         verbose_name = _('price table')
         verbose_name_plural = _('price tables')
-        unique_together = ('amount','cach_price','credit_price')
+        #unique_together = ('amount','cach_price','credit_price')
     def __str__(self):
         return str(self.amount) + ' | ' + str(self.cach_price) + '₪' + ' | ' + str(self.credit_price) + '₪'
 
@@ -48,6 +49,7 @@ class CampainProduct(models.Model):
         return str(self.catalogImage)# + ' | ' + str(len(self.priceTable.all()))
 
 from django.utils.html import mark_safe
+from django.utils import timezone
 
 from datetime import datetime
 class MonthCampain(models.Model):
@@ -58,7 +60,7 @@ class MonthCampain(models.Model):
     endTime = models.DateTimeField(verbose_name=_('end time'), default=datetime.now, blank=True)
     #products = models.ManyToManyField(to=CampainProduct, verbose_name=_('products'))
     products = models.ManyToManyField(to=CatalogImage, verbose_name=_('products'), through='CampainProduct')
-    album = models.ForeignKey(to=CatalogAlbum, verbose_name=_('album'), on_delete=models.SET_NULL, null=True,blank=True)
+    album = models.ForeignKey(to=CatalogAlbum, verbose_name=_('album'), on_delete=models.CASCADE, null=True,blank=True, related_name='campain')
     
     def show_users(self):
         return ', '.join([str(user) for user in self.users.all()])
@@ -69,10 +71,25 @@ class MonthCampain(models.Model):
         ret += '</ul>'
         return mark_safe(ret)
     
+    def can_users_see_campain(self):
+        return self.startTime < timezone.now() and timezone.now() < self.endTime and self.is_shown
+    can_users_see_campain.boolean = True
+    def copy_to_empty_campain(self):
+        new_cmapain = MonthCampain.objects.create(name=self.name + ' (עותק)', startTime=self.startTime, endTime=self.endTime, is_shown=False)
+        campain_products = CampainProduct.objects.filter(monthCampain=self)
+        for product in campain_products:
+            new_campain_product = CampainProduct.objects.create(monthCampain=new_cmapain, catalogImage=product.catalogImage, order=product.order)
+            prices = product.priceTable.all()
+            for price in prices:
+                new_campain_product.priceTable.add(PriceTable.objects.create(amount=price.amount, cach_price=price.cach_price, credit_price=price.credit_price))
+        new_cmapain.save()
+        
+        
+    
     def save(self, *args, **kwargs):
         if self.album == None:
             #title,slug,description,fotter,keywords,images,parent,is_public 
-            self.album = CatalogAlbum.objects.create(title=self.name,slug='campain_'+self.name, description='', fotter='',keywords='',parent=None, is_public=False, is_campain=True)
+            self.album = CatalogAlbum.objects.create(title=self.name,slug='campain_'+ slugify(self.name), description='', fotter='',keywords='',parent=None, is_public=False, is_campain=True)
         print(self.album.images.count())
         self.album.images.clear()
         print(self.album.images.count())
