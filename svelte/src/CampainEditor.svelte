@@ -165,14 +165,12 @@ import {deepEqual} from './utils/utils.js'
 										<input type="number" name="" id="" bind:value={price.cach_price}>
 										<div class="price-diff">
 											{(((price.cach_price / product.cost_price) - 1)*100).toFixed(2)} %
-											hey
 										</div>
 									</td>
 									<td>
 										<input type="number" name="" id="" bind:value={price.credit_price}>
 										<div class="price-diff">
-											{(((price.credit_price / price.cach_price) - 1)*100).toFixed(2)} %
-											hey
+											{((((price.credit_price*0.83 / price.cach_price) - 1)*100)).toFixed(2)} %
 										</div>
 									</td>
 									<td>
