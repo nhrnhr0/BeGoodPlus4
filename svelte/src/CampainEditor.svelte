@@ -110,7 +110,7 @@ import {deepEqual} from './utils/utils.js'
 				<th>פעולות</th>
 				<th>סדר</th>
 				<th>תמונה</th>
-				<th>מחיר עלות</th>
+				<th>מחיר עלות (לפני מע"מ)</th>
 				<th>מחירים</th>
 			</tr>
 		</thead>
@@ -164,14 +164,13 @@ import {deepEqual} from './utils/utils.js'
 									<td>
 										<input type="number" name="" id="" bind:value={price.cach_price}>
 										<div class="price-diff">
-											<!-- מחיר מכירה  =( הרווח הרצוי – 1 ) / עלות רכישה מהספק. -->
-											{(((product.cost_price - price.cach_price)/(-1*price.cach_price))*100).toFixed(2)}%
+											{(((price.cach_price / product.cost_price) - 1)*100).toFixed(2)} %
 										</div>
 									</td>
 									<td>
 										<input type="number" name="" id="" bind:value={price.credit_price}>
 										<div class="price-diff">
-											{(((price.cach_price - price.credit_price)/(-1*price.credit_price))*100).toFixed(2)}%
+											{(((price.credit_price / price.cach_price) - 1)*100).toFixed(2)} %
 										</div>
 									</td>
 									<td>
