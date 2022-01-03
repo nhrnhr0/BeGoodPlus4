@@ -1,9 +1,14 @@
+import io
 import uuid
 from django.db.models.fields import json
+from django.http.response import FileResponse
 from django.utils.safestring import mark_safe
 from colorhash import ColorHash
 from django.db import models
 from matplotlib.colors import rgb2hex
+from numpy.ma.core import prod
+import xlwt
+from xlwt.Style import XFStyle
 from catalogImages.models import CatalogImage
 from core.models import uuid2slug
 from django.db.models.fields.related import OneToOneField
@@ -15,10 +20,11 @@ from begoodPlus.secrects import TELEGRAM_BOT_TOKEN
 from catalogAlbum.models import CatalogAlbum
 from django.contrib.auth.models import User
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+from json2html import *
 from PIL import Image
 from io import BytesIO
 import colorsys
@@ -34,12 +40,12 @@ class UserLogEntry(models.Model):
         return self.action
     
     def admin_description(self):
-        return str(self.id) + ')\t \t' + self.timestamp.strftime("%H:%M:%S.%f")[:-3] + "\t - \t" + self.action
+        data =  json2html.convert(json=json.loads(self.extra))
+        return str(self.id) + ')\t \t' + self.timestamp.strftime("%H:%M:%S.%f")[:-3] + "\t - \t" + self.action + "\t - \t" + data
         #newExtra = self.extra
         #del newExtra['a']
         #del newExtra['timestemp']
         #return self.timestamp.strftime("%d/%m/%Y, %H:%M:%S.%f")[:-3] + ' || ' + self.action + ' || ' + str(self.extra)
-    
 
     
 class UserSessionLogger(models.Model):
@@ -147,6 +153,30 @@ class UserSessionLogger(models.Model):
             'chart': chart,
         }
         return ret
+    
+    def get_sum_products_watch_time(self,data):
+        sum_products_watch_time = {}
+        logs = data['session']['logs']
+        for idx, logStr  in enumerate(logs):
+            try:
+                
+                #log_data = json.loads(logStr['data'])
+                log_data = logStr['data']
+                if log_data['t'] == 'open product':
+                    if(idx < logs.__len__() - 1 and idx > 0):
+                        last_log_data = logs[idx-1]['data']
+                        s_time = datetime.strptime(last_log_data['timestemp'],'%Y-%m-%dT%H:%M:%S.%fZ')
+                        e_time = datetime.strptime(log_data['timestemp'],'%Y-%m-%dT%H:%M:%S.%fZ')
+                        duration = e_time - s_time#logs[idx+1]['data']['timestemp'] - 
+                        product_id = log_data['w']['id']
+                        if product_id in sum_products_watch_time:
+                            sum_products_watch_time[product_id] += duration
+                        else:
+                            sum_products_watch_time[product_id] = duration
+            except:
+                pass
+        return sum_products_watch_time
+    
     def get_pie_cart(self,data):
         if(len(data) == 0):
             return None
@@ -301,7 +331,7 @@ class UserSessionLogger(models.Model):
         bot = telegram.Bot(token=TELEGRAM_BOT_TOKEN)
         #for chat_id in self.chat_ids:
         messageObj = self.generate_telegram_message()
-        chat_id = '354783543'
+        chat_id = '-666095377'
         if(messageObj['chart']):
             buff = fig2img(messageObj['chart'])
             print(bot.send_document(chat_id=chat_id, document=buff, parse_mode='HTML'))
@@ -316,6 +346,44 @@ class UserSessionLogger(models.Model):
             bot.send_message(chat_id, info, parse_mode='HTML')
         #print(bot.send_message(chat_id=chat_id, text=messageObj['message'], parse_mode='HTML'))
     
+    def generate_user_liked_products(self):
+        data = self.analyze_user_session()
+        sum_products_watch_time = self.get_sum_products_watch_time(data)
+        
+        watch_duration = []
+        for id in sum_products_watch_time:
+            ducation = sum_products_watch_time[id]
+            product = CatalogImage.objects.get(id=id)
+            watch_duration.append({'id':id, 'title':product.title, 'duration':ducation})
+        
+        CHANCE_ADD_TO_CART = 100
+        CHANCE_PRODUCT_VIEW = 1
+        cart_products = []
+        for cart_product in data['all_add_to_cart']:
+            cart_products.append({'id': cart_product, 'title': data['all_add_to_cart'][cart_product]['ti']})
+        
+        
+        watch_products = []
+        return {
+            'cart': cart_products,
+            'watch': pd.DataFrame(watch_duration)
+        }
+        '''
+        if len(watch_duration) != 0:
+            df = pd.DataFrame(watch_duration)
+            df['total'] = df.duration / df.duration.sum() * 100
+        
+        
+            df = df.sort_values(by=['total'], ascending=False)
+            for index, row in df.iterrows():
+                product = row
+                watch_products.append({'id': product.id, 'chance': "{:.2f}".format(CHANCE_PRODUCT_VIEW * product.total)})
+        
+        '''
+        
+        ### send products as telegram message:
+        
+        
     def analyze_user_session(self):
         # UserSessionLogger.objects.first().analyze_user_session()
         username = None
@@ -445,3 +513,70 @@ class Client(models.Model):
     
     comment = models.TextField(verbose_name=_('comments'), blank=True, null=True)
     
+
+    
+    def generate_user_products_from_sessions(self):
+        sessions = UserSessionLogger.objects.filter(user=self.user)
+        cart_products = []
+        product_duration = pd.DataFrame()
+        info = {
+            'user': self.user,
+            'sessions_count': len(sessions),
+            'sessions': [{'id': session.id, 'start': session.session_start_timestemp, 'end':session.session_end_timestemp, 'logs': session.logs.count()} for session in sessions],
+        }
+        for session in sessions:
+            temp = session.generate_user_liked_products()
+            cart_products.extend(temp['cart'])
+            product_duration = product_duration.append(temp['watch'])
+        info['cart_products'] = cart_products
+        # remove from product_duration dataFrame rows with duration < MIN_DUR secound and duration > MAX_DUR
+        MIN_DUR = timedelta(seconds=1)
+        MAX_DUR = timedelta(minutes=30)
+        max_time = MIN_DUR
+        if(product_duration.shape[0] == 0):
+            product_duration['duration'] = MAX_DUR-MIN_DUR
+        else:
+            product_duration = product_duration[product_duration.duration > MIN_DUR]
+            product_duration = product_duration[product_duration.duration < MAX_DUR]
+            max_time = product_duration.max().duration
+        cart_df = pd.DataFrame(cart_products)
+        # add max_time to every row of cart_df
+        cart_df['duration'] = max_time
+        product_duration = product_duration.append(cart_df)
+    
+        product_duration['prc'] = product_duration.duration / product_duration.duration.sum() * 100
+        #print(product_duration.head())
+        #print(info)
+        # sort product_duration by prc
+        product_duration = product_duration.sort_values(by='prc', ascending=False)
+        buffer = self.export_dataframe_to_excel(product_duration)
+        return buffer
+    
+    def export_dataframe_to_excel(self, df):
+        buffer = io.BytesIO()
+        wb = xlwt.Workbook()
+        ws = wb.add_sheet('sheet1',cell_overwrite_ok=True)
+        ws.cols_right_to_left = True
+        title_style = XFStyle()
+        alignment_center = xlwt.Alignment()
+        alignment_center.horz = xlwt.Alignment.HORZ_CENTER
+        alignment_center.vert = xlwt.Alignment.VERT_CENTER
+        title_style.alignment = alignment_center
+        
+        title_style.font.bold = True
+        
+        for header in df.columns:
+            ws.write(0, df.columns.get_loc(header), header, title_style)
+        
+        
+        inc_row = 0
+        for row_num, row in df.iterrows():
+            ws.write(inc_row+1, 0, row['id'], title_style)
+            ws.write(inc_row+1, 1, row['title'], title_style)
+            ws.write(inc_row+1, 2, row['duration'].total_seconds(), title_style)
+            ws.write(inc_row+1, 3, row['prc'], title_style)
+            
+            inc_row += 1
+        wb.save(buffer)
+        buffer.seek(0)
+        return buffer
