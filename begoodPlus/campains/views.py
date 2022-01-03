@@ -15,7 +15,7 @@ from django.utils import timezone
 # Create your views here.
 # api view to get all the active campains of a user
 
-def get_user_campains_serializer(user):
+def get_user_campains_serializer_data(user):
     if(user.is_anonymous):
         return {}
     campains = MonthCampain.objects.filter(is_shown=True, users__in=[user.client], endTime__gte=timezone.now(), startTime__lte=timezone.now())
@@ -29,7 +29,7 @@ def get_user_campains(request):
         if request.user.is_authenticated:
             
             
-            return JsonResponse(get_user_campains_serializer(request.user), safe=False)
+            return JsonResponse(get_user_campains_serializer_data(request.user), safe=False)
         else:
             return JsonResponse({
                 'status':'fail',

@@ -4,7 +4,7 @@ from django.http import JsonResponse
 from django.db.models.functions import Greatest
 from django.contrib.postgres.search import TrigramSimilarity
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from campains.views import get_user_campains_serializer
+from campains.views import get_user_campains_serializer_data
 
 from client.views import get_user_info
 from .models import SvelteCartModal, SvelteCartProductEntery, SvelteContactFormModal, UserSearchData
@@ -71,7 +71,7 @@ def set_csrf_token(request, factory_id=None):
     return JsonResponse({"details": "CSRF cookie set",
                          'uid': uid,
                          'whoAmI': get_user_info(request.user),
-                         'campains': get_user_campains_serializer(request.user),}, safe=False)
+                         'campains': get_user_campains_serializer_data(request.user),}, safe=False)
 @api_view(['POST'])
 @permission_classes((AllowAny,))
 def svelte_contact_form(request):
@@ -113,6 +113,7 @@ def svelte_cart_form(request):
             name = body['name']  or ''
             email = body['email']  or ''
             phone = body['phone']  or ''
+            business_name = body['business_name']  or ''
             uuid = body['uuid'] or ''
             message = body['message']  or ''
             products = body['products'] or ''
@@ -121,7 +122,7 @@ def svelte_cart_form(request):
                 user = None
             else:
                 user = request.user
-            data = SvelteCartModal.objects.create(user=user, device=device,uid=uuid, name=name, phone=phone, email=email, message=message)
+            data = SvelteCartModal.objects.create(user=user, device=device,uid=uuid,businessName=business_name, name=name, phone=phone, email=email, message=message)
             #data.products.set(products)
             products_objs = SvelteCartProductEntery.objects.bulk_create([SvelteCartProductEntery(product_id=p['id'],amount=p['amount'] or 1) for p in products])
             data.productEntries.set(products_objs)
