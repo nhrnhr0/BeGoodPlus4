@@ -20,7 +20,7 @@ celerybeat.pid
 begoodPlus/env2
 frontend/my-svelte-project/public/**
 env2
-
+newEnv
 /node_modules/
 /public/build/
 
