@@ -33,6 +33,10 @@ def close_inactive_user_sessions():
             session.session_end_timestemp = last_log.timestamp
             session.save()
             ret.append({session, True})
+            try:
+                session.send_telegram_message()
+            except:
+                pass
         else:
             ret.append({session, False})
     return ret
