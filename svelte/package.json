@@ -6,7 +6,7 @@
       "patterns": [
         "src"
       ],
-      "extensions": "svelte"
+      "extensions": ["svelte", "js"]
     }
   },
   "scripts": {
