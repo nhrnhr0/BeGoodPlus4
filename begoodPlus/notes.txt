@@ -1,7 +1,20 @@
 ### COPY database to backups in boostpop
 PGPASSWORD=password pg_dump -h localhost -U postgres -d msdb > /home/ubuntu/db_backups/msdb_"`date +"%d-%m-%Y-%H_%M_%S"`".sql
 
+### COPY from sql file to local docker
+# on cmd:
+docker ps
+docker cp <src-path> <container>:/tmp/db.sql
+docker exec -it <container name> /bin/bash
 
+## example 
+docker cp msdb_04-01-2022-21_01_01.sql pg:/tmp/db.sql
+docker exec -it pg /bin/bash
+# create new database
+        psql -h localhost -U postgres
+        CREATE DATABASE testdb5;
+        exit
+PGPASSWORD=password psql -h localhost -U postgres -d testdb5 < /tmp/db.sql 
 
 CELERY:
 run windows:
