@@ -1,6 +1,6 @@
 sudo git pull
 source ../env/bin/activate
-pip install -r fianl_req.txt
+pip install -r final_req.txt
 python manage.py migrate
 python manage.py collectstatic --noinput
 sudo supervisorctl restart begoodcelery
