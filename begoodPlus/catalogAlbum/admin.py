@@ -1,3 +1,4 @@
+from django import forms
 from django.contrib import admin
 
 from catalogAlbum.models import CatalogAlbum, ThroughImage
@@ -6,18 +7,22 @@ from django.utils.translation import gettext_lazy  as _
 from catalogImages.models import CatalogImage
 from adminsortable.admin import (SortableAdmin, SortableTabularInline)
 
-'''
-class CatalogImageInline(admin.TabularInline):
-    model = CatalogAlbum.images.through
-    ordering = ('weight',)
-'''
-class CatalogImageInline(SortableTabularInline):
-    model =  ThroughImage
 
+class CatalogImageInlineFormset(forms.BaseInlineFormSet):
+    def __init__(self, *args, **kwargs):
+        super(CatalogImageInlineFormset, self).__init__(*args, **kwargs)
+        self.queryset = self.queryset.select_related("catalogImage", "catalogAlbum")
+
+class CatalogImageInline(SortableTabularInline):
+    model = CatalogAlbum.images.through
+    formset = CatalogImageInlineFormset
+    extra = 0
+    fields = ('image_order', 'catalogImage', 'catalogAlbum')
+    readonly_fields = ('image_order','catalogImage', 'catalogAlbum')
 
 from mptt.admin import MPTTModelAdmin
 from mptt.admin import DraggableMPTTAdmin
-from django.db.models import Count
+from django.db.models import Count, fields
 
 
 
@@ -25,7 +30,6 @@ class CatalogAlbumAdmin(SortableAdmin, DraggableMPTTAdmin):
     inlines = (CatalogImageInline,)
     list_display = ('tree_actions','indented_title', 'slug' ,'related_images_count','is_public','is_campain',)#'get_absolute_url')
     readonly_fields = ('related_images_count',)
-    
     #readonly_fields = ('get_absolute_url',)
     prepopulated_fields = {'slug': ('title',),}
     
@@ -38,7 +42,7 @@ class CatalogAlbumAdmin(SortableAdmin, DraggableMPTTAdmin):
     actions  = ['make_public','make_private']
     def get_queryset(self, request):
         qs = super().get_queryset(request)
-
+        qs = qs.prefetch_related('images')
         # Add cumulative product count
         qs = qs.annotate(image_count=Count('images'))
         return qs

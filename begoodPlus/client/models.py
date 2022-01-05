@@ -28,6 +28,8 @@ from json2html import *
 from PIL import Image
 from io import BytesIO
 import colorsys
+from tabulate import tabulate
+
 # Create your models here.
 class UserLogEntry(models.Model):
     #user = models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,null=True, blank=True)
@@ -517,6 +519,10 @@ class Client(models.Model):
     
     def generate_user_products_from_sessions(self):
         sessions = UserSessionLogger.objects.filter(user=self.user)
+        uids = [session.uid for session in sessions]
+        # remove duplicates from uids
+        uids = list(set(uids))
+        sessions = UserSessionLogger.objects.filter(uid__in=uids)
         cart_products = []
         product_duration = pd.DataFrame()
         info = {
@@ -538,17 +544,42 @@ class Client(models.Model):
         else:
             product_duration = product_duration[product_duration.duration > MIN_DUR]
             product_duration = product_duration[product_duration.duration < MAX_DUR]
+            #product_duration = product_duration[product_duration.duration != np.NaN]
             max_time = product_duration.max().duration
+            if pd.isnull(max_time):
+                max_time = MIN_DUR
         cart_df = pd.DataFrame(cart_products)
         # add max_time to every row of cart_df
         cart_df['duration'] = max_time
         product_duration = product_duration.append(cart_df)
-    
-        product_duration['prc'] = product_duration.duration / product_duration.duration.sum() * 100
+        product_duration = product_duration.dropna()
+        if product_duration.empty:
+            return None
+        # sum duration of each product based on col id
+        
+        #v = tabulate(df, headers='keys', tablefmt='psql')
+        #print(v)
+        #product_duration = product_duration.groupby(['title'])
+        print(product_duration.head())
+        product_duration = product_duration.groupby('id')['duration'].agg('sum').reset_index()
+        max_time = product_duration.duration.max()
+        #print(tabulate(df, headers='keys', tablefmt='psql'))
+        print(product_duration.head())
+        sum = product_duration.duration.sum() * 100
+        if sum == 0:
+            sum = 1
+        print('max_time: ' + str(max_time))
+        product_duration['prc'] = product_duration.duration / sum
+        product_duration['prc2'] = product_duration.duration / max_time
+        product_duration['duration'] = product_duration['duration'].apply(lambda x: x.total_seconds())
         #print(product_duration.head())
         #print(info)
         # sort product_duration by prc
         product_duration = product_duration.sort_values(by='prc', ascending=False)
+        print('==============================', 'product duration')
+        print(product_duration.head())
+        print('==============================', 'product duration')
+        
         buffer = self.export_dataframe_to_excel(product_duration)
         return buffer
     
@@ -571,11 +602,16 @@ class Client(models.Model):
         
         inc_row = 0
         for row_num, row in df.iterrows():
-            ws.write(inc_row+1, 0, row['id'], title_style)
-            ws.write(inc_row+1, 1, row['title'], title_style)
-            ws.write(inc_row+1, 2, row['duration'].total_seconds(), title_style)
-            ws.write(inc_row+1, 3, row['prc'], title_style)
-            
+            #i = 0
+            for header in df.columns:
+                col_loc = df.columns.get_loc(header)
+                ws.write(inc_row+1,col_loc , row[header], title_style)
+                #i+=1
+            #ws.write(inc_row+1, 0, row['id'], title_style)
+            #ws.write(inc_row+1, 1, row['title'], title_style)
+            #ws.write(inc_row+1, 2, row['duration'].total_seconds(), title_style)
+            #ws.write(inc_row+1, 3, row['prc'], title_style)
+            #ws.write(inc_row+1, 4, row['prc2'], title_style)
             inc_row += 1
         wb.save(buffer)
         buffer.seek(0)

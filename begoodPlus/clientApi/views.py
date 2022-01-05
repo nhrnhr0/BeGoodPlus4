@@ -43,16 +43,17 @@ from rest_framework.decorators import api_view, renderer_classes
 from rest_framework.renderers import JSONRenderer, TemplateHTMLRenderer
 from django.views.decorators.cache import cache_page
 import functools
+from django.db import connection
 
 @api_view(('GET',))
 @renderer_classes((JSONRenderer,))
 def get_album_images(request, pk):
-    data = expensive_get_album_images(pk)
-    return Response(data)
-
-@functools.lru_cache(maxsize=256)
-def expensive_get_album_images(pk):
     album = CatalogAlbum.objects.get(id=pk)
     images = album.images.order_by('throughimage__image_order')
+    images = images.prefetch_related('colors','sizes','albums').select_related('packingTypeClient')
     ser = ImageClientApi(images, many=True)
-    return ser.data
+    data = ser.data
+    print(connection.queries)
+    print(len(connection.queries))
+    
+    return Response(data)
