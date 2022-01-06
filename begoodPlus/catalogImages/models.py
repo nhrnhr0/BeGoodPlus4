@@ -30,7 +30,7 @@ class CatalogImage(models.Model):
     desc.short_description= _('short description')
     cimage = models.CharField(verbose_name=_('cloudinary image url'), null=True, blank=True, max_length=2047)#CloudinaryField('product_image', overwrite=True,resource_type="image",null=True, blank=True)
     image = models.ImageField(verbose_name=_("image"), null=True, blank=True)
-    local_image = models.ImageField(verbose_name=_("local image"), null=True, blank=True)
+    image_thumbnail = models.ImageField(verbose_name=_("local image"), null=True, blank=True)
     cost_price = models.FloatField(verbose_name=_('cost price'), blank=False, null=False, default=1)
     client_price = models.FloatField(verbose_name=_('store price'),  blank=False, null=False, default=1)
     recomended_price = models.FloatField(verbose_name=_('private client price'),  blank=False, null=False, default=1)
