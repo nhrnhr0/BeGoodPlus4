@@ -29,8 +29,7 @@ class CatalogImage(models.Model):
         return self.description[0:30]
     desc.short_description= _('short description')
     cimage = models.CharField(verbose_name=_('cloudinary image url'), null=True, blank=True, max_length=2047)#CloudinaryField('product_image', overwrite=True,resource_type="image",null=True, blank=True)
-    image = models.ImageField(verbose_name=_("image"))
-    image_thumbnail = models.ImageField(verbose_name=_("image thumbnail"), null=True, blank=True)
+    image = models.ImageField(verbose_name=_("image"), null=True, blank=True)
     cost_price = models.FloatField(verbose_name=_('cost price'), blank=False, null=False, default=1)
     client_price = models.FloatField(verbose_name=_('store price'),  blank=False, null=False, default=1)
     recomended_price = models.FloatField(verbose_name=_('private client price'),  blank=False, null=False, default=1)
@@ -137,26 +136,34 @@ class CatalogImage(models.Model):
     
     def save(self, *args, **kwargs):
         
-        if self.image:
+        if bool(self.image.name):
             # fails if your don't upload an image, so don't upload image to cloudinary
+            mfile = None
             try:
                 output = CatalogImage.optimize_image(self.image, size=(923, 715))
-                self.image = InMemoryUploadedFile(output, 'ImageField', "%s.png" % self.image.name.split('.')[0], 'image/PNG',
+                mfile = InMemoryUploadedFile(output, 'ImageField', "%s.png" % self.image.name.split('.')[0], 'image/PNG',
                                             sys.getsizeof(output), None)
-                output2 = CatalogImage.optimize_tubmail(self.image, size=(250,250))
-                self.image_thumbnail = InMemoryUploadedFile(output2, 'ImageField', "image_thumbnail_%s.png" % self.image.name.split('.')[0], 'image/PNG',
-                                            sys.getsizeof(output2), None)
+                
+                #output2 = CatalogImage.optimize_tubmail(self.image, size=(250,250))
+                #self.image_thumbnail = InMemoryUploadedFile(output2, 'ImageField', "image_thumbnail_%s.png" % self.image.name.split('.')[0], 'image/PNG',
+                #                            sys.getsizeof(output2), None)
+                #super(CatalogImage, self).save(*args,**kwargs)
             except:
                 pass
             try:
-                fname = Path(self.image.file.name).with_suffix('').name
+                #fname = Path(self.image.file.name).with_suffix('').name
                 #fname = fname.substring(0, fname.lastIndexOf('.'))
-                res = cloudinary.uploader.upload(self.image.file,
-                    folder = "site/products/", 
-                    public_id = fname
-                    )#public_id = self.title + '_' + str(self.id))
-                self.cimage = 'v' + str(res['version']) +'/'+ res['public_id']
-                #self.save()
+                if mfile:
+                    res = cloudinary.uploader.upload(mfile,
+                        folder = "site/products/", 
+                        #public_id = fname,
+                        unique_filename = False,
+                        use_filename = True,
+                        overwrite=True,
+                        invalidate=True
+                        )#public_id = self.title + '_' + str(self.id))
+                    self.cimage = 'v' + str(res['version']) +'/'+ res['public_id']
+                    self.image = None
                 pass
             except Exception as e:
                 print(e)
