@@ -140,6 +140,15 @@ class CatalogImage(models.Model):
         if self.image:
             # fails if your don't upload an image, so don't upload image to cloudinary
             try:
+                output = CatalogImage.optimize_image(self.image, size=(923, 715))
+                self.image = InMemoryUploadedFile(output, 'ImageField', "%s.png" % self.image.name.split('.')[0], 'image/PNG',
+                                            sys.getsizeof(output), None)
+                output2 = CatalogImage.optimize_tubmail(self.image, size=(250,250))
+                self.image_thumbnail = InMemoryUploadedFile(output2, 'ImageField', "image_thumbnail_%s.png" % self.image.name.split('.')[0], 'image/PNG',
+                                            sys.getsizeof(output2), None)
+            except:
+                pass
+            try:
                 fname = Path(self.image.file.name).with_suffix('').name
                 #fname = fname.substring(0, fname.lastIndexOf('.'))
                 res = cloudinary.uploader.upload(self.image.file,
@@ -151,6 +160,8 @@ class CatalogImage(models.Model):
                 pass
             except Exception as e:
                 print(e)
+            
+            
         super(CatalogImage, self).save(*args,**kwargs)
         '''
             try:
