@@ -30,6 +30,7 @@ class CatalogImage(models.Model):
     desc.short_description= _('short description')
     cimage = models.CharField(verbose_name=_('cloudinary image url'), null=True, blank=True, max_length=2047)#CloudinaryField('product_image', overwrite=True,resource_type="image",null=True, blank=True)
     image = models.ImageField(verbose_name=_("image"), null=True, blank=True)
+    local_image = models.ImageField(verbose_name=_("local image"), null=True, blank=True)
     cost_price = models.FloatField(verbose_name=_('cost price'), blank=False, null=False, default=1)
     client_price = models.FloatField(verbose_name=_('store price'),  blank=False, null=False, default=1)
     recomended_price = models.FloatField(verbose_name=_('private client price'),  blank=False, null=False, default=1)
@@ -144,9 +145,9 @@ class CatalogImage(models.Model):
                 mfile = InMemoryUploadedFile(output, 'ImageField', "%s.png" % self.image.name.split('.')[0], 'image/PNG',
                                             sys.getsizeof(output), None)
                 
-                #output2 = CatalogImage.optimize_tubmail(self.image, size=(250,250))
-                #self.image_thumbnail = InMemoryUploadedFile(output2, 'ImageField', "image_thumbnail_%s.png" % self.image.name.split('.')[0], 'image/PNG',
-                #                            sys.getsizeof(output2), None)
+                output2 = CatalogImage.optimize_tubmail(self.image, size=(250,250))
+                self.local_image = InMemoryUploadedFile(output2, 'ImageField', "image_thumbnail_%s.png" % self.image.name.split('.')[0], 'image/PNG',
+                                           sys.getsizeof(output2), None)
                 #super(CatalogImage, self).save(*args,**kwargs)
             except:
                 pass
