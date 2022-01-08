@@ -23,14 +23,14 @@ class FirstImageSerializer(serializers.ModelSerializer):
         fields = ('id','title', 'cimage')
 
 class AlbumClientApi(serializers.ModelSerializer):
-    first_image = serializers.SerializerMethodField('_get_first_image')
+    '''first_image = serializers.SerializerMethodField('_get_first_image')
     def _get_first_image(self, obj):
         serializer = FirstImageSerializer(obj.images.order_by("throughimage__image_order").first(),context=self.context,)
         return serializer.data
-    
+    '''
     class Meta:
         model = CatalogAlbum
-        fields = ('id', 'title','slug','description','fotter','is_public','is_campain', 'first_image',)
+        fields = ('id', 'title','slug','description','fotter','is_public','is_campain')#, 'first_image',)
 
 class ImageClientApi(serializers.ModelSerializer):
     packing_type = serializers.CharField(source='packingTypeClient.name')
