@@ -130,7 +130,9 @@ def svelte_cart_form(request):
             send_cart_email.delay(data.id)
             return JsonResponse({
                 'status':'success',
-                'detail':'form sent successfuly'
+                'detail':'form sent successfuly',
+                'cart_id': data.id,
+                'product_ids': [p.product_id for p in products_objs]
                 })
         except Exception as e:
             return JsonResponse({
