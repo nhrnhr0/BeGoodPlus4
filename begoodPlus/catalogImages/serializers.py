@@ -9,12 +9,13 @@ from productSize.models import ProductSize
 from packingType.models import PackingType
 from provider.models import Provider
 import datetime
+
+# I don't think this is used somewhere.
 class CatalogImageApiSerializer(serializers.ModelSerializer):
     class Meta:
         model = CatalogImage
         fields = ('id','date_modified','title', 'description', 'barcode',
-                  'whatsapp_text', 'image',
-                  'cost_price', 'client_price', 'recomended_price', 
+                  'whatsapp_text', 'image', 'albums',
                   'packingTypeProvider', 'packingTypeClient',
                   'colors', 'sizes', 'providers', 'can_tag', 'detailTabel')
         extra_kwargs = {"image": {"required": False, "allow_null": True}}

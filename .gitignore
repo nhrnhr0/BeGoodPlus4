@@ -21,3 +21,8 @@ begoodPlus/env2
 frontend/my-svelte-project/public/**
 env2
 newEnv
+/node_modules/
+/public/build/
+
+.DS_Store
+svelte/src/config.js

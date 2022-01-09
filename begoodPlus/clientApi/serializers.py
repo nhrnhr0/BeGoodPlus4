@@ -30,7 +30,7 @@ class AlbumClientApi(serializers.ModelSerializer):
     
     class Meta:
         model = CatalogAlbum
-        fields = ('id', 'title','slug','description','fotter','is_public', 'first_image')
+        fields = ('id', 'title','slug','description','fotter','is_public','is_campain', 'first_image',)
 
 class ImageClientApi(serializers.ModelSerializer):
     packing_type = serializers.CharField(source='packingTypeClient.name')

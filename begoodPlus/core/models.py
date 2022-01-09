@@ -120,6 +120,7 @@ class SvelteCartModal(models.Model):
     device = models.CharField(verbose_name=_('device'), max_length=250)
     uid = models.UUIDField(verbose_name=_('uuid'), null=True, blank=True)
     name = models.CharField(verbose_name=_('name'), max_length=120)
+    businessName = models.CharField(verbose_name=_('business name'), max_length=120, null=True, blank=True)
     phone = models.CharField(verbose_name=_('phone'), max_length=120)
     email = models.EmailField(verbose_name=_('email'), max_length=120)
     products = models.ManyToManyField(to=CatalogImage, blank=True)

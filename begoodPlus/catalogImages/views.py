@@ -7,7 +7,14 @@ from rest_framework import status
 from .serializers import CatalogImageSerializer, CatalogImageApiSerializer
 from rest_framework.request import Request
 from catalogImageDetail.models import CatalogImageDetail
-
+def admin_api_get_product_cost_price(request, product_id):
+    if request.user.is_superuser:
+        ret = {}
+        if request.method == "GET":
+            catalogImage = CatalogImage.objects.get(pk=product_id)
+            ret = {'cost_price': catalogImage.cost_price}
+        return JsonResponse(ret)
+    
 def all_images_ids(request):
     ret = {}
     if request.method == "GET":
