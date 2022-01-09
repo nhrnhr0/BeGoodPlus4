@@ -86,12 +86,14 @@ class SvelteCartModalAdmin(admin.ModelAdmin):
             
             ws.write(4, 0, "id",title_style)
             ws.write(4, 1, "שם",title_style)
-            ws.write(4, 2, "ספקים",title_style)
+            ws.write(4, 2, "כמות",title_style)
+            ws.write(4, 3, "ספקים",title_style)
             
-            for idx, product in enumerate(obj.products.all()):
-                ws.write(5 + idx, 0, product.id,value_style)
-                ws.write(5 + idx, 1, product.title,value_style)
-                ws.write(5 + idx, 2, '\n\r'.join(list(product.providers.values_list('name', flat=True))),value_style)
+            for idx, entry in enumerate(obj.productEntries.all()):
+                ws.write(5 + idx, 0, entry.product.id,value_style)
+                ws.write(5 + idx, 1, entry.product.title,value_style)
+                ws.write(5 + idx, 2, entry.amount, value_style)
+                ws.write(5 + idx, 3, '\n\r'.join(list(entry.product.providers.values_list('name', flat=True))),value_style)
                 #ws.write(3 + idx, 2, product.providers)
             #user,device,name,phone,email,products,created_date
         wb.save(buffer)
