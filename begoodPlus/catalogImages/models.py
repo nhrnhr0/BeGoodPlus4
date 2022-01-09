@@ -144,16 +144,6 @@ class CatalogImage(models.Model):
                 output = CatalogImage.optimize_image(self.image, size=(923, 715))
                 mfile = InMemoryUploadedFile(output, 'ImageField', "%s.png" % self.image.name.split('.')[0], 'image/PNG',
                                             sys.getsizeof(output), None)
-                
-                output2 = CatalogImage.optimize_tubmail(self.image, size=(250,250))
-                self.local_image = InMemoryUploadedFile(output2, 'ImageField', "image_thumbnail_%s.png" % self.image.name.split('.')[0], 'image/PNG',
-                                           sys.getsizeof(output2), None)
-                #super(CatalogImage, self).save(*args,**kwargs)
-            except:
-                pass
-            try:
-                #fname = Path(self.image.file.name).with_suffix('').name
-                #fname = fname.substring(0, fname.lastIndexOf('.'))
                 if mfile:
                     res = cloudinary.uploader.upload(mfile,
                         folder = "site/products/", 
@@ -165,7 +155,6 @@ class CatalogImage(models.Model):
                         )#public_id = self.title + '_' + str(self.id))
                     self.cimage = 'v' + str(res['version']) +'/'+ res['public_id']
                     self.image = None
-                pass
             except Exception as e:
                 print(e)
             

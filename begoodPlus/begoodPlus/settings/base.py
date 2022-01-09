@@ -75,7 +75,6 @@ INSTALLED_APPS = [
     'advanced_filters',
     #'rest_framework_simplejwt',
     'corsheaders',
-    'cloudinary',
     'celery',
     'django_celery_beat',
     'django_svelte',
@@ -113,8 +112,11 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
     
+    'django.contrib.staticfiles',
+    'cloudinary_storage',
+    'cloudinary',
+
     #'debug_toolbar', # TODO: remove in production
 ]
 
@@ -311,6 +313,12 @@ cloudinary.config(
   api_secret = secrects.CLOUDINARY_SECRECT,
   secure = True
 )
+DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': secrects.CLOUDINARY_NAME,
+    'API_KEY': secrects.CLOUDINARY_KEY,
+    'API_SECRET': secrects.CLOUDINARY_SECRECT,
+}
 
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'

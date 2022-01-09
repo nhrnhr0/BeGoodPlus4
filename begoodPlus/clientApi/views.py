@@ -2,6 +2,7 @@ from rest_framework.response import Response
 from django.http.response import JsonResponse
 from django.shortcuts import render
 from catalogImages.models import CatalogImage
+from client.views import get_user_info, whoAmI
 from clientApi.serializers import ColorClientApi, ImageClientApi, SizeClientApi
 from clientApi.serializers import AlbumClientApi, LogoClientApi
 from rest_framework import viewsets
@@ -73,9 +74,7 @@ def main_page_api(request):
         logos: logos_json,
         all_products: products
     '''
-    start = time.time()
-
-    all_albums_qs = CatalogAlbum.objects.all()#.prefetch_related('images')
+    all_albums_qs = CatalogAlbum.objects.filter(is_public=True)#.prefetch_related('images')
     albums = AlbumClientApi(all_albums_qs, many=True).data
     sizes = SizeClientApi(ProductSize.objects.all(), many=True).data
     colors = ColorClientApi(ProductColor.objects.all(), many=True).data
@@ -85,14 +84,11 @@ def main_page_api(request):
     #    all_products_data[album.id] = images_from_album_serializer(album).data
     
     ret = {
-        'random_number': random.randint(1,1000),
         'colors': colors,
         'sizes': sizes,
         'logos': logos,
         'albums': albums,
     }
-    end = time.time()
-    print(end - start)
     return JsonResponse(ret, safe=False)
     #logos = CatalogLogo.objects.all()
     
@@ -114,7 +110,7 @@ class CustomAuthToken(ObtainAuthToken):
         
         login(request, user)
         response = super(CustomAuthToken, self).post(request, format=None)
-        
+        who_am_i = get_user_info(request.user)
         token, created = Token.objects.get_or_create(user=user)
         response.set_cookie(
             'auth_token',
@@ -122,6 +118,9 @@ class CustomAuthToken(ObtainAuthToken):
             httponly=True,
             samesite='strict'
         )
+        # add whoAmI to the response
+        response.data['me'] = who_am_i
+        print('CustomAuthToken:', response.data)
         return response
 
 from rest_framework.decorators import api_view
