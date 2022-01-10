@@ -151,12 +151,14 @@ def api_logout(request):
             'detail': 'User is not authenticated',
         })
     logout(request)
-    
-    request.session.flush()
-    return JsonResponse({
+    response = JsonResponse({
         'status':'success',
         'detail':'logout successfuly'
         })
+    response.delete_cookie('auth_token')
+
+    request.session.flush()
+    return response
 
 
 

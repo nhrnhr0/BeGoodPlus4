@@ -6,7 +6,7 @@ from client.views import get_user_info, whoAmI
 from clientApi.serializers import ColorClientApi, ImageClientApi, SizeClientApi
 from clientApi.serializers import AlbumClientApi, LogoClientApi
 from rest_framework import viewsets
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly
 from catalogAlbum.models import CatalogAlbum
 from rest_framework.renderers import JSONRenderer
 from catalogLogos.models import CatalogLogo
@@ -40,7 +40,7 @@ class SizesClientViewSet(viewsets.ModelViewSet):
     serializer_class = SizeClientApi
     permission_classes = [IsAuthenticatedOrReadOnly]
     
-from rest_framework.decorators import api_view, renderer_classes
+from rest_framework.decorators import api_view, authentication_classes, permission_classes, renderer_classes
 from rest_framework.renderers import JSONRenderer, TemplateHTMLRenderer
 from django.views.decorators.cache import cache_page
 import functools
@@ -65,6 +65,7 @@ def images_from_album_serializer(album):
 
 import time
 import random
+@permission_classes((AllowAny,))
 @api_view(('GET',))
 def main_page_api(request):
     '''
