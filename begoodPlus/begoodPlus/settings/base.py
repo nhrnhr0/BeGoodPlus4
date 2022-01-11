@@ -105,7 +105,7 @@ INSTALLED_APPS = [
     'productImages',
     'stock',
     'glofa_types',
-    
+    'mcrm',
     ### django modals ###
     'django.contrib.admin',
     'django.contrib.auth',

@@ -15,6 +15,7 @@ Including another URLconf
 """
 from clientApi.views import main_page_api
 from campains.views import admin_get_all_campains, admin_get_campain_products, get_user_campains
+from mcrm.views import mcrm_lead_register
 from core.views import test_celery_view
 from catalogImages.views import admin_api_get_product_cost_price, all_images_ids
 from clientApi.views import ColorsClientViewSet, ImageClientViewSet, SizesClientViewSet,LogoClientViewSet, get_album_images
@@ -95,7 +96,7 @@ urlpatterns = [
     re_path(r'get_album_images/(?P<pk>\d+)',get_album_images),
     path('client-api/',include(clientRouter.urls)),
     path('client-api/get-user-campains/',get_user_campains),
-    
+    path('client-api/lead-distribution/', mcrm_lead_register),
     path('svelte/api/', include(svelteRouter.urls)),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('api/who-am-i/', whoAmI),
