@@ -45,8 +45,11 @@ from django.template.loader import render_to_string
 from django.core import mail
 from django.utils.html import strip_tags
 from django.conf import settings
+from begoodPlus.secrects import TELEGRAM_BOT_TOKEN
+import telegram
+
 @shared_task
-def send_cart_email(cart_id):
+def send_cart_notification(cart_id):
     print('=================== send_cart_email is running ==========================')
     cart = SvelteCartModal.objects.get(id=cart_id)
     # subject = to the current date and time if the cart
@@ -62,6 +65,16 @@ def send_cart_email(cart_id):
     mail.send_mail(subject, plain_message, from_email, [to], html_message=html_message)
     print('=================== send_cart_email is done ==========================')
 
+    # sending telegram message
+    bot = telegram.Bot(token=TELEGRAM_BOT_TOKEN)
+    #for chat_id in self.chat_ids:
+    chat_id = '-666095377'
+    telegram_message = '* ' + subject + ' *' + '\n'
+    for item in cart.productEntries.all():
+        row = str(item.amount) + ' ' + item.product.title + '\n'
+        telegram_message += row
+    bot.send_message(chat_id=chat_id, text=telegram_message)
+    
 '''from __future__ import absolute_import, unicode_literals
 
 from celery import shared_task

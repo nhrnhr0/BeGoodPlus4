@@ -54,12 +54,26 @@ class CatalogAlbum(MPTTModel):
     parent = TreeForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='children')
     is_public = models.BooleanField(verbose_name=_('is public'), default=True)
     is_campain = models.BooleanField(verbose_name=_('is campain'), default=False)
-    cimage = models.ImageField(verbose_name=_('image'), upload_to='catalogAlbum/', blank=True, null=True)
+    cimage = models.CharField(max_length=500, verbose_name=_("cimage"), default='', blank=True)
     #campain = models.ForeignKey('MonthCampain', on_delete=models.CASCADE, null=True, blank=True, related_name='album')
     #renew_for = models.DurationField(null=True, blank=True, default=datetime.timedelta(days=3))
     #renew_after = models.DurationField(null=True, blank=True, default=datetime.timedelta(days=1))
     #timer = models.DateTimeField(null=True, blank=True)
-
+    def save(self, *args, **kwargs):
+        if self.cimage == '':
+            img = self.images.order_by('throughimage__image_order').first()
+            self.cimage = img.cimage
+        super(CatalogAlbum, self).save(*args, **kwargs)
+        
+        
+    def render_cimage_thumbnail(self, *args, **kwargs):
+        ret = ''
+        if self.cimage:
+            ret += '<img width="50px" height="50px" src="%s" />' % ("https://res.cloudinary.com/ms-global/image/upload/" + self.cimage)
+        return mark_safe(ret)
+    render_cimage_thumbnail.short_description = _("thumbnail")
+        
+        
     @property
     def sorted_image_set(self):
         return self.images.order_by('throughimage__image_order')

@@ -127,7 +127,7 @@ def svelte_cart_form(request):
             products_objs = SvelteCartProductEntery.objects.bulk_create([SvelteCartProductEntery(product_id=p['id'],amount=p['amount'] or 1) for p in products])
             data.productEntries.set(products_objs)
             data.save()
-            send_cart_email.delay(data.id)
+            send_cart_notification.delay(data.id)
             return JsonResponse({
                 'status':'success',
                 'detail':'form sent successfuly',
@@ -167,7 +167,7 @@ def api_logout(request):
 
 
 
-from .tasks import send_cart_email, test
+from .tasks import send_cart_notification, test
 
 def test_celery_view(request):
     print('test_celery_view start')
