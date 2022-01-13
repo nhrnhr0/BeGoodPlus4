@@ -17,10 +17,10 @@ def new_user_subscribed_task(subscriber_id):
     crmUser = CrmUser.objects.get(id=subscriber_id)
     flashyCreateContact(crmUser)
     
-    send_new_user_telegram_message_to_admin_group(crmUser)
     if(crmUser.want_whatsapp):
         trigger_welcome_whatsapp_message_to_user(crmUser)
-        
+    
+    send_new_user_telegram_message_to_admin_group(crmUser)
 def trigger_welcome_whatsapp_message_to_user(crmUser):
     
     to_number = crmUser.phone
