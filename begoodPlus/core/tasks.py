@@ -47,6 +47,7 @@ from django.utils.html import strip_tags
 from django.conf import settings
 from begoodPlus.secrects import TELEGRAM_BOT_TOKEN
 import telegram
+from begoodPlus.celery import telegram_bot
 
 @shared_task
 def send_cart_notification(cart_id):

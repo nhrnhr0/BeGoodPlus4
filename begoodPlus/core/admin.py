@@ -2,8 +2,8 @@ from django.contrib import admin
 from django.utils.translation import gettext_lazy  as _
 import io
 from django.http import FileResponse
-from xlwt.Style import XFStyle
-
+from openpyxl import Workbook
+from openpyxl.worksheet.datavalidation import DataValidation
 import client
 
 # Register your models here.
@@ -29,7 +29,55 @@ from .models import SvelteContactFormModal
 class ContactFormModalAdmin(admin.ModelAdmin):
     list_display = ('user', 'uniqe_color','device', 'name', 'email', 'phone','message', 'created_date')
 admin.site.register(SvelteContactFormModal, ContactFormModalAdmin)
-import xlwt
+
+
+def cart_to_dict(obj: SvelteCartModal):
+    clients_name = ''
+    if obj.user:
+        if obj.user.is_anonymous == False:
+            clients_name = obj.user.client.businessName
+        else:
+            clients_name = 'anonymous'
+    else:
+        clients_name = 'anonymous'
+    products = []
+    for idx, entry in enumerate(obj.productEntries.all()):
+        providers = []
+        for catalogImageDetail in entry.product.detailTabel.all():
+            makat = ''
+            if catalogImageDetail.providerMakat != None and catalogImageDetail.providerMakat != '': 
+                    makat = catalogImageDetail.providerMakat
+            providers.append({
+                'name': catalogImageDetail.provider.name,
+                'makat': makat
+            })
+        providers_with_makat = [v['name'] for v in providers]
+        all_providers = entry.product.providers.all()
+        all_providers = all_providers.exclude(name__in=providers_with_makat)
+        for provider in all_providers:
+            providers.append({
+                'name': provider.name,
+                'makat': '-',
+            })
+        products.append({
+            'id': entry.product.id,
+            'שם': entry.product.title,
+            'כמות': entry.amount,
+            'מחיר עלות ללא מע\"מ': entry.product.cost_price,
+            'מחיר חנות ללא מע\"מ': entry.product.client_price,
+            'מחיר לקוח פרטי ללא מע\"מ': entry.product.recomended_price,
+            'ספקים': providers,
+        })
+    ret = {
+        'משתמש': clients_name,
+        'מכשיר': obj.device,
+        'שם בטופס': obj.name,
+        'טלפון בטופס': obj.phone,
+        'אימייל בטופס': obj.email,
+        'תאריך הגשה': obj.created_date.strftime("%m/%d/%Y, %H:%M:%S"),
+        'מוצרים': products,
+    }
+    return ret
 
 from core.tasks import send_cart_notification
 class SvelteCartModalAdmin(admin.ModelAdmin):
@@ -43,7 +91,66 @@ class SvelteCartModalAdmin(admin.ModelAdmin):
             send_cart_notification.delay(obj.id)
     resend_email_action.short_description = _("resend selected carts email")
     
+    
+    
+    def data_to_excel(self, data, filename):
+        wb = Workbook()
+        ws = wb.active
+        ws.sheet_view.rightToLeft = True
+        ws_rows_counter = 1
+        ws.append(['שם מוצר', 'כמות', 'מחיר עלות ללא מע"מ','מחיר חנות ללא מע"מ', 'מחיר לקוח פרטי ללא מע"מ', 'ספקים', 'לקוח','תאריך הזמנה'])
+        for cart in data:
+            active_ws = wb.create_sheet(cart['משתמש'])
+            active_ws.sheet_view.rightToLeft = True
+            active_ws.append(['משתמש', 'מכשיר', 'שם בטופס', 'טלפון בטופס', 'אימייל בטופס', 'תאריך הגשה'])
+            active_ws.append([cart['משתמש'], cart['מכשיר'], cart['שם בטופס'], cart['טלפון בטופס'], cart['אימייל בטופס'], cart['תאריך הגשה']])
+            active_ws.append(['מוצרים'])
+            active_ws.append(['שם', 'כמות', 'מחיר עלות ללא מע"מ','מחיר חנות ללא מע"מ', 'מחיר לקוח פרטי ללא מע"מ', 'ספקים'])
+            
+            row_products_offset = 4
+            current_row = row_products_offset
+            for product in cart['מוצרים']:
+                
+                active_ws.append([product['שם'], product['כמות'], product['מחיר עלות ללא מע"מ'], product['מחיר חנות ללא מע"מ'], product['מחיר לקוח פרטי ללא מע"מ']])
+                providers = product['ספקים']
+                if(len(providers) > 0):
+                    providers = [(v['name'] + ' - ' + v['makat']).replace(',','').replace('\"', '') for v in providers]
+                    print(providers)
+                    providers_str = ','.join(providers)
+                    dv = DataValidation(type="list", formula1='"' + providers_str + '"', allow_blank=False)
+                    active_ws.add_data_validation(dv)
+                    current_row += 1
+                    wanted_col = 6
+                    provider_cell = active_ws.cell(row=current_row, column=wanted_col)
+                    provider_cell.value = providers[0]
+                    dv.add(provider_cell)
+                    
+                    ws_rows_counter += 1
+                    ws.append([product['שם'], product['כמות'], product['מחיר עלות ללא מע"מ'], product['מחיר חנות ללא מע"מ'], product['מחיר לקוח פרטי ללא מע"מ']])
+                    ws.add_data_validation(dv)
+                    provider_cell = ws.cell(row=ws_rows_counter, column=wanted_col)
+                    provider_cell.value = providers[0]
+                    dv.add(provider_cell)
+                    ws.cell(row=ws_rows_counter, column=7).value = cart['משתמש']
+                    ws.cell(row=ws_rows_counter, column=8).value = cart['תאריך הגשה']
+                    
+        return wb
     def download_cart_excel(modeladmin, request, queryset):
+        queryset = queryset.select_related('user').prefetch_related('productEntries', 'productEntries__product__providers')
+        
+        file_name='cart_excel'
+        buffer = io.BytesIO()
+        all_data = []
+        for obj in queryset:
+            file_name += '_' + str(obj.id)
+            cart_data = cart_to_dict(obj)
+            all_data.append(cart_data)
+            print(cart_data)
+        wb = modeladmin.data_to_excel(all_data, file_name)
+        wb.save(buffer)
+        buffer.seek(0)
+        return FileResponse(buffer, as_attachment=True, filename=file_name + '.xls')
+        return
         queryset = queryset.select_related('user').prefetch_related('productEntries', 'productEntries__product__providers')
         value_style = XFStyle()
         title_style = XFStyle()
