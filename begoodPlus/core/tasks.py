@@ -66,14 +66,13 @@ def send_cart_notification(cart_id):
     print('=================== send_cart_email is done ==========================')
 
     # sending telegram message
-    bot = telegram.Bot(token=TELEGRAM_BOT_TOKEN)
     #for chat_id in self.chat_ids:
     chat_id = '-666095377'
     telegram_message = '* ' + subject + ' *' + '\n'
     for item in cart.productEntries.all():
         row = str(item.amount) + ' ' + item.product.title + '\n'
         telegram_message += row
-    bot.send_message(chat_id=chat_id, text=telegram_message)
+    telegram_bot.send_message(chat_id=chat_id, text=telegram_message)
     
 '''from __future__ import absolute_import, unicode_literals
 

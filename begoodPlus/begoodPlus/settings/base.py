@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 import os
 
 from rest_framework.fields import DateTimeField
+import telegram
 from .. import secrects
 import cloudinary
 import cloudinary.uploader
@@ -356,7 +357,6 @@ WEBPUSH_SETTINGS = {
     "VAPID_PRIVATE_KEY":secrects.VAPID_PRIVATE_KEY,
     "VAPID_ADMIN_EMAIL": "computer-support@ms-global.co.il"
 }
-
 
 
 BROKER_USER = secrects.BROKER_USER

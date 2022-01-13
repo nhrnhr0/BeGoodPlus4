@@ -10,4 +10,4 @@ class CrmUser(models.Model):
     email = models.EmailField(max_length=100, null=True, blank=True)
     want_emails = models.BooleanField(default=True)
     want_whatsapp = models.BooleanField(default=True)
-    
+    flashy_contact_id = models.CharField(max_length=256, null=True, blank=True)

@@ -16,6 +16,6 @@ class CrmUser(models.Model):
 '''
 
 class AdminCrmUser(admin.ModelAdmin):
-    list_display = ('businessName', 'businessType', 'name', 'phone', 'email', 'want_emails', 'want_whatsapp', 'businessTypeCustom',)
+    list_display = ('businessName', 'businessType', 'name', 'phone', 'email', 'want_emails', 'want_whatsapp', 'businessTypeCustom','flashy_contact_id')
     pass
 admin.site.register(CrmUser, AdminCrmUser)

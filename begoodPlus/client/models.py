@@ -29,6 +29,7 @@ from PIL import Image
 from io import BytesIO
 import colorsys
 from tabulate import tabulate
+from begoodPlus.celery import telegram_bot
 
 # Create your models here.
 class UserLogEntry(models.Model):
@@ -330,22 +331,21 @@ class UserSessionLogger(models.Model):
             buf.seek(0)
             return buf
         # UserSessionLogger.objects.get(id=85).send_telegram_message()
-        bot = telegram.Bot(token=TELEGRAM_BOT_TOKEN)
         #for chat_id in self.chat_ids:
         messageObj = self.generate_telegram_message()
         chat_id = '-666095377'
         if(messageObj['chart']):
             buff = fig2img(messageObj['chart'])
-            print(bot.send_document(chat_id=chat_id, document=buff, parse_mode='HTML'))
+            print(telegram_bot.send_document(chat_id=chat_id, document=buff, parse_mode='HTML'))
             #print(bot.send_message(chat_id=chat_id, text=messageObj['message'], parse_mode='HTML'))
         #else:
             #print(bot.send_message(chat_id=chat_id, text=messageObj['message'], parse_mode='HTML'))
         info = messageObj['message']
         if len(info) > 4096:
             for x in range(0, len(info), 4096):
-                bot.send_message(chat_id, info[x:x+4096], parse_mode='HTML')
+                telegram_bot.send_message(chat_id, info[x:x+4096], parse_mode='HTML')
         else:
-            bot.send_message(chat_id, info, parse_mode='HTML')
+            telegram_bot.send_message(chat_id, info, parse_mode='HTML')
         #print(bot.send_message(chat_id=chat_id, text=messageObj['message'], parse_mode='HTML'))
     
     def generate_user_liked_products(self):

@@ -16,6 +16,13 @@ app.autodiscover_tasks()
 #app.conf.broker_url = BASE_REDIS_URL
 app.conf.beat_scheduler = 'django_celery_beat.schedulers.DatabaseScheduler'
 
+
+import telegram
+from begoodPlus import secrects
+
+telegram_bot = telegram.Bot(token=secrects.TELEGRAM_BOT_TOKEN)
+
+
 '''
 from backend.celery import app
 from backend.celery import task
