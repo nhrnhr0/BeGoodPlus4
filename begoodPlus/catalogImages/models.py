@@ -29,13 +29,13 @@ class CatalogImage(models.Model):
         return self.description[0:30]
     desc.short_description= _('short description')
     cimage = models.CharField(verbose_name=_('cloudinary image url'), null=True, blank=True, max_length=2047)#CloudinaryField('product_image', overwrite=True,resource_type="image",null=True, blank=True)
-    image = models.ImageField(verbose_name=_("image"))
-    image_thumbnail = models.ImageField(verbose_name=_("image thumbnail"), null=True, blank=True)
+    image = models.ImageField(verbose_name=_("image"), null=True, blank=True)
+    image_thumbnail = models.ImageField(verbose_name=_("local image"), null=True, blank=True)
     cost_price = models.FloatField(verbose_name=_('cost price'), blank=False, null=False, default=1)
     client_price = models.FloatField(verbose_name=_('store price'),  blank=False, null=False, default=1)
     recomended_price = models.FloatField(verbose_name=_('private client price'),  blank=False, null=False, default=1)
     date_modified = models.DateTimeField(auto_now=True)
-
+    date_created = models.DateTimeField(auto_now_add=True)
     packingTypeProvider = models.ForeignKey(to=PackingType,related_name='PTprovider', on_delete=models.SET_DEFAULT, default=9, verbose_name=_('packing type from provider'))
     packingTypeClient = models.ForeignKey(to=PackingType,related_name='PTclient', on_delete=models.SET_DEFAULT, default=9, verbose_name=_('packing type for client'))
     colors = models.ManyToManyField(to=Color, verbose_name=_('colors'))
@@ -137,20 +137,28 @@ class CatalogImage(models.Model):
     
     def save(self, *args, **kwargs):
         
-        if self.image:
+        if bool(self.image.name):
             # fails if your don't upload an image, so don't upload image to cloudinary
+            mfile = None
             try:
-                fname = Path(self.image.file.name).with_suffix('').name
-                #fname = fname.substring(0, fname.lastIndexOf('.'))
-                res = cloudinary.uploader.upload(self.image.file,
-                    folder = "site/products/", 
-                    public_id = fname
-                    )#public_id = self.title + '_' + str(self.id))
-                self.cimage = 'v' + str(res['version']) +'/'+ res['public_id']
-                #self.save()
-                pass
+                output = CatalogImage.optimize_image(self.image, size=(923, 715))
+                mfile = InMemoryUploadedFile(output, 'ImageField', "%s.png" % self.image.name.split('.')[0], 'image/PNG',
+                                            sys.getsizeof(output), None)
+                if mfile:
+                    res = cloudinary.uploader.upload(mfile,
+                        folder = "site/products/", 
+                        #public_id = fname,
+                        unique_filename = False,
+                        use_filename = True,
+                        overwrite=True,
+                        invalidate=True
+                        )#public_id = self.title + '_' + str(self.id))
+                    self.cimage = 'v' + str(res['version']) +'/'+ res['public_id']
+                    self.image = None
             except Exception as e:
                 print(e)
+            
+            
         super(CatalogImage, self).save(*args,**kwargs)
         '''
             try:
@@ -229,7 +237,8 @@ class CatalogImage(models.Model):
     
     def render_image(self, *args, **kwargs):
         ret = ''
-        ret += '<img src="%s"/>' % (settings.MEDIA_URL + self.image.name) 
+        if self.image:
+            ret += '<img src="%s"/>' % (settings.MEDIA_URL + self.image.name) 
         return mark_safe(ret)
     render_image.short_description = _("image")
     

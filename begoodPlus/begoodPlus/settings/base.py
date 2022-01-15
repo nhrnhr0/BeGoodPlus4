@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 import os
 
 from rest_framework.fields import DateTimeField
+import telegram
 from .. import secrects
 import cloudinary
 import cloudinary.uploader
@@ -75,7 +76,6 @@ INSTALLED_APPS = [
     'advanced_filters',
     #'rest_framework_simplejwt',
     'corsheaders',
-    'cloudinary',
     'celery',
     'django_celery_beat',
     'django_svelte',
@@ -106,15 +106,18 @@ INSTALLED_APPS = [
     'productImages',
     'stock',
     'glofa_types',
-    
+    'mcrm',
     ### django modals ###
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
     
+    'django.contrib.staticfiles',
+    'cloudinary_storage',
+    'cloudinary',
+
     #'debug_toolbar', # TODO: remove in production
 ]
 
@@ -311,6 +314,12 @@ cloudinary.config(
   api_secret = secrects.CLOUDINARY_SECRECT,
   secure = True
 )
+DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': secrects.CLOUDINARY_NAME,
+    'API_KEY': secrects.CLOUDINARY_KEY,
+    'API_SECRET': secrects.CLOUDINARY_SECRECT,
+}
 
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -339,6 +348,7 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.BasicAuthentication',
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.TokenAuthentication',
+        'core.authentication.TokenAuthSupportCookie',
     )
 }
 
@@ -347,7 +357,6 @@ WEBPUSH_SETTINGS = {
     "VAPID_PRIVATE_KEY":secrects.VAPID_PRIVATE_KEY,
     "VAPID_ADMIN_EMAIL": "computer-support@ms-global.co.il"
 }
-
 
 
 BROKER_USER = secrects.BROKER_USER

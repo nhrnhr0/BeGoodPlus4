@@ -127,10 +127,12 @@ def svelte_cart_form(request):
             products_objs = SvelteCartProductEntery.objects.bulk_create([SvelteCartProductEntery(product_id=p['id'],amount=p['amount'] or 1) for p in products])
             data.productEntries.set(products_objs)
             data.save()
-            send_cart_email.delay(data.id)
+            send_cart_notification.delay(data.id)
             return JsonResponse({
                 'status':'success',
-                'detail':'form sent successfuly'
+                'detail':'form sent successfuly',
+                'cart_id': data.id,
+                'product_ids': [p.product_id for p in products_objs]
                 })
         except Exception as e:
             return JsonResponse({
@@ -149,12 +151,14 @@ def api_logout(request):
             'detail': 'User is not authenticated',
         })
     logout(request)
-    
-    request.session.flush()
-    return JsonResponse({
+    response = JsonResponse({
         'status':'success',
         'detail':'logout successfuly'
         })
+    response.delete_cookie('auth_token')
+
+    request.session.flush()
+    return response
 
 
 
@@ -163,7 +167,7 @@ def api_logout(request):
 
 
 
-from .tasks import send_cart_email, test
+from .tasks import send_cart_notification, test
 
 def test_celery_view(request):
     print('test_celery_view start')

@@ -22,6 +22,8 @@ def get_user_campains_serializer_data(user):
     serializer = ClientMonthCampainSerializer(campains, many=True)
     return serializer.data
 
+
+
 @api_view(['GET'])
 @permission_classes((IsAuthenticated,))
 def get_user_campains(request):

@@ -24,7 +24,7 @@ class SearchCatalogImageSerializer(serializers.ModelSerializer):
         model = CatalogImage
         #fields = '__all__'
         #exclude = ('colors','sizes')
-        fields = ('id','url','title', 'albums','description', 'cimage','image_thumbnail',)
+        fields = ('id','url','title', 'albums','description', 'cimage',)
 '''
 from .models import BeseContactInformation
 class UserTasksSerializer(serializers.ModelSerializer):

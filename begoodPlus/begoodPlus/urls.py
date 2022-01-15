@@ -13,7 +13,9 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from clientApi.views import main_page_api
 from campains.views import admin_get_all_campains, admin_get_campain_products, get_user_campains
+from mcrm.views import mcrm_lead_register
 from core.views import test_celery_view
 from catalogImages.views import admin_api_get_product_cost_price, all_images_ids
 from clientApi.views import ColorsClientViewSet, ImageClientViewSet, SizesClientViewSet,LogoClientViewSet, get_album_images
@@ -71,9 +73,11 @@ from core.views import autocompleteModel, autocompleteClick, success_view#  admi
 from catalogAlbum.views import catalogView_api#,catalog_timer
 #from customerCart.views import cart_changed
 from customerCart.views import cart_del, cart_add,cart_view,cart_info
-from rest_framework.authtoken.views import obtain_auth_token
+#from rest_framework.authtoken.views import obtain_auth_token
+from clientApi.views import CustomAuthToken
 #from rest_framework_simplejwt.views import (TokenObtainPairView,TokenRefreshView,)
 urlpatterns = [
+    path('main_page_api/', main_page_api, name='main_page_api'),
     path('admin-api/get-all-campaigns/', admin_get_all_campains),
     path('admin-api/get-campaign-products/<int:campain_id>', admin_get_campain_products),
     path('admin-api/get_product_cost_price/<int:product_id>', admin_api_get_product_cost_price),
@@ -82,7 +86,7 @@ urlpatterns = [
     
     #path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     #path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('api/get-token/', obtain_auth_token),
+    path('api/get-token/', CustomAuthToken.as_view(), name='get_token'),
     
     
     path('admin/', admin.site.urls),
@@ -92,7 +96,7 @@ urlpatterns = [
     re_path(r'get_album_images/(?P<pk>\d+)',get_album_images),
     path('client-api/',include(clientRouter.urls)),
     path('client-api/get-user-campains/',get_user_campains),
-    
+    path('client-api/lead-distribution/', mcrm_lead_register),
     path('svelte/api/', include(svelteRouter.urls)),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('api/who-am-i/', whoAmI),

@@ -17,6 +17,8 @@ class ClientAdmin(admin.ModelAdmin):
         all_file_buffers = []
         for client in queryset:
             exel_file_buffer = client.generate_user_products_from_sessions()
+            if (exel_file_buffer == None):
+                continue
             all_file_buffers.append({'name': client.businessName, 'data': exel_file_buffer})
         return self.download_zip_file(all_file_buffers)
     pass
