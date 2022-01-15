@@ -237,7 +237,8 @@ class CatalogImage(models.Model):
     
     def render_image(self, *args, **kwargs):
         ret = ''
-        ret += '<img src="%s"/>' % (settings.MEDIA_URL + self.image.name) 
+        if self.image:
+            ret += '<img src="%s"/>' % (settings.MEDIA_URL + self.image.name) 
         return mark_safe(ret)
     render_image.short_description = _("image")
     

@@ -11,3 +11,6 @@ class CrmUser(models.Model):
     want_emails = models.BooleanField(default=True)
     want_whatsapp = models.BooleanField(default=True)
     flashy_contact_id = models.CharField(max_length=256, null=True, blank=True)
+    
+    class Meta():
+        unique_together = ('businessName', 'name')
