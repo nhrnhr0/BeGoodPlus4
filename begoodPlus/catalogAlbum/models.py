@@ -60,7 +60,7 @@ class CatalogAlbum(MPTTModel):
     #renew_after = models.DurationField(null=True, blank=True, default=datetime.timedelta(days=1))
     #timer = models.DateTimeField(null=True, blank=True)
     def save(self, *args, **kwargs):
-        if self.cimage == '':
+        if self.cimage == '' and self.id != None:
             img = self.images.order_by('throughimage__image_order').first()
             self.cimage = img.cimage
         super(CatalogAlbum, self).save(*args, **kwargs)
