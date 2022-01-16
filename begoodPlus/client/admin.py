@@ -9,10 +9,11 @@ from .models import Client, ClientOrganizations, PaymentTime, PaymantWay, Client
 import zipfile
 
 class ClientAdmin(admin.ModelAdmin):
-    list_display = ('created_at', 'user', 'businessName', 'extraName')
+    list_display = ('created_at','__str__', 'user', 'businessName', 'extraName')
     actions = ['generate_user_products_from_sessions']
     filter_horizontal = ('categorys',)
-    
+    search_fields = ('businessName', 'user__username', 'email','howPay__name','whenPay__name',)
+    list_filter = ('storeType', 'clientType',)
     def generate_user_products_from_sessions(self, request, queryset):
         all_file_buffers = []
         for client in queryset:

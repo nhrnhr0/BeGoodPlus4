@@ -1,4 +1,5 @@
 import io
+from random import choices
 import uuid
 from django.db.models.fields import json
 from django.http.response import FileResponse
@@ -473,16 +474,25 @@ class PaymentTime(models.Model):
         return self.name
 
 
+from model_utils import Choices
+
 class Client(models.Model):
     # שדה תאריך ושעה של יצירת החשבון במערכת
     created_at = models.DateTimeField(auto_now_add=True)
+    CLIENT_TYPE = Choices((0, 'not_defined', _('not defined')), (1, 'private', _('private')), (2, 'kibuttz', _('kibuttz')))
     
     user = OneToOneField(to=User,
         on_delete=models.CASCADE,
         primary_key=True,
         verbose_name=_('user'))
     def __str__(self):
-        return self.businessName
+        try:
+            mtype = str(self.CLIENT_TYPE._display_map.get(int(self.clientType)))
+        except:
+            mtype = ''
+        
+        ret = self.businessName + ' - ' + str(mtype)
+        return ret
     businessName = models.CharField(verbose_name=_('business name '), max_length=120)
     email = models.EmailField(verbose_name=_('email'), max_length=120)
     extraName = models.CharField(verbose_name=_('extra name'), max_length=120, null=True,blank=True)
@@ -490,6 +500,7 @@ class Client(models.Model):
     categorys = models.ManyToManyField(verbose_name=_('categories'), to=CatalogAlbum, blank=True)
     tariff = models.SmallIntegerField(verbose_name=_('tariff (%)'), default=0)
     privateCompany = models.CharField(max_length=254, verbose_name=_('P.C.'))
+    clientType = models.CharField(max_length=10, choices=CLIENT_TYPE, verbose_name=_('client type'), default=CLIENT_TYPE.not_defined)
     address = models.CharField(verbose_name=_('address'), max_length=511)
     contactMan = models.CharField(verbose_name=_('contact man'),max_length=100)
     contactManPosition = models.CharField(verbose_name=_('contact man position'), max_length=100)
