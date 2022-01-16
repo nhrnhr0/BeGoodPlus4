@@ -34,7 +34,8 @@ class CatalogLogo(Sortable):
         
     def render_image(self, *args, **kwargs):
         ret = ''
-        ret += '<img height="100px" width="auto" src="%s"/>' % (settings.MEDIA_URL + self.img.name) 
+        if self.img:
+            ret += '<img height="100px" width="auto" src="%s"/>' % (settings.MEDIA_URL + self.img.name) 
         return mark_safe(ret)
     render_image.short_description = _("image")
     
