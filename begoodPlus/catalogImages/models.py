@@ -38,6 +38,8 @@ class CatalogImage(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     packingTypeProvider = models.ForeignKey(to=PackingType,related_name='PTprovider', on_delete=models.SET_DEFAULT, default=9, verbose_name=_('packing type from provider'))
     packingTypeClient = models.ForeignKey(to=PackingType,related_name='PTclient', on_delete=models.SET_DEFAULT, default=9, verbose_name=_('packing type for client'))
+    amountSinglePack = models.IntegerField(verbose_name=_('amount in single pack'), blank=False, null=False, default=0)
+    amountCarton = models.IntegerField(verbose_name=_('amount in carton'), blank=False, null=False, default=0)
     colors = models.ManyToManyField(to=Color, verbose_name=_('colors'))
     sizes = models.ManyToManyField(to=ProductSize, verbose_name=_('sizes'))
     providers = models.ManyToManyField(to=Provider, verbose_name=_('providers'))
