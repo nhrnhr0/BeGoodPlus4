@@ -2,9 +2,10 @@
 
 
 from begoodPlus import secrects
-from begoodPlus.secrects import FLASHY_MY_API_KEY,TELEGRAM_BOT_TOKEN
+from begoodPlus.secrects import FLASHY_MY_API_KEY,TELEGRAM_ADMIN_GROUP_CHAT_ID
 from .models import CrmUser
 import requests
+
 import telegram
 from begoodPlus.celery import telegram_bot
 from celery import shared_task
@@ -31,7 +32,7 @@ def trigger_welcome_whatsapp_message_to_user(crmUser):
 def send_new_user_telegram_message_to_admin_group(user):
     
     
-    chat_id = secrects.TELEGRAM_ADMIN_GROUP_CHAT_ID
+    chat_id = TELEGRAM_ADMIN_GROUP_CHAT_ID
     args = {'user_name': user.name,
             'user_business_name': user.businessName,
             'user_business_type': user.businessType,
