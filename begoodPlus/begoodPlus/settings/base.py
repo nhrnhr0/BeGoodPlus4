@@ -307,7 +307,7 @@ STATICFILES_DIRS = [
 
 MEDIA_URL= '/media/'
 MEDIA_ROOT = os.path.join(STATIC_ROOT, 'media_root/')
-
+CLOUDINARY_BASE_URL = 'https://res.cloudinary.com/ms-global/image/upload/'
 cloudinary.config( 
   cloud_name = secrects.CLOUDINARY_NAME,
   api_key = secrects.CLOUDINARY_KEY,

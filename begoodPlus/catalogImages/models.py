@@ -6,6 +6,7 @@ from django.core.files.base import ContentFile
 from django.utils.html import mark_safe
 from django.conf import settings
 from django.urls import reverse
+from begoodPlus.settings.base import CLOUDINARY_BASE_URL
 
 from color.models import Color
 from provider.models import Provider
@@ -92,6 +93,11 @@ class CatalogImage(models.Model):
         verbose_name_plural = _('Catalog images')
         #ordering = ['throughimage__image_order'] 
         
+    def get_cloundinary_url(self):
+        if self.cimage and self.cimage != '':
+            return CLOUDINARY_BASE_URL + self.cimage
+        else:
+            ''
     
     def optimize_image(image,size, *args, **kwargs):
         desired_size = 500
