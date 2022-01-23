@@ -45,7 +45,7 @@ from django.template.loader import render_to_string
 from django.core import mail
 from django.utils.html import strip_tags
 from django.conf import settings
-from begoodPlus.secrects import TELEGRAM_BOT_TOKEN
+from begoodPlus.secrects import TELEGRAM_ADMIN_GROUP_CHAT_ID, MAIN_EMAIL_RECEIVER
 import telegram
 from begoodPlus.celery import telegram_bot
 
@@ -62,13 +62,13 @@ def send_cart_notification(cart_id):
     html_message = render_to_string('emails/cart_template.html', {'cart': cart})
     plain_message = strip_tags(html_message)
     from_email = 'עגלת קניות <Main@ms-global.co.il>'
-    to = settings.MAIN_EMAIL_RECEIVER
+    to = MAIN_EMAIL_RECEIVER
     mail.send_mail(subject, plain_message, from_email, [to], html_message=html_message)
     print('=================== send_cart_email is done ==========================')
 
     # sending telegram message
     #for chat_id in self.chat_ids:
-    chat_id = '-666095377'
+    chat_id = TELEGRAM_ADMIN_GROUP_CHAT_ID
     telegram_message = '* ' + subject + ' *' + '\n'
     for item in cart.productEntries.all():
         row = str(item.amount) + ' ' + item.product.title + '\n'

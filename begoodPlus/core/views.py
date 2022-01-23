@@ -7,6 +7,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from campains.views import get_user_campains_serializer_data
 
 from client.views import get_user_info
+from clientApi.serializers import ImageClientApi
 from .models import SvelteCartModal, SvelteCartProductEntery, SvelteContactFormModal, UserSearchData
 from django.urls import reverse
 
@@ -196,13 +197,16 @@ def autocompleteModel(request):
 
 
     ser_context={'request': request}
-    products = SearchCatalogImageSerializer(products_qs,context=ser_context, many=True)
+    products_qs_short = products_qs[0:20]
+    products_qs_short = products_qs_short.prefetch_related('colors','sizes', 'albums')
+    products = ImageClientApi(products_qs_short, many=True)
+    #products = SearchCatalogImageSerializer(products_qs,context=ser_context, many=True)
     session = get_session_key(request)
     
-    search_history = UserSearchData.objects.create(session=session, term=q, resultCount=len(products.data))#+ len(mylogos.data)
+    search_history = UserSearchData.objects.create(session=session, term=q, resultCount=products_qs.count())#+ len(mylogos.data)
     search_history.save()
     all = products.data# + mylogos.data
-    all = all[0:20]
+    #all = all[0:20]
     context = {'all':all,
                 'q':q,
                 'id': search_history.id}

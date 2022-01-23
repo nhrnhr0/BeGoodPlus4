@@ -1,3 +1,4 @@
+import requests
 from django.contrib import admin
 from django.utils.translation import gettext_lazy  as _
 import io
@@ -5,7 +6,8 @@ from django.http import FileResponse
 from openpyxl import Workbook
 from openpyxl.worksheet.datavalidation import DataValidation
 import client
-
+from openpyxl.drawing import image
+from openpyxl.utils.cell import get_column_letter
 # Register your models here.
 from .models import SvelteCartModal, UserSearchData
 class UserSearchDataAdmin(admin.ModelAdmin):
@@ -95,10 +97,10 @@ class SvelteCartModalAdmin(admin.ModelAdmin):
     
     def data_to_excel(self, data, filename):
         wb = Workbook()
-        ws = wb.active
-        ws.sheet_view.rightToLeft = True
+        main_ws = wb.active
+        main_ws.sheet_view.rightToLeft = True
         ws_rows_counter = 1
-        ws.append(['שם מוצר', 'כמות', 'מחיר עלות ללא מע"מ','מחיר חנות ללא מע"מ', 'מחיר לקוח פרטי ללא מע"מ', 'ספקים', 'לקוח','תאריך הזמנה'])
+        main_ws.append(['שם מוצר', 'כמות', 'מחיר עלות ללא מע"מ','מחיר חנות ללא מע"מ', 'מחיר לקוח פרטי ללא מע"מ', 'ספקים', 'לקוח','תאריך הזמנה'])
         for cart in data:
             active_ws = wb.create_sheet(cart['משתמש'])
             active_ws.sheet_view.rightToLeft = True
@@ -126,14 +128,13 @@ class SvelteCartModalAdmin(admin.ModelAdmin):
                     dv.add(provider_cell)
                     
                     ws_rows_counter += 1
-                    ws.append([product['שם'], product['כמות'], product['מחיר עלות ללא מע"מ'], product['מחיר חנות ללא מע"מ'], product['מחיר לקוח פרטי ללא מע"מ']])
-                    ws.add_data_validation(dv)
-                    provider_cell = ws.cell(row=ws_rows_counter, column=wanted_col)
+                    main_ws.append([product['שם'], product['כמות'], product['מחיר עלות ללא מע"מ'], product['מחיר חנות ללא מע"מ'], product['מחיר לקוח פרטי ללא מע"מ']])
+                    main_ws.add_data_validation(dv)
+                    provider_cell = main_ws.cell(row=ws_rows_counter, column=wanted_col)
                     provider_cell.value = providers[0]
                     dv.add(provider_cell)
-                    ws.cell(row=ws_rows_counter, column=7).value = cart['משתמש']
-                    ws.cell(row=ws_rows_counter, column=8).value = cart['תאריך הגשה']
-                    
+                    main_ws.cell(row=ws_rows_counter, column=7).value = cart['משתמש']
+                    main_ws.cell(row=ws_rows_counter, column=8).value = cart['תאריך הגשה']
         return wb
     def download_cart_excel(modeladmin, request, queryset):
         queryset = queryset.select_related('user').prefetch_related('productEntries', 'productEntries__product__providers')

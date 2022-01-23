@@ -12,6 +12,7 @@ docker cp msdb_04-01-2022-21_01_01.sql pg:/tmp/db.sql
 docker exec -it pg /bin/bash
 # create new database
         psql -h localhost -U postgres
+        DROP DATABASE testdb5;
         CREATE DATABASE testdb5;
         exit
 PGPASSWORD=password psql -h localhost -U postgres -d testdb5 < /tmp/db.sql 

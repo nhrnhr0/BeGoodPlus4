@@ -6,6 +6,7 @@ from django.core.files.base import ContentFile
 from django.utils.html import mark_safe
 from django.conf import settings
 from django.urls import reverse
+from begoodPlus.settings.base import CLOUDINARY_BASE_URL
 
 from color.models import Color
 from provider.models import Provider
@@ -38,6 +39,8 @@ class CatalogImage(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     packingTypeProvider = models.ForeignKey(to=PackingType,related_name='PTprovider', on_delete=models.SET_DEFAULT, default=9, verbose_name=_('packing type from provider'))
     packingTypeClient = models.ForeignKey(to=PackingType,related_name='PTclient', on_delete=models.SET_DEFAULT, default=9, verbose_name=_('packing type for client'))
+    amountSinglePack = models.IntegerField(verbose_name=_('amount in single pack'), blank=False, null=False, default=0)
+    amountCarton = models.IntegerField(verbose_name=_('amount in carton'), blank=False, null=False, default=0)
     colors = models.ManyToManyField(to=Color, verbose_name=_('colors'))
     sizes = models.ManyToManyField(to=ProductSize, verbose_name=_('sizes'))
     providers = models.ManyToManyField(to=Provider, verbose_name=_('providers'))
@@ -90,6 +93,11 @@ class CatalogImage(models.Model):
         verbose_name_plural = _('Catalog images')
         #ordering = ['throughimage__image_order'] 
         
+    def get_cloundinary_url(self):
+        if self.cimage and self.cimage != '':
+            return CLOUDINARY_BASE_URL + self.cimage
+        else:
+            ''
     
     def optimize_image(image,size, *args, **kwargs):
         desired_size = 500

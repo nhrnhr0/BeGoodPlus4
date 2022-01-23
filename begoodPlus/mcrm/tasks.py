@@ -2,9 +2,10 @@
 
 
 from begoodPlus import secrects
-from begoodPlus.secrects import FLASHY_MY_API_KEY,TELEGRAM_BOT_TOKEN
+from begoodPlus.secrects import FLASHY_MAIN_LIST_ID, FLASHY_MY_API_KEY,TELEGRAM_ADMIN_GROUP_CHAT_ID
 from .models import CrmUser
 import requests
+
 import telegram
 from begoodPlus.celery import telegram_bot
 from celery import shared_task
@@ -15,12 +16,21 @@ from celery import shared_task
 @shared_task
 def new_user_subscribed_task(subscriber_id):
     crmUser = CrmUser.objects.get(id=subscriber_id)
-    flashyCreateContact(crmUser)
+    try:
+        flashyCreateContact(crmUser)
+    except:
+        pass
     
     if(crmUser.want_whatsapp):
-        trigger_welcome_whatsapp_message_to_user(crmUser)
-    
-    send_new_user_telegram_message_to_admin_group(crmUser)
+        try:
+            #trigger_welcome_whatsapp_message_to_user(crmUser)
+            pass
+        except:
+            pass
+    try:
+        send_new_user_telegram_message_to_admin_group(crmUser)
+    except:
+        pass
 def trigger_welcome_whatsapp_message_to_user(crmUser):
     
     to_number = crmUser.phone
@@ -31,7 +41,7 @@ def trigger_welcome_whatsapp_message_to_user(crmUser):
 def send_new_user_telegram_message_to_admin_group(user):
     
     
-    chat_id = secrects.TELEGRAM_ADMIN_GROUP_CHAT_ID
+    chat_id = TELEGRAM_ADMIN_GROUP_CHAT_ID
     args = {'user_name': user.name,
             'user_business_name': user.businessName,
             'user_business_type': user.businessType,
@@ -51,12 +61,14 @@ def send_new_user_telegram_message_to_admin_group(user):
     '''.format(**args)
     #telegram_bot.sendMessage(chat_id=chat_id, text=message)
     
-    telegram_bot.sendMessage(chat_id=chat_id, text=message)
+    res = telegram_bot.sendMessage(chat_id=chat_id, text=message)
+    print('done sending telegram message: ', res)
 def flashyCreateContact(user):
-    response = requests.post('https://flashyapp.com/api/contacts/create',
+    print('=========== start flashyCreateContact ===========')
+    response = requests.post(f'https://flashyapp.com/api/lists/{FLASHY_MAIN_LIST_ID}/subscribe',
                     json={
                         "key": FLASHY_MY_API_KEY,
-                        "contact": {
+                        "subscriber": {
                             "email": user.email,
                             "first_name": user.name,
                             "phone": user.phone,
@@ -70,6 +82,7 @@ def flashyCreateContact(user):
     json_response = response.json()
     if(json_response['success'] == True):
         print('flashy contact created')
-        contact_id = json_response['contact']['contact_id']
+        contact_id = json_response['subscriber']['contact_id']
         user.flashy_contact_id = contact_id
         user.save()
+    print('=========== end flashyCreateContact ===========')
