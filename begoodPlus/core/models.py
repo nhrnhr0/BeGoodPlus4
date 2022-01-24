@@ -4,7 +4,7 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.utils.html import mark_safe
 from django.conf import settings
-
+import json
 import uuid
 
 from django.conf import settings
@@ -14,6 +14,9 @@ from rest_framework.authtoken.models import Token
 
 from base64 import urlsafe_b64decode, urlsafe_b64encode
 from uuid import UUID
+from productColor.models import ProductColor
+
+from productSize.models import ProductSize
 
 def uuid2slug(uuidstring):
     if uuidstring:
@@ -108,6 +111,7 @@ class SvelteContactFormModal(models.Model):
 class SvelteCartProductEntery(models.Model):
     product = models.ForeignKey(to=CatalogImage, on_delete=models.CASCADE)
     amount = models.IntegerField(verbose_name=_('amount'), default=1)
+    details = models.JSONField(verbose_name=_('details'), blank=True, null=True)
     def __str__(self):
         return str(self.amount) + ' - ' + self.product.title
     class Meta:
@@ -134,7 +138,24 @@ class SvelteCartModal(models.Model):
             ret += f'<li><div style="font-weight: bold;">{str(i.amount)} - {str(i.product)}</div></li>'
         ret+= '</ul>'
         return mark_safe(ret)
-    
+    def products_amount_display_with_sizes_and_colors(self):
+        ret = '<table>'
+        for i in self.productEntries.all():
+            ret += f'<tr><td style="font-weight: bold;">{str(i.amount)} - {str(i.product)}</td>'
+            if i.details != None:
+                details = i.details
+                detail_table = '<td><table>'
+                # i.details = [{"size_id": 90, "color_id": "77", "quantity": 12}, {"size_id": 90, "color_id": "78", "quantity": 35}, {"size_id": 89, "color_id": "79", "quantity": 6}, {"size_id": 88, "color_id": "83", "quantity": 19}, {"size_id": 89, "color_id": "83", "quantity": 7}]
+                for detail in details:
+                    size = ProductSize.objects.get(pk=detail['size_id'])
+                    color = ProductColor.objects.get(pk=detail['color_id'])
+                    qyt = detail['quantity'] if 'quantity' in detail else '-'
+                    detail_table += f'<tr><td>{size.size}</td><td>{color.name}</td><td>{str(qyt)}</td></tr>'
+                detail_table += '</table></td><hr>'
+                ret += detail_table
+            ret += '</tr>'
+        ret+= '</table>'
+        return mark_safe(ret)
     def uniqe_color(self):
         ret = f'<span width="25px" height="25px" style="color:black;background-color: {ColorHash(str(self.uid)).hex}">{uuid2slug(self.uid)}</span>'
         return mark_safe(ret)

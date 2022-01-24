@@ -86,7 +86,7 @@ class SvelteCartModalAdmin(admin.ModelAdmin):
     list_display = ('id', 'user', 'uniqe_color','device','name','phone','email','created_date')
     #filter_horizontal = ('products',)
     exclude = ('products','productEntries')
-    readonly_fields =('products_amount_display',)
+    readonly_fields =('products_amount_display_with_sizes_and_colors',)
     actions = ['resend_email_action','download_cart_excel',]
     def resend_email_action(modeladmin, request, queryset):
         for obj in queryset:
