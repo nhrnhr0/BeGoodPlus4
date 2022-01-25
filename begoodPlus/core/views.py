@@ -55,6 +55,7 @@ from django.db.models import Value,CharField
 from catalogAlbum.serializers import CatalogImageSerializer
 from django.views.decorators.csrf import ensure_csrf_cookie
 import uuid
+from django.conf import settings
 
 from rest_framework.decorators import api_view, permission_classes
 @api_view(['POST', 'GET'])
@@ -128,7 +129,10 @@ def svelte_cart_form(request):
             products_objs = SvelteCartProductEntery.objects.bulk_create([SvelteCartProductEntery(product_id=p['id'],amount=p['amount'] or 1, details = p['mentries'] or {}) for p in products])
             data.productEntries.set(products_objs)
             data.save()
-            send_cart_notification.delay(data.id)
+            if (settings.DEBUG):
+                send_cart_notification(data.id)
+            else:
+                send_cart_notification.delay(data.id)
             return JsonResponse({
                 'status':'success',
                 'detail':'form sent successfuly',
