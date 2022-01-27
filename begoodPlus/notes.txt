@@ -35,8 +35,8 @@ BOISBR/TRfYsLzTyjxtxs15KTRfx1lCJLPqbwDbpLoNW
 
 # new migration code:
 python manage.py shell
-from catalogImages.models import catalogImage
-all = catalogImage.objects.all()
+from catalogImages.models import CatalogImage
+all = CatalogImage.objects.all()
 for obj in all:
         obj.update_image_to_cloudinary = False
         obj.update_show_sizes_popup()

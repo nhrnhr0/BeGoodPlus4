@@ -10,6 +10,8 @@ import uuid
 from django.conf import settings
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from numpy import NaN
+import pandas as pd
 from rest_framework.authtoken.models import Token
 
 from base64 import urlsafe_b64decode, urlsafe_b64encode
@@ -144,15 +146,23 @@ class SvelteCartModal(models.Model):
             ret += f'<tr><td style="font-weight: bold;">{str(i.amount)} - {str(i.product)}</td>'
             if i.details != None:
                 details = i.details
-                detail_table = '<td><table>'
+                #detail_table = '<td><table>'
                 # i.details = [{"size_id": 90, "color_id": "77", "quantity": 12}, {"size_id": 90, "color_id": "78", "quantity": 35}, {"size_id": 89, "color_id": "79", "quantity": 6}, {"size_id": 88, "color_id": "83", "quantity": 19}, {"size_id": 89, "color_id": "83", "quantity": 7}]
+                tableData = []
                 for detail in details:
-                    size = ProductSize.objects.get(pk=detail['size_id'])
-                    color = ProductColor.objects.get(pk=detail['color_id'])
+                    size = ProductSize.objects.get(pk=detail['size_id']).size
+                    color = ProductColor.objects.get(pk=detail['color_id']).name
                     qyt = detail['quantity'] if 'quantity' in detail else '-'
-                    detail_table += f'<tr><td>{size.size}</td><td>{color.name}</td><td>{str(qyt)}</td></tr>'
-                detail_table += '</table></td><hr>'
-                ret += detail_table
+                    tableData.append({'size':size, 'color':color, 'qyt':qyt})
+                    #detail_table += f'<tr><td>{size.size}</td><td>{color.name}</td><td>{str(qyt)}</td></tr>'
+                #detail_table += '</table></td><hr>'
+                #ret += detail_table
+                if(len(tableData) > 0):
+                    df = pd.DataFrame(tableData)
+                    # remove from df rows with qyt == '-' or qyt == 0 or qyt == Nan or qyt == None
+                    #df = df[df['qyt'].str.contains('-') == True or df['qyt'].str.contains('0') == True or df['qyt'].str.contains('NaN') == True or df['qyt'].str.contains('None') == True]
+                    df = df.pivot(index='color', columns='size', values='qyt')
+                    ret += '<td>' + df.to_html(index=True, header=True, table_id='table_id', na_rep='-') + '</td>'
             ret += '</tr>'
         ret+= '</table>'
         return mark_safe(ret)

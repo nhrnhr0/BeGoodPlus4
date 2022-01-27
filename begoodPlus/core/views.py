@@ -72,8 +72,8 @@ def set_csrf_token(request, factory_id=None):
         uid = str(uuid.uuid4().hex)
     return JsonResponse({"details": "CSRF cookie set",
                          'uid': uid,
-                         'whoAmI': get_user_info(request.user),
-                         'campains': get_user_campains_serializer_data(request.user),}, safe=False)
+                         'whoAmI': get_user_info(request.user),},safe=False)
+                         #'campains': get_user_campains_serializer_data(request.user),}, safe=False)
 @api_view(['POST'])
 @permission_classes((AllowAny,))
 def svelte_contact_form(request):

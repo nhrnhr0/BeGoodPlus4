@@ -19,22 +19,30 @@
         </tr>
         <tr>
             <td>
-                <div>משתמש</div>
-                <div>שם העסק</div>
+                משתמש
             </td>
             <td>
                 {% if cart.user %}
-                <a href="https://catalog.ms-global.co.il/admin/auth/user/{{cart.user.id}}/change/">
-                    <p>{{cart.user}}</p>
-                </a>
-                <a href="https://catalog.ms-global.co.il/admin/client/client/{{cart.user.id}}/change/">
-                    <p>{{cart.user.client.businessName}}</p>
-
-                </a>
+                    <a href="https://catalog.ms-global.co.il/admin/auth/user/{{cart.user.id}}/change/">
+                        <p>{{cart.user}}</p>
+                    </a>
                 {% else %}
-                    <p> - </p>
+                    <p> אנונימי </p>
                 {% endif %}
-
+            </td>
+        </tr>
+        <tr>
+            <td>
+                שם העסק
+            </td>
+            <td>
+                {% if cart.user %}
+                    <a href="https://catalog.ms-global.co.il/admin/client/client/{{cart.user.id}}/change/">
+                        <p>{{cart.user.client.businessName}}</p>
+                    </a>
+                {% else %}
+                    <p> {{cart.businessName}} </p>
+                {% endif %}
             </td>
         </tr>
         <tr>

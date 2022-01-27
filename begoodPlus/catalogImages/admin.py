@@ -81,7 +81,7 @@ class albumsInline(admin.TabularInline):
     extra=1
 # Register your models here.
 class CatalogImageAdmin(AdminAdvancedFiltersMixin, admin.ModelAdmin):
-    list_display = ('id', 'show_sizes_popup','render_thumbnail','title','cost_price_dis','client_price_dis','recomended_price_dis','get_albums','cost_price','client_price','recomended_price','date_created', 'date_modified','barcode')
+    list_display = ('id', 'show_sizes_popup','render_thumbnail','title','cost_price_dis','client_price_dis','recomended_price_dis','get_albums','cost_price','client_price','recomended_price','date_created', 'date_modified','barcode', 'show_sizes_popup')
     list_editable = ('cost_price','client_price','recomended_price')
     list_display_links = ('title',)
     actions = ['download_images_csv',]
