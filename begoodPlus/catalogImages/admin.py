@@ -81,7 +81,7 @@ class albumsInline(admin.TabularInline):
     extra=1
 # Register your models here.
 class CatalogImageAdmin(AdminAdvancedFiltersMixin, admin.ModelAdmin):
-    list_display = ('id', 'render_thumbnail','title','cost_price_dis','client_price_dis','recomended_price_dis','get_albums','cost_price','client_price','recomended_price','date_created', 'date_modified','barcode')
+    list_display = ('id', 'show_sizes_popup','render_thumbnail','title','cost_price_dis','client_price_dis','recomended_price_dis','get_albums','cost_price','client_price','recomended_price','date_created', 'date_modified','barcode')
     list_editable = ('cost_price','client_price','recomended_price')
     list_display_links = ('title',)
     actions = ['download_images_csv',]
@@ -94,7 +94,7 @@ class CatalogImageAdmin(AdminAdvancedFiltersMixin, admin.ModelAdmin):
     exclude = ('detailTabel',)
     advanced_filter_fields = (
         'title', 'description','sizes__size', 'colors__name','provides__name',
-        'barcode', 'cost_price', 'client_price', 'recomended_price', 'albums__title',
+        'barcode', 'cost_price', 'client_price', 'recomended_price', 'albums__title', 'show_sizes_popup',
         ('packingTypeProvider__name', 'שיטת אריזה מהספק'), ('packingTypeClient__name', 'שיטת אריזה ללקוח'),'date_modified', 'can_tag')
 
     def get_queryset(self, request):

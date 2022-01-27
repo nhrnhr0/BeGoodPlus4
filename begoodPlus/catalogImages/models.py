@@ -19,6 +19,10 @@ from cloudinary.models import CloudinaryField
 import cloudinary
 from pathlib import Path
 from django.core.files.uploadedfile import InMemoryUploadedFile
+
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
 # Create your models here.
 class CatalogImage(models.Model):
     title = models.CharField(max_length=120, verbose_name=_("title"), unique=False)
@@ -29,6 +33,7 @@ class CatalogImage(models.Model):
     def desc(self):
         return self.description[0:30]
     desc.short_description= _('short description')
+    update_image_to_cloudinary = models.BooleanField(default=True)
     cimage = models.CharField(verbose_name=_('cloudinary image url'), null=True, blank=True, max_length=2047)#CloudinaryField('product_image', overwrite=True,resource_type="image",null=True, blank=True)
     image = models.ImageField(verbose_name=_("image"), null=True, blank=True)
     image_thumbnail = models.ImageField(verbose_name=_("local image"), null=True, blank=True)
@@ -44,6 +49,9 @@ class CatalogImage(models.Model):
     colors = models.ManyToManyField(to=Color, verbose_name=_('colors'))
     sizes = models.ManyToManyField(to=ProductSize, verbose_name=_('sizes'))
     providers = models.ManyToManyField(to=Provider, verbose_name=_('providers'))
+    
+    show_sizes_popup = models.BooleanField(verbose_name=_('show sizes popup'), default=True)
+    
     
     detailTabel = models.ManyToManyField(related_name='parent',to=CatalogImageDetail, verbose_name=_('mini-tabel'), blank=True)
 
@@ -143,9 +151,16 @@ class CatalogImage(models.Model):
         output.seek(0)
         return output 
     
+    
+    def update_show_sizes_popup(self):
+        if self.sizes.count() > 1:
+            self.show_sizes_popup = True
+        else:
+            self.show_sizes_popup = False
+        self.save()
+    
     def save(self, *args, **kwargs):
-        
-        if bool(self.image.name):
+        if self.update_image_to_cloudinary:
             # fails if your don't upload an image, so don't upload image to cloudinary
             mfile = None
             try:
@@ -165,76 +180,9 @@ class CatalogImage(models.Model):
                     self.image = None
             except Exception as e:
                 print(e)
-            
-            
-        super(CatalogImage, self).save(*args,**kwargs)
-        '''
-            try:
-                output = CatalogImage.optimize_image(self.image, size=(923, 715))
-                self.image = InMemoryUploadedFile(output, 'ImageField', "%s.png" % self.image.name.split('.')[0], 'image/PNG',
-                                            sys.getsizeof(output), None)
-                output2 = CatalogImage.optimize_tubmail(self.image, size=(250,250))
-                self.image_thumbnail = InMemoryUploadedFile(output2, 'ImageField', "image_thumbnail_%s.png" % self.image.name.split('.')[0], 'image/PNG',
-                                            sys.getsizeof(output2), None)
-            except:
-                pass
-            
-        super(CatalogImage, self).save(*args,**kwargs)
-        if not self.cimage:
-            fname = Path(self.image.file.name).with_suffix('').name
-            #fname = fname.substring(0, fname.lastIndexOf('.'))
-            res = cloudinary.uploader.upload(self.image.file,
-                folder = "site/products/", 
-                public_id = fname
-                )#public_id = self.title + '_' + str(self.id))
-            self.cimage = 'v' + str(res['version']) +'/'+ res['public_id']
-            self.save()
-            pass
-            '''
-        # if the image is set and and squere image we will generate one
-        '''
-        im = Image.open(self.image)
-        im2 = Image.open(self.image)
-        output = BytesIO()
-        output2 = BytesIO()
-
-        # Resize/modify the image
-        im = im.resize((923, 715))
-        im2 = im2.resize((450, 450))
-        im = im.convert('RGB')
-        im2 = im2.convert('RGB')
-
-        # after modifications, save it to the output
-        im.save(output, format='JPEG', quality=75)
-        im2.save(output2, format='JPEG', quality=75)
-        output.seek(0)
-        output2.seek(0)
-
-        # change the imagefield value to be the newley modifed image value
-        self.image = InMemoryUploadedFile(output, 'ImageField', "%s.jpg" % self.image.name.split('.')[0], 'image/jpeg',
-                                        sys.getsizeof(output), None)
-        self.image_thumbnail = InMemoryUploadedFile(output2, 'ImageField', "image_thumbnail_%s.jpg" % self.image.name.split('.')[0], 'image/jpeg',
-                                        sys.getsizeof(output2), None)
-        print(self.image, self.image.size)
-        print(self.image_thumbnail, self.image_thumbnail.size)
-        '''
-        '''
-        if self.image and not self.image_thumbnail:
-            thub = Image.open(self.image)
-            #thub.thumbnail(size)
-            thub = thub.resize((450,450), Image.BILINEAR)
-            f = BytesIO()
-            try:
-                thub.save(f, format='png')
-                self.image_thumbnail.save('thunbnail_' + self.image.name,
-                                                ContentFile(f.getvalue()))
             finally:
-                f.close()
-        '''
-        
-        
-        
-
+                self.update_image_to_cloudinary = False
+        super(CatalogImage, self).save(*args,**kwargs)
         
     def render_thumbnail(self, *args, **kwargs):
         ret = ''
