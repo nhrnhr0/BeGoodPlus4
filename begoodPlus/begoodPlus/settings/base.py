@@ -97,6 +97,7 @@ INSTALLED_APPS = [
     'clientApi',
     'client',
     'campains',
+    'catalogImageAttrs',
     
     #### old unused modals ####
     'clientLikedImages',

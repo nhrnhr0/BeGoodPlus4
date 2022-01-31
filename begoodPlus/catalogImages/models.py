@@ -7,6 +7,7 @@ from django.utils.html import mark_safe
 from django.conf import settings
 from django.urls import reverse
 from begoodPlus.settings.base import CLOUDINARY_BASE_URL
+from catalogImageAttrs.models import ProductPrices
 
 from color.models import Color
 from provider.models import Provider
@@ -22,6 +23,9 @@ from django.core.files.uploadedfile import InMemoryUploadedFile
 
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+
+
+
 
 # Create your models here.
 class CatalogImage(models.Model):
@@ -57,6 +61,8 @@ class CatalogImage(models.Model):
 
     can_tag = models.BooleanField(default=False, verbose_name=_('can tag'))
     #big_discount = models.BooleanField(default=False)
+    
+    clientPrices = models.OneToOneField(to=ProductPrices, on_delete=models.SET_NULL, null=True, blank=True)
     
     NO_DISCOUNT = ''
     DISCOUNT_10_PRES = '/static/assets/catalog/imgs/discount_10.gif'

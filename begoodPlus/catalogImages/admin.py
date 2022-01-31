@@ -182,3 +182,4 @@ class CatalogImageAdmin(AdminAdvancedFiltersMixin, admin.ModelAdmin):
         url = reverse('admin:%s_%s_change' % (obj._meta.app_label,  obj._meta.model_name),  args=[obj.id] )
         return u'<a href="%s">%s</a>' % (url,  obj.__str__())
 admin.site.register(CatalogImage,CatalogImageAdmin)
+
