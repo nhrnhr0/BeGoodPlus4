@@ -6,6 +6,7 @@ from django.utils.html import mark_safe
 from django.conf import settings
 import json
 import uuid
+from json2html import *
 
 from django.conf import settings
 from django.db.models.signals import post_save
@@ -121,6 +122,24 @@ class SvelteCartProductEntery(models.Model):
         #unique_together = ('cart', 'product')
     
     
+class ActiveCartTracker(models.Model):
+    data = models.JSONField(verbose_name=_('data'), blank=True, null=True)
+    last_updated = models.DateTimeField(auto_now=True, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
+    last_ip = models.CharField(verbose_name=_('last ip'), max_length=120, blank=True, null=True)
+    active_cart_id = models.CharField(verbose_name=_('active cart id'), max_length=120, unique=True)
+    
+    def cart_products_size(self):
+        if self.data:
+            return len(self.data.keys())
+        else:
+            return 0
+    def cart_products_html_table(self):
+        print(self.data)
+        html = ''
+        if self.data:
+            html = json2html.convert(json=self.data)
+        return mark_safe(html)
 class SvelteCartModal(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, null=True, blank=True)
     device = models.CharField(verbose_name=_('device'), max_length=250)

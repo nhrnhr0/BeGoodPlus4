@@ -9,7 +9,13 @@ import client
 from openpyxl.drawing import image
 from openpyxl.utils.cell import get_column_letter
 # Register your models here.
-from .models import SvelteCartModal, UserSearchData
+from .models import ActiveCartTracker, SvelteCartModal, UserSearchData
+class ActiveCartTrackerAdmin(admin.ModelAdmin):
+    list_display = ('last_updated','created_at','last_ip','active_cart_id','cart_products_size')
+    readonly_fields = ('last_updated','created_at','last_ip','active_cart_id','cart_products_html_table','cart_products_size')
+    
+admin.site.register(ActiveCartTracker, ActiveCartTrackerAdmin)
+
 class UserSearchDataAdmin(admin.ModelAdmin):
     list_display = ('id', 'created_date', 'term', 'resultCount', 'session')
 
