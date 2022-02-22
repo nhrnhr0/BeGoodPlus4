@@ -528,6 +528,8 @@ class Client(models.Model):
     howPay = models.ForeignKey(verbose_name=_('payment way'), to=PaymantWay, on_delete=models.PROTECT, null=True,blank=True)
     whenPay = models.ForeignKey(verbose_name=_('payment time'), to=PaymentTime, on_delete=models.PROTECT, null=True,blank=True)
     isWithholdingTax = models.BooleanField(verbose_name=_('IsWithholdingTax'), default=False)
+    
+    show_prices = models.BooleanField(verbose_name=_('show prices'), default=False)
     #availabilityHours = models.TextField(verbose_name=_('availability hours'), blank=True)
     #availabilityDays = models.TextField(verbose_name=_('availability days'), blank=True)
     

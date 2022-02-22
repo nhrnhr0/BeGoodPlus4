@@ -72,6 +72,7 @@ def get_user_info(user):
             'businessName': user.client.businessName,
             'is_superuser': user.is_superuser,
             'campains': get_user_campains_serializer_data(user),
+            'show_prices': user.client.show_prices,
         }
     return {}
 

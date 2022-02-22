@@ -35,7 +35,7 @@ class AlbumClientApi(serializers.ModelSerializer):
 class ImageClientApi(serializers.ModelSerializer):
     class Meta:
         model = CatalogImage
-        fields = ('id','title','description','cimage','colors','sizes','can_tag','discount', 'albums','amountSinglePack','amountCarton', 'show_sizes_popup')
+        fields = ('id','title','description','cimage','colors','sizes','can_tag','discount', 'albums','amountSinglePack','amountCarton', 'show_sizes_popup', 'client_price')
         filter_backends = [DjangoFilterBackend]
         filterset_fields = ['albums']
 
