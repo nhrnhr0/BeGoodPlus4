@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-01-16 14:17+0200\n"
+"POT-Creation-Date: 2022-02-24 07:49+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -29,7 +29,7 @@ msgstr "מספר"
 msgid "text"
 msgstr "טקסט חופשי"
 
-#: .\campains\models.py:26 .\core\models.py:110
+#: .\campains\models.py:26 .\core\models.py:116
 msgid "amount"
 msgstr "כמות"
 
@@ -72,9 +72,10 @@ msgstr "האם מוצג"
 #: .\campains\models.py:57 .\catalogLogos\models.py:11
 #: .\clientLikedImages\models.py:7 .\client\models.py:456
 #: .\client\models.py:462 .\client\models.py:467 .\client\models.py:472
-#: .\core\models.py:43 .\core\models.py:98 .\core\models.py:122
-#: .\customerCart\models.py:11 .\mcrm\models.py:9 .\myUserTasks\models.py:19
-#: .\myUserTasks\models.py:27 .\product\models.py:21 .\provider\models.py:12
+#: .\core\models.py:49 .\core\models.py:104 .\core\models.py:147
+#: .\customerCart\models.py:11 .\mcrm\models.py:5 .\mcrm\models.py:13
+#: .\myUserTasks\models.py:19 .\myUserTasks\models.py:27 .\product\models.py:21
+#: .\provider\models.py:12
 msgid "name"
 msgstr "שם"
 
@@ -106,7 +107,7 @@ msgstr "הפוך אלבומים מסומנים פומביים"
 msgid "Mark selected albums as private"
 msgstr "הפוך אלבומים מסומנים כפרטיים"
 
-#: .\catalogAlbum\models.py:48 .\catalogImages\models.py:23
+#: .\catalogAlbum\models.py:48 .\catalogImages\models.py:32
 #: .\category\models.py:7
 msgid "title"
 msgstr "כותרת"
@@ -115,7 +116,7 @@ msgstr "כותרת"
 msgid "slug"
 msgstr "סלאג"
 
-#: .\catalogAlbum\models.py:50 .\catalogImages\models.py:24
+#: .\catalogAlbum\models.py:50 .\catalogImages\models.py:33
 #: .\glofa_types\models.py:12
 msgid "description"
 msgstr "תיאור"
@@ -146,11 +147,11 @@ msgstr "האם קמפיין"
 msgid "cimage"
 msgstr "תמונה"
 
-#: .\catalogAlbum\models.py:74 .\catalogImages\models.py:236
+#: .\catalogAlbum\models.py:74 .\catalogImages\models.py:198
 msgid "thumbnail"
 msgstr "תמונה קטנה"
 
-#: .\catalogAlbum\models.py:95 .\catalogImages\models.py:86
+#: .\catalogAlbum\models.py:95 .\catalogImages\models.py:103
 msgid "copy link"
 msgstr "העתק לינק"
 
@@ -166,26 +167,36 @@ msgstr "תמונת קטלוג"
 msgid "catalog album"
 msgstr "תמונת קטלוג"
 
+#: .\catalogImageAttrs\models.py:11
+#, fuzzy
+#| msgid "private client price"
+msgid "catalog image client price entry"
+msgstr "מחיר לקוח פרטי"
+
+#: .\catalogImageAttrs\models.py:12
+msgid "catalog image client price entries"
+msgstr ""
+
 #: .\catalogImageDetail\models.py:14 .\catalogImages\admin.py:49
-#: .\catalogImages\models.py:41
+#: .\catalogImages\models.py:53
 msgid "colors"
 msgstr "צבעים"
 
 #: .\catalogImageDetail\models.py:15 .\catalogImages\admin.py:58
-#: .\catalogImages\models.py:42
+#: .\catalogImages\models.py:54
 msgid "sizes"
 msgstr "גדלים"
 
 #: .\catalogImageDetail\models.py:17 .\catalogImages\admin.py:63
-#: .\catalogImages\models.py:34
+#: .\catalogImages\models.py:44
 msgid "cost price"
 msgstr "מחיר עלות"
 
-#: .\catalogImageDetail\models.py:18 .\catalogImages\models.py:35
+#: .\catalogImageDetail\models.py:18 .\catalogImages\models.py:45
 msgid "store price"
 msgstr "מחיר חנות"
 
-#: .\catalogImageDetail\models.py:19 .\catalogImages\models.py:36
+#: .\catalogImageDetail\models.py:19 .\catalogImages\models.py:46
 msgid "private client price"
 msgstr "מחיר לקוח פרטי"
 
@@ -211,78 +222,90 @@ msgstr "מחיר לקוח פרטי"
 msgid "recomended price"
 msgstr "מחיר עלות"
 
-#: .\catalogImages\models.py:25
+#: .\catalogImages\models.py:34
 #, fuzzy
 #| msgid "code"
 msgid "barcode"
 msgstr "קוד"
 
-#: .\catalogImages\models.py:26
+#: .\catalogImages\models.py:35
 msgid "free text"
 msgstr "טקסט חופשי"
 
-#: .\catalogImages\models.py:27
+#: .\catalogImages\models.py:36
 msgid "whatsapp text"
 msgstr "טקסט לוואצאפ"
 
-#: .\catalogImages\models.py:30
+#: .\catalogImages\models.py:39
 msgid "short description"
 msgstr "תיאור קצר"
 
-#: .\catalogImages\models.py:31
+#: .\catalogImages\models.py:41
 msgid "cloudinary image url"
 msgstr "קישור תמונה לאחסון תמונות"
 
-#: .\catalogImages\models.py:32 .\catalogImages\models.py:243
+#: .\catalogImages\models.py:42 .\catalogImages\models.py:205
 #: .\catalogLogos\models.py:12 .\catalogLogos\models.py:40
 #: .\glofa_types\models.py:24 .\productImages\models.py:12
 #: .\product\models.py:99
 msgid "image"
 msgstr "תמונה"
 
-#: .\catalogImages\models.py:33
+#: .\catalogImages\models.py:43
 #, fuzzy
 #| msgid "Catalog image"
 msgid "local image"
 msgstr "תמונת קטלוג"
 
-#: .\catalogImages\models.py:39
+#: .\catalogImages\models.py:49
 msgid "packing type from provider"
 msgstr "שיטת אריזה מהספק"
 
-#: .\catalogImages\models.py:40
+#: .\catalogImages\models.py:50
 msgid "packing type for client"
 msgstr "שיטת אריזה ללקוח"
 
-#: .\catalogImages\models.py:43
+#: .\catalogImages\models.py:51
+msgid "amount in single pack"
+msgstr ""
+
+#: .\catalogImages\models.py:52
+msgid "amount in carton"
+msgstr ""
+
+#: .\catalogImages\models.py:55
 msgid "providers"
 msgstr "ספקים"
 
-#: .\catalogImages\models.py:45
+#: .\catalogImages\models.py:57
+msgid "show sizes popup"
+msgstr ""
+
+#: .\catalogImages\models.py:60
 msgid "mini-tabel"
 msgstr ""
 
-#: .\catalogImages\models.py:47
+#: .\catalogImages\models.py:62
 msgid "can tag"
 msgstr "ניתן למיתוג"
 
-#: .\catalogImages\models.py:70
+#: .\catalogImages\models.py:87
 msgid "cost price (no VAT)"
 msgstr "מחיר עלות (ללא מע'מ)"
 
-#: .\catalogImages\models.py:74
+#: .\catalogImages\models.py:91
 msgid "store price  (no VAT)"
 msgstr "מחיר חנות (ללא מע'מ)"
 
-#: .\catalogImages\models.py:77
+#: .\catalogImages\models.py:94
 msgid "private client price (no VAT)"
 msgstr "מחיר לקוח פרטי (ללא מע'מ)"
 
-#: .\catalogImages\models.py:89
+#: .\catalogImages\models.py:106
 msgid "Catalog image"
 msgstr "תמונת קטלוג"
 
-#: .\catalogImages\models.py:90
+#: .\catalogImages\models.py:107
 msgid "Catalog images"
 msgstr "תמונות קטלוג"
 
@@ -300,7 +323,7 @@ msgstr "ייצוג צבע"
 msgid "category"
 msgstr "קטגוריה"
 
-#: .\category\models.py:14 .\client\models.py:500
+#: .\category\models.py:14 .\client\models.py:515
 msgid "categories"
 msgstr "קטגוריות"
 
@@ -308,9 +331,9 @@ msgstr "קטגוריות"
 msgid "products count"
 msgstr "צבעי מוצר"
 
-#: .\clientLikedImages\models.py:8 .\client\models.py:497 .\core\models.py:45
-#: .\core\models.py:100 .\core\models.py:125 .\customerCart\models.py:13
-#: .\mcrm\models.py:11 .\myUserTasks\models.py:21 .\myUserTasks\models.py:29
+#: .\clientLikedImages\models.py:8 .\client\models.py:512 .\core\models.py:51
+#: .\core\models.py:106 .\core\models.py:150 .\customerCart\models.py:13
+#: .\mcrm\models.py:15 .\myUserTasks\models.py:21 .\myUserTasks\models.py:29
 msgid "email"
 msgstr "אימייל"
 
@@ -320,8 +343,8 @@ msgstr "אימייל"
 msgid "phone number"
 msgstr "מספר"
 
-#: .\clientLikedImages\models.py:10 .\core\models.py:46 .\core\models.py:101
-#: .\core\models.py:128 .\myUserTasks\models.py:22
+#: .\clientLikedImages\models.py:10 .\core\models.py:52 .\core\models.py:107
+#: .\core\models.py:153 .\myUserTasks\models.py:22
 msgid "message"
 msgstr "הודעה"
 
@@ -339,11 +362,11 @@ msgstr ""
 msgid "Send telegram message"
 msgstr ""
 
-#: .\client\models.py:58 .\core\models.py:97 .\core\models.py:121
+#: .\client\models.py:58 .\core\models.py:103 .\core\models.py:146
 msgid "uuid"
 msgstr ""
 
-#: .\client\models.py:59 .\core\models.py:96 .\core\models.py:120
+#: .\client\models.py:59 .\core\models.py:102 .\core\models.py:145
 msgid "device"
 msgstr "IP"
 
@@ -351,127 +374,121 @@ msgstr "IP"
 msgid "session duration"
 msgstr "זמן התחברות"
 
-#: .\client\models.py:482
-msgid "not defined"
-msgstr "לא מוגדר"
-
-#: .\client\models.py:482
-msgid "private"
-msgstr "חברה פרטית"
-
-#: .\client\models.py:482
-msgid "kibuttz"
-msgstr "קיבוץ"
-
-#: .\client\models.py:487
+#: .\client\models.py:498
 msgid "user"
 msgstr "משתמש"
 
-#: .\client\models.py:496
+#: .\client\models.py:511
 #, fuzzy
 #| msgid "business name"
 msgid "business name "
 msgstr "שם העסק"
 
-#: .\client\models.py:498
+#: .\client\models.py:513
 msgid "extra name"
 msgstr "שם נוסף"
 
-#: .\client\models.py:499
+#: .\client\models.py:514
 msgid "store type"
 msgstr "סוג חנות"
 
-#: .\client\models.py:501
+#: .\client\models.py:516
 msgid "tariff (%)"
 msgstr "סוג מחירון"
 
-#: .\client\models.py:502
+#: .\client\models.py:517
 msgid "P.C."
 msgstr "ח.פ."
 
-#: .\client\models.py:503
+#: .\client\models.py:518
 #, fuzzy
 #| msgid "private client price"
 msgid "client type"
 msgstr "מחיר לקוח פרטי"
 
-#: .\client\models.py:504
+#: .\client\models.py:519
 msgid "address"
 msgstr "כתובת"
 
-#: .\client\models.py:505
+#: .\client\models.py:520
 msgid "contact man"
 msgstr "איש קשר"
 
-#: .\client\models.py:506
+#: .\client\models.py:521
 msgid "contact man position"
 msgstr "תפקיד איש קשר"
 
-#: .\client\models.py:507
+#: .\client\models.py:522
 msgid "contact man phone"
 msgstr "טלפון איש קשר"
 
-#: .\client\models.py:508
+#: .\client\models.py:523
 msgid "contact man 2"
 msgstr "איש קשר 2"
 
-#: .\client\models.py:509
+#: .\client\models.py:524
 msgid "contact man 2 phone"
 msgstr "טלפון איש קשר 2"
 
-#: .\client\models.py:510
+#: .\client\models.py:525
 msgid "office phone"
 msgstr "טלפון במשרד"
 
-#: .\client\models.py:511
+#: .\client\models.py:526
 msgid "extra email"
 msgstr "אימייל נוסף"
 
-#: .\client\models.py:512
+#: .\client\models.py:527
 msgid "organization"
 msgstr "ארגון"
 
-#: .\client\models.py:513
+#: .\client\models.py:528
 msgid "payment way"
 msgstr "דרך תשלום"
 
-#: .\client\models.py:514
+#: .\client\models.py:529
 msgid "payment time"
 msgstr "זמן תשלום"
 
-#: .\client\models.py:515
+#: .\client\models.py:530
 msgid "IsWithholdingTax"
 msgstr "ניכוי מס במקור"
 
-#: .\client\models.py:519
+#: .\client\models.py:532
+#, fuzzy
+#| msgid "store price"
+msgid "show prices"
+msgstr "מחיר חנות"
+
+#: .\client\models.py:536
 msgid "sunday"
 msgstr "יום ראשון"
 
-#: .\client\models.py:520
+#: .\client\models.py:537
 msgid "monday"
 msgstr "יום שני"
 
-#: .\client\models.py:521
+#: .\client\models.py:538
 msgid "tuesday"
 msgstr "יום שלישי"
 
-#: .\client\models.py:522
+#: .\client\models.py:539
 msgid "wednesday"
 msgstr "יום רביעי"
 
-#: .\client\models.py:523
+#: .\client\models.py:540
 msgid "thursday"
 msgstr "יום חמישי"
 
-#: .\client\models.py:524
+#: .\client\models.py:541
 msgid "friday"
 msgstr "יום שישי"
 
-#: .\client\models.py:525
+#: .\client\models.py:542
 msgid "saturday"
 msgstr "יום שבת"
 
-#: .\client\models.py:527 .\product\models.py:31
+#: .\client\models.py:544 .\product\models.py:31
 msgid "comments"
 msgstr "הערות"
 
@@ -485,39 +502,57 @@ msgstr "צבע"
 msgid "Colors"
 msgstr "צבע"
 
-#: .\color\models.py:12
+#: .\color\models.py:16
 msgid "color name"
 msgstr "צבע"
 
-#: .\color\models.py:13 .\stock\models.py:20
+#: .\color\models.py:17 .\stock\models.py:20
 msgid "color"
 msgstr "צבע"
 
-#: .\core\admin.py:92
+#: .\core\admin.py:100
 msgid "resend selected carts email"
 msgstr "שלח מחדש עגלות מסומנות למייל"
 
-#: .\core\admin.py:260
+#: .\core\admin.py:267
 msgid "download selected carts excel"
 msgstr "הורד עגלות מסומנות לאקסל"
 
-#: .\core\models.py:44 .\core\models.py:99 .\core\models.py:124
-#: .\customerCart\models.py:12 .\mcrm\models.py:10 .\myUserTasks\models.py:20
+#: .\core\models.py:50 .\core\models.py:105 .\core\models.py:149
+#: .\customerCart\models.py:12 .\mcrm\models.py:14 .\myUserTasks\models.py:20
 #: .\myUserTasks\models.py:28
 #, fuzzy
 #| msgid "telephone"
 msgid "phone"
 msgstr "טלפון"
 
-#: .\core\models.py:57 .\customerCart\models.py:23
+#: .\core\models.py:63 .\customerCart\models.py:23
 msgid "owner"
 msgstr "בעלים"
 
-#: .\core\models.py:85
+#: .\core\models.py:91
 msgid "number of results"
 msgstr "מספר תוצאות"
 
-#: .\core\models.py:123 .\mcrm\models.py:6
+#: .\core\models.py:117
+#, fuzzy
+#| msgid "Order details"
+msgid "details"
+msgstr "פרטי הזמנות"
+
+#: .\core\models.py:126
+msgid "data"
+msgstr ""
+
+#: .\core\models.py:129
+msgid "last ip"
+msgstr ""
+
+#: .\core\models.py:130
+msgid "active cart id"
+msgstr ""
+
+#: .\core\models.py:148 .\mcrm\models.py:10
 msgid "business name"
 msgstr "שם העסק"
 
@@ -547,29 +582,33 @@ msgstr "תמונת קטלוג"
 msgid "glofa images"
 msgstr "סוגי גלופה"
 
-#: .\mcrm\models.py:7
+#: .\mcrm\models.py:11
 msgid "business type"
-msgstr "שם העסק"
+msgstr "סוג העסק"
 
-#: .\mcrm\models.py:8
+#: .\mcrm\models.py:12
 msgid "business type custom"
 msgstr "שם העסק פירוט"
 
-#: .\mcrm\models.py:12
+#: .\mcrm\models.py:16
 #, fuzzy
 #| msgid "extra email"
 msgid "want emails"
 msgstr "אימייל נוסף"
 
-#: .\mcrm\models.py:13
+#: .\mcrm\models.py:17
 #, fuzzy
 #| msgid "whatsapp text"
 msgid "want whatsapp"
 msgstr "רוצה לוואצאפ"
 
-#: .\mcrm\models.py:14
+#: .\mcrm\models.py:18
 msgid "flashy contact id"
 msgstr "מספר זהות בפלאשי"
+
+#: .\mcrm\models.py:19
+msgid "tags"
+msgstr ""
 
 #: .\packingType\models.py:7
 msgid "Packing type"
@@ -693,18 +732,22 @@ msgid "Success"
 msgstr ""
 
 #: .\static_cdn\templates\admin\change_list.html:32
+#: .\static_cdn\templates\admin\mcrm\change_list.html:32
 msgid "Home"
 msgstr "בית"
 
 #: .\static_cdn\templates\admin\change_list.html:52
+#: .\static_cdn\templates\admin\mcrm\change_list.html:53
 msgid "Please correct the error below."
 msgstr ""
 
 #: .\static_cdn\templates\admin\change_list.html:52
+#: .\static_cdn\templates\admin\mcrm\change_list.html:53
 msgid "Please correct the errors below."
 msgstr ""
 
 #: .\static_cdn\templates\admin\change_list.html:63
+#: .\static_cdn\templates\admin\mcrm\change_list.html:64
 msgid "Filter"
 msgstr ""
 
@@ -773,6 +816,15 @@ msgstr "טווח מחירים ללקוח עסקי"
 #: .\stock\models.py:55
 msgid "makat"
 msgstr "מק\"ט"
+
+#~ msgid "not defined"
+#~ msgstr "לא מוגדר"
+
+#~ msgid "private"
+#~ msgstr "חברה פרטית"
+
+#~ msgid "kibuttz"
+#~ msgstr "קיבוץ"
 
 #~ msgid "image thumbnail"
 #~ msgstr "תמונה ריבוע"
@@ -1260,9 +1312,6 @@ msgstr "מק\"ט"
 
 #~ msgid "Order detail"
 #~ msgstr "פרטי הזמנה"
-
-#~ msgid "Order details"
-#~ msgstr "פרטי הזמנות"
 
 #~ msgid "add printing"
 #~ msgstr "הוסף הדפסה"

@@ -14,7 +14,7 @@ docker exec -it pg /bin/bash
         psql -h localhost -U postgres
         DROP DATABASE testdb5;
         CREATE DATABASE testdb5;
-        exit
+        \q
 PGPASSWORD=password psql -h localhost -U postgres -d testdb5 < /tmp/db.sql 
 
 CELERY:
