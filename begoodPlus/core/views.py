@@ -109,7 +109,7 @@ def svelte_contact_form(request):
 def track_cart(request):
     body_unicode = request.data
     device = request.COOKIES.get('device')
-    active_cart_id = request.COOKIES.get('active_cart')
+    active_cart_id = body_unicode.get('active_cart_id')
     if active_cart_id == None:
         active_cart_id = str(uuid.uuid4().hex)
     obj, is_created = ActiveCartTracker.objects.get_or_create(active_cart_id=active_cart_id)
@@ -118,7 +118,7 @@ def track_cart(request):
     obj.data = body_unicode
     obj.save()
     response = HttpResponse(json.dumps({'status':'ok','active_cart_id':active_cart_id}), content_type='application/json')
-    response.set_cookie('active_cart', active_cart_id, max_age=60*60*24*365*10, httponly=True)
+    #response.set_cookie('active_cart', active_cart_id, max_age=60*60*24*365*10, httponly=True)
     return response
 
 @api_view(['POST'])
