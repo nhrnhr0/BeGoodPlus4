@@ -8,6 +8,8 @@ from openpyxl.worksheet.datavalidation import DataValidation
 import client
 from openpyxl.drawing import image
 from openpyxl.utils.cell import get_column_letter
+
+from client.models import UserQuestion
 # Register your models here.
 from .models import ActiveCartTracker, SvelteCartModal, UserSearchData
 class ActiveCartTrackerAdmin(admin.ModelAdmin):
@@ -266,3 +268,9 @@ class SvelteCartModalAdmin(admin.ModelAdmin):
         return FileResponse(buffer, as_attachment=True, filename=file_name + '.xls')
     download_cart_excel.short_description = _("download selected carts excel")
 admin.site.register(SvelteCartModal, SvelteCartModalAdmin)
+
+
+class UserQuestionAdmin(admin.ModelAdmin):
+    list_display = ('id','is_answered', 'user', 'product', 'question', 'answer', 'created_at', 'ip',)
+    search_fields = ('user', 'question', 'answer', 'product')
+admin.site.register(UserQuestion, UserQuestionAdmin)

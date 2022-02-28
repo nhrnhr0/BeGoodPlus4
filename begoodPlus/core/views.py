@@ -5,6 +5,7 @@ from django.db.models.functions import Greatest
 from django.contrib.postgres.search import TrigramSimilarity
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from campains.views import get_user_campains_serializer_data
+from client.models import UserQuestion
 
 from client.views import get_user_info
 from clientApi.serializers import ImageClientApi
@@ -120,6 +121,29 @@ def track_cart(request):
     response = HttpResponse(json.dumps({'status':'ok','active_cart_id':active_cart_id}), content_type='application/json')
     #response.set_cookie('active_cart', active_cart_id, max_age=60*60*24*365*10, httponly=True)
     return response
+
+@api_view(['POST'])
+@permission_classes((AllowAny,))
+def client_product_question(request):
+    print('client_product_question start')
+    body = request.data
+    device = request.COOKIES.get('device')
+    print('client_product_question', body)
+    product_id = body.get('product_id', None)
+    question = body.get('question', None)
+    if(request.user.is_anonymous):
+        user = None
+    else:
+        user = request.user
+    data = UserQuestion.objects.create(
+        product = CatalogImage.objects.get(id=product_id),question = question,
+        user = user,ip=device,is_answered=False)
+    data.save()
+    return JsonResponse({
+        'status':'success',
+        'id':data.id,
+        'detail':'form sent successfuly'
+        })
 
 @api_view(['POST'])
 @permission_classes((AllowAny,))

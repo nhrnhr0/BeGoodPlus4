@@ -644,3 +644,14 @@ class Client(models.Model):
         wb.save(buffer)
         buffer.seek(0)
         return buffer
+    
+    
+
+class UserQuestion(models.Model):
+    is_answered = models.BooleanField(verbose_name=_('is answered'), default=False)
+    product = models.ForeignKey(to=CatalogImage, verbose_name=_('product'), on_delete=models.SET_NULL, null=True, blank=True)    
+    question = models.TextField(verbose_name=_('question'), blank=True, null=True)
+    user = models.ForeignKey(to=User, verbose_name=_('user'), on_delete=models.SET_NULL, null=True, blank=True)
+    created_at = models.DateTimeField(verbose_name=_('created at'), auto_now_add=True)
+    ip = models.CharField(verbose_name=_('ip'), max_length=50, blank=True, null=True)
+    answer = models.TextField(verbose_name=_('answer'), blank=True, null=True)

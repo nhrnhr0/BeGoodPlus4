@@ -16,7 +16,7 @@ Including another URLconf
 from clientApi.views import main_page_api
 from campains.views import admin_get_all_campains, admin_get_campain_products, get_user_campains
 from mcrm.views import mcrm_lead_register, admin_upload_bulk_crm_exel
-from core.views import test_celery_view
+from core.views import client_product_question, test_celery_view
 from catalogImages.views import admin_api_get_product_cost_price, all_images_ids
 from clientApi.views import ColorsClientViewSet, ImageClientViewSet, SizesClientViewSet,LogoClientViewSet, get_album_images
 from clientApi.views import AlbumClientViewSet
@@ -77,6 +77,7 @@ from customerCart.views import cart_del, cart_add,cart_view,cart_info
 from clientApi.views import CustomAuthToken
 #from rest_framework_simplejwt.views import (TokenObtainPairView,TokenRefreshView,)
 urlpatterns = [
+    path('product-question', client_product_question, name='client_product_question'),
     path('admin_upload_bulk_crm_exel', admin_upload_bulk_crm_exel, name='admin_upload_bulk_crm_exel'),
     path('main_page_api/', main_page_api, name='main_page_api'),
     path('admin-api/get-all-campaigns/', admin_get_all_campains),
