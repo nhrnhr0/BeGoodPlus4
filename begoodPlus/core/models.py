@@ -115,6 +115,9 @@ class SvelteCartProductEntery(models.Model):
     product = models.ForeignKey(to=CatalogImage, on_delete=models.CASCADE)
     amount = models.IntegerField(verbose_name=_('amount'), default=1)
     details = models.JSONField(verbose_name=_('details'), blank=True, null=True)
+    #cart = models.ForeignKey(to='SvelteCartModal', on_delete=models.CASCADE, null=True, blank=True)
+
+    
     def __str__(self):
         return str(self.amount) + ' - ' + self.product.title
     class Meta:
@@ -150,6 +153,7 @@ class SvelteCartModal(models.Model):
     email = models.EmailField(verbose_name=_('email'), max_length=120)
     products = models.ManyToManyField(to=CatalogImage, blank=True)
     productEntries = models.ManyToManyField(to=SvelteCartProductEntery, blank=True)
+    productsRaw = models.CharField(verbose_name=_('products'), blank=True, null=True, max_length=2048)
     message = models.TextField(verbose_name=_('message'), blank=True, null=True)
     created_date = models.DateTimeField(auto_now_add=True, blank=True, null=True)
     

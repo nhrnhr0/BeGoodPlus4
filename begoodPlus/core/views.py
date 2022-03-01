@@ -149,41 +149,37 @@ def client_product_question(request):
 @permission_classes((AllowAny,))
 def svelte_cart_form(request):
     if request.method == "POST":
-        try:
-            body_unicode = request.data #body.decode('utf-8')
-            device = request.COOKIES.get('device')
-            body = body_unicode #json.loads(body_unicode)
-            name = body['name']  or ''
-            email = body['email']  or ''
-            phone = body['phone']  or ''
-            business_name = body['business_name']  or ''
-            uuid = body['uuid'] or ''
-            message = body['message']  or ''
-            products = body['products'] or ''
-            
-            if(request.user.is_anonymous):
-                user = None
-            else:
-                user = request.user
-            data = SvelteCartModal.objects.create(user=user, device=device,uid=uuid,businessName=business_name, name=name, phone=phone, email=email, message=message)
-            #data.products.set(products)
-            products_objs = SvelteCartProductEntery.objects.bulk_create([SvelteCartProductEntery(product_id=p['id'],amount=p['amount'] or 1, details = p['mentries'] or {}) for p in products])
-            data.productEntries.set(products_objs)
-            data.save()
-            if (settings.DEBUG):
-                send_cart_notification(data.id)
-            else:
-                send_cart_notification.delay(data.id)
-            return JsonResponse({
-                'status':'success',
-                'detail':'form sent successfuly',
-                'cart_id': data.id,
-                'product_ids': [p.product_id for p in products_objs]
-                })
-        except Exception as e:
-            return JsonResponse({
-                'status': 'warning',
-                'detail': str(e),
+        body_unicode = request.data #body.decode('utf-8')
+        device = request.COOKIES.get('device')
+        body = body_unicode #json.loads(body_unicode)
+        name = body['name']  or ''
+        email = body['email']  or ''
+        phone = body['phone']  or ''
+        business_name = body['business_name']  or ''
+        uuid = body['uuid'] or ''
+        message = body['message']  or ''
+        products = body['products'] or ''
+        raw_cart = body['raw_cart'] or '' 
+        
+        if(request.user.is_anonymous):
+            user = None
+        else:
+            user = request.user
+        db_cart = SvelteCartModal.objects.create(user=user, device=device,uid=uuid,businessName=business_name, name=name, phone=phone, email=email, message=message)
+        #data.products.set(products)
+        db_cart.productsRaw = raw_cart
+        products_objs = SvelteCartProductEntery.objects.bulk_create([SvelteCartProductEntery(product_id=p['id'],amount=p['amount'] or 1, details = p['mentries'] or {}) for p in products])
+        db_cart.productEntries.set(products_objs)
+        db_cart.save()
+        if (settings.DEBUG):
+            send_cart_notification(db_cart.id)
+        else:
+            send_cart_notification.delay(db_cart.id)
+        return JsonResponse({
+            'status':'success',
+            'detail':'form sent successfuly',
+            'cart_id': db_cart.id,
+            'product_ids': [p.product_id for p in products_objs]
             })
 
 

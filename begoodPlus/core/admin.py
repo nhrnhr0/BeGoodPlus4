@@ -1,3 +1,4 @@
+from calendar import c
 import requests
 from django.contrib import admin
 from django.utils.translation import gettext_lazy  as _
@@ -11,7 +12,7 @@ from openpyxl.utils.cell import get_column_letter
 
 from client.models import UserQuestion
 # Register your models here.
-from .models import ActiveCartTracker, SvelteCartModal, UserSearchData
+from .models import ActiveCartTracker, SvelteCartModal, SvelteCartProductEntery, UserSearchData
 class ActiveCartTrackerAdmin(admin.ModelAdmin):
     list_display = ('last_updated','created_at','last_ip','active_cart_id','cart_products_size')
     readonly_fields = ('last_updated','created_at','last_ip','active_cart_id','cart_products_html_table','cart_products_size')
@@ -90,12 +91,22 @@ def cart_to_dict(obj: SvelteCartModal):
     return ret
 
 from core.tasks import send_cart_notification
+
+class SvelteCartProductEnteryAdmin(admin.ModelAdmin):
+    list_display = ('id', 'product', 'amount', 'details')
+admin.site.register(SvelteCartProductEntery, SvelteCartProductEnteryAdmin)
+
 class SvelteCartModalAdmin(admin.ModelAdmin):
     list_display = ('id', 'user', 'uniqe_color','device','name','phone','email','created_date')
     #filter_horizontal = ('products',)
     exclude = ('products','productEntries')
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        qs = qs.select_related('user').prefetch_related('productEntries')
+        return qs
     readonly_fields =('products_amount_display_with_sizes_and_colors',)
     actions = ['resend_email_action','download_cart_excel',]
+    list_select_related = ['user']
     def resend_email_action(modeladmin, request, queryset):
         for obj in queryset:
             send_cart_notification.delay(obj.id)
