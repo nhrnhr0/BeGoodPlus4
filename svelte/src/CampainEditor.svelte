@@ -12,6 +12,7 @@ import {deepEqual} from './utils/utils.js'
 	let data;
 	let server_data;
 	let updateing = false;
+	
 	onMount(async()=> {
 		let url = GET_CAMPAIN_PRODUCTS_URL + object_id;
 		console.log('url', url);

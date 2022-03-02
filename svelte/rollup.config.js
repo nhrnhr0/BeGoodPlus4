@@ -86,6 +86,7 @@ let exportable = [];
 [
   "App",
   "CampainEditor",
+  "AdminCartEditor"
   // "MyComponent",
 ].forEach((d) => exportable.push(componentExportDetails(d)));
 
