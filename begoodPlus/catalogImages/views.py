@@ -7,6 +7,15 @@ from rest_framework import status
 from .serializers import CatalogImageSerializer, CatalogImageApiSerializer
 from rest_framework.request import Request
 from catalogImageDetail.models import CatalogImageDetail
+
+def get_product_sizes_colors_martix(request, id):
+    ret = {}
+    if request.user.is_superuser and request.method == "GET":
+        catalogImage = CatalogImage.objects.get(pk=id)
+        ret = {'sizes': list(catalogImage.sizes.all().values_list('id','size')),
+            'colors': list(catalogImage.colors.all().values_list('id','name','color'))}
+    return JsonResponse(ret)
+
 def admin_api_get_product_cost_price(request, product_id):
     if request.user.is_superuser:
         ret = {}

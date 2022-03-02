@@ -144,6 +144,7 @@ class ActiveCartTracker(models.Model):
             html = json2html.convert(json=self.data)
         return mark_safe(html)
 class SvelteCartModal(models.Model):
+    doneOrder = models.BooleanField(default=False, verbose_name=_('done order'))
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, null=True, blank=True)
     device = models.CharField(verbose_name=_('device'), max_length=250)
     uid = models.UUIDField(verbose_name=_('uuid'), null=True, blank=True)
@@ -153,10 +154,11 @@ class SvelteCartModal(models.Model):
     email = models.EmailField(verbose_name=_('email'), max_length=120)
     products = models.ManyToManyField(to=CatalogImage, blank=True)
     productEntries = models.ManyToManyField(to=SvelteCartProductEntery, blank=True)
-    productsRaw = models.CharField(verbose_name=_('products'), blank=True, null=True, max_length=2048)
+    productsRaw = models.TextField(verbose_name=_('raw products'), blank=True, null=True)
     message = models.TextField(verbose_name=_('message'), blank=True, null=True)
     created_date = models.DateTimeField(auto_now_add=True, blank=True, null=True)
-    
+    def cart_count(self):
+        return self.productEntries.count()
     def products_amount_display(self):
         ret = '<ul>'
         for i in self.productEntries.all():
@@ -165,6 +167,18 @@ class SvelteCartModal(models.Model):
         return mark_safe(ret)
     def products_amount_display_with_sizes_and_colors(self):
         ret = '<table>'
+        all_sizes = ProductSize.objects.all().values('id','size')
+        all_colors = ProductColor.objects.all().values('id','name')
+        def get_size_name(size_id):
+            for i in all_sizes:
+                if i['id'] == size_id:
+                    return i['size']
+        def get_color_name(color_id):
+            color_id = int(color_id)
+            for i in all_colors:
+                if i['id'] == color_id:
+                    return i['name']
+        
         for i in self.productEntries.all():
             ret += f'<tr><td style="font-weight: bold;">{str(i.amount)} - {str(i.product)}</td>'
             if i.details != None:
@@ -173,8 +187,10 @@ class SvelteCartModal(models.Model):
                 # i.details = [{"size_id": 90, "color_id": "77", "quantity": 12}, {"size_id": 90, "color_id": "78", "quantity": 35}, {"size_id": 89, "color_id": "79", "quantity": 6}, {"size_id": 88, "color_id": "83", "quantity": 19}, {"size_id": 89, "color_id": "83", "quantity": 7}]
                 tableData = []
                 for detail in details:
-                    size = ProductSize.objects.get(pk=detail['size_id']).size
-                    color = ProductColor.objects.get(pk=detail['color_id']).name
+                    #size = ProductSize.objects.get(pk=detail['size_id']).size
+                    #color = ProductColor.objects.get(pk=detail['color_id']).name
+                    size = get_size_name(detail['size_id'])
+                    color = get_color_name(detail['color_id'])
                     qyt = detail['quantity'] if 'quantity' in detail else '-'
                     tableData.append({'size':size, 'color':color, 'qyt':qyt})
                     #detail_table += f'<tr><td>{size.size}</td><td>{color.name}</td><td>{str(qyt)}</td></tr>'
@@ -190,7 +206,7 @@ class SvelteCartModal(models.Model):
         ret+= '</table>'
         return mark_safe(ret)
     def uniqe_color(self):
-        ret = f'<span width="25px" height="25px" style="color:black;background-color: {ColorHash(str(self.uid)).hex}">{uuid2slug(self.uid)}</span>'
+        ret = f'<span width="25px" height="25px" style="color:black;background-color: {ColorHash(str(self.uid)).hex}">{self.device}</span>'
         return mark_safe(ret)
     
     

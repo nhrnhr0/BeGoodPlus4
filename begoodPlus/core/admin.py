@@ -97,12 +97,30 @@ class SvelteCartProductEnteryAdmin(admin.ModelAdmin):
 admin.site.register(SvelteCartProductEntery, SvelteCartProductEnteryAdmin)
 
 class SvelteCartModalAdmin(admin.ModelAdmin):
-    list_display = ('id', 'user', 'uniqe_color','device','name','phone','email','created_date')
+    list_display = ('id', 'doneOrder', 'user','buiss_display', 'cart_count', 'uniqe_color','name','phone','email','created_date')
+    
     #filter_horizontal = ('products',)
+    readonly_fields = ('buiss_display','productsRaw','cart_count')
     exclude = ('products','productEntries')
+    
+    def change_view(self, request, object_id, form_url='', extra_context=None):
+        extra_context = extra_context or {}
+        extra_context['my_data'] = {'object_id':object_id}
+        return super(SvelteCartModalAdmin, self).change_view(
+            request, object_id, form_url, extra_context=extra_context,
+        )
+    
+    def buiss_display(self, obj):
+        if obj.user:
+            if obj.user.is_anonymous == False:
+                return obj.user.client.businessName
+            else:
+                return 'anonymous'
+    buiss_display.short_description = _('Business Name')
+    
     def get_queryset(self, request):
         qs = super().get_queryset(request)
-        qs = qs.select_related('user').prefetch_related('productEntries')
+        qs = qs.select_related('user').select_related('user__client').prefetch_related('productEntries')
         return qs
     readonly_fields =('products_amount_display_with_sizes_and_colors',)
     actions = ['resend_email_action','download_cart_excel',]

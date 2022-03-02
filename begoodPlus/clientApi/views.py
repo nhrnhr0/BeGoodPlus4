@@ -63,6 +63,13 @@ def images_from_album_serializer(album):
     ser = ImageClientApi(images, many=True)
     return ser
 
+def get_all_sizes_api(request):
+    sizes = SizeClientApi(ProductSize.objects.all(), many=True).data
+    return JsonResponse(sizes, safe=False)
+def get_all_colors_api(request):
+    colors = ColorClientApi(ProductColor.objects.all(), many=True).data
+    return JsonResponse(colors, safe=False)
+
 import time
 import random
 @permission_classes((AllowAny,))
