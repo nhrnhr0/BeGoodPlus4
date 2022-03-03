@@ -10,16 +10,17 @@ from .serializers import CatalogImageSerializer, CatalogImageApiSerializer
 from rest_framework.request import Request
 from catalogImageDetail.models import CatalogImageDetail
 from django.views.decorators.csrf import csrf_exempt
-
+from rest_framework.decorators import api_view
+import json
 @csrf_exempt
 def admin_remove_product_from_cart(request):
     ret = {}
     if request.method == "POST" and request.user.is_superuser:
-        data = request.POST
-        ret = SvelteCartProductEntery.objects.filter(id=data['entry_id']).delete()
-        print (ret)
-    pass
+        data = json.loads(request.body.decode('utf8'))
+        afected_rows = SvelteCartProductEntery.objects.filter(id=data['entry_id']).delete()
+        ret = {'afected_rows': afected_rows[0]}
     return JsonResponse(ret)
+    
 @csrf_exempt
 def admin_add_to_existing_cart(request):
     ret = {}
