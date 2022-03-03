@@ -1,3 +1,4 @@
+from urllib import request
 from django.db import models
 from django.utils.translation import gettext_lazy  as _
 from django.contrib.contenttypes.fields import GenericForeignKey
@@ -188,7 +189,7 @@ class SvelteCartModal(models.Model):
                 tableData = []
                 for detail in details:
                     #size = ProductSize.objects.get(pk=detail['size_id']).size
-                    #color = ProductColor.objects.get(pk=detail['color_id']).name
+                #color = ProductColor.objects.get(pk=detail['color_id']).name
                     size = get_size_name(detail['size_id'])
                     color = get_color_name(detail['color_id'])
                     qyt = detail['quantity'] if 'quantity' in detail else '-'
@@ -202,6 +203,8 @@ class SvelteCartModal(models.Model):
                     #df = df[df['qyt'].str.contains('-') == True or df['qyt'].str.contains('0') == True or df['qyt'].str.contains('NaN') == True or df['qyt'].str.contains('None') == True]
                     df = df.pivot(index='color', columns='size', values='qyt')
                     ret += '<td>' + df.to_html(index=True, header=True, table_id='table_id', na_rep='-') + '</td>'
+        
+            ret += '<td>' + '<form action="/admin-api/remove-product-from-cart/" method="POST">' + '<input type="hidden" name="product_id" value="' + str(i.product.id) + '">' + '<input type="hidden" name="cart_id" value="' + str(self.id) + '">' + '<input type="hidden" name="entry_id" value="' + str(i.id) + '"><input type="submit" value="Remove">' + '</form>' + '</td>'
             ret += '</tr>'
         ret+= '</table>'
         return mark_safe(ret)

@@ -109,11 +109,11 @@ import AutoComplete from "simple-svelte-autocomplete";
                                             <td>{color_id_to_rep(color_id)}</td>
                                             {#each product.sizes as size_id}
                                                 <td >
-                                                    <input type="number" name="{product.id}_{color_id}_{size_id}" value="0" min="0" max="100">
+                                                    <input type="number" name="PROD_{product.id}_CLR_{color_id}_SIZE_{size_id}" value="0" min="0" max="100">
                                                 </td>
                                             {/each}
                                             <td>
-                                                <input type="checkbox" name="{product.id}_{color_id}_delete" value="1">
+                                                <input type="checkbox" name="PROD_{product.id}_CLR_{color_id}_delete" value="1">
                                             </td>
                                         </tr>
                                     {/each}

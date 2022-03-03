@@ -17,7 +17,7 @@ from clientApi.views import get_all_colors_api, get_all_sizes_api, main_page_api
 from campains.views import admin_get_all_campains, admin_get_campain_products, get_user_campains
 from mcrm.views import mcrm_lead_register, admin_upload_bulk_crm_exel
 from core.views import client_product_question, test_celery_view
-from catalogImages.views import admin_api_get_product_cost_price, all_images_ids, get_product_sizes_colors_martix
+from catalogImages.views import admin_api_get_product_cost_price, all_images_ids, get_product_sizes_colors_martix, admin_remove_product_from_cart,admin_add_to_existing_cart
 from clientApi.views import ColorsClientViewSet, ImageClientViewSet, SizesClientViewSet,LogoClientViewSet, get_album_images
 from clientApi.views import AlbumClientViewSet
 from catalogImageDetail.views import SvelteCatalogImageDetailViewSet
@@ -80,7 +80,11 @@ urlpatterns = [
     path('product-question', client_product_question, name='client_product_question'),
     path('admin_upload_bulk_crm_exel', admin_upload_bulk_crm_exel, name='admin_upload_bulk_crm_exel'),
     path('main_page_api/', main_page_api, name='main_page_api'),
+    
+    path('admin-api/remove-product-from-cart/', admin_remove_product_from_cart, name='admin_remove_product_from_cart'),
     path('admin-api/get-product-sizes-colors-martix/<int:id>', get_product_sizes_colors_martix, name=''),
+    path('admin-api/add-to-existing-cart/', admin_add_to_existing_cart, name='admin_add_to_existing_cart'),
+    
     path('admin-api/get-all-campaigns/', admin_get_all_campains),
     path('admin-api/get-campaign-products/<int:campain_id>', admin_get_campain_products),
     path('admin-api/get_product_cost_price/<int:product_id>', admin_api_get_product_cost_price),
