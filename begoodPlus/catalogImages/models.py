@@ -24,8 +24,10 @@ from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-
-
+class CatalogImageVarient(models.Model):
+    name = models.CharField(max_length=255, verbose_name=_('Name'), unique=True)
+    def __str__(self):
+        return self.name
 
 # Create your models here.
 class CatalogImage(models.Model):
@@ -52,6 +54,7 @@ class CatalogImage(models.Model):
     amountCarton = models.IntegerField(verbose_name=_('amount in carton'), blank=False, null=False, default=0)
     colors = models.ManyToManyField(to=Color, verbose_name=_('colors'))
     sizes = models.ManyToManyField(to=ProductSize, verbose_name=_('sizes'))
+    varients = models.ManyToManyField(to=CatalogImageVarient, verbose_name=_('varients'))
     providers = models.ManyToManyField(to=Provider, verbose_name=_('providers'))
     
     show_sizes_popup = models.BooleanField(verbose_name=_('show sizes popup'), default=True)

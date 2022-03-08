@@ -6,6 +6,8 @@ from django.utils.translation import gettext_lazy  as _
 from django.urls import reverse
 import csv
 import io
+from .models import CatalogImage, CatalogImageVarient
+
 from django.http import FileResponse
 from xlwt.Style import XFStyle
 from catalogAlbum.models import ThroughImage
@@ -16,7 +18,13 @@ from io import BytesIO
 
 from core.utils import url_to_edit_object
 
-from .models import CatalogImage
+class CatalogImageVarientAdmin(AdminAdvancedFiltersMixin, admin.ModelAdmin):
+    model = CatalogImageVarient
+    list_display = ('name',)
+    search_fields = ('name',)
+
+admin.site.register(CatalogImageVarient, CatalogImageVarientAdmin)
+
 class tableInline(admin.TabularInline):
     model = CatalogImage.detailTabel.through
     #fields = ['',]
@@ -89,7 +97,7 @@ class CatalogImageAdmin(AdminAdvancedFiltersMixin, admin.ModelAdmin):
     readonly_fields = ('id', 'render_thumbnail', 'render_image',)
     search_fields = ('title','description', 'barcode', 'detailTabel__providerMakat')
     list_filter = ('albums', 'providers','sizes','colors',)
-    filter_horizontal = ('colors', 'sizes','providers',)#'detailTabel'
+    filter_horizontal = ('colors', 'sizes','providers', 'varients')#'detailTabel'
     list_per_page = 50
     exclude = ('detailTabel',)
     advanced_filter_fields = (

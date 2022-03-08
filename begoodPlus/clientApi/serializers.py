@@ -32,10 +32,18 @@ class AlbumClientApi(serializers.ModelSerializer):
         model = CatalogAlbum
         fields = ('id', 'title','slug','description','fotter','is_public','is_campain', 'cimage')#, 'first_image',)
 
+from catalogImages.models import CatalogImageVarient
+class VarientSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CatalogImageVarient
+        fields = ('id','name')
+
+
 class ImageClientApi(serializers.ModelSerializer):
+    varients = VarientSerializer(read_only=True, many=True)
     class Meta:
         model = CatalogImage
-        fields = ('id','title','description','cimage','colors','sizes','can_tag','discount', 'albums','amountSinglePack','amountCarton', 'show_sizes_popup', 'client_price')
+        fields = ('id','title','description','cimage','colors','sizes','varients','can_tag','discount', 'albums','amountSinglePack','amountCarton', 'show_sizes_popup', 'client_price')
         filter_backends = [DjangoFilterBackend]
         filterset_fields = ['albums']
 

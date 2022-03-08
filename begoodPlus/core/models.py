@@ -44,7 +44,7 @@ def create_auth_token(sender, instance=None, created=False, **kwargs):
     if created:
         Token.objects.create(user=instance)
 
-from catalogImages.models import CatalogImage
+from catalogImages.models import CatalogImage, CatalogImageVarient
 # Create your models here.
 class BeseContactInformation(models.Model):
     name = models.CharField(verbose_name=_('name'), max_length=50, null=True,blank=True)
@@ -170,14 +170,19 @@ class SvelteCartModal(models.Model):
         ret = '<table>'
         all_sizes = ProductSize.objects.all().values('id','size')
         all_colors = ProductColor.objects.all().values('id','name')
+        all_varients = CatalogImageVarient.objects.all().values('id','name')
+        def get_varient_name(varient_id):
+            for i in all_varients:
+                if i['id'] == int(varient_id):
+                    return i['name']
         def get_size_name(size_id):
             for i in all_sizes:
-                if i['id'] == size_id:
+                if i['id'] == int(size_id):
                     return i['size']
         def get_color_name(color_id):
             color_id = int(color_id)
             for i in all_colors:
-                if i['id'] == color_id:
+                if i['id'] == int(color_id):
                     return i['name']
         
         for i in self.productEntries.all():
@@ -187,13 +192,21 @@ class SvelteCartModal(models.Model):
                 #detail_table = '<td><table>'
                 # i.details = [{"size_id": 90, "color_id": "77", "quantity": 12}, {"size_id": 90, "color_id": "78", "quantity": 35}, {"size_id": 89, "color_id": "79", "quantity": 6}, {"size_id": 88, "color_id": "83", "quantity": 19}, {"size_id": 89, "color_id": "83", "quantity": 7}]
                 tableData = []
-                for detail in details:
-                    #size = ProductSize.objects.get(pk=detail['size_id']).size
-                #color = ProductColor.objects.get(pk=detail['color_id']).name
-                    size = get_size_name(detail['size_id'])
-                    color = get_color_name(detail['color_id'])
-                    qyt = detail['quantity'] if 'quantity' in detail else '-'
-                    tableData.append({'size':size, 'color':color, 'qyt':qyt})
+                
+                for color_id in details.keys():
+                    for size_id in details[color_id].keys():
+                        size = get_size_name(size_id)
+                        color = get_color_name(color_id)
+                        
+                        if 'quantity' in details[color_id][size_id].keys():
+                            
+                            tableData.append({'size': size, 'color': color, 'varient': '','qyt': details[color_id][size_id]['quantity']})
+                        else:
+                            for varient_id in details[color_id][size_id].keys():
+                                varient = get_varient_name(varient_id)
+                                tableData.append({'size': size, 'color': color, 'varient': varient, 'qyt': details[color_id][size_id][varient_id]['quantity']})
+                    
+                    
                     #detail_table += f'<tr><td>{size.size}</td><td>{color.name}</td><td>{str(qyt)}</td></tr>'
                 #detail_table += '</table></td><hr>'
                 #ret += detail_table
@@ -201,7 +214,10 @@ class SvelteCartModal(models.Model):
                     df = pd.DataFrame(tableData)
                     # remove from df rows with qyt == '-' or qyt == 0 or qyt == Nan or qyt == None
                     #df = df[df['qyt'].str.contains('-') == True or df['qyt'].str.contains('0') == True or df['qyt'].str.contains('NaN') == True or df['qyt'].str.contains('None') == True]
-                    df = df.pivot(index='color', columns='size', values='qyt')
+                    try:
+                        df = df.pivot(index=['color','varient'], columns='size', values='qyt')
+                    except Exception as e:
+                        print(e)
                     ret += '<td>' + df.to_html(index=True, header=True, table_id='table_id', na_rep='-') + '</td>'
         
             ret += '<td id="cart-entry-'+str(i.id)+'">'  + '<input type="hidden" name="product_id" value="' + str(i.product.id) + '">' + '<input type="hidden" name="cart_id" value="' + str(self.id) + '">' + '<input type="hidden" name="entry_id" value="' + str(i.id) + '"><button type="button" onclick="remove_product_from_cart(' + str(self.id) + ',' +str(i.id)+')">' + 'מחק' + '</button>' + '</td>'

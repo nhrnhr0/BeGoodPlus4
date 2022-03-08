@@ -168,8 +168,17 @@ def svelte_cart_form(request):
         db_cart = SvelteCartModal.objects.create(user=user, device=device,uid=uuid,businessName=business_name, name=name, phone=phone, email=email, message=message)
         #data.products.set(products)
         db_cart.productsRaw = raw_cart
-        products_objs = SvelteCartProductEntery.objects.bulk_create([SvelteCartProductEntery(product_id=p['id'],amount=p['amount'] or 1, details = p['mentries'] or {}) for p in products])
-        db_cart.productEntries.set(products_objs)
+        # products = [{'id': 5, 'amount': 145, 'mentries': {...}}, {'id': 18, 'amount': 0, 'mentries': {...}}, {'id': 138, 'amount': 0}]
+        data = []
+        for p in products:
+            pid = p.get('id')
+            pamount = p.get('amount')
+            pentries = p.get('mentries', None) or {}
+            obj = SvelteCartProductEntery.objects.create(product_id=pid, amount=pamount, details=pentries)
+            data.append(obj)
+        #data = [SvelteCartProductEntery(product_id=p['id'],amount=p['amount'] or 1, details = p['mentries'] or {}) for p in products]
+        #products_objs = SvelteCartProductEntery.objects.bulk_create(data)
+        db_cart.productEntries.set(data)
         db_cart.save()
         if (settings.DEBUG):
             send_cart_notification(db_cart.id)
@@ -179,7 +188,7 @@ def svelte_cart_form(request):
             'status':'success',
             'detail':'form sent successfuly',
             'cart_id': db_cart.id,
-            'product_ids': [p.product_id for p in products_objs]
+            'product_ids': [p.product_id for p in data]
             })
 
 

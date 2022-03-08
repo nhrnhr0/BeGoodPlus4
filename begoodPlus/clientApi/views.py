@@ -59,7 +59,7 @@ def get_album_images(request, pk):
 
 def images_from_album_serializer(album):
     images = album.images.order_by('throughimage__image_order')
-    images = images.prefetch_related('colors','sizes','albums').select_related('packingTypeClient')
+    images = images.prefetch_related('colors','sizes','albums','varients').select_related('packingTypeClient')
     ser = ImageClientApi(images, many=True)
     return ser
 
