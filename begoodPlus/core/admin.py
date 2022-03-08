@@ -101,6 +101,7 @@ class SvelteCartModalAdmin(admin.ModelAdmin):
     
     #filter_horizontal = ('products',)
     readonly_fields = ('buiss_display','productsRaw','cart_count')
+    readonly_fields = ('productsRaw',)
     exclude = ('products','productEntries')
     
     def change_view(self, request, object_id, form_url='', extra_context=None):
