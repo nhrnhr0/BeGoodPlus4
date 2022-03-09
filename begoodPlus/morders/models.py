@@ -50,8 +50,9 @@ class MOrder(models.Model):
     
     def products_display(self):
         products = []
-        for p in self.products.all():
-            products.append({'product': p.product.title, 'quantity': int(p.quantity), 'price': p.price, 'color': p.color.name, 'size': p.size.size, 'varient': p.varient, 'comment': p.comment, 'clientBuyPrice':p.clientBuyPrice, 'clientProvider': p.clientProvider})
+        qs = self.products.all().prefetch_related('product', 'size', 'color', 'varient', 'provider')
+        for p in qs:
+            products.append({'product': p.product.title, 'quantity': int(p.quantity), 'price': p.price, 'color': p.color.name, 'size': p.size.size, 'varient': p.varient, 'comment': p.comment, 'clientBuyPrice':p.clientBuyPrice, 'clientProvider': p.clientProvider, 'provider': p.provider.name})
         try:
             df = pd.DataFrame(products)
         except Exception as e:
@@ -59,9 +60,11 @@ class MOrder(models.Model):
             return ' '
         print(df.columns)
         print(df.head())
-        df['cell_display'] = df['quantity'].astype(str)# + ' ' + df['price'].astype(str) + '₪'
-        df['price_display'] = df['price'].astype(str) + '₪'
-        df = df.pivot(index=['product', 'color', 'varient', 'price_display'], columns='size', values=['cell_display',])
+        #df['cell_display'] = df['quantity'].astype(str)# + ' ' + df['price'].astype(str) + '₪'
+        #df['price_display'] = df['price'] + '₪'
+        if len(df) == 0:
+            return mark_safe(df.to_html(index=False))
+        df = df.pivot(index=['product', 'color', 'varient', 'price'], columns='size', values=['quantity'])
         
         print(df.columns)
         print(df.head())
