@@ -98,6 +98,7 @@ INSTALLED_APPS = [
     'client',
     'campains',
     'catalogImageAttrs',
+    'morders',
     
     #### old unused modals ####
     'clientLikedImages',

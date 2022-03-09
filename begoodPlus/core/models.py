@@ -15,7 +15,6 @@ from django.dispatch import receiver
 from numpy import NaN
 import pandas as pd
 from rest_framework.authtoken.models import Token
-
 from base64 import urlsafe_b64decode, urlsafe_b64encode
 from uuid import UUID
 from productColor.models import ProductColor
@@ -228,6 +227,57 @@ class SvelteCartModal(models.Model):
         ret = f'<span width="25px" height="25px" style="color:black;background-color: {ColorHash(str(self.uid)).hex}">{self.device}</span>'
         return mark_safe(ret)
     
-    
+    def turn_to_morder(self):
+        from morders.models import MOrder, MOrderItem
+        cart= self
+        client = self.user.client
+        name = self.name if self.name != '' else self.user.client.businessName
+        phone = self.phone if self.phone != '' else self.user.client.contactManPhone
+        email = self.email if self.email != '' else self.user.client.email
+        message = self.message if self.message != '' else ''
+        status = 'new'
+        products = self.productEntries.all()
+        products_list = []
+        for i in products:
+            product = i.product
+            quantity = i.amount
+            details = i.details
+            # example details:
+            # {'84': {'94': {'quantity': 0}, '95': {'quantity': 0}, '96': {'quantity': 0}, '97': {'quantity': 0}, '98': {'quantity': 0}, '99': {'quantity': 0}, '100': {'quantity': 0}, '101': {'quantity': 0}, '102': {'quantity': 0}, 'quantity': 0}}
+            # {'COLOR_ID': {'SIZE_ID': {'VARIANT_ID': {'quantity': 0}...}...}}
+            # or 
+            # {'COLOR_ID': {'SIZE_ID': {'quantity': 0}...}...}
+            
+            for color_id in details.keys():
+                for size_id in details[color_id].keys():
+                    if 'quantity' in details[color_id][size_id].keys():
+                        quantity = details[color_id][size_id]['quantity']
+                        products_list.append({'product': product,'price':product.client_price, 'quantity': quantity, 'color_id': color_id, 'size_id': size_id, 'varient_id': None})
+                    else:
+                        for varient_id in details[color_id][size_id].keys():
+                            quantity = details[color_id][size_id][varient_id]['quantity']
+                            products_list.append({'product': product,'price':product.client_price, 'quantity': quantity, 'color_id': color_id, 'size_id': size_id, 'varient_id': varient_id})
+        
+        order_product = [MOrderItem(product=i['product'], quantity=i['quantity'], color_id=i['color_id'], size_id=i['size_id'], varient_id=i['varient_id'], price=i['price']) for i in products_list]
+        MOrderItem.objects.bulk_create(order_product)
+        morder = MOrder.objects.create(cart=cart,client=client,name=name,phone=phone,email=email,status=status, message=message)
+        morder.products.add(*order_product)
+        
+        
+            
+            #price
+            #color
+            #size
+            #varient
+            #provider
+            #clientProvider
+            #clientBuyPrice
+            #ergent
+            #prining
+            #embroidery
+            #comment
+        
+        #return morder
+        
 
     

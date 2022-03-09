@@ -124,14 +124,19 @@ class SvelteCartModalAdmin(admin.ModelAdmin):
         qs = qs.select_related('user').select_related('user__client').prefetch_related('productEntries')
         return qs
     readonly_fields =('products_amount_display_with_sizes_and_colors',)
-    actions = ['resend_email_action','download_cart_excel',]
+    actions = ['resend_email_action','download_cart_excel','turn_to_morder',]
     list_select_related = ['user']
     def resend_email_action(modeladmin, request, queryset):
         for obj in queryset:
             send_cart_notification.delay(obj.id)
     resend_email_action.short_description = _("resend selected carts email")
     
-    
+    def turn_to_morder(self, request, queryset):
+        for obj in queryset:
+            obj.doneOrder = True
+            obj.turn_to_morder()
+            obj.save()
+    turn_to_morder.short_description = _("turn selected carts to order")
     
     def data_to_excel(self, data, filename):
         wb = Workbook()
