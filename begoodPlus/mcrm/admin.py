@@ -48,6 +48,7 @@ class AdminCrmUser(AdminAdvancedFiltersMixin, admin.ModelAdmin):
         # data:
         data = []
         data.append(['WhatsApp Number(with country code)', 'First Name', 'Last Name', 'Other'])
+        queryset = queryset.filter(want_whatsapp=True)
         for obj in queryset:
             data.append(['+' + str(obj.phone), obj.name.split(' ')[0], obj.name.split(' ')[-1], obj.name])
         
