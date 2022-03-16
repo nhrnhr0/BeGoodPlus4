@@ -36,7 +36,6 @@ SECRET_KEY = secrects.SECRET_KEY
 
 ALLOWED_HOSTS = ['*']
 
-MY_DOMAIN = 'https://ms-global.co.il' #'http://127.0.0.1:8000'
 '''
 from celery.schedules import crontab
 
@@ -99,6 +98,7 @@ INSTALLED_APPS = [
     'campains',
     'catalogImageAttrs',
     'morders',
+    'inventory',
     
     #### old unused modals ####
     'clientLikedImages',

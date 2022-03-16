@@ -15,6 +15,7 @@ Including another URLconf
 """
 from clientApi.views import get_all_colors_api, get_all_sizes_api, main_page_api
 from campains.views import admin_get_all_campains, admin_get_campain_products, get_user_campains
+from inventory.views import doc_stock_enter
 from mcrm.views import mcrm_lead_register, admin_upload_bulk_crm_exel
 from core.views import client_product_question, test_celery_view
 from catalogImages.views import admin_api_get_product_cost_price, all_images_ids, get_product_sizes_colors_martix, admin_remove_product_from_cart,admin_add_to_existing_cart
@@ -32,7 +33,7 @@ import debug_toolbar
 from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import path, include, re_path
-from provider.views import SvelteApiProviderViewSet
+from provider.views import SvelteApiProviderViewSet, search_providers
 from rest_framework import routers
 from django.contrib.auth.models import User
 
@@ -97,6 +98,7 @@ urlpatterns = [
     
     
     path('admin/', admin.site.urls),
+    path('inv/doc-stock-enter/<int:id>', doc_stock_enter, name='admin_edit_doc_stock_enter'),
     
     #path('api/', include(router.urls)),
 
@@ -117,7 +119,7 @@ urlpatterns = [
     
     path('catalog_api', catalogView_api, name="catalog-view-api"),
     
-    
+    path('search-providers/', search_providers, name="search-providers"),
     path('search',autocompleteModel),
     path('search-click', autocompleteClick),
     path('contact-form', svelte_contact_form, name='contact-form'),

@@ -1,11 +1,13 @@
-import {SEARCH_API_URL} from './../consts/consts.js';
+import {SEARCH_API_URL, SEARCH_PROVIDERS_API_URL} from './../consts/consts.js';
 import {getCookie} from './../utils/utils.js';
 export function apiSearchProducts(keyword) {
     const url = SEARCH_API_URL + '?q=' + encodeURIComponent(keyword);
     return fetch_wraper(url);
 }
-
-
+export function apiSearchProviders(keyword) {
+    const url = SEARCH_PROVIDERS_API_URL + '?q=' + encodeURIComponent(keyword);
+    return fetch_wraper(url);
+}
 export function fetch_wraper(url, requestOptions, custom_fetch, isRetry = false) {
     console.log('fetch_wraper: ', url);
     let headers_json= {

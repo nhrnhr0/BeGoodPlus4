@@ -14,6 +14,7 @@ var host = pathArray[2];
 var url = protocol + '//' + host;
 export const BASE_URL =  url; //'https://catalog.boost-pop.com'; //'http://127.0.0.1:8000'; // 
 export const SEARCH_API_URL = BASE_URL + '/search';
+export const SEARCH_PROVIDERS_API_URL = BASE_URL + '/search-providers';
 export const GET_PRODUCT_COST_PRICE_URL = BASE_URL + '/admin-api/get_product_cost_price/';
 export const ADMIN_ADD_TO_EXISTINT_CART_URL = BASE_URL + '/admin-api/add-to-existing-cart/';
 export const ADMIN_RMEOVE_FROM_EXISTING_CART_URL = BASE_URL + '/admin-api/remove-from-existing-cart/';
