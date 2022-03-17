@@ -1,5 +1,10 @@
-import {SEARCH_API_URL, SEARCH_PROVIDERS_API_URL} from './../consts/consts.js';
+import {SEARCH_API_URL, SEARCH_PROVIDERS_API_URL,INV_API_GET_ENTER_DOC_DATA_URL} from './../consts/consts.js';
 import {getCookie} from './../utils/utils.js';
+
+export function apiLoadEnterDocData(docId) {
+    return fetch_wraper(`${INV_API_GET_ENTER_DOC_DATA_URL}${docId}`);
+}
+
 export function apiSearchProducts(keyword) {
     const url = SEARCH_API_URL + '?q=' + encodeURIComponent(keyword);
     return fetch_wraper(url);

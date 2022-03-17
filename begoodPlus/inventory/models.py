@@ -55,6 +55,7 @@ class Warehouse(models.Model):
 # - byUser - User
 class DocStockEnter(models.Model):
     description = models.TextField(null=True, blank=True)
+    docNumber = models.CharField(max_length=100, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     provider = models.ForeignKey(to=Provider, on_delete=models.SET_DEFAULT, default=7)
     warehouse = models.ForeignKey(to=Warehouse, on_delete=models.SET_DEFAULT, default=1)

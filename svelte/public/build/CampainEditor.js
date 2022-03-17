@@ -4340,9 +4340,6 @@ var campaineditor = (function () {
         }
         return cookieValue;
     }
-
-
-
     function deepEqual(object1, object2) {
         const keys1 = Object.keys(object1);
         const keys2 = Object.keys(object2);

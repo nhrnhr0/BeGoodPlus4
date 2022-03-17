@@ -21,3 +21,4 @@ export const ADMIN_RMEOVE_FROM_EXISTING_CART_URL = BASE_URL + '/admin-api/remove
 export const ADMIN_GET_PRODUCT_SIZES_COLORS_MARTIX = BASE_URL + '/admin-api/get-product-sizes-colors-martix';
 export const GET_ALL_SIZES_API = BASE_URL + '/client-api/get-all-sizes/';
 export const GET_ALL_COLORS_API = BASE_URL + '/client-api/get-all-colors/';
+export const INV_API_GET_ENTER_DOC_DATA_URL = BASE_URL + '/inv/enter-doc/';
