@@ -13,6 +13,8 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from clientApi.views import get_all_varients_api
+from inventory.views import search_ppn
 from clientApi.views import get_all_colors_api, get_all_sizes_api, main_page_api
 from campains.views import admin_get_all_campains, admin_get_campain_products, get_user_campains
 from inventory.views import DocStockEnterViewSet, doc_stock_enter, get_enter_doc_data
@@ -103,6 +105,7 @@ urlpatterns = [
     path('inv/doc-stock-enter/<int:id>', doc_stock_enter, name='admin_edit_doc_stock_enter'),
     path('inv/get-enter-doc-data/<int:docId>', get_enter_doc_data, name='admin_get_enter_doc_data'),
     path('inv/enter-doc/<int:id>', DocStockEnterViewSet.as_view(), name='admin_enter_doc'),
+    path('search-ppn/', search_ppn, name='search_ppn'),
     #path('api/', include(router.urls)),
 
     re_path(r'get_album_images/(?P<pk>\d+)',get_album_images),
@@ -110,6 +113,7 @@ urlpatterns = [
     path('client-api/get-user-campains/',get_user_campains),
     path('client-api/lead-distribution/', mcrm_lead_register),
     path('client-api/get-all-sizes/', get_all_sizes_api),
+    path('client-api/get-all-variants/', get_all_varients_api),
     path('client-api/get-all-colors/', get_all_colors_api),
     path('svelte/api/', include(svelteRouter.urls)),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),

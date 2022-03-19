@@ -1,6 +1,8 @@
 from audioop import reverse
-from django.http import HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
+from provider.models import Provider
+from inventory.models import PPN
 
 from inventory.models import DocStockEnter
 from inventory.serializers import DocStockEnterSerializer
@@ -27,3 +29,22 @@ class DocStockEnterViewSet(RetrieveUpdateDestroyAPIView):
     permission_classes = [permissions.IsAdminUser]
     lookup_field = "id"
     
+    
+from .serializers import PPNSerializer
+import json
+def search_ppn(request):
+    # if the user is not superuser:
+    #   return error
+    if not request.user.is_superuser:
+        return HttpResponseRedirect(reverse('admin:index'))
+    if request.method == 'GET':
+        search_term = request.GET.get('q')
+        provider = request.GET.get('provider')
+        if search_term:
+            ppns= PPN.objects.filter(providerProductName__icontains=search_term,provider__name=provider)#.values('id', 'product', 'provider' 'providerProductName')
+            serializer = PPNSerializer(ppns, many=True)
+            return HttpResponse(json.dumps(serializer.data), content_type='application/json')
+        else:
+            return HttpResponse(json.dumps([]), content_type='application/json')
+    else:
+        return HttpResponse(json.dumps([]), content_type='application/json')

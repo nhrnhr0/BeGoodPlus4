@@ -1,6 +1,15 @@
 
-from .models import DocStockEnter, ProductEnterItems, SKUM, Warehouse
+from .models import PPN, DocStockEnter, ProductEnterItems, SKUM, Warehouse
 from rest_framework import serializers
+class PPNSerializer(serializers.ModelSerializer):
+    product_id = serializers.CharField(source='product.id')
+    product_name = serializers.CharField(source='product.title')
+    provider_id = serializers.CharField(source='provider.id')
+    provider_name = serializers.CharField(source='provider.name')
+    
+    class Meta:
+        model = PPN
+        fields = ('id', 'provider_id', 'provider_name', 'product_id', 'product_name', 'providerProductName')
 
 class SKUMSerializer(serializers.ModelSerializer):
     size_name = serializers.CharField(source='size.size')

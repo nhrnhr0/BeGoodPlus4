@@ -2,12 +2,18 @@
 
 <script>
     import AutoComplete from "simple-svelte-autocomplete";
-    import { apiSearchProviders ,apiLoadEnterDocData} from "./api/api";
+    import { apiSearchProviders ,apiLoadEnterDocData, apiSearchPPN, apiGetAllSizes, apiGetAllColors, apiGetAllVariants} from "./api/api";
     import { Grid, Row, Column,Theme, RadioButton, Form , FormGroup, Checkbox, RadioButtonGroup, Select, SelectItem, Button} from "carbon-components-svelte";
     import { Accordion, AccordionItem } from "carbon-components-svelte";
+    import { TextInput,NumberInput } from "carbon-components-svelte";
+
 import { onMount } from "svelte";
 import { groupBy } from "./utils/utils";
 import PivotTableComponent from "./components/PivotTableComponent.svelte";
+import DocumentStockEnterEntryForm from "./components/DocumentStockEnterEntryForm.svelte";
+import EditQuantityModal from "./components/EditQuantityModal.svelte";
+import { editQuantityModalOpener } from "./stores/modalManager";
+import { ALL_SIZES,ALL_COLORS,ALL_VARIENTS } from "./stores/globals";
     let theme = "white";
     export let id = undefined;
     let docData;
@@ -16,12 +22,21 @@ import PivotTableComponent from "./components/PivotTableComponent.svelte";
     async function load_data_from_server() {
         let response = await apiLoadEnterDocData(id);
             docData = response;
+            providerValue = response.provider_name;
             grouped_products = groupBy(docData.items, x => x.sku_ppn_name);
             console.log('docData = ', docData);
             console.log('grouped_products = ', grouped_products);
     }
     onMount(async()=> {
         console.log('id = ', id);
+        let all_sizes_data = await apiGetAllSizes();
+        let all_colors_data = await apiGetAllColors();
+        let all_variants_data = await apiGetAllVariants();
+
+        ALL_SIZES.set(all_sizes_data);
+        ALL_COLORS.set(all_colors_data);
+        ALL_VARIENTS.set(all_variants_data);
+        console.log('ALL_SIZES = ', $ALL_SIZES);
         if(id){
             load_data_from_server()
         }
@@ -33,8 +48,52 @@ import PivotTableComponent from "./components/PivotTableComponent.svelte";
         console.log(data);
         return data;
     }
-</script>
 
+
+    function clear_form() {
+        bill_name_user_selected = undefined;
+    }
+    let ouwr_name_value = "";
+    $: {
+        if (bill_name_user_selected){
+            allow_ower_name_edit = true;
+        }else {
+            allow_ower_name_edit = true;
+            ouwr_name_value = bill_name_user_selected.product_name;
+        }
+    }
+
+
+    // ============================================================
+    // ================= handle new product form ==================
+    // ============================================================
+    // bill_name_changed allow_search allow_ower_name_edit allow_price_edit
+    let bill_name_user_selected = "";
+    let allow_ower_name_edit = false;
+    let allow_price_edit = false;
+    let bill_name_user_input;
+    
+    
+    /*function bill_name_changed(bill_name) {
+        console.log('bill_name_changed = ', bill_name);
+        if(bill_name){
+            allow_ower_name_edit = true;
+            allow_price_edit = true;
+        }
+        else{
+            allow_ower_name_edit = false;
+            allow_price_edit = false;
+        }
+    }*/
+
+    function edit_quantity(data) {
+        console.log(data);
+        $editQuantityModalOpener.data = data;
+        $editQuantityModalOpener.isOpen = true;
+    }
+
+</script>
+<EditQuantityModal></EditQuantityModal>
 <div class="document-stock-entery">
     <Theme bind:theme persist persistKey="__carbon-theme" />
     <RadioButtonGroup legendText="Carbon theme" bind:selected={theme}>
@@ -89,97 +148,9 @@ import PivotTableComponent from "./components/PivotTableComponent.svelte";
                     <th>מחיר קנייה נוכחית</th>
                     <th>כמות כוללת</th>
                     <th>פירוט צבעים מידות וריאנטים</th>
+                    <th>ערוך כמות</th>
                 </tr>
             </thead>
-            <!--
-(2) ['דגמ"ח אמרקאי ת.חוץ+גומי', Array(4)]
-0: "דגמ\"ח אמרקאי ת.חוץ+גומי"
-1: Array(4)
-0:
-created_at: "2022-03-16T12:29:05.761799+02:00"
-id: 1
-price: "23.000"
-quantity: 2
-sku:
-color: 77
-color_name: "שחור"
-created_at: "2022-03-16T12:25:30.747203+02:00"
-id: 1
-ppn: 1
-ppn_name: "דגמ\"ח אמרקאי ת.חוץ+גומי"
-product_id: "20"
-product_name: "דגמ\"ח אינדאני"
-size: 87
-size_name: "S"
-verient: null
-verient_name: ""
-[[Prototype]]: Object
-[[Prototype]]: Object
-1:
-created_at: "2022-03-16T12:33:48.631403+02:00"
-id: 2
-price: "23.000"
-quantity: 2
-sku:
-color: 77
-color_name: "שחור"
-created_at: "2022-03-16T12:33:40.446125+02:00"
-id: 2
-ppn: 1
-ppn_name: "דגמ\"ח אמרקאי ת.חוץ+גומי"
-product_id: "20"
-product_name: "דגמ\"ח אינדאני"
-size: 88
-size_name: "M"
-verient: null
-verient_name: ""
-[[Prototype]]: Object
-[[Prototype]]: Object
-2:
-created_at: "2022-03-16T12:34:24.965838+02:00"
-id: 3
-price: "23.000"
-quantity: 4
-sku:
-color: 77
-color_name: "שחור"
-created_at: "2022-03-16T12:34:19.278850+02:00"
-id: 3
-ppn: 1
-ppn_name: "דגמ\"ח אמרקאי ת.חוץ+גומי"
-product_id: "20"
-product_name: "דגמ\"ח אינדאני"
-size: 89
-size_name: "L"
-verient: null
-verient_name: ""
-[[Prototype]]: Object
-[[Prototype]]: Object
-3:
-created_at: "2022-03-16T12:36:15.895973+02:00"
-id: 4
-price: "23.000"
-quantity: 2
-sku:
-color: 77
-color_name: "שחור"
-created_at: "2022-03-16T12:36:07.526396+02:00"
-id: 4
-ppn: 1
-ppn_name: "דגמ\"ח אמרקאי ת.חוץ+גומי"
-product_id: "20"
-product_name: "דגמ\"ח אינדאני"
-size: 90
-size_name: "XL"
-verient: null
-verient_name: ""
-[[Prototype]]: Object
-[[Prototype]]: Object
-length: 4
-[[Prototype]]: Array(0)
-length: 2
-[[Prototype]]: Array(0)
-            -->
             <tbody>
                 {#each Array.from(grouped_products) as grou, i} 
                     <tr>
@@ -195,102 +166,37 @@ length: 2
                             }, 0)}
                         </td>
                         <td>
-                            <!--
-                                pivot table
-                                index:  color_name, verient_name
-                                column: size_name
-                                value:  quantity
-                            -->
                             <PivotTableComponent
                                 data={grou[1]}
                             />
-                            
-                            <!--
-                            <table class="pivot-table">
-                                <thead>
-                                    <tr>
-                                        <th>צבע</th>
-                                        <th>מידה</th>
-                                        <th>כמות</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {#each grou[1] as product}
-                                        <tr>
-                                            <td>{product.sku.color_name}</td>
-                                            <td>{product.sku.size_name}</td>
-                                            <td>{product.quantity}</td>
-                                        </tr>
-                                    {/each}
-                                </tbody>
-                            </table>
-                            -->
+                        </td>
+                        <td>
+                            <Button on:click={edit_quantity({'docId': docData.id, 'data':{'sku_ppn_id': grou[1][0].sku_ppn_id,'sku_ppn_name': grou[1][0].sku_ppn_name,'sku_product_id': grou[1][0].sku_product_id,'sku_product_name': grou[1][0].sku_product_name },})} >ערוך כמות</Button>
                         </td>
                     </tr>
 
                 {/each}
-                <!--
-                {#each docData.items as item}
-                <tr>
-                    <td>{item.sku.ppn_name}</td>
-                    <td>{item.sku.product_name}</td>
-                    <td>{item.price}</td>
-                    <td><input type="number" /></td>
-                    <td>X</td>
-                    <td>
-                        <table >
-                            <thread>
-                                <tr>
-                                    <th>צבע</th>
-                                    <th>מידה</th>
-                                    <th>ריאנט</th>
-                                </tr>
-                            </thread>
-                            <tbody>
-                                <tr>
-                                    <td>-</td>
-                                    <td>-</td>
-                                    <td>-</td>
-                                </tr>
-                        </table>
-                    </td>
-                </tr>
-                {/each}
-                -->
             </tbody>
         </table>
-        <!--<form class="product-entery-form">
-            <div class="entry-wraper">
-                <div class="field-label">
-                    תאריך יצירה
-                </div>
-                <div class="field-value">
-                    {docData.created_at}
-                </div>
-            </div>
-            <div class="entry-wraper">
-                <div class="field-label">
-                    מחסן
-                </div>
-                <div class="field-value">
-                    {docData.warehouse_name}
-                </div>
-            </div>
-            <div class="entry-wraper">
-                <div class="field-label">
-                    ספק
-                </div>
-                <div class="field-value">
-                    {docData.provider_name}
-                </div>
-            </div>
-        </form>-->
+        <DocumentStockEnterEntryForm
+            providerValue={providerValue}>
+
+        </DocumentStockEnterEntryForm>
     {/if}
 </div>
 
 
 <style lang="scss">
-
+    .search-item {
+        .inner {
+            .label {
+                span {
+                    font-weight: bold;
+                }
+            }
+        }
+    }
+    
     table.table {
         margin-top: 150px;
         width: 100%;

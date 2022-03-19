@@ -1,6 +1,7 @@
 from rest_framework.response import Response
 from django.http.response import JsonResponse
 from django.shortcuts import render
+from clientApi.serializers import VarientSerializer
 from catalogImages.models import CatalogImage
 from client.views import get_user_info, whoAmI
 from clientApi.serializers import ColorClientApi, ImageClientApi, SizeClientApi
@@ -63,13 +64,16 @@ def images_from_album_serializer(album):
     ser = ImageClientApi(images, many=True)
     return ser
 
+from catalogImages.models import CatalogImageVarient
 def get_all_sizes_api(request):
     sizes = SizeClientApi(ProductSize.objects.all(), many=True).data
     return JsonResponse(sizes, safe=False)
 def get_all_colors_api(request):
     colors = ColorClientApi(ProductColor.objects.all(), many=True).data
     return JsonResponse(colors, safe=False)
-
+def get_all_varients_api(request):
+    varients = VarientSerializer(CatalogImageVarient.objects.all(), many=True).data
+    return JsonResponse(varients, safe=False)
 import time
 import random
 @permission_classes((AllowAny,))
