@@ -1,6 +1,29 @@
-import {SEARCH_API_URL,GET_ALL_SIZES_API, SEARCH_PROVIDERS_API_URL,INV_API_GET_ENTER_DOC_DATA_URL, SEARCH_PPN_API_URL, GET_ALL_COLORS_API, GET_ALL_VARIENTS_API} from './../consts/consts.js';
+import {SEARCH_API_URL,GET_ALL_SIZES_API, GET_DOC_STOCK_ENTER_PPN_ENTRIES, SEARCH_PROVIDERS_API_URL,INV_API_GET_ENTER_DOC_DATA_URL, SEARCH_PPN_API_URL, GET_ALL_COLORS_API, GET_ALL_VARIENTS_API, DELETE_DOC_STOCK_EnterEntery as DELETE_DOC_STOCK_ENTER_ENTRY, ADD_DOC_STOCK_ENTER_ENTRY_API_URL} from './../consts/consts.js';
 import {getCookie} from './../utils/utils.js';
-
+export async function apiAddDocStockEnterEntery(data) {
+    const response = await fetch_wraper(ADD_DOC_STOCK_ENTER_ENTRY_API_URL, {
+        method: 'POST',
+        body: JSON.stringify(data),
+    });
+    return response;
+}
+export async function apiDeleteDocStockEnterPPnEntry(docId, ppnId, entryId) {
+    const response = await fetch_wraper(DELETE_DOC_STOCK_ENTER_ENTRY, {
+        method: 'POST',
+        body: JSON.stringify({
+            docId: docId,
+            ppnId: ppnId,
+            entryId: entryId
+        })
+    });
+    return response;
+}
+export async function apiGetDocStockEnterPPnEntries(doc_id, ppnId){
+    const response = await fetch(GET_DOC_STOCK_ENTER_PPN_ENTRIES + '?docId=' + encodeURIComponent(doc_id) + '&ppnId=' + encodeURIComponent(ppnId) , {
+        method: 'GET',
+    });
+    return await response.json();
+}
 export async function apiGetAllSizes() {
     return await fetch_wraper(GET_ALL_SIZES_API);
 }

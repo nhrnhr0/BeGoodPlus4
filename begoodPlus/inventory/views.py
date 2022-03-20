@@ -1,9 +1,10 @@
 from audioop import reverse
+from html import entities
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from provider.models import Provider
 from inventory.models import PPN
-
+from rest_framework.decorators import api_view
 from inventory.models import DocStockEnter
 from inventory.serializers import DocStockEnterSerializer
 # Create your views here.
@@ -21,6 +22,75 @@ def get_enter_doc_data(request, docId):
     #   return error
     doc = DocStockEnter.objects.get(id=docId)
 
+from .models import SKUM, ProductEnterItems
+
+@api_view(['POST'])
+def add_doc_stock_enter_ppn_entry(request):
+    if(request.method == 'POST' and request.user.is_superuser):
+        ver = request.data.get('ver')
+        size = request.data.get('size')
+        color = request.data.get('color')
+        amount = request.data.get('amount')
+        sku_ppn_id = request.data.get('sku_ppn_id')
+        price = request.data.get('price')
+        doc_id = request.data.get('doc_id')
+        docObj = DocStockEnter.objects.get(id=doc_id)
+        sku, is_created = SKUM.objects.get_or_create(ppn_id=sku_ppn_id,
+                                                    size_name=size,
+                                                    color_name=color,
+                                                    verient_name=ver)
+        
+        entryObj, is_created = ProductEnterItems.objects.get_or_create(sku)
+        entryObj.price = price
+        entryObj.amount = amount
+        docObj.items.add(entryObj)
+    
+
+@api_view(['POST'])
+def delete_doc_stock_enter_ppn_entry(request):
+    if request.user.is_superuser:
+        docId = request.data.get('docId')
+        ppnId = request.data.get('ppnId')
+        entryId = request.data.get('entryId')
+        obj = ProductEnterItems.objects.get(id=entryId)
+        obj.delete()
+        return get_doc_stock_enter_ppn_entries_logic(request, docId, ppnId)
+    else:
+        return HttpResponse(json.dumps([]), content_type='application/json')
+
+def get_doc_stock_enter_ppn_entries_logic(request, docId, ppnId):
+    if docId == None or ppnId == None:
+        print('could not get docId or ppnId')
+    else:
+        if request.user.is_superuser:
+            
+            doc = DocStockEnter.objects.get(id=docId)
+            entries = doc.items.filter(sku__ppn__id=ppnId)
+            entries = entries.select_related('sku', 'sku__ppn', 'sku__size', 'sku__color', 'sku__verient')
+            serializer = ProductEnterItemsSerializer(entries, many=True)
+            return HttpResponse(json.dumps(serializer.data), content_type='application/json')
+    return HttpResponse(json.dumps([]), content_type='application/json')
+
+@api_view(["GET"])
+def get_doc_stock_enter_ppn_entries(request):
+    docId = request.GET.get('docId')
+    ppnId = request.GET.get('ppnId')
+    return get_doc_stock_enter_ppn_entries_logic(request, docId, ppnId)
+    # if the user is not superuser:
+    #   return error
+    '''
+    if not request.user.is_superuser:
+        return HttpResponseRedirect(reverse('admin:index'))
+    if request.method == 'GET':
+        doc = DocStockEnter.objects.get(id=docId)
+        entities = doc.items.filter(ppn__id=ppnId)
+        serializer = ProductEnterItemsSerializer(entities, many=True)
+        return HttpResponse(json.dumps(serializer.data), content_type='application/json')
+        
+    else:
+        return HttpResponse(json.dumps([]), content_type='application/json')
+    '''
+
 from rest_framework.generics import ListAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework import permissions
 class DocStockEnterViewSet(RetrieveUpdateDestroyAPIView):
@@ -30,7 +100,7 @@ class DocStockEnterViewSet(RetrieveUpdateDestroyAPIView):
     lookup_field = "id"
     
     
-from .serializers import PPNSerializer
+from .serializers import PPNSerializer, ProductEnterItemsSerializer
 import json
 def search_ppn(request):
     # if the user is not superuser:
