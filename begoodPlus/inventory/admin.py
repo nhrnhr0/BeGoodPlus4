@@ -12,9 +12,11 @@ admin.site.register(PPN, PPNAdmin)
 
 
 class WarehouseStockAdmin(admin.ModelAdmin):
-    list_display = ('created_at', 'updated_at', 'sku', 'quantity', 'warehouse', 'avgPrice')
-    readonly_fields = ('created_at', 'updated_at')
+    list_display = ('created_at', 'updated_at', 'sku', 'quantity', 'warehouse_display', 'avgPrice')
+    readonly_fields = ('created_at', 'updated_at', 'warehouse_display')
     list_filter = ('warehouse', 'sku')
+    def warehouse_display(self, obj):
+        return obj.warehouse.first().name
 admin.site.register(WarehouseStock, WarehouseStockAdmin)
 
 class WarehouseAdmin(admin.ModelAdmin):
@@ -26,7 +28,12 @@ class DocStockEnterAdmin(admin.ModelAdmin):
     list_display = ('created_at', 'id', 'docNumber', 'provider', 'warehouse', 'isAplied', 'byUser','get_admin_edit_url')
     readonly_fields = ('created_at','byUser','get_admin_edit_url')
     filter_horizontal = ('items',)
+    actions = ['apply_doc']
     list_filter = ('created_at', 'provider', 'warehouse', 'isAplied', 'byUser')
+    
+    def apply_doc(self, request, queryset):
+        for doc in queryset:
+            doc.apply_doc()
 admin.site.register(DocStockEnter, DocStockEnterAdmin)
 
 class SKUMAdmin(admin.ModelAdmin):

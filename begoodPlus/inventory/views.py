@@ -2,27 +2,42 @@ from audioop import reverse
 from html import entities
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
+from catalogImages.models import CatalogImageVarient
+from color.models import Color
+from productSize.models import ProductSize
 from provider.models import Provider
 from inventory.models import PPN
 from rest_framework.decorators import api_view
 from inventory.models import DocStockEnter
 from inventory.serializers import DocStockEnterSerializer
+from django.contrib.auth.decorators import permission_required
+from django.contrib.auth.decorators import login_required
+
 # Create your views here.
+#@permission_required('inventory.view_docstockenter')
 def doc_stock_enter(request, id):
     # if the user is not superuser:
     #   redirect to login page
     if not request.user.is_superuser:
-        return HttpResponseRedirect(reverse('admin:index'))
+        return HttpResponseRedirect('/admin/login/?next=' + request.path)
     context = {}
     context['my_data'] = {'id': id}
     return render(request, 'doc_stock_enter.html', context=context)
 
-def get_enter_doc_data(request, docId):
-    # if the user is not superuser:
-    #   return error
-    doc = DocStockEnter.objects.get(id=docId)
 
 from .models import SKUM, ProductEnterItems
+
+def show_inventory_stock(request):
+    # if the user is not superuser:
+    #   redirect to login page
+    if not request.user.is_superuser:
+        return HttpResponseRedirect('/admin/login/?next=' + request.path)
+    context = {}
+    # get all products in the first warehouse
+    products = ProductEnterItems.objects.filter(doc__warehouse__name='מחסן ראשי')
+    products = products.select_related('sku', 'sku__ppn', 'sku__size', 'sku__color', 'sku__verient')
+    context['my_data'] = {'products':ProductEnterItemsSerializer(products, many=True).data}
+    return render(request, 'show_inventory.html', context=context)
 
 @api_view(['POST'])
 def add_doc_stock_enter_ppn_entry(request):
@@ -35,15 +50,34 @@ def add_doc_stock_enter_ppn_entry(request):
         price = request.data.get('price')
         doc_id = request.data.get('doc_id')
         docObj = DocStockEnter.objects.get(id=doc_id)
-        sku, is_created = SKUM.objects.get_or_create(ppn_id=sku_ppn_id,
-                                                    size_name=size,
-                                                    color_name=color,
-                                                    verient_name=ver)
+        sizeObj = ProductSize.objects.get(size=size)
+        colorObj = Color.objects.get(name=color)
+        ppnObj = PPN.objects.get(id=sku_ppn_id)
+        verObj = None
+        if ver:
+            verObj = CatalogImageVarient.objects.get(name=ver)
+        sku, is_created = SKUM.objects.get_or_create(ppn=ppnObj,size=sizeObj,color=colorObj,verient=verObj)
+        entryObjs = docObj.items.filter(sku=sku)
+        if len(entryObjs) > 1:
+            print('error: ', entryObjs)
+            return
+        elif len(entryObjs) == 0:
+            entryObj = ProductEnterItems(sku=sku, quantity=amount, price=price)
+            entryObj.save()
+            docObj.items.add(entryObj)
+        else:
+            entryObj = entryObjs[0]
+            entryObj.quantity = amount
+            entryObj.price = price
         
-        entryObj, is_created = ProductEnterItems.objects.get_or_create(sku)
-        entryObj.price = price
-        entryObj.amount = amount
-        docObj.items.add(entryObj)
+        #entryObjs = ProductEnterItems.objects.filter(sku, DocStockEnter__in=doc_id)
+        #print(entryObjs)
+        
+        #entryObj.price = price
+        #entryObj.quantity = amount
+        #docObj.items.add(entryObj)
+        
+        return get_doc_stock_enter_ppn_entries_logic(request, doc_id, sku_ppn_id)
     
 
 @api_view(['POST'])

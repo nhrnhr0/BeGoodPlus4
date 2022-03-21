@@ -91,7 +91,25 @@ import { ALL_SIZES,ALL_COLORS,ALL_VARIENTS } from "./stores/globals";
         $editQuantityModalOpener.data = data;
         $editQuantityModalOpener.isOpen = true;
     }
+    async function searchPPN(keyword) {
+        let json = await apiSearchPPN(keyword, providerValue);
+        let data = json;
+        console.log(data);
+        return data;
+    }
 
+    let selectedNewPPN = "";
+    let allow_amount_edit_to_new_product = false;
+    function newPPNSelected() {
+        console.log(selectedNewPPN, ' selected')
+        if(selectedNewPPN) {
+            allow_amount_edit_to_new_product = true;
+        }
+    }
+    function refresh_data() {
+        console.log('refresh_data');
+        load_data_from_server();
+    }
 </script>
 <EditQuantityModal></EditQuantityModal>
 <div class="document-stock-entery">
@@ -128,8 +146,10 @@ import { ALL_SIZES,ALL_COLORS,ALL_VARIENTS } from "./stores/globals";
                     <td>{docData.created_at}</td>
                     <td>{docData.warehouse_name}</td>
                 </tr>
+                
             </tbody>
         </table>
+        <Button on:click={refresh_data}>עדכן</Button>
         <table class="products-info table">
             <!--
                 table:
@@ -158,7 +178,7 @@ import { ALL_SIZES,ALL_COLORS,ALL_VARIENTS } from "./stores/globals";
                         <td>{grou[1][0].sku_product_name}</td>
                         <td>{grou[1][0].price}</td>
                         <td>
-                            <div contenteditable="true">{grou[1][0].price}</div>
+                            <div>{grou[1][0].price}</div>
                         </td>
                         <td>
                             {grou[1].reduce((acc, cur) => {
@@ -171,17 +191,56 @@ import { ALL_SIZES,ALL_COLORS,ALL_VARIENTS } from "./stores/globals";
                             />
                         </td>
                         <td>
-                            <Button on:click={edit_quantity({'docId': docData.id, 'data':{'sku_ppn_id': grou[1][0].sku_ppn_id,'sku_ppn_name': grou[1][0].sku_ppn_name,'sku_product_id': grou[1][0].sku_product_id,'sku_product_name': grou[1][0].sku_product_name },})} >ערוך כמות</Button>
+                            <Button on:click={edit_quantity({'docId': docData.id, 'data':{'defult_price': grou[1][0].price, 'sku_ppn_id': grou[1][0].sku_ppn_id,'sku_ppn_name': grou[1][0].sku_ppn_name,'sku_product_id': grou[1][0].sku_product_id,'sku_product_name': grou[1][0].sku_product_name },})} >ערוך כמות</Button>
                         </td>
                     </tr>
 
                 {/each}
+                <tr>
+                    <td>
+                        <AutoComplete onChang={newPPNSelected} id="newPPNEnteryInput" loadingText="מחפש מוצרים..."
+                            create={false} showLoadingIndicator=true noResultsText=""
+                            searchFunction={searchPPN} delay={200}
+                            localFiltering="{false}" labelFieldName="providerProductName"
+                            valueFieldName="providerProductName" bind:selectedItem={selectedNewPPN}
+                            onChange={newPPNSelected}
+                        >
+                        <div slot="item" let:item={item} let:label={label}>
+                            <div class="search-item">
+                                <div class="inner">
+                                    <div class="label">
+                                        {item.providerProductName} - 
+                                        <span>{item.product_name}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        </AutoComplete>
+                    </td>
+                    {#if allow_amount_edit_to_new_product}
+                        <td>
+                            <Button on:click={edit_quantity(
+                            {
+                                'docId': docData.id,
+                                    'data':{
+                                        'defult_price':0,
+                                        'sku_ppn_id': selectedNewPPN.id,
+                                        'sku_ppn_name': selectedNewPPN.providerProductName,
+                                        'sku_product_id': selectedNewPPN.product_id,
+                                        'sku_product_name': selectedNewPPN.product_name
+                                    },
+                            })} >ערוך כמות</Button>
+                        </td>
+                    {/if}
+                </tr>
             </tbody>
         </table>
+        <!--
         <DocumentStockEnterEntryForm
             providerValue={providerValue}>
 
         </DocumentStockEnterEntryForm>
+        -->
     {/if}
 </div>
 

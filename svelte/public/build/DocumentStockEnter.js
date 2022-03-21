@@ -1,5 +1,5 @@
 
-(function(l, r) { if (!l || l.getElementById('livereloadscript')) return; r = l.createElement('script'); r.async = 1; r.src = '//' + (self.location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1'; r.id = 'livereloadscript'; l.getElementsByTagName('head')[0].appendChild(r) })(self.document);
+(function(l, r) { if (!l || l.getElementById('livereloadscript')) return; r = l.createElement('script'); r.async = 1; r.src = '//' + (self.location.host || 'localhost').split(':')[0] + ':35730/livereload.js?snipver=1'; r.id = 'livereloadscript'; l.getElementsByTagName('head')[0].appendChild(r) })(self.document);
 var documentstockenter = (function () {
     'use strict';
 
@@ -1505,7 +1505,7 @@ var documentstockenter = (function () {
     		each_blocks[i] = null;
     	});
 
-    	let if_block = /*maxItemsToShowInList*/ ctx[5] > 0 && /*filteredListItems*/ ctx[27].length > /*maxItemsToShowInList*/ ctx[5] && create_if_block_1$a(ctx);
+    	let if_block = /*maxItemsToShowInList*/ ctx[5] > 0 && /*filteredListItems*/ ctx[27].length > /*maxItemsToShowInList*/ ctx[5] && create_if_block_1$b(ctx);
 
     	const block = {
     		c: function create() {
@@ -1560,7 +1560,7 @@ var documentstockenter = (function () {
     				if (if_block) {
     					if_block.p(ctx, dirty);
     				} else {
-    					if_block = create_if_block_1$a(ctx);
+    					if_block = create_if_block_1$b(ctx);
     					if_block.c();
     					if_block.m(if_block_anchor.parentNode, if_block_anchor);
     				}
@@ -2061,7 +2061,7 @@ var documentstockenter = (function () {
     }
 
     // (1221:6) {#if maxItemsToShowInList > 0 && filteredListItems.length > maxItemsToShowInList}
-    function create_if_block_1$a(ctx) {
+    function create_if_block_1$b(ctx) {
     	let div;
     	let t0;
     	let t1_value = /*filteredListItems*/ ctx[27].length - /*maxItemsToShowInList*/ ctx[5] + "";
@@ -2093,7 +2093,7 @@ var documentstockenter = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_1$a.name,
+    		id: create_if_block_1$b.name,
     		type: "if",
     		source: "(1221:6) {#if maxItemsToShowInList > 0 && filteredListItems.length > maxItemsToShowInList}",
     		ctx
@@ -7331,7 +7331,7 @@ var documentstockenter = (function () {
     }
 
     // (147:13) 
-    function create_if_block_1$9(ctx) {
+    function create_if_block_1$a(ctx) {
     	let current;
     	const default_slot_template = /*#slots*/ ctx[19].default;
     	const default_slot = create_slot(default_slot_template, ctx, /*$$scope*/ ctx[18], get_default_slot_context$4);
@@ -7379,7 +7379,7 @@ var documentstockenter = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_1$9.name,
+    		id: create_if_block_1$a.name,
     		type: "if",
     		source: "(147:13) ",
     		ctx
@@ -7540,7 +7540,7 @@ var documentstockenter = (function () {
     	let if_block;
     	let if_block_anchor;
     	let current;
-    	const if_block_creators = [create_if_block$s, create_if_block_1$9, create_if_block_2$8, create_else_block$a];
+    	const if_block_creators = [create_if_block$s, create_if_block_1$a, create_if_block_2$8, create_else_block$a];
     	const if_blocks = [];
 
     	function select_block_type(ctx, dirty) {
@@ -15488,7 +15488,7 @@ var documentstockenter = (function () {
     }
 
     // (449:12) {#if headers[j].empty}
-    function create_if_block_1$8(ctx) {
+    function create_if_block_1$9(ctx) {
     	let td;
     	let t;
     	let current;
@@ -15555,7 +15555,7 @@ var documentstockenter = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_1$8.name,
+    		id: create_if_block_1$9.name,
     		type: "if",
     		source: "(449:12) {#if headers[j].empty}",
     		ctx
@@ -15710,7 +15710,7 @@ var documentstockenter = (function () {
     	let if_block;
     	let if_block_anchor;
     	let current;
-    	const if_block_creators = [create_if_block_1$8, create_else_block$6];
+    	const if_block_creators = [create_if_block_1$9, create_else_block$6];
     	const if_blocks = [];
 
     	function select_block_type_2(ctx, dirty) {
@@ -15954,7 +15954,7 @@ var documentstockenter = (function () {
     				colspan: /*selectable*/ ctx[3]
     				? /*headers*/ ctx[4].length + 2
     				: /*headers*/ ctx[4].length + 1,
-    				$$slots: { default: [create_default_slot_3] },
+    				$$slots: { default: [create_default_slot_3$1] },
     				$$scope: { ctx }
     			},
     			$$inline: true
@@ -16031,7 +16031,7 @@ var documentstockenter = (function () {
     }
 
     // (493:12) <TableCell               colspan="{selectable ? headers.length + 2 : headers.length + 1}"             >
-    function create_default_slot_3(ctx) {
+    function create_default_slot_3$1(ctx) {
     	let div;
     	let current;
     	const expanded_row_slot_template = /*#slots*/ ctx[44]["expanded-row"];
@@ -16086,7 +16086,7 @@ var documentstockenter = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_default_slot_3.name,
+    		id: create_default_slot_3$1.name,
     		type: "slot",
     		source: "(493:12) <TableCell               colspan=\\\"{selectable ? headers.length + 2 : headers.length + 1}\\\"             >",
     		ctx
@@ -16231,7 +16231,7 @@ var documentstockenter = (function () {
     }
 
     // (351:4) <TableBody>
-    function create_default_slot_2$2(ctx) {
+    function create_default_slot_2$3(ctx) {
     	let each_blocks = [];
     	let each_1_lookup = new Map();
     	let each_1_anchor;
@@ -16307,7 +16307,7 @@ var documentstockenter = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_default_slot_2$2.name,
+    		id: create_default_slot_2$3.name,
     		type: "slot",
     		source: "(351:4) <TableBody>",
     		ctx
@@ -16333,7 +16333,7 @@ var documentstockenter = (function () {
 
     	tablebody = new TableBody$1({
     			props: {
-    				$$slots: { default: [create_default_slot_2$2] },
+    				$$slots: { default: [create_default_slot_2$3] },
     				$$scope: { ctx }
     			},
     			$$inline: true
@@ -17441,7 +17441,7 @@ var documentstockenter = (function () {
     	let t2;
     	let circle;
     	let div0_aria_live_value;
-    	let if_block = /*small*/ ctx[0] && create_if_block_1$7(ctx);
+    	let if_block = /*small*/ ctx[0] && create_if_block_1$8(ctx);
     	let div1_levels = [/*$$restProps*/ ctx[6]];
     	let div1_data = {};
 
@@ -17510,7 +17510,7 @@ var documentstockenter = (function () {
     				if (if_block) {
     					if_block.p(ctx, dirty);
     				} else {
-    					if_block = create_if_block_1$7(ctx);
+    					if_block = create_if_block_1$8(ctx);
     					if_block.c();
     					if_block.m(svg, circle);
     				}
@@ -17598,7 +17598,7 @@ var documentstockenter = (function () {
     }
 
     // (38:8) {#if small}
-    function create_if_block_1$7(ctx) {
+    function create_if_block_1$8(ctx) {
     	let circle;
 
     	const block = {
@@ -17625,7 +17625,7 @@ var documentstockenter = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_1$7.name,
+    		id: create_if_block_1$8.name,
     		type: "if",
     		source: "(38:8) {#if small}",
     		ctx
@@ -18004,7 +18004,7 @@ var documentstockenter = (function () {
     const file$h = "node_modules\\carbon-components-svelte\\src\\FormGroup\\FormGroup.svelte";
 
     // (33:2) {#if legendText}
-    function create_if_block_1$6(ctx) {
+    function create_if_block_1$7(ctx) {
     	let legend;
     	let t;
     	let legend_id_value;
@@ -18035,7 +18035,7 @@ var documentstockenter = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_1$6.name,
+    		id: create_if_block_1$7.name,
     		type: "if",
     		source: "(33:2) {#if legendText}",
     		ctx
@@ -18088,7 +18088,7 @@ var documentstockenter = (function () {
     	let current;
     	let mounted;
     	let dispose;
-    	let if_block0 = /*legendText*/ ctx[4] && create_if_block_1$6(ctx);
+    	let if_block0 = /*legendText*/ ctx[4] && create_if_block_1$7(ctx);
     	const default_slot_template = /*#slots*/ ctx[8].default;
     	const default_slot = create_slot(default_slot_template, ctx, /*$$scope*/ ctx[7], null);
     	let if_block1 = /*message*/ ctx[2] && create_if_block$e(ctx);
@@ -18154,7 +18154,7 @@ var documentstockenter = (function () {
     				if (if_block0) {
     					if_block0.p(ctx, dirty);
     				} else {
-    					if_block0 = create_if_block_1$6(ctx);
+    					if_block0 = create_if_block_1$7(ctx);
     					if_block0.c();
     					if_block0.m(fieldset, t0);
     				}
@@ -20155,7 +20155,7 @@ var documentstockenter = (function () {
     	let t;
     	let button;
     	let current;
-    	const if_block_creators = [create_if_block_1$5, create_if_block_2$5];
+    	const if_block_creators = [create_if_block_1$6, create_if_block_2$5];
     	const if_blocks = [];
 
     	function select_block_type(ctx, dirty) {
@@ -20294,7 +20294,7 @@ var documentstockenter = (function () {
     	button = new Button$1({
     			props: {
     				kind: "secondary",
-    				$$slots: { default: [create_default_slot_2$1] },
+    				$$slots: { default: [create_default_slot_2$2] },
     				$$scope: { ctx }
     			},
     			$$inline: true
@@ -20345,7 +20345,7 @@ var documentstockenter = (function () {
     }
 
     // (283:8) {#if secondaryButtons.length > 0}
-    function create_if_block_1$5(ctx) {
+    function create_if_block_1$6(ctx) {
     	let each_1_anchor;
     	let current;
     	let each_value = /*secondaryButtons*/ ctx[15];
@@ -20431,7 +20431,7 @@ var documentstockenter = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_1$5.name,
+    		id: create_if_block_1$6.name,
     		type: "if",
     		source: "(283:8) {#if secondaryButtons.length > 0}",
     		ctx
@@ -20441,7 +20441,7 @@ var documentstockenter = (function () {
     }
 
     // (295:10) <Button             kind="secondary"             on:click="{() => {               dispatch('click:button--secondary', {                 text: secondaryButtonText,               });             }}"           >
-    function create_default_slot_2$1(ctx) {
+    function create_default_slot_2$2(ctx) {
     	let t;
 
     	const block = {
@@ -20461,7 +20461,7 @@ var documentstockenter = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_default_slot_2$1.name,
+    		id: create_default_slot_2$2.name,
     		type: "slot",
     		source: "(295:10) <Button             kind=\\\"secondary\\\"             on:click=\\\"{() => {               dispatch('click:button--secondary', {                 text: secondaryButtonText,               });             }}\\\"           >",
     		ctx
@@ -23856,7 +23856,7 @@ var documentstockenter = (function () {
     }
 
     // (337:4) {#if error}
-    function create_if_block_1$4(ctx) {
+    function create_if_block_1$5(ctx) {
     	let div;
     	let t;
 
@@ -23886,7 +23886,7 @@ var documentstockenter = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_1$4.name,
+    		id: create_if_block_1$5.name,
     		type: "if",
     		source: "(337:4) {#if error}",
     		ctx
@@ -23959,7 +23959,7 @@ var documentstockenter = (function () {
     	current_block_type_index = select_block_type(ctx);
     	if_block0 = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
     	let if_block1 = !/*error*/ ctx[23] && !/*warn*/ ctx[14] && /*helperText*/ ctx[16] && create_if_block_2$4(ctx);
-    	let if_block2 = /*error*/ ctx[23] && create_if_block_1$4(ctx);
+    	let if_block2 = /*error*/ ctx[23] && create_if_block_1$5(ctx);
     	let if_block3 = !/*error*/ ctx[23] && /*warn*/ ctx[14] && create_if_block$6(ctx);
 
     	const block = {
@@ -24056,7 +24056,7 @@ var documentstockenter = (function () {
     				if (if_block2) {
     					if_block2.p(ctx, dirty);
     				} else {
-    					if_block2 = create_if_block_1$4(ctx);
+    					if_block2 = create_if_block_1$5(ctx);
     					if_block2.c();
     					if_block2.m(div0, t2);
     				}
@@ -25221,7 +25221,7 @@ var documentstockenter = (function () {
     	let if_block1 = !/*invalid*/ ctx[7] && /*warn*/ ctx[9] && create_if_block_4$1(ctx);
     	let if_block2 = !/*invalid*/ ctx[7] && /*helperText*/ ctx[11] && create_if_block_3$1(ctx);
     	let if_block3 = /*invalid*/ ctx[7] && create_if_block_2$3(ctx);
-    	let if_block4 = !/*invalid*/ ctx[7] && /*warn*/ ctx[9] && create_if_block_1$3(ctx);
+    	let if_block4 = !/*invalid*/ ctx[7] && /*warn*/ ctx[9] && create_if_block_1$4(ctx);
 
     	const block = {
     		c: function create() {
@@ -25413,7 +25413,7 @@ var documentstockenter = (function () {
     				if (if_block4) {
     					if_block4.p(ctx, dirty);
     				} else {
-    					if_block4 = create_if_block_1$3(ctx);
+    					if_block4 = create_if_block_1$4(ctx);
     					if_block4.c();
     					if_block4.m(if_block4_anchor.parentNode, if_block4_anchor);
     				}
@@ -25636,7 +25636,7 @@ var documentstockenter = (function () {
     }
 
     // (199:6) {#if !invalid && warn}
-    function create_if_block_1$3(ctx) {
+    function create_if_block_1$4(ctx) {
     	let div;
     	let t;
 
@@ -25666,7 +25666,7 @@ var documentstockenter = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_1$3.name,
+    		id: create_if_block_1$4.name,
     		type: "if",
     		source: "(199:6) {#if !invalid && warn}",
     		ctx
@@ -27588,7 +27588,7 @@ var documentstockenter = (function () {
     }
 
     // (224:4) {#if !isFluid && invalid}
-    function create_if_block_1$2(ctx) {
+    function create_if_block_1$3(ctx) {
     	let div;
     	let t;
 
@@ -27618,7 +27618,7 @@ var documentstockenter = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_1$2.name,
+    		id: create_if_block_1$3.name,
     		type: "if",
     		source: "(224:4) {#if !isFluid && invalid}",
     		ctx
@@ -27736,7 +27736,7 @@ var documentstockenter = (function () {
     	let if_block6 = /*isFluid*/ ctx[20] && !/*inline*/ ctx[16] && /*invalid*/ ctx[11] && create_if_block_4(ctx);
     	let if_block7 = /*isFluid*/ ctx[20] && !/*inline*/ ctx[16] && /*warn*/ ctx[13] && create_if_block_3(ctx);
     	let if_block8 = !/*invalid*/ ctx[11] && !/*warn*/ ctx[13] && !/*isFluid*/ ctx[20] && !/*inline*/ ctx[16] && /*helperText*/ ctx[6] && create_if_block_2$2(ctx);
-    	let if_block9 = !/*isFluid*/ ctx[20] && /*invalid*/ ctx[11] && create_if_block_1$2(ctx);
+    	let if_block9 = !/*isFluid*/ ctx[20] && /*invalid*/ ctx[11] && create_if_block_1$3(ctx);
     	let if_block10 = !/*isFluid*/ ctx[20] && !/*invalid*/ ctx[11] && /*warn*/ ctx[13] && create_if_block$3(ctx);
 
     	const block = {
@@ -28045,7 +28045,7 @@ var documentstockenter = (function () {
     				if (if_block9) {
     					if_block9.p(ctx, dirty);
     				} else {
-    					if_block9 = create_if_block_1$2(ctx);
+    					if_block9 = create_if_block_1$3(ctx);
     					if_block9.c();
     					if_block9.m(div1, t10);
     				}
@@ -29201,7 +29201,7 @@ var documentstockenter = (function () {
     }
 
     // (110:30) 
-    function create_if_block_1$1(ctx) {
+    function create_if_block_1$2(ctx) {
     	let select_1;
     	let updating_selected;
     	let current;
@@ -29268,7 +29268,7 @@ var documentstockenter = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_1$1.name,
+    		id: create_if_block_1$2.name,
     		type: "if",
     		source: "(110:30) ",
     		ctx
@@ -29489,7 +29489,7 @@ var documentstockenter = (function () {
     	let t1;
     	let current;
     	let if_block0 = /*persist*/ ctx[1] && create_if_block_2$1(ctx);
-    	const if_block_creators = [create_if_block$2, create_if_block_1$1];
+    	const if_block_creators = [create_if_block$2, create_if_block_1$2];
     	const if_blocks = [];
 
     	function select_block_type(ctx, dirty) {
@@ -29869,7 +29869,7 @@ var documentstockenter = (function () {
     		c: function create() {
     			div = element("div");
     			attr_dev(div, "id", "output-" + /*uniqueId*/ ctx[0]);
-    			add_location(div, file$3, 36, 0, 1182);
+    			add_location(div, file$3, 38, 0, 1276);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -29909,7 +29909,8 @@ var documentstockenter = (function () {
     				'צבע': data[i].sku_color_name,
     				'גודל': data[i].sku_size_name,
     				'וריאנט': data[i].sku_verient_name,
-    				'quantity': data[i].quantity
+    				'quantity': data[i].quantity,
+    				'price': data[i].price
     			};
 
     			callback(d);
@@ -29928,7 +29929,7 @@ var documentstockenter = (function () {
     					rows: ["צבע", "וריאנט"],
     					cols: ["גודל"],
     					aggregator: sum(intFormat)(["quantity"])
-    				});
+    				}); //vals: ["price", 'quantity'],
     			},
     			1000
     		);
@@ -30055,7 +30056,7 @@ var documentstockenter = (function () {
     }
 
     // (82:16) 
-    function create_item_slot(ctx) {
+    function create_item_slot$1(ctx) {
     	let div3;
     	let div2;
     	let div1;
@@ -30096,7 +30097,7 @@ var documentstockenter = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_item_slot.name,
+    		id: create_item_slot$1.name,
     		type: "slot",
     		source: "(82:16) ",
     		ctx
@@ -30240,7 +30241,7 @@ var documentstockenter = (function () {
     		valueFieldName: "product_name",
     		$$slots: {
     			item: [
-    				create_item_slot,
+    				create_item_slot$1,
     				({ label, item }) => ({ 11: label, 12: item }),
     				({ label, item }) => (label ? 2048 : 0) | (item ? 4096 : 0)
     			]
@@ -30608,9 +30609,9 @@ var documentstockenter = (function () {
     	return child_ctx;
     }
 
-    // (81:0) {#if $editQuantityModalOpener.isOpen && $editQuantityModalOpener.data != undefined}
+    // (84:0) {#if $editQuantityModalOpener.isOpen && $editQuantityModalOpener.data != undefined}
     function create_if_block$1(ctx) {
-    	let div12;
+    	let div13;
     	let div4;
     	let div0;
     	let label0;
@@ -30668,23 +30669,24 @@ var documentstockenter = (function () {
     	let div8;
     	let label7;
     	let t28;
-    	let numberinput0;
+    	let textinput3;
     	let updating_value_3;
     	let t29;
     	let div9;
     	let label8;
     	let t31;
-    	let numberinput1;
+    	let textinput4;
     	let updating_value_4;
     	let t32;
+    	let div11;
     	let div10;
     	let button;
     	let t33;
-    	let div11;
+    	let div12;
     	let t34;
     	let hr1;
     	let t35;
-    	let div13;
+    	let div14;
     	let h41;
     	let t37;
     	let current_block_type_index;
@@ -30701,8 +30703,8 @@ var documentstockenter = (function () {
     		list: "sizes_list"
     	};
 
-    	if (/*size_input_val*/ ctx[2] !== void 0) {
-    		textinput0_props.value = /*size_input_val*/ ctx[2];
+    	if (/*size_input_val*/ ctx[3] !== void 0) {
+    		textinput0_props.value = /*size_input_val*/ ctx[3];
     	}
 
     	textinput0 = new TextInput$1({ props: textinput0_props, $$inline: true });
@@ -30725,8 +30727,8 @@ var documentstockenter = (function () {
     		list: "color_list"
     	};
 
-    	if (/*color_input_val*/ ctx[3] !== void 0) {
-    		textinput1_props.value = /*color_input_val*/ ctx[3];
+    	if (/*color_input_val*/ ctx[4] !== void 0) {
+    		textinput1_props.value = /*color_input_val*/ ctx[4];
     	}
 
     	textinput1 = new TextInput$1({ props: textinput1_props, $$inline: true });
@@ -30749,8 +30751,8 @@ var documentstockenter = (function () {
     		list: "varients_list"
     	};
 
-    	if (/*ver_input_val*/ ctx[1] !== void 0) {
-    		textinput2_props.value = /*ver_input_val*/ ctx[1];
+    	if (/*ver_input_val*/ ctx[2] !== void 0) {
+    		textinput2_props.value = /*ver_input_val*/ ctx[2];
     	}
 
     	textinput2 = new TextInput$1({ props: textinput2_props, $$inline: true });
@@ -30763,50 +30765,42 @@ var documentstockenter = (function () {
     		each_blocks[i] = create_each_block$1(get_each_context$1(ctx, each_value, i));
     	}
 
-    	function numberinput0_value_binding(value) {
-    		/*numberinput0_value_binding*/ ctx[17](value);
+    	function textinput3_value_binding(value) {
+    		/*textinput3_value_binding*/ ctx[17](value);
     	}
 
-    	let numberinput0_props = { type: "number" };
+    	let textinput3_props = {};
 
     	if (/*amount*/ ctx[5] !== void 0) {
-    		numberinput0_props.value = /*amount*/ ctx[5];
+    		textinput3_props.value = /*amount*/ ctx[5];
     	}
 
-    	numberinput0 = new NumberInput$1({
-    			props: numberinput0_props,
-    			$$inline: true
-    		});
+    	textinput3 = new TextInput$1({ props: textinput3_props, $$inline: true });
+    	binding_callbacks.push(() => bind(textinput3, 'value', textinput3_value_binding));
 
-    	binding_callbacks.push(() => bind(numberinput0, 'value', numberinput0_value_binding));
-
-    	function numberinput1_value_binding(value) {
-    		/*numberinput1_value_binding*/ ctx[18](value);
+    	function textinput4_value_binding(value) {
+    		/*textinput4_value_binding*/ ctx[18](value);
     	}
 
-    	let numberinput1_props = { type: "number" };
+    	let textinput4_props = {};
 
-    	if (/*price_input_val*/ ctx[4] !== void 0) {
-    		numberinput1_props.value = /*price_input_val*/ ctx[4];
+    	if (/*price_input_val*/ ctx[0] !== void 0) {
+    		textinput4_props.value = /*price_input_val*/ ctx[0];
     	}
 
-    	numberinput1 = new NumberInput$1({
-    			props: numberinput1_props,
-    			$$inline: true
-    		});
-
-    	binding_callbacks.push(() => bind(numberinput1, 'value', numberinput1_value_binding));
+    	textinput4 = new TextInput$1({ props: textinput4_props, $$inline: true });
+    	binding_callbacks.push(() => bind(textinput4, 'value', textinput4_value_binding));
 
     	button = new Button$1({
     			props: {
-    				$$slots: { default: [create_default_slot_2] },
+    				$$slots: { default: [create_default_slot_2$1] },
     				$$scope: { ctx }
     			},
     			$$inline: true
     		});
 
     	button.$on("click", /*addNewEntry*/ ctx[11]);
-    	const if_block_creators = [create_if_block_1, create_else_block_1];
+    	const if_block_creators = [create_if_block_1$1, create_else_block_1];
     	const if_blocks = [];
 
     	function select_block_type(ctx, dirty) {
@@ -30819,7 +30813,7 @@ var documentstockenter = (function () {
 
     	const block = {
     		c: function create() {
-    			div12 = element("div");
+    			div13 = element("div");
     			div4 = element("div");
     			div0 = element("div");
     			label0 = element("label");
@@ -30894,116 +30888,119 @@ var documentstockenter = (function () {
     			label7 = element("label");
     			label7.textContent = "כמות";
     			t28 = space();
-    			create_component(numberinput0.$$.fragment);
+    			create_component(textinput3.$$.fragment);
     			t29 = space();
     			div9 = element("div");
     			label8 = element("label");
     			label8.textContent = "מחיר";
     			t31 = space();
-    			create_component(numberinput1.$$.fragment);
+    			create_component(textinput4.$$.fragment);
     			t32 = space();
+    			div11 = element("div");
     			div10 = element("div");
     			create_component(button.$$.fragment);
     			t33 = space();
-    			div11 = element("div");
+    			div12 = element("div");
     			t34 = space();
     			hr1 = element("hr");
     			t35 = space();
-    			div13 = element("div");
+    			div14 = element("div");
     			h41 = element("h4");
     			h41.textContent = "מוצרים קיימים בטופס";
     			t37 = space();
     			if_block.c();
     			attr_dev(label0, "class", "bx--label");
     			attr_dev(label0, "for", "product-sku_product_name");
-    			add_location(label0, file$1, 85, 20, 3026);
+    			add_location(label0, file$1, 88, 20, 3182);
     			attr_dev(input0, "class", "bx--text-input");
     			attr_dev(input0, "id", "product-sku_product_name");
     			attr_dev(input0, "type", "text");
-    			input0.value = input0_value_value = /*$editQuantityModalOpener*/ ctx[0].data.data.sku_product_name;
+    			input0.value = input0_value_value = /*$editQuantityModalOpener*/ ctx[1].data.data.sku_product_name;
     			input0.disabled = true;
-    			add_location(input0, file$1, 86, 20, 3120);
+    			add_location(input0, file$1, 89, 20, 3276);
     			attr_dev(div0, "class", "bx--form-item2");
-    			add_location(div0, file$1, 84, 12, 2976);
+    			add_location(div0, file$1, 87, 12, 3132);
     			attr_dev(label1, "for", "product-sku_product_id");
-    			add_location(label1, file$1, 89, 16, 3342);
+    			add_location(label1, file$1, 92, 16, 3498);
     			attr_dev(input1, "class", "bx--text-input");
     			attr_dev(input1, "id", "product-sku_product_id");
     			attr_dev(input1, "type", "text");
-    			input1.value = input1_value_value = /*$editQuantityModalOpener*/ ctx[0].data.data.sku_product_id;
+    			input1.value = input1_value_value = /*$editQuantityModalOpener*/ ctx[1].data.data.sku_product_id;
     			input1.disabled = true;
-    			add_location(input1, file$1, 90, 16, 3413);
+    			add_location(input1, file$1, 93, 16, 3569);
     			attr_dev(div1, "class", "bx--form-item2");
-    			add_location(div1, file$1, 88, 12, 3296);
+    			add_location(div1, file$1, 91, 12, 3452);
     			attr_dev(label2, "for", "product-sku_ppn_name");
-    			add_location(label2, file$1, 93, 16, 3631);
+    			add_location(label2, file$1, 96, 16, 3787);
     			attr_dev(input2, "class", "bx--text-input");
     			attr_dev(input2, "id", "product-sku_ppn_name");
     			attr_dev(input2, "type", "text");
-    			input2.value = input2_value_value = /*$editQuantityModalOpener*/ ctx[0].data.data.sku_ppn_name;
+    			input2.value = input2_value_value = /*$editQuantityModalOpener*/ ctx[1].data.data.sku_ppn_name;
     			input2.disabled = true;
-    			add_location(input2, file$1, 94, 16, 3697);
+    			add_location(input2, file$1, 97, 16, 3853);
     			attr_dev(div2, "class", "bx--form-item2");
-    			add_location(div2, file$1, 92, 12, 3585);
+    			add_location(div2, file$1, 95, 12, 3741);
     			attr_dev(label3, "for", "product-sku_ppn_id");
-    			add_location(label3, file$1, 97, 16, 3911);
+    			add_location(label3, file$1, 100, 16, 4067);
     			attr_dev(input3, "class", "bx--text-input");
     			attr_dev(input3, "id", "product-sku_ppn_id");
     			attr_dev(input3, "type", "text");
-    			input3.value = input3_value_value = /*$editQuantityModalOpener*/ ctx[0].data.data.sku_ppn_id;
+    			input3.value = input3_value_value = /*$editQuantityModalOpener*/ ctx[1].data.data.sku_ppn_id;
     			input3.disabled = true;
-    			add_location(input3, file$1, 98, 16, 3983);
+    			add_location(input3, file$1, 101, 16, 4139);
     			attr_dev(div3, "class", "bx--form-item2");
-    			add_location(div3, file$1, 96, 12, 3865);
-    			attr_dev(div4, "class", "bx--row svelte-1gm2w8p");
-    			add_location(div4, file$1, 83, 4, 2941);
-    			attr_dev(hr0, "class", "seperator svelte-1gm2w8p");
-    			add_location(hr0, file$1, 101, 8, 4159);
-    			attr_dev(h40, "class", "svelte-1gm2w8p");
-    			add_location(h40, file$1, 102, 8, 4191);
+    			add_location(div3, file$1, 99, 12, 4021);
+    			attr_dev(div4, "class", "bx--row svelte-cmr7k9");
+    			add_location(div4, file$1, 86, 4, 3097);
+    			attr_dev(hr0, "class", "seperator svelte-cmr7k9");
+    			add_location(hr0, file$1, 104, 8, 4315);
+    			attr_dev(h40, "class", "svelte-cmr7k9");
+    			add_location(h40, file$1, 105, 8, 4347);
     			attr_dev(label4, "for", "size");
-    			add_location(label4, file$1, 112, 16, 4485);
+    			add_location(label4, file$1, 115, 16, 4641);
     			attr_dev(datalist0, "id", "sizes_list");
-    			add_location(datalist0, file$1, 114, 16, 4639);
-    			attr_dev(div5, "class", "bx--form-item2 svelte-1gm2w8p");
-    			add_location(div5, file$1, 111, 12, 4439);
+    			add_location(datalist0, file$1, 117, 16, 4795);
+    			attr_dev(div5, "class", "bx--form-item2 svelte-cmr7k9");
+    			add_location(div5, file$1, 114, 12, 4595);
     			attr_dev(label5, "for", "color");
-    			add_location(label5, file$1, 123, 16, 4938);
+    			add_location(label5, file$1, 126, 16, 5094);
     			attr_dev(datalist1, "id", "color_list");
-    			add_location(datalist1, file$1, 125, 16, 5093);
-    			attr_dev(div6, "class", "bx--form-item2 svelte-1gm2w8p");
-    			add_location(div6, file$1, 122, 12, 4892);
+    			add_location(datalist1, file$1, 128, 16, 5249);
+    			attr_dev(div6, "class", "bx--form-item2 svelte-cmr7k9");
+    			add_location(div6, file$1, 125, 12, 5048);
     			attr_dev(label6, "for", "varients");
-    			add_location(label6, file$1, 133, 16, 5393);
+    			add_location(label6, file$1, 136, 16, 5549);
     			attr_dev(datalist2, "id", "varients_list");
-    			add_location(datalist2, file$1, 135, 16, 5559);
-    			attr_dev(div7, "class", "bx--form-item2 svelte-1gm2w8p");
-    			add_location(div7, file$1, 132, 12, 5347);
+    			add_location(datalist2, file$1, 138, 16, 5715);
+    			attr_dev(div7, "class", "bx--form-item2 svelte-cmr7k9");
+    			add_location(div7, file$1, 135, 12, 5503);
     			attr_dev(label7, "for", "amount");
-    			add_location(label7, file$1, 143, 16, 5870);
-    			attr_dev(div8, "class", "bx--form-item2 svelte-1gm2w8p");
-    			add_location(div8, file$1, 142, 12, 5824);
+    			add_location(label7, file$1, 146, 16, 6026);
+    			attr_dev(div8, "class", "bx--form-item2 svelte-cmr7k9");
+    			add_location(div8, file$1, 145, 12, 5980);
     			attr_dev(label8, "for", "amount");
-    			add_location(label8, file$1, 148, 16, 6051);
-    			attr_dev(div9, "class", "bx--form-item2 svelte-1gm2w8p");
-    			add_location(div9, file$1, 147, 12, 6005);
-    			attr_dev(div10, "class", "bx--form-item2 svelte-1gm2w8p");
-    			add_location(div10, file$1, 153, 12, 6209);
-    			attr_dev(form, "class", "new-product-form svelte-1gm2w8p");
-    			add_location(form, file$1, 110, 8, 4394);
-    			attr_dev(div11, "class", "existing-entries");
-    			add_location(div11, file$1, 160, 8, 6352);
-    			attr_dev(div12, "class", "main svelte-1gm2w8p");
-    			add_location(div12, file$1, 82, 0, 2917);
-    			attr_dev(hr1, "class", "seperator svelte-1gm2w8p");
-    			add_location(hr1, file$1, 164, 4, 6434);
-    			add_location(h41, file$1, 166, 8, 6502);
-    			attr_dev(div13, "class", "existing-entries");
-    			add_location(div13, file$1, 165, 4, 6462);
+    			add_location(label8, file$1, 151, 16, 6191);
+    			attr_dev(div9, "class", "bx--form-item2 svelte-cmr7k9");
+    			add_location(div9, file$1, 150, 12, 6145);
+    			attr_dev(div10, "class", "bx--form-item2 svelte-cmr7k9");
+    			add_location(div10, file$1, 158, 12, 6393);
+    			attr_dev(div11, "class", "bx--form-item2 svelte-cmr7k9");
+    			add_location(div11, file$1, 155, 12, 6319);
+    			attr_dev(form, "class", "new-product-form svelte-cmr7k9");
+    			add_location(form, file$1, 113, 8, 4550);
+    			attr_dev(div12, "class", "existing-entries");
+    			add_location(div12, file$1, 165, 8, 6536);
+    			attr_dev(div13, "class", "main svelte-cmr7k9");
+    			add_location(div13, file$1, 85, 0, 3073);
+    			attr_dev(hr1, "class", "seperator svelte-cmr7k9");
+    			add_location(hr1, file$1, 169, 4, 6618);
+    			add_location(h41, file$1, 171, 8, 6686);
+    			attr_dev(div14, "class", "existing-entries");
+    			add_location(div14, file$1, 170, 4, 6646);
     		},
     		m: function mount(target, anchor) {
-    			insert_dev(target, div12, anchor);
-    			append_dev(div12, div4);
+    			insert_dev(target, div13, anchor);
+    			append_dev(div13, div4);
     			append_dev(div4, div0);
     			append_dev(div0, label0);
     			append_dev(div0, t1);
@@ -31023,12 +31020,12 @@ var documentstockenter = (function () {
     			append_dev(div3, label3);
     			append_dev(div3, t10);
     			append_dev(div3, input3);
-    			append_dev(div12, t11);
-    			append_dev(div12, hr0);
-    			append_dev(div12, t12);
-    			append_dev(div12, h40);
-    			append_dev(div12, t14);
-    			append_dev(div12, form);
+    			append_dev(div13, t11);
+    			append_dev(div13, hr0);
+    			append_dev(div13, t12);
+    			append_dev(div13, h40);
+    			append_dev(div13, t14);
+    			append_dev(div13, form);
     			append_dev(form, div5);
     			append_dev(div5, label4);
     			append_dev(div5, t16);
@@ -31068,48 +31065,49 @@ var documentstockenter = (function () {
     			append_dev(form, div8);
     			append_dev(div8, label7);
     			append_dev(div8, t28);
-    			mount_component(numberinput0, div8, null);
+    			mount_component(textinput3, div8, null);
     			append_dev(form, t29);
     			append_dev(form, div9);
     			append_dev(div9, label8);
     			append_dev(div9, t31);
-    			mount_component(numberinput1, div9, null);
+    			mount_component(textinput4, div9, null);
     			append_dev(form, t32);
-    			append_dev(form, div10);
+    			append_dev(form, div11);
+    			append_dev(div11, div10);
     			mount_component(button, div10, null);
-    			append_dev(div12, t33);
-    			append_dev(div12, div11);
+    			append_dev(div13, t33);
+    			append_dev(div13, div12);
     			insert_dev(target, t34, anchor);
     			insert_dev(target, hr1, anchor);
     			insert_dev(target, t35, anchor);
-    			insert_dev(target, div13, anchor);
-    			append_dev(div13, h41);
-    			append_dev(div13, t37);
-    			if_blocks[current_block_type_index].m(div13, null);
+    			insert_dev(target, div14, anchor);
+    			append_dev(div14, h41);
+    			append_dev(div14, t37);
+    			if_blocks[current_block_type_index].m(div14, null);
     			current = true;
     		},
     		p: function update(ctx, dirty) {
-    			if (!current || dirty[0] & /*$editQuantityModalOpener*/ 1 && input0_value_value !== (input0_value_value = /*$editQuantityModalOpener*/ ctx[0].data.data.sku_product_name) && input0.value !== input0_value_value) {
+    			if (!current || dirty[0] & /*$editQuantityModalOpener*/ 2 && input0_value_value !== (input0_value_value = /*$editQuantityModalOpener*/ ctx[1].data.data.sku_product_name) && input0.value !== input0_value_value) {
     				prop_dev(input0, "value", input0_value_value);
     			}
 
-    			if (!current || dirty[0] & /*$editQuantityModalOpener*/ 1 && input1_value_value !== (input1_value_value = /*$editQuantityModalOpener*/ ctx[0].data.data.sku_product_id) && input1.value !== input1_value_value) {
+    			if (!current || dirty[0] & /*$editQuantityModalOpener*/ 2 && input1_value_value !== (input1_value_value = /*$editQuantityModalOpener*/ ctx[1].data.data.sku_product_id) && input1.value !== input1_value_value) {
     				prop_dev(input1, "value", input1_value_value);
     			}
 
-    			if (!current || dirty[0] & /*$editQuantityModalOpener*/ 1 && input2_value_value !== (input2_value_value = /*$editQuantityModalOpener*/ ctx[0].data.data.sku_ppn_name) && input2.value !== input2_value_value) {
+    			if (!current || dirty[0] & /*$editQuantityModalOpener*/ 2 && input2_value_value !== (input2_value_value = /*$editQuantityModalOpener*/ ctx[1].data.data.sku_ppn_name) && input2.value !== input2_value_value) {
     				prop_dev(input2, "value", input2_value_value);
     			}
 
-    			if (!current || dirty[0] & /*$editQuantityModalOpener*/ 1 && input3_value_value !== (input3_value_value = /*$editQuantityModalOpener*/ ctx[0].data.data.sku_ppn_id) && input3.value !== input3_value_value) {
+    			if (!current || dirty[0] & /*$editQuantityModalOpener*/ 2 && input3_value_value !== (input3_value_value = /*$editQuantityModalOpener*/ ctx[1].data.data.sku_ppn_id) && input3.value !== input3_value_value) {
     				prop_dev(input3, "value", input3_value_value);
     			}
 
     			const textinput0_changes = {};
 
-    			if (!updating_value && dirty[0] & /*size_input_val*/ 4) {
+    			if (!updating_value && dirty[0] & /*size_input_val*/ 8) {
     				updating_value = true;
-    				textinput0_changes.value = /*size_input_val*/ ctx[2];
+    				textinput0_changes.value = /*size_input_val*/ ctx[3];
     				add_flush_callback(() => updating_value = false);
     			}
 
@@ -31141,9 +31139,9 @@ var documentstockenter = (function () {
 
     			const textinput1_changes = {};
 
-    			if (!updating_value_1 && dirty[0] & /*color_input_val*/ 8) {
+    			if (!updating_value_1 && dirty[0] & /*color_input_val*/ 16) {
     				updating_value_1 = true;
-    				textinput1_changes.value = /*color_input_val*/ ctx[3];
+    				textinput1_changes.value = /*color_input_val*/ ctx[4];
     				add_flush_callback(() => updating_value_1 = false);
     			}
 
@@ -31175,9 +31173,9 @@ var documentstockenter = (function () {
 
     			const textinput2_changes = {};
 
-    			if (!updating_value_2 && dirty[0] & /*ver_input_val*/ 2) {
+    			if (!updating_value_2 && dirty[0] & /*ver_input_val*/ 4) {
     				updating_value_2 = true;
-    				textinput2_changes.value = /*ver_input_val*/ ctx[1];
+    				textinput2_changes.value = /*ver_input_val*/ ctx[2];
     				add_flush_callback(() => updating_value_2 = false);
     			}
 
@@ -31207,24 +31205,24 @@ var documentstockenter = (function () {
     				each_blocks.length = each_value.length;
     			}
 
-    			const numberinput0_changes = {};
+    			const textinput3_changes = {};
 
     			if (!updating_value_3 && dirty[0] & /*amount*/ 32) {
     				updating_value_3 = true;
-    				numberinput0_changes.value = /*amount*/ ctx[5];
+    				textinput3_changes.value = /*amount*/ ctx[5];
     				add_flush_callback(() => updating_value_3 = false);
     			}
 
-    			numberinput0.$set(numberinput0_changes);
-    			const numberinput1_changes = {};
+    			textinput3.$set(textinput3_changes);
+    			const textinput4_changes = {};
 
-    			if (!updating_value_4 && dirty[0] & /*price_input_val*/ 16) {
+    			if (!updating_value_4 && dirty[0] & /*price_input_val*/ 1) {
     				updating_value_4 = true;
-    				numberinput1_changes.value = /*price_input_val*/ ctx[4];
+    				textinput4_changes.value = /*price_input_val*/ ctx[0];
     				add_flush_callback(() => updating_value_4 = false);
     			}
 
-    			numberinput1.$set(numberinput1_changes);
+    			textinput4.$set(textinput4_changes);
     			const button_changes = {};
 
     			if (dirty[1] & /*$$scope*/ 16) {
@@ -31255,7 +31253,7 @@ var documentstockenter = (function () {
     				}
 
     				transition_in(if_block, 1);
-    				if_block.m(div13, null);
+    				if_block.m(div14, null);
     			}
     		},
     		i: function intro(local) {
@@ -31263,8 +31261,8 @@ var documentstockenter = (function () {
     			transition_in(textinput0.$$.fragment, local);
     			transition_in(textinput1.$$.fragment, local);
     			transition_in(textinput2.$$.fragment, local);
-    			transition_in(numberinput0.$$.fragment, local);
-    			transition_in(numberinput1.$$.fragment, local);
+    			transition_in(textinput3.$$.fragment, local);
+    			transition_in(textinput4.$$.fragment, local);
     			transition_in(button.$$.fragment, local);
     			transition_in(if_block);
     			current = true;
@@ -31273,27 +31271,27 @@ var documentstockenter = (function () {
     			transition_out(textinput0.$$.fragment, local);
     			transition_out(textinput1.$$.fragment, local);
     			transition_out(textinput2.$$.fragment, local);
-    			transition_out(numberinput0.$$.fragment, local);
-    			transition_out(numberinput1.$$.fragment, local);
+    			transition_out(textinput3.$$.fragment, local);
+    			transition_out(textinput4.$$.fragment, local);
     			transition_out(button.$$.fragment, local);
     			transition_out(if_block);
     			current = false;
     		},
     		d: function destroy(detaching) {
-    			if (detaching) detach_dev(div12);
+    			if (detaching) detach_dev(div13);
     			destroy_component(textinput0);
     			destroy_each(each_blocks_2, detaching);
     			destroy_component(textinput1);
     			destroy_each(each_blocks_1, detaching);
     			destroy_component(textinput2);
     			destroy_each(each_blocks, detaching);
-    			destroy_component(numberinput0);
-    			destroy_component(numberinput1);
+    			destroy_component(textinput3);
+    			destroy_component(textinput4);
     			destroy_component(button);
     			if (detaching) detach_dev(t34);
     			if (detaching) detach_dev(hr1);
     			if (detaching) detach_dev(t35);
-    			if (detaching) detach_dev(div13);
+    			if (detaching) detach_dev(div14);
     			if_blocks[current_block_type_index].d();
     		}
     	};
@@ -31302,14 +31300,14 @@ var documentstockenter = (function () {
     		block,
     		id: create_if_block$1.name,
     		type: "if",
-    		source: "(81:0) {#if $editQuantityModalOpener.isOpen && $editQuantityModalOpener.data != undefined}",
+    		source: "(84:0) {#if $editQuantityModalOpener.isOpen && $editQuantityModalOpener.data != undefined}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (116:20) {#each $ALL_SIZES as size}
+    // (119:20) {#each $ALL_SIZES as size}
     function create_each_block_2(ctx) {
     	let option;
     	let option_id_value;
@@ -31321,7 +31319,7 @@ var documentstockenter = (function () {
     			attr_dev(option, "id", option_id_value = "clr-" + /*size*/ ctx[32].id);
     			option.__value = option_value_value = /*size*/ ctx[32].size;
     			option.value = option.__value;
-    			add_location(option, file$1, 116, 24, 4739);
+    			add_location(option, file$1, 119, 24, 4895);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, option, anchor);
@@ -31345,14 +31343,14 @@ var documentstockenter = (function () {
     		block,
     		id: create_each_block_2.name,
     		type: "each",
-    		source: "(116:20) {#each $ALL_SIZES as size}",
+    		source: "(119:20) {#each $ALL_SIZES as size}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (127:20) {#each $ALL_COLORS as color}
+    // (130:20) {#each $ALL_COLORS as color}
     function create_each_block_1$1(ctx) {
     	let option;
     	let option_id_value;
@@ -31364,7 +31362,7 @@ var documentstockenter = (function () {
     			attr_dev(option, "id", option_id_value = "clr-" + /*color*/ ctx[29].id);
     			option.__value = option_value_value = /*color*/ ctx[29].name;
     			option.value = option.__value;
-    			add_location(option, file$1, 127, 24, 5195);
+    			add_location(option, file$1, 130, 24, 5351);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, option, anchor);
@@ -31388,14 +31386,14 @@ var documentstockenter = (function () {
     		block,
     		id: create_each_block_1$1.name,
     		type: "each",
-    		source: "(127:20) {#each $ALL_COLORS as color}",
+    		source: "(130:20) {#each $ALL_COLORS as color}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (137:20) {#each $ALL_VARIENTS as varient}
+    // (140:20) {#each $ALL_VARIENTS as varient}
     function create_each_block$1(ctx) {
     	let option;
     	let option_id_value;
@@ -31407,7 +31405,7 @@ var documentstockenter = (function () {
     			attr_dev(option, "id", option_id_value = "clr-" + /*varient*/ ctx[26].id);
     			option.__value = option_value_value = /*varient*/ ctx[26].name;
     			option.value = option.__value;
-    			add_location(option, file$1, 137, 24, 5668);
+    			add_location(option, file$1, 140, 24, 5824);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, option, anchor);
@@ -31431,15 +31429,15 @@ var documentstockenter = (function () {
     		block,
     		id: create_each_block$1.name,
     		type: "each",
-    		source: "(137:20) {#each $ALL_VARIENTS as varient}",
+    		source: "(140:20) {#each $ALL_VARIENTS as varient}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (155:16) <Button on:click={addNewEntry}>
-    function create_default_slot_2(ctx) {
+    // (160:16) <Button on:click={addNewEntry}>
+    function create_default_slot_2$1(ctx) {
     	let t;
 
     	const block = {
@@ -31456,16 +31454,16 @@ var documentstockenter = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_default_slot_2.name,
+    		id: create_default_slot_2$1.name,
     		type: "slot",
-    		source: "(155:16) <Button on:click={addNewEntry}>",
+    		source: "(160:16) <Button on:click={addNewEntry}>",
     		ctx
     	});
 
     	return block;
     }
 
-    // (197:8) {:else}
+    // (203:8) {:else}
     function create_else_block_1(ctx) {
     	let loading;
     	let current;
@@ -31502,15 +31500,15 @@ var documentstockenter = (function () {
     		block,
     		id: create_else_block_1.name,
     		type: "else",
-    		source: "(197:8) {:else}",
+    		source: "(203:8) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (168:8) {#if existingEntries}
-    function create_if_block_1(ctx) {
+    // (173:8) {#if existingEntries}
+    function create_if_block_1$1(ctx) {
     	let div;
     	let datatable;
     	let current;
@@ -31523,6 +31521,7 @@ var documentstockenter = (function () {
     					{ key: "sku_size_name", value: "גודל" },
     					{ key: "sku_verient_name", value: "מודל" },
     					{ key: 'quantity', value: 'כמות' },
+    					{ key: 'price', value: 'מחיר' },
     					{ key: 'actions', value: 'פעולות' }
     				],
     				rows: /*existingEntries*/ ctx[6],
@@ -31543,7 +31542,7 @@ var documentstockenter = (function () {
     			div = element("div");
     			create_component(datatable.$$.fragment);
     			attr_dev(div, "class", "existing-entry");
-    			add_location(div, file$1, 171, 12, 7998);
+    			add_location(div, file$1, 176, 12, 8182);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -31554,7 +31553,7 @@ var documentstockenter = (function () {
     			const datatable_changes = {};
     			if (dirty[0] & /*existingEntries*/ 64) datatable_changes.rows = /*existingEntries*/ ctx[6];
 
-    			if (dirty[0] & /*$editQuantityModalOpener, cell*/ 33554433 | dirty[1] & /*$$scope*/ 16) {
+    			if (dirty[0] & /*$editQuantityModalOpener, cell*/ 33554434 | dirty[1] & /*$$scope*/ 16) {
     				datatable_changes.$$scope = { dirty, ctx };
     			}
 
@@ -31577,16 +31576,16 @@ var documentstockenter = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_1.name,
+    		id: create_if_block_1$1.name,
     		type: "if",
-    		source: "(168:8) {#if existingEntries}",
+    		source: "(173:8) {#if existingEntries}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (189:24) {:else}
+    // (195:24) {:else}
     function create_else_block(ctx) {
     	let t_value = /*cell*/ ctx[25].value + "";
     	let t;
@@ -31612,14 +31611,14 @@ var documentstockenter = (function () {
     		block,
     		id: create_else_block.name,
     		type: "else",
-    		source: "(189:24) {:else}",
+    		source: "(195:24) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (185:24) {#if cell.key === "actions"}
+    // (191:24) {#if cell.key === "actions"}
     function create_if_block_2(ctx) {
     	let button;
     	let current;
@@ -31676,14 +31675,14 @@ var documentstockenter = (function () {
     		block,
     		id: create_if_block_2.name,
     		type: "if",
-    		source: "(185:24) {#if cell.key === \\\"actions\\\"}",
+    		source: "(191:24) {#if cell.key === \\\"actions\\\"}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (186:28) <Button kind="danger" size="small" on:click={() => {                                  deleteEntry($editQuantityModalOpener.data.docId, row.sku_ppn_id, row.id, );                              }}>
+    // (192:28) <Button kind="danger" size="small" on:click={() => {                                  deleteEntry($editQuantityModalOpener.data.docId, row.sku_ppn_id, row.id, );                              }}>
     function create_default_slot_1$1(ctx) {
     	let t;
 
@@ -31703,14 +31702,14 @@ var documentstockenter = (function () {
     		block,
     		id: create_default_slot_1$1.name,
     		type: "slot",
-    		source: "(186:28) <Button kind=\\\"danger\\\" size=\\\"small\\\" on:click={() => {                                  deleteEntry($editQuantityModalOpener.data.docId, row.sku_ppn_id, row.id, );                              }}>",
+    		source: "(192:28) <Button kind=\\\"danger\\\" size=\\\"small\\\" on:click={() => {                                  deleteEntry($editQuantityModalOpener.data.docId, row.sku_ppn_id, row.id, );                              }}>",
     		ctx
     	});
 
     	return block;
     }
 
-    // (184:20) <svelte:fragment slot="cell" let:row let:cell>
+    // (190:20) <svelte:fragment slot="cell" let:row let:cell>
     function create_cell_slot(ctx) {
     	let current_block_type_index;
     	let if_block;
@@ -31783,18 +31782,18 @@ var documentstockenter = (function () {
     		block,
     		id: create_cell_slot.name,
     		type: "slot",
-    		source: "(184:20) <svelte:fragment slot=\\\"cell\\\" let:row let:cell>",
+    		source: "(190:20) <svelte:fragment slot=\\\"cell\\\" let:row let:cell>",
     		ctx
     	});
 
     	return block;
     }
 
-    // (74:0) <Modal    bind:open={$editQuantityModalOpener.isOpen}    modalHeading="שנה כמויות"    on:open    on:close    on:submit  >
+    // (77:0) <Modal    bind:open={$editQuantityModalOpener.isOpen}    modalHeading="שנה כמויות"    on:open    on:close    on:submit  >
     function create_default_slot$1(ctx) {
     	let if_block_anchor;
     	let current;
-    	let if_block = /*$editQuantityModalOpener*/ ctx[0].isOpen && /*$editQuantityModalOpener*/ ctx[0].data != undefined && create_if_block$1(ctx);
+    	let if_block = /*$editQuantityModalOpener*/ ctx[1].isOpen && /*$editQuantityModalOpener*/ ctx[1].data != undefined && create_if_block$1(ctx);
 
     	const block = {
     		c: function create() {
@@ -31807,11 +31806,11 @@ var documentstockenter = (function () {
     			current = true;
     		},
     		p: function update(ctx, dirty) {
-    			if (/*$editQuantityModalOpener*/ ctx[0].isOpen && /*$editQuantityModalOpener*/ ctx[0].data != undefined) {
+    			if (/*$editQuantityModalOpener*/ ctx[1].isOpen && /*$editQuantityModalOpener*/ ctx[1].data != undefined) {
     				if (if_block) {
     					if_block.p(ctx, dirty);
 
-    					if (dirty[0] & /*$editQuantityModalOpener*/ 1) {
+    					if (dirty[0] & /*$editQuantityModalOpener*/ 2) {
     						transition_in(if_block, 1);
     					}
     				} else {
@@ -31849,7 +31848,7 @@ var documentstockenter = (function () {
     		block,
     		id: create_default_slot$1.name,
     		type: "slot",
-    		source: "(74:0) <Modal    bind:open={$editQuantityModalOpener.isOpen}    modalHeading=\\\"שנה כמויות\\\"    on:open    on:close    on:submit  >",
+    		source: "(77:0) <Modal    bind:open={$editQuantityModalOpener.isOpen}    modalHeading=\\\"שנה כמויות\\\"    on:open    on:close    on:submit  >",
     		ctx
     	});
 
@@ -31871,8 +31870,8 @@ var documentstockenter = (function () {
     		$$scope: { ctx }
     	};
 
-    	if (/*$editQuantityModalOpener*/ ctx[0].isOpen !== void 0) {
-    		modal_props.open = /*$editQuantityModalOpener*/ ctx[0].isOpen;
+    	if (/*$editQuantityModalOpener*/ ctx[1].isOpen !== void 0) {
+    		modal_props.open = /*$editQuantityModalOpener*/ ctx[1].isOpen;
     	}
 
     	modal = new Modal$1({ props: modal_props, $$inline: true });
@@ -31899,9 +31898,9 @@ var documentstockenter = (function () {
     				modal_changes.$$scope = { dirty, ctx };
     			}
 
-    			if (!updating_open && dirty[0] & /*$editQuantityModalOpener*/ 1) {
+    			if (!updating_open && dirty[0] & /*$editQuantityModalOpener*/ 2) {
     				updating_open = true;
-    				modal_changes.open = /*$editQuantityModalOpener*/ ctx[0].isOpen;
+    				modal_changes.open = /*$editQuantityModalOpener*/ ctx[1].isOpen;
     				add_flush_callback(() => updating_open = false);
     			}
 
@@ -31938,7 +31937,7 @@ var documentstockenter = (function () {
     	let $ALL_COLORS;
     	let $ALL_VARIENTS;
     	validate_store(editQuantityModalOpener, 'editQuantityModalOpener');
-    	component_subscribe($$self, editQuantityModalOpener, $$value => $$invalidate(0, $editQuantityModalOpener = $$value));
+    	component_subscribe($$self, editQuantityModalOpener, $$value => $$invalidate(1, $editQuantityModalOpener = $$value));
     	validate_store(ALL_SIZES, 'ALL_SIZES');
     	component_subscribe($$self, ALL_SIZES, $$value => $$invalidate(7, $ALL_SIZES = $$value));
     	validate_store(ALL_COLORS, 'ALL_COLORS');
@@ -31987,14 +31986,10 @@ var documentstockenter = (function () {
     			apiAddDocStockEnterEntery(newEntry).then(res => {
     				$$invalidate(6, existingEntries = res);
     			});
-
-    			existingEntries.push(newEntry);
-    			$$invalidate(1, ver_input_val = undefined);
-    			$$invalidate(2, size_input_val = undefined);
-    			$$invalidate(3, color_input_val = undefined);
-    			$$invalidate(5, amount = undefined);
-    		}
-    	}
+    		} //existingEntries.push(newEntry);
+    		//ver_input_val = undefined;
+    	} //size_input_val = undefined;
+    	//color_input_val = undefined;
 
     	const writable_props = [];
 
@@ -32004,27 +31999,27 @@ var documentstockenter = (function () {
 
     	function textinput0_value_binding(value) {
     		size_input_val = value;
-    		$$invalidate(2, size_input_val);
+    		$$invalidate(3, size_input_val);
     	}
 
     	function textinput1_value_binding(value) {
     		color_input_val = value;
-    		$$invalidate(3, color_input_val);
+    		$$invalidate(4, color_input_val);
     	}
 
     	function textinput2_value_binding(value) {
     		ver_input_val = value;
-    		$$invalidate(1, ver_input_val);
+    		$$invalidate(2, ver_input_val);
     	}
 
-    	function numberinput0_value_binding(value) {
+    	function textinput3_value_binding(value) {
     		amount = value;
     		$$invalidate(5, amount);
     	}
 
-    	function numberinput1_value_binding(value) {
+    	function textinput4_value_binding(value) {
     		price_input_val = value;
-    		$$invalidate(4, price_input_val);
+    		($$invalidate(0, price_input_val), $$invalidate(1, $editQuantityModalOpener));
     	}
 
     	const click_handler = row => {
@@ -32082,10 +32077,10 @@ var documentstockenter = (function () {
     	});
 
     	$$self.$inject_state = $$props => {
-    		if ('ver_input_val' in $$props) $$invalidate(1, ver_input_val = $$props.ver_input_val);
-    		if ('size_input_val' in $$props) $$invalidate(2, size_input_val = $$props.size_input_val);
-    		if ('color_input_val' in $$props) $$invalidate(3, color_input_val = $$props.color_input_val);
-    		if ('price_input_val' in $$props) $$invalidate(4, price_input_val = $$props.price_input_val);
+    		if ('ver_input_val' in $$props) $$invalidate(2, ver_input_val = $$props.ver_input_val);
+    		if ('size_input_val' in $$props) $$invalidate(3, size_input_val = $$props.size_input_val);
+    		if ('color_input_val' in $$props) $$invalidate(4, color_input_val = $$props.color_input_val);
+    		if ('price_input_val' in $$props) $$invalidate(0, price_input_val = $$props.price_input_val);
     		if ('amount' in $$props) $$invalidate(5, amount = $$props.amount);
     		if ('existingEntries' in $$props) $$invalidate(6, existingEntries = $$props.existingEntries);
     	};
@@ -32095,11 +32090,15 @@ var documentstockenter = (function () {
     	}
 
     	$$self.$$.update = () => {
-    		if ($$self.$$.dirty[0] & /*$editQuantityModalOpener*/ 1) {
+    		if ($$self.$$.dirty[0] & /*$editQuantityModalOpener, price_input_val*/ 3) {
     			{
     				if ($editQuantityModalOpener.isOpen) {
     					let docId = $editQuantityModalOpener.data.docId;
     					let sku_ppn_id = $editQuantityModalOpener.data.data.sku_ppn_id;
+
+    					if (price_input_val == undefined) {
+    						$$invalidate(0, price_input_val = $editQuantityModalOpener.data.data.defult_price);
+    					}
 
     					apiGetDocStockEnterPPnEntries(docId, sku_ppn_id).then(res => {
     						$$invalidate(6, existingEntries = res);
@@ -32112,11 +32111,11 @@ var documentstockenter = (function () {
     	};
 
     	return [
+    		price_input_val,
     		$editQuantityModalOpener,
     		ver_input_val,
     		size_input_val,
     		color_input_val,
-    		price_input_val,
     		amount,
     		existingEntries,
     		$ALL_SIZES,
@@ -32129,8 +32128,8 @@ var documentstockenter = (function () {
     		textinput0_value_binding,
     		textinput1_value_binding,
     		textinput2_value_binding,
-    		numberinput0_value_binding,
-    		numberinput1_value_binding,
+    		textinput3_value_binding,
+    		textinput4_value_binding,
     		click_handler,
     		modal_open_binding,
     		open_handler,
@@ -32189,26 +32188,26 @@ var documentstockenter = (function () {
 
     function get_each_context(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[18] = list[i];
-    	child_ctx[20] = i;
+    	child_ctx[26] = list[i];
+    	child_ctx[28] = i;
     	return child_ctx;
     }
 
     function get_each_context_1(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[21] = list[i];
+    	child_ctx[29] = list[i];
     	return child_ctx;
     }
 
-    // (100:8) {#each ["white", "g10", "g80", "g90", "g100"] as value}
+    // (118:8) {#each ["white", "g10", "g80", "g90", "g100"] as value}
     function create_each_block_1(ctx) {
     	let radiobutton;
     	let current;
 
     	radiobutton = new RadioButton$1({
     			props: {
-    				labelText: /*value*/ ctx[21],
-    				value: /*value*/ ctx[21]
+    				labelText: /*value*/ ctx[29],
+    				value: /*value*/ ctx[29]
     			},
     			$$inline: true
     		});
@@ -32240,15 +32239,15 @@ var documentstockenter = (function () {
     		block,
     		id: create_each_block_1.name,
     		type: "each",
-    		source: "(100:8) {#each [\\\"white\\\", \\\"g10\\\", \\\"g80\\\", \\\"g90\\\", \\\"g100\\\"] as value}",
+    		source: "(118:8) {#each [\\\"white\\\", \\\"g10\\\", \\\"g80\\\", \\\"g90\\\", \\\"g100\\\"] as value}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (99:4) <RadioButtonGroup legendText="Carbon theme" bind:selected={theme}>
-    function create_default_slot_1(ctx) {
+    // (117:4) <RadioButtonGroup legendText="Carbon theme" bind:selected={theme}>
+    function create_default_slot_3(ctx) {
     	let each_1_anchor;
     	let current;
     	let each_value_1 = ["white", "g10", "g80", "g90", "g100"];
@@ -32302,16 +32301,16 @@ var documentstockenter = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_default_slot_1.name,
+    		id: create_default_slot_3.name,
     		type: "slot",
-    		source: "(99:4) <RadioButtonGroup legendText=\\\"Carbon theme\\\" bind:selected={theme}>",
+    		source: "(117:4) <RadioButtonGroup legendText=\\\"Carbon theme\\\" bind:selected={theme}>",
     		ctx
     	});
 
     	return block;
     }
 
-    // (104:4) {#if docData}
+    // (122:4) {#if docData}
     function create_if_block(ctx) {
     	let h1;
     	let t0;
@@ -32353,28 +32352,44 @@ var documentstockenter = (function () {
     	let t21_value = /*docData*/ ctx[1].warehouse_name + "";
     	let t21;
     	let t22;
+    	let button;
+    	let t23;
     	let table1;
     	let thead1;
     	let tr2;
     	let th5;
-    	let t24;
+    	let t25;
     	let th6;
-    	let t26;
+    	let t27;
     	let th7;
-    	let t28;
+    	let t29;
     	let th8;
-    	let t30;
+    	let t31;
     	let th9;
-    	let t32;
+    	let t33;
     	let th10;
-    	let t34;
+    	let t35;
     	let th11;
-    	let t36;
-    	let tbody1;
     	let t37;
-    	let documentstockenterentryform;
+    	let tbody1;
+    	let t38;
+    	let tr3;
+    	let td5;
+    	let autocomplete;
+    	let updating_selectedItem;
+    	let t39;
     	let current;
-    	let each_value = Array.from(/*grouped_products*/ ctx[3]);
+
+    	button = new Button$1({
+    			props: {
+    				$$slots: { default: [create_default_slot_2] },
+    				$$scope: { ctx }
+    			},
+    			$$inline: true
+    		});
+
+    	button.$on("click", /*refresh_data*/ ctx[8]);
+    	let each_value = Array.from(/*grouped_products*/ ctx[2]);
     	validate_each_argument(each_value);
     	let each_blocks = [];
 
@@ -32386,10 +32401,44 @@ var documentstockenter = (function () {
     		each_blocks[i] = null;
     	});
 
-    	documentstockenterentryform = new DocumentStockEnterEntryForm({
-    			props: { providerValue: /*providerValue*/ ctx[2] },
+    	function autocomplete_selectedItem_binding(value) {
+    		/*autocomplete_selectedItem_binding*/ ctx[13](value);
+    	}
+
+    	let autocomplete_props = {
+    		onChang: /*newPPNSelected*/ ctx[7],
+    		id: "newPPNEnteryInput",
+    		loadingText: "מחפש מוצרים...",
+    		create: false,
+    		showLoadingIndicator: "true",
+    		noResultsText: "",
+    		searchFunction: /*searchPPN*/ ctx[6],
+    		delay: 200,
+    		localFiltering: false,
+    		labelFieldName: "providerProductName",
+    		valueFieldName: "providerProductName",
+    		onChange: /*newPPNSelected*/ ctx[7],
+    		$$slots: {
+    			item: [
+    				create_item_slot,
+    				({ label, item }) => ({ 24: label, 25: item }),
+    				({ label, item }) => [(label ? 16777216 : 0) | (item ? 33554432 : 0)]
+    			]
+    		},
+    		$$scope: { ctx }
+    	};
+
+    	if (/*selectedNewPPN*/ ctx[3] !== void 0) {
+    		autocomplete_props.selectedItem = /*selectedNewPPN*/ ctx[3];
+    	}
+
+    	autocomplete = new SimpleAutocomplete({
+    			props: autocomplete_props,
     			$$inline: true
     		});
+
+    	binding_callbacks.push(() => bind(autocomplete, 'selectedItem', autocomplete_selectedItem_binding));
+    	let if_block = /*allow_amount_edit_to_new_product*/ ctx[4] && create_if_block_1(ctx);
 
     	const block = {
     		c: function create() {
@@ -32432,84 +32481,93 @@ var documentstockenter = (function () {
     			td4 = element("td");
     			t21 = text(t21_value);
     			t22 = space();
+    			create_component(button.$$.fragment);
+    			t23 = space();
     			table1 = element("table");
     			thead1 = element("thead");
     			tr2 = element("tr");
     			th5 = element("th");
     			th5.textContent = "שם בחשבונית";
-    			t24 = space();
+    			t25 = space();
     			th6 = element("th");
     			th6.textContent = "שם אצלנו";
-    			t26 = space();
+    			t27 = space();
     			th7 = element("th");
     			th7.textContent = "מחיר אחרון";
-    			t28 = space();
+    			t29 = space();
     			th8 = element("th");
     			th8.textContent = "מחיר קנייה נוכחית";
-    			t30 = space();
+    			t31 = space();
     			th9 = element("th");
     			th9.textContent = "כמות כוללת";
-    			t32 = space();
+    			t33 = space();
     			th10 = element("th");
     			th10.textContent = "פירוט צבעים מידות וריאנטים";
-    			t34 = space();
+    			t35 = space();
     			th11 = element("th");
     			th11.textContent = "ערוך כמות";
-    			t36 = space();
+    			t37 = space();
     			tbody1 = element("tbody");
 
     			for (let i = 0; i < each_blocks.length; i += 1) {
     				each_blocks[i].c();
     			}
 
-    			t37 = space();
-    			create_component(documentstockenterentryform.$$.fragment);
-    			add_location(h1, file, 104, 4, 3879);
+    			t38 = space();
+    			tr3 = element("tr");
+    			td5 = element("td");
+    			create_component(autocomplete.$$.fragment);
+    			t39 = space();
+    			if (if_block) if_block.c();
+    			add_location(h1, file, 122, 4, 4443);
     			attr_dev(th0, "class", "svelte-eic6lw");
-    			add_location(th0, file, 115, 20, 4121);
+    			add_location(th0, file, 133, 20, 4685);
     			attr_dev(th1, "class", "svelte-eic6lw");
-    			add_location(th1, file, 116, 20, 4162);
+    			add_location(th1, file, 134, 20, 4726);
     			attr_dev(th2, "class", "svelte-eic6lw");
-    			add_location(th2, file, 117, 20, 4205);
+    			add_location(th2, file, 135, 20, 4769);
     			attr_dev(th3, "class", "svelte-eic6lw");
-    			add_location(th3, file, 118, 20, 4239);
+    			add_location(th3, file, 136, 20, 4803);
     			attr_dev(th4, "class", "svelte-eic6lw");
-    			add_location(th4, file, 119, 20, 4275);
-    			add_location(tr0, file, 114, 16, 4095);
-    			add_location(thead0, file, 113, 12, 4070);
+    			add_location(th4, file, 137, 20, 4839);
+    			add_location(tr0, file, 132, 16, 4659);
+    			add_location(thead0, file, 131, 12, 4634);
     			attr_dev(td0, "class", "svelte-eic6lw");
-    			add_location(td0, file, 124, 20, 4398);
+    			add_location(td0, file, 142, 20, 4962);
     			attr_dev(td1, "class", "svelte-eic6lw");
-    			add_location(td1, file, 125, 20, 4441);
+    			add_location(td1, file, 143, 20, 5005);
     			attr_dev(td2, "class", "svelte-eic6lw");
-    			add_location(td2, file, 126, 20, 4491);
+    			add_location(td2, file, 144, 20, 5055);
     			attr_dev(td3, "class", "svelte-eic6lw");
-    			add_location(td3, file, 127, 20, 4545);
+    			add_location(td3, file, 145, 20, 5109);
     			attr_dev(td4, "class", "svelte-eic6lw");
-    			add_location(td4, file, 128, 20, 4596);
-    			add_location(tr1, file, 123, 16, 4372);
-    			add_location(tbody0, file, 122, 12, 4347);
+    			add_location(td4, file, 146, 20, 5160);
+    			add_location(tr1, file, 141, 16, 4936);
+    			add_location(tbody0, file, 140, 12, 4911);
     			attr_dev(table0, "class", "base-info table svelte-eic6lw");
-    			add_location(table0, file, 112, 8, 4025);
+    			add_location(table0, file, 130, 8, 4589);
     			attr_dev(th5, "class", "svelte-eic6lw");
-    			add_location(th5, file, 144, 20, 5051);
+    			add_location(th5, file, 164, 20, 5688);
     			attr_dev(th6, "class", "svelte-eic6lw");
-    			add_location(th6, file, 145, 20, 5093);
+    			add_location(th6, file, 165, 20, 5730);
     			attr_dev(th7, "class", "svelte-eic6lw");
-    			add_location(th7, file, 146, 20, 5132);
+    			add_location(th7, file, 166, 20, 5769);
     			attr_dev(th8, "class", "svelte-eic6lw");
-    			add_location(th8, file, 147, 20, 5173);
+    			add_location(th8, file, 167, 20, 5810);
     			attr_dev(th9, "class", "svelte-eic6lw");
-    			add_location(th9, file, 148, 20, 5221);
+    			add_location(th9, file, 168, 20, 5858);
     			attr_dev(th10, "class", "svelte-eic6lw");
-    			add_location(th10, file, 149, 20, 5262);
+    			add_location(th10, file, 169, 20, 5899);
     			attr_dev(th11, "class", "svelte-eic6lw");
-    			add_location(th11, file, 150, 20, 5319);
-    			add_location(tr2, file, 143, 16, 5025);
-    			add_location(thead1, file, 142, 12, 5000);
-    			add_location(tbody1, file, 153, 12, 5396);
+    			add_location(th11, file, 170, 20, 5956);
+    			add_location(tr2, file, 163, 16, 5662);
+    			add_location(thead1, file, 162, 12, 5637);
+    			attr_dev(td5, "class", "svelte-eic6lw");
+    			add_location(td5, file, 199, 20, 7299);
+    			add_location(tr3, file, 198, 16, 7273);
+    			add_location(tbody1, file, 173, 12, 6033);
     			attr_dev(table1, "class", "products-info table svelte-eic6lw");
-    			add_location(table1, file, 132, 8, 4702);
+    			add_location(table1, file, 152, 8, 5339);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, h1, anchor);
@@ -32546,43 +32604,56 @@ var documentstockenter = (function () {
     			append_dev(tr1, td4);
     			append_dev(td4, t21);
     			insert_dev(target, t22, anchor);
+    			mount_component(button, target, anchor);
+    			insert_dev(target, t23, anchor);
     			insert_dev(target, table1, anchor);
     			append_dev(table1, thead1);
     			append_dev(thead1, tr2);
     			append_dev(tr2, th5);
-    			append_dev(tr2, t24);
+    			append_dev(tr2, t25);
     			append_dev(tr2, th6);
-    			append_dev(tr2, t26);
+    			append_dev(tr2, t27);
     			append_dev(tr2, th7);
-    			append_dev(tr2, t28);
+    			append_dev(tr2, t29);
     			append_dev(tr2, th8);
-    			append_dev(tr2, t30);
+    			append_dev(tr2, t31);
     			append_dev(tr2, th9);
-    			append_dev(tr2, t32);
+    			append_dev(tr2, t33);
     			append_dev(tr2, th10);
-    			append_dev(tr2, t34);
+    			append_dev(tr2, t35);
     			append_dev(tr2, th11);
-    			append_dev(table1, t36);
+    			append_dev(table1, t37);
     			append_dev(table1, tbody1);
 
     			for (let i = 0; i < each_blocks.length; i += 1) {
     				each_blocks[i].m(tbody1, null);
     			}
 
-    			insert_dev(target, t37, anchor);
-    			mount_component(documentstockenterentryform, target, anchor);
+    			append_dev(tbody1, t38);
+    			append_dev(tbody1, tr3);
+    			append_dev(tr3, td5);
+    			mount_component(autocomplete, td5, null);
+    			append_dev(tr3, t39);
+    			if (if_block) if_block.m(tr3, null);
     			current = true;
     		},
     		p: function update(ctx, dirty) {
-    			if ((!current || dirty & /*docData*/ 2) && t1_value !== (t1_value = /*docData*/ ctx[1].id + "")) set_data_dev(t1, t1_value);
-    			if ((!current || dirty & /*docData*/ 2) && t13_value !== (t13_value = /*docData*/ ctx[1].id + "")) set_data_dev(t13, t13_value);
-    			if ((!current || dirty & /*docData*/ 2) && t15_value !== (t15_value = /*docData*/ ctx[1].docNumber + "")) set_data_dev(t15, t15_value);
-    			if ((!current || dirty & /*docData*/ 2) && t17_value !== (t17_value = /*docData*/ ctx[1].provider_name + "")) set_data_dev(t17, t17_value);
-    			if ((!current || dirty & /*docData*/ 2) && t19_value !== (t19_value = /*docData*/ ctx[1].created_at + "")) set_data_dev(t19, t19_value);
-    			if ((!current || dirty & /*docData*/ 2) && t21_value !== (t21_value = /*docData*/ ctx[1].warehouse_name + "")) set_data_dev(t21, t21_value);
+    			if ((!current || dirty[0] & /*docData*/ 2) && t1_value !== (t1_value = /*docData*/ ctx[1].id + "")) set_data_dev(t1, t1_value);
+    			if ((!current || dirty[0] & /*docData*/ 2) && t13_value !== (t13_value = /*docData*/ ctx[1].id + "")) set_data_dev(t13, t13_value);
+    			if ((!current || dirty[0] & /*docData*/ 2) && t15_value !== (t15_value = /*docData*/ ctx[1].docNumber + "")) set_data_dev(t15, t15_value);
+    			if ((!current || dirty[0] & /*docData*/ 2) && t17_value !== (t17_value = /*docData*/ ctx[1].provider_name + "")) set_data_dev(t17, t17_value);
+    			if ((!current || dirty[0] & /*docData*/ 2) && t19_value !== (t19_value = /*docData*/ ctx[1].created_at + "")) set_data_dev(t19, t19_value);
+    			if ((!current || dirty[0] & /*docData*/ 2) && t21_value !== (t21_value = /*docData*/ ctx[1].warehouse_name + "")) set_data_dev(t21, t21_value);
+    			const button_changes = {};
 
-    			if (dirty & /*edit_quantity, docData, Array, grouped_products*/ 26) {
-    				each_value = Array.from(/*grouped_products*/ ctx[3]);
+    			if (dirty[1] & /*$$scope*/ 2) {
+    				button_changes.$$scope = { dirty, ctx };
+    			}
+
+    			button.$set(button_changes);
+
+    			if (dirty[0] & /*edit_quantity, docData, grouped_products*/ 38) {
+    				each_value = Array.from(/*grouped_products*/ ctx[2]);
     				validate_each_argument(each_value);
     				let i;
 
@@ -32596,7 +32667,7 @@ var documentstockenter = (function () {
     						each_blocks[i] = create_each_block(child_ctx);
     						each_blocks[i].c();
     						transition_in(each_blocks[i], 1);
-    						each_blocks[i].m(tbody1, null);
+    						each_blocks[i].m(tbody1, t38);
     					}
     				}
 
@@ -32609,28 +32680,65 @@ var documentstockenter = (function () {
     				check_outros();
     			}
 
-    			const documentstockenterentryform_changes = {};
-    			if (dirty & /*providerValue*/ 4) documentstockenterentryform_changes.providerValue = /*providerValue*/ ctx[2];
-    			documentstockenterentryform.$set(documentstockenterentryform_changes);
+    			const autocomplete_changes = {};
+
+    			if (dirty[0] & /*item*/ 33554432 | dirty[1] & /*$$scope*/ 2) {
+    				autocomplete_changes.$$scope = { dirty, ctx };
+    			}
+
+    			if (!updating_selectedItem && dirty[0] & /*selectedNewPPN*/ 8) {
+    				updating_selectedItem = true;
+    				autocomplete_changes.selectedItem = /*selectedNewPPN*/ ctx[3];
+    				add_flush_callback(() => updating_selectedItem = false);
+    			}
+
+    			autocomplete.$set(autocomplete_changes);
+
+    			if (/*allow_amount_edit_to_new_product*/ ctx[4]) {
+    				if (if_block) {
+    					if_block.p(ctx, dirty);
+
+    					if (dirty[0] & /*allow_amount_edit_to_new_product*/ 16) {
+    						transition_in(if_block, 1);
+    					}
+    				} else {
+    					if_block = create_if_block_1(ctx);
+    					if_block.c();
+    					transition_in(if_block, 1);
+    					if_block.m(tr3, null);
+    				}
+    			} else if (if_block) {
+    				group_outros();
+
+    				transition_out(if_block, 1, 1, () => {
+    					if_block = null;
+    				});
+
+    				check_outros();
+    			}
     		},
     		i: function intro(local) {
     			if (current) return;
+    			transition_in(button.$$.fragment, local);
 
     			for (let i = 0; i < each_value.length; i += 1) {
     				transition_in(each_blocks[i]);
     			}
 
-    			transition_in(documentstockenterentryform.$$.fragment, local);
+    			transition_in(autocomplete.$$.fragment, local);
+    			transition_in(if_block);
     			current = true;
     		},
     		o: function outro(local) {
+    			transition_out(button.$$.fragment, local);
     			each_blocks = each_blocks.filter(Boolean);
 
     			for (let i = 0; i < each_blocks.length; i += 1) {
     				transition_out(each_blocks[i]);
     			}
 
-    			transition_out(documentstockenterentryform.$$.fragment, local);
+    			transition_out(autocomplete.$$.fragment, local);
+    			transition_out(if_block);
     			current = false;
     		},
     		d: function destroy(detaching) {
@@ -32638,10 +32746,12 @@ var documentstockenter = (function () {
     			if (detaching) detach_dev(t2);
     			if (detaching) detach_dev(table0);
     			if (detaching) detach_dev(t22);
+    			destroy_component(button, detaching);
+    			if (detaching) detach_dev(t23);
     			if (detaching) detach_dev(table1);
     			destroy_each(each_blocks, detaching);
-    			if (detaching) detach_dev(t37);
-    			destroy_component(documentstockenterentryform, detaching);
+    			destroy_component(autocomplete);
+    			if (if_block) if_block.d();
     		}
     	};
 
@@ -32649,15 +32759,42 @@ var documentstockenter = (function () {
     		block,
     		id: create_if_block.name,
     		type: "if",
-    		source: "(104:4) {#if docData}",
+    		source: "(122:4) {#if docData}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (174:28) <Button on:click={edit_quantity({'docId': docData.id, 'data':{'sku_ppn_id': grou[1][0].sku_ppn_id,'sku_ppn_name': grou[1][0].sku_ppn_name,'sku_product_id': grou[1][0].sku_product_id,'sku_product_name': grou[1][0].sku_product_name },})} >
-    function create_default_slot(ctx) {
+    // (152:8) <Button on:click={refresh_data}>
+    function create_default_slot_2(ctx) {
+    	let t;
+
+    	const block = {
+    		c: function create() {
+    			t = text("עדכן");
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, t, anchor);
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(t);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_default_slot_2.name,
+    		type: "slot",
+    		source: "(152:8) <Button on:click={refresh_data}>",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (194:28) <Button on:click={edit_quantity({'docId': docData.id, 'data':{'defult_price': grou[1][0].price, 'sku_ppn_id': grou[1][0].sku_ppn_id,'sku_ppn_name': grou[1][0].sku_ppn_name,'sku_product_id': grou[1][0].sku_product_id,'sku_product_name': grou[1][0].sku_product_name },})} >
+    function create_default_slot_1(ctx) {
     	let t;
 
     	const block = {
@@ -32674,37 +32811,37 @@ var documentstockenter = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_default_slot.name,
+    		id: create_default_slot_1.name,
     		type: "slot",
-    		source: "(174:28) <Button on:click={edit_quantity({'docId': docData.id, 'data':{'sku_ppn_id': grou[1][0].sku_ppn_id,'sku_ppn_name': grou[1][0].sku_ppn_name,'sku_product_id': grou[1][0].sku_product_id,'sku_product_name': grou[1][0].sku_product_name },})} >",
+    		source: "(194:28) <Button on:click={edit_quantity({'docId': docData.id, 'data':{'defult_price': grou[1][0].price, 'sku_ppn_id': grou[1][0].sku_ppn_id,'sku_ppn_name': grou[1][0].sku_ppn_name,'sku_product_id': grou[1][0].sku_product_id,'sku_product_name': grou[1][0].sku_product_name },})} >",
     		ctx
     	});
 
     	return block;
     }
 
-    // (155:16) {#each Array.from(grouped_products) as grou, i}
+    // (175:16) {#each Array.from(grouped_products) as grou, i}
     function create_each_block(ctx) {
     	let tr;
     	let td0;
-    	let t0_value = /*grou*/ ctx[18][0] + "";
+    	let t0_value = /*grou*/ ctx[26][0] + "";
     	let t0;
     	let t1;
     	let td1;
-    	let t2_value = /*grou*/ ctx[18][1][0].sku_product_name + "";
+    	let t2_value = /*grou*/ ctx[26][1][0].sku_product_name + "";
     	let t2;
     	let t3;
     	let td2;
-    	let t4_value = /*grou*/ ctx[18][1][0].price + "";
+    	let t4_value = /*grou*/ ctx[26][1][0].price + "";
     	let t4;
     	let t5;
     	let td3;
     	let div;
-    	let t6_value = /*grou*/ ctx[18][1][0].price + "";
+    	let t6_value = /*grou*/ ctx[26][1][0].price + "";
     	let t6;
     	let t7;
     	let td4;
-    	let t8_value = /*grou*/ ctx[18][1].reduce(func, 0) + "";
+    	let t8_value = /*grou*/ ctx[26][1].reduce(func, 0) + "";
     	let t8;
     	let t9;
     	let td5;
@@ -32712,38 +32849,39 @@ var documentstockenter = (function () {
     	let t10;
     	let td6;
     	let button;
-    	let t11;
     	let current;
 
     	pivottablecomponent = new PivotTableComponent({
-    			props: { data: /*grou*/ ctx[18][1] },
+    			props: { data: /*grou*/ ctx[26][1] },
     			$$inline: true
     		});
 
     	button = new Button$1({
     			props: {
-    				$$slots: { default: [create_default_slot] },
+    				$$slots: { default: [create_default_slot_1] },
     				$$scope: { ctx }
     			},
     			$$inline: true
     		});
 
     	button.$on("click", function () {
-    		if (is_function(/*edit_quantity*/ ctx[4]({
+    		if (is_function(/*edit_quantity*/ ctx[5]({
     			'docId': /*docData*/ ctx[1].id,
     			'data': {
-    				'sku_ppn_id': /*grou*/ ctx[18][1][0].sku_ppn_id,
-    				'sku_ppn_name': /*grou*/ ctx[18][1][0].sku_ppn_name,
-    				'sku_product_id': /*grou*/ ctx[18][1][0].sku_product_id,
-    				'sku_product_name': /*grou*/ ctx[18][1][0].sku_product_name
+    				'defult_price': /*grou*/ ctx[26][1][0].price,
+    				'sku_ppn_id': /*grou*/ ctx[26][1][0].sku_ppn_id,
+    				'sku_ppn_name': /*grou*/ ctx[26][1][0].sku_ppn_name,
+    				'sku_product_id': /*grou*/ ctx[26][1][0].sku_product_id,
+    				'sku_product_name': /*grou*/ ctx[26][1][0].sku_product_name
     			}
-    		}))) /*edit_quantity*/ ctx[4]({
+    		}))) /*edit_quantity*/ ctx[5]({
     			'docId': /*docData*/ ctx[1].id,
     			'data': {
-    				'sku_ppn_id': /*grou*/ ctx[18][1][0].sku_ppn_id,
-    				'sku_ppn_name': /*grou*/ ctx[18][1][0].sku_ppn_name,
-    				'sku_product_id': /*grou*/ ctx[18][1][0].sku_product_id,
-    				'sku_product_name': /*grou*/ ctx[18][1][0].sku_product_name
+    				'defult_price': /*grou*/ ctx[26][1][0].price,
+    				'sku_ppn_id': /*grou*/ ctx[26][1][0].sku_ppn_id,
+    				'sku_ppn_name': /*grou*/ ctx[26][1][0].sku_ppn_name,
+    				'sku_product_id': /*grou*/ ctx[26][1][0].sku_product_id,
+    				'sku_product_name': /*grou*/ ctx[26][1][0].sku_product_name
     			}
     		}).apply(this, arguments);
     	});
@@ -32772,24 +32910,22 @@ var documentstockenter = (function () {
     			t10 = space();
     			td6 = element("td");
     			create_component(button.$$.fragment);
-    			t11 = space();
     			attr_dev(td0, "class", "svelte-eic6lw");
-    			add_location(td0, file, 156, 24, 5521);
+    			add_location(td0, file, 176, 24, 6158);
     			attr_dev(td1, "class", "svelte-eic6lw");
-    			add_location(td1, file, 157, 24, 5565);
+    			add_location(td1, file, 177, 24, 6202);
     			attr_dev(td2, "class", "svelte-eic6lw");
-    			add_location(td2, file, 158, 24, 5629);
-    			attr_dev(div, "contenteditable", "true");
-    			add_location(div, file, 160, 28, 5716);
+    			add_location(td2, file, 178, 24, 6266);
+    			add_location(div, file, 180, 28, 6353);
     			attr_dev(td3, "class", "svelte-eic6lw");
-    			add_location(td3, file, 159, 24, 5682);
+    			add_location(td3, file, 179, 24, 6319);
     			attr_dev(td4, "class", "svelte-eic6lw");
-    			add_location(td4, file, 162, 24, 5825);
+    			add_location(td4, file, 182, 24, 6439);
     			attr_dev(td5, "class", "svelte-eic6lw");
-    			add_location(td5, file, 167, 24, 6042);
+    			add_location(td5, file, 187, 24, 6656);
     			attr_dev(td6, "class", "svelte-eic6lw");
-    			add_location(td6, file, 172, 24, 6233);
-    			add_location(tr, file, 155, 20, 5491);
+    			add_location(td6, file, 192, 24, 6847);
+    			add_location(tr, file, 175, 20, 6128);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, tr, anchor);
@@ -32814,22 +32950,21 @@ var documentstockenter = (function () {
     			append_dev(tr, t10);
     			append_dev(tr, td6);
     			mount_component(button, td6, null);
-    			append_dev(tr, t11);
     			current = true;
     		},
     		p: function update(new_ctx, dirty) {
     			ctx = new_ctx;
-    			if ((!current || dirty & /*grouped_products*/ 8) && t0_value !== (t0_value = /*grou*/ ctx[18][0] + "")) set_data_dev(t0, t0_value);
-    			if ((!current || dirty & /*grouped_products*/ 8) && t2_value !== (t2_value = /*grou*/ ctx[18][1][0].sku_product_name + "")) set_data_dev(t2, t2_value);
-    			if ((!current || dirty & /*grouped_products*/ 8) && t4_value !== (t4_value = /*grou*/ ctx[18][1][0].price + "")) set_data_dev(t4, t4_value);
-    			if ((!current || dirty & /*grouped_products*/ 8) && t6_value !== (t6_value = /*grou*/ ctx[18][1][0].price + "")) set_data_dev(t6, t6_value);
-    			if ((!current || dirty & /*grouped_products*/ 8) && t8_value !== (t8_value = /*grou*/ ctx[18][1].reduce(func, 0) + "")) set_data_dev(t8, t8_value);
+    			if ((!current || dirty[0] & /*grouped_products*/ 4) && t0_value !== (t0_value = /*grou*/ ctx[26][0] + "")) set_data_dev(t0, t0_value);
+    			if ((!current || dirty[0] & /*grouped_products*/ 4) && t2_value !== (t2_value = /*grou*/ ctx[26][1][0].sku_product_name + "")) set_data_dev(t2, t2_value);
+    			if ((!current || dirty[0] & /*grouped_products*/ 4) && t4_value !== (t4_value = /*grou*/ ctx[26][1][0].price + "")) set_data_dev(t4, t4_value);
+    			if ((!current || dirty[0] & /*grouped_products*/ 4) && t6_value !== (t6_value = /*grou*/ ctx[26][1][0].price + "")) set_data_dev(t6, t6_value);
+    			if ((!current || dirty[0] & /*grouped_products*/ 4) && t8_value !== (t8_value = /*grou*/ ctx[26][1].reduce(func, 0) + "")) set_data_dev(t8, t8_value);
     			const pivottablecomponent_changes = {};
-    			if (dirty & /*grouped_products*/ 8) pivottablecomponent_changes.data = /*grou*/ ctx[18][1];
+    			if (dirty[0] & /*grouped_products*/ 4) pivottablecomponent_changes.data = /*grou*/ ctx[26][1];
     			pivottablecomponent.$set(pivottablecomponent_changes);
     			const button_changes = {};
 
-    			if (dirty & /*$$scope*/ 16777216) {
+    			if (dirty[1] & /*$$scope*/ 2) {
     				button_changes.$$scope = { dirty, ctx };
     			}
 
@@ -32857,7 +32992,182 @@ var documentstockenter = (function () {
     		block,
     		id: create_each_block.name,
     		type: "each",
-    		source: "(155:16) {#each Array.from(grouped_products) as grou, i}",
+    		source: "(175:16) {#each Array.from(grouped_products) as grou, i}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (208:24) 
+    function create_item_slot(ctx) {
+    	let div3;
+    	let div2;
+    	let div1;
+    	let div0;
+    	let t0_value = /*item*/ ctx[25].providerProductName + "";
+    	let t0;
+    	let t1;
+    	let span;
+    	let t2_value = /*item*/ ctx[25].product_name + "";
+    	let t2;
+
+    	const block = {
+    		c: function create() {
+    			div3 = element("div");
+    			div2 = element("div");
+    			div1 = element("div");
+    			div0 = element("div");
+    			t0 = text(t0_value);
+    			t1 = text(" - \r\n                                        ");
+    			span = element("span");
+    			t2 = text(t2_value);
+    			attr_dev(span, "class", "svelte-eic6lw");
+    			add_location(span, file, 212, 40, 8203);
+    			attr_dev(div0, "class", "label");
+    			add_location(div0, file, 210, 36, 8071);
+    			attr_dev(div1, "class", "inner");
+    			add_location(div1, file, 209, 32, 8014);
+    			attr_dev(div2, "class", "search-item svelte-eic6lw");
+    			add_location(div2, file, 208, 28, 7955);
+    			attr_dev(div3, "slot", "item");
+    			add_location(div3, file, 207, 24, 7874);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, div3, anchor);
+    			append_dev(div3, div2);
+    			append_dev(div2, div1);
+    			append_dev(div1, div0);
+    			append_dev(div0, t0);
+    			append_dev(div0, t1);
+    			append_dev(div0, span);
+    			append_dev(span, t2);
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty[0] & /*item*/ 33554432 && t0_value !== (t0_value = /*item*/ ctx[25].providerProductName + "")) set_data_dev(t0, t0_value);
+    			if (dirty[0] & /*item*/ 33554432 && t2_value !== (t2_value = /*item*/ ctx[25].product_name + "")) set_data_dev(t2, t2_value);
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(div3);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_item_slot.name,
+    		type: "slot",
+    		source: "(208:24) ",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (220:20) {#if allow_amount_edit_to_new_product}
+    function create_if_block_1(ctx) {
+    	let td;
+    	let button;
+    	let current;
+
+    	button = new Button$1({
+    			props: {
+    				$$slots: { default: [create_default_slot] },
+    				$$scope: { ctx }
+    			},
+    			$$inline: true
+    		});
+
+    	button.$on("click", function () {
+    		if (is_function(/*edit_quantity*/ ctx[5]({
+    			'docId': /*docData*/ ctx[1].id,
+    			'data': {
+    				'defult_price': 0,
+    				'sku_ppn_id': /*selectedNewPPN*/ ctx[3].id,
+    				'sku_ppn_name': /*selectedNewPPN*/ ctx[3].providerProductName,
+    				'sku_product_id': /*selectedNewPPN*/ ctx[3].product_id,
+    				'sku_product_name': /*selectedNewPPN*/ ctx[3].product_name
+    			}
+    		}))) /*edit_quantity*/ ctx[5]({
+    			'docId': /*docData*/ ctx[1].id,
+    			'data': {
+    				'defult_price': 0,
+    				'sku_ppn_id': /*selectedNewPPN*/ ctx[3].id,
+    				'sku_ppn_name': /*selectedNewPPN*/ ctx[3].providerProductName,
+    				'sku_product_id': /*selectedNewPPN*/ ctx[3].product_id,
+    				'sku_product_name': /*selectedNewPPN*/ ctx[3].product_name
+    			}
+    		}).apply(this, arguments);
+    	});
+
+    	const block = {
+    		c: function create() {
+    			td = element("td");
+    			create_component(button.$$.fragment);
+    			attr_dev(td, "class", "svelte-eic6lw");
+    			add_location(td, file, 220, 24, 8541);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, td, anchor);
+    			mount_component(button, td, null);
+    			current = true;
+    		},
+    		p: function update(new_ctx, dirty) {
+    			ctx = new_ctx;
+    			const button_changes = {};
+
+    			if (dirty[1] & /*$$scope*/ 2) {
+    				button_changes.$$scope = { dirty, ctx };
+    			}
+
+    			button.$set(button_changes);
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(button.$$.fragment, local);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(button.$$.fragment, local);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(td);
+    			destroy_component(button);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_1.name,
+    		type: "if",
+    		source: "(220:20) {#if allow_amount_edit_to_new_product}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (222:28) <Button on:click={edit_quantity(                              {                                  'docId': docData.id,                                      'data':{                                          'defult_price':0,                                          'sku_ppn_id': selectedNewPPN.id,                                          'sku_ppn_name': selectedNewPPN.providerProductName,                                          'sku_product_id': selectedNewPPN.product_id,                                          'sku_product_name': selectedNewPPN.product_name                                      },                              })} >
+    function create_default_slot(ctx) {
+    	let t;
+
+    	const block = {
+    		c: function create() {
+    			t = text("ערוך כמות");
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, t, anchor);
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(t);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_default_slot.name,
+    		type: "slot",
+    		source: "(222:28) <Button on:click={edit_quantity(                              {                                  'docId': docData.id,                                      'data':{                                          'defult_price':0,                                          'sku_ppn_id': selectedNewPPN.id,                                          'sku_ppn_name': selectedNewPPN.providerProductName,                                          'sku_product_id': selectedNewPPN.product_id,                                          'sku_product_name': selectedNewPPN.product_name                                      },                              })} >",
     		ctx
     	});
 
@@ -32878,7 +33188,7 @@ var documentstockenter = (function () {
     	editquantitymodal = new EditQuantityModal({ $$inline: true });
 
     	function theme_1_theme_binding(value) {
-    		/*theme_1_theme_binding*/ ctx[7](value);
+    		/*theme_1_theme_binding*/ ctx[11](value);
     	}
 
     	let theme_1_props = {
@@ -32894,12 +33204,12 @@ var documentstockenter = (function () {
     	binding_callbacks.push(() => bind(theme_1, 'theme', theme_1_theme_binding));
 
     	function radiobuttongroup_selected_binding(value) {
-    		/*radiobuttongroup_selected_binding*/ ctx[8](value);
+    		/*radiobuttongroup_selected_binding*/ ctx[12](value);
     	}
 
     	let radiobuttongroup_props = {
     		legendText: "Carbon theme",
-    		$$slots: { default: [create_default_slot_1] },
+    		$$slots: { default: [create_default_slot_3] },
     		$$scope: { ctx }
     	};
 
@@ -32926,7 +33236,7 @@ var documentstockenter = (function () {
     			t2 = space();
     			if (if_block) if_block.c();
     			attr_dev(div, "class", "document-stock-entery");
-    			add_location(div, file, 96, 0, 3523);
+    			add_location(div, file, 114, 0, 4087);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -32942,10 +33252,10 @@ var documentstockenter = (function () {
     			if (if_block) if_block.m(div, null);
     			current = true;
     		},
-    		p: function update(ctx, [dirty]) {
+    		p: function update(ctx, dirty) {
     			const theme_1_changes = {};
 
-    			if (!updating_theme && dirty & /*theme*/ 1) {
+    			if (!updating_theme && dirty[0] & /*theme*/ 1) {
     				updating_theme = true;
     				theme_1_changes.theme = /*theme*/ ctx[0];
     				add_flush_callback(() => updating_theme = false);
@@ -32954,11 +33264,11 @@ var documentstockenter = (function () {
     			theme_1.$set(theme_1_changes);
     			const radiobuttongroup_changes = {};
 
-    			if (dirty & /*$$scope*/ 16777216) {
+    			if (dirty[1] & /*$$scope*/ 2) {
     				radiobuttongroup_changes.$$scope = { dirty, ctx };
     			}
 
-    			if (!updating_selected && dirty & /*theme*/ 1) {
+    			if (!updating_selected && dirty[0] & /*theme*/ 1) {
     				updating_selected = true;
     				radiobuttongroup_changes.selected = /*theme*/ ctx[0];
     				add_flush_callback(() => updating_selected = false);
@@ -32970,7 +33280,7 @@ var documentstockenter = (function () {
     				if (if_block) {
     					if_block.p(ctx, dirty);
 
-    					if (dirty & /*docData*/ 2) {
+    					if (dirty[0] & /*docData*/ 2) {
     						transition_in(if_block, 1);
     					}
     				} else {
@@ -33033,9 +33343,9 @@ var documentstockenter = (function () {
     	let $editQuantityModalOpener;
     	let $ALL_SIZES;
     	validate_store(editQuantityModalOpener, 'editQuantityModalOpener');
-    	component_subscribe($$self, editQuantityModalOpener, $$value => $$invalidate(11, $editQuantityModalOpener = $$value));
+    	component_subscribe($$self, editQuantityModalOpener, $$value => $$invalidate(17, $editQuantityModalOpener = $$value));
     	validate_store(ALL_SIZES, 'ALL_SIZES');
-    	component_subscribe($$self, ALL_SIZES, $$value => $$invalidate(12, $ALL_SIZES = $$value));
+    	component_subscribe($$self, ALL_SIZES, $$value => $$invalidate(18, $ALL_SIZES = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('DocumentStockEnter', slots, []);
     	let theme = "white";
@@ -33047,8 +33357,8 @@ var documentstockenter = (function () {
     	async function load_data_from_server() {
     		let response = await apiLoadEnterDocData(id);
     		$$invalidate(1, docData = response);
-    		$$invalidate(2, providerValue = response.provider_name);
-    		$$invalidate(3, grouped_products = groupBy(docData.items, x => x.sku_ppn_name));
+    		providerValue = response.provider_name;
+    		$$invalidate(2, grouped_products = groupBy(docData.items, x => x.sku_ppn_name));
     		console.log('docData = ', docData);
     		console.log('grouped_products = ', grouped_products);
     	}
@@ -33076,7 +33386,7 @@ var documentstockenter = (function () {
     	}
 
     	function clear_form() {
-    		$$invalidate(6, bill_name_user_selected = undefined);
+    		$$invalidate(10, bill_name_user_selected = undefined);
     	}
 
     	let ouwr_name_value = "";
@@ -33108,6 +33418,29 @@ var documentstockenter = (function () {
     		set_store_value(editQuantityModalOpener, $editQuantityModalOpener.isOpen = true, $editQuantityModalOpener);
     	}
 
+    	async function searchPPN(keyword) {
+    		let json = await apiSearchPPN(keyword, providerValue);
+    		let data = json;
+    		console.log(data);
+    		return data;
+    	}
+
+    	let selectedNewPPN = "";
+    	let allow_amount_edit_to_new_product = false;
+
+    	function newPPNSelected() {
+    		console.log(selectedNewPPN, ' selected');
+
+    		if (selectedNewPPN) {
+    			$$invalidate(4, allow_amount_edit_to_new_product = true);
+    		}
+    	}
+
+    	function refresh_data() {
+    		console.log('refresh_data');
+    		load_data_from_server();
+    	}
+
     	const writable_props = ['id'];
 
     	Object.keys($$props).forEach(key => {
@@ -33124,8 +33457,13 @@ var documentstockenter = (function () {
     		$$invalidate(0, theme);
     	}
 
+    	function autocomplete_selectedItem_binding(value) {
+    		selectedNewPPN = value;
+    		$$invalidate(3, selectedNewPPN);
+    	}
+
     	$$self.$$set = $$props => {
-    		if ('id' in $$props) $$invalidate(5, id = $$props.id);
+    		if ('id' in $$props) $$invalidate(9, id = $$props.id);
     	};
 
     	$$self.$capture_state = () => ({
@@ -33175,21 +33513,28 @@ var documentstockenter = (function () {
     		allow_price_edit,
     		bill_name_user_input,
     		edit_quantity,
+    		searchPPN,
+    		selectedNewPPN,
+    		allow_amount_edit_to_new_product,
+    		newPPNSelected,
+    		refresh_data,
     		$editQuantityModalOpener,
     		$ALL_SIZES
     	});
 
     	$$self.$inject_state = $$props => {
     		if ('theme' in $$props) $$invalidate(0, theme = $$props.theme);
-    		if ('id' in $$props) $$invalidate(5, id = $$props.id);
+    		if ('id' in $$props) $$invalidate(9, id = $$props.id);
     		if ('docData' in $$props) $$invalidate(1, docData = $$props.docData);
-    		if ('providerValue' in $$props) $$invalidate(2, providerValue = $$props.providerValue);
-    		if ('grouped_products' in $$props) $$invalidate(3, grouped_products = $$props.grouped_products);
+    		if ('providerValue' in $$props) providerValue = $$props.providerValue;
+    		if ('grouped_products' in $$props) $$invalidate(2, grouped_products = $$props.grouped_products);
     		if ('ouwr_name_value' in $$props) ouwr_name_value = $$props.ouwr_name_value;
-    		if ('bill_name_user_selected' in $$props) $$invalidate(6, bill_name_user_selected = $$props.bill_name_user_selected);
+    		if ('bill_name_user_selected' in $$props) $$invalidate(10, bill_name_user_selected = $$props.bill_name_user_selected);
     		if ('allow_ower_name_edit' in $$props) allow_ower_name_edit = $$props.allow_ower_name_edit;
     		if ('allow_price_edit' in $$props) allow_price_edit = $$props.allow_price_edit;
     		if ('bill_name_user_input' in $$props) bill_name_user_input = $$props.bill_name_user_input;
+    		if ('selectedNewPPN' in $$props) $$invalidate(3, selectedNewPPN = $$props.selectedNewPPN);
+    		if ('allow_amount_edit_to_new_product' in $$props) $$invalidate(4, allow_amount_edit_to_new_product = $$props.allow_amount_edit_to_new_product);
     	};
 
     	if ($$props && "$$inject" in $$props) {
@@ -33197,7 +33542,7 @@ var documentstockenter = (function () {
     	}
 
     	$$self.$$.update = () => {
-    		if ($$self.$$.dirty & /*bill_name_user_selected*/ 64) {
+    		if ($$self.$$.dirty[0] & /*bill_name_user_selected*/ 1024) {
     			{
     				if (bill_name_user_selected) {
     					allow_ower_name_edit = true;
@@ -33212,20 +33557,25 @@ var documentstockenter = (function () {
     	return [
     		theme,
     		docData,
-    		providerValue,
     		grouped_products,
+    		selectedNewPPN,
+    		allow_amount_edit_to_new_product,
     		edit_quantity,
+    		searchPPN,
+    		newPPNSelected,
+    		refresh_data,
     		id,
     		bill_name_user_selected,
     		theme_1_theme_binding,
-    		radiobuttongroup_selected_binding
+    		radiobuttongroup_selected_binding,
+    		autocomplete_selectedItem_binding
     	];
     }
 
     class DocumentStockEnter extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance, create_fragment, safe_not_equal, { id: 5 });
+    		init(this, options, instance, create_fragment, safe_not_equal, { id: 9 }, null, [-1, -1]);
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,

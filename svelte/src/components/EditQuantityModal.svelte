@@ -28,6 +28,9 @@
         if ($editQuantityModalOpener.isOpen) {
             let docId = $editQuantityModalOpener.data.docId;
             let sku_ppn_id= $editQuantityModalOpener.data.data.sku_ppn_id;
+            if(price_input_val == undefined){
+                price_input_val = $editQuantityModalOpener.data.data.defult_price;
+            }
             apiGetDocStockEnterPPnEntries(docId, sku_ppn_id).then(res => {
                 existingEntries = res;
             });
@@ -60,11 +63,11 @@
             apiAddDocStockEnterEntery(newEntry).then(res => {
                 existingEntries = res;
             });
-            existingEntries.push(newEntry);
-            ver_input_val = undefined;
-            size_input_val = undefined;
-            color_input_val = undefined;
-            amount = undefined;
+            //existingEntries.push(newEntry);
+            //ver_input_val = undefined;
+            //size_input_val = undefined;
+            //color_input_val = undefined;
+            //amount = undefined;
         }
     }
 </script>
@@ -142,14 +145,16 @@
 
             <div class="bx--form-item2">
                 <label for="amount">כמות</label>
-                <NumberInput type="number" bind:value={amount} />
+                <TextInput bind:value={amount} />
             </div>
 
             <div class="bx--form-item2">
                 <label for="amount">מחיר</label>
-                <NumberInput type="number" bind:value={price_input_val} />
+                <TextInput bind:value={price_input_val} />
             </div>
 
+            <div class="bx--form-item2">
+                
             
             <div class="bx--form-item2">
                 <Button on:click={addNewEntry}>הוסף</Button>
@@ -177,6 +182,7 @@
                         { key: "sku_size_name", value: "גודל" },
                         { key: "sku_verient_name", value: "מודל" },
                         {key: 'quantity', value: 'כמות'},
+                        {key: 'price', value: 'מחיר'},
                         { key: 'actions', value: 'פעולות' }
                     ]}
                     rows={existingEntries}>
@@ -217,11 +223,15 @@
     }
     .new-product-form {
         display:grid;
-        grid-template-columns: repeat(5, 1fr);
+        grid-template-columns: repeat(3, 1fr);
         gap: 1rem;
         flex-direction:row;
         .bx--form-item2 {
             flex:1;
         }
+        
     }
+    :global(.bx--modal-footer) {
+            display:none;
+        }
 </style>

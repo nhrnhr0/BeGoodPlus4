@@ -13,6 +13,7 @@ import { uuidv4 } from '../utils/utils';
                 'גודל': data[i].sku_size_name,
                 'וריאנט': data[i].sku_verient_name,
                 'quantity': data[i].quantity,
+                'price': data[i].price,
             }
             callback(d);
         }
@@ -28,7 +29,8 @@ import { uuidv4 } from '../utils/utils';
                 {
                     rows: ["צבע", "וריאנט"],
                     cols: ["גודל"],
-                    aggregator: sum(intFormat)(["quantity"])
+                    aggregator: sum(intFormat)(["quantity"]),
+                    //vals: ["price", 'quantity'],
                 }
             );
         }, 1000);

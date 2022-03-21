@@ -7,6 +7,8 @@ from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from productSize.models import ProductSize
 from color.models import Color
+from django.db.models.signals import post_save
+
 from django.utils.html import mark_safe
 # Create your models here.
 
@@ -38,7 +40,15 @@ class WarehouseStock(models.Model):
     quantity = models.IntegerField()
     avgPrice = models.DecimalField(max_digits=10, decimal_places=3)
     buyHistory = models.ManyToManyField(to='ProductEnterItems', related_name='buyHistory', blank=True)
-
+@receiver(post_save, sender=WarehouseStock, dispatch_uid='update_catalogImage_stock')
+def update_catalogImage_stock(sender, instance, created, **kwargs):
+    # get all warchouseStock objects with the same sku__ppn__product_id
+    # get the qunatity of all these objects
+    # update the catalogImage stock
+    sku = instance.sku
+    qty = WarehouseStock.objects.filter(sku__ppn__product=sku.ppn.product).aggregate(models.Sum('quantity'))['quantity__sum']
+    sku.ppn.product.qyt = qty
+    sku.ppn.product.save()
 class Warehouse(models.Model):
     name = models.CharField(max_length=100)
     stock = models.ManyToManyField(to=WarehouseStock, blank=True, related_name='warehouse')
@@ -59,10 +69,30 @@ class DocStockEnter(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     provider = models.ForeignKey(to=Provider, on_delete=models.SET_DEFAULT, default=7)
     warehouse = models.ForeignKey(to=Warehouse, on_delete=models.SET_DEFAULT, default=1)
-    items = models.ManyToManyField(to='ProductEnterItems', related_name='DocStockEnter')
+    items = models.ManyToManyField(to='ProductEnterItems', related_name='doc')
     isAplied = models.BooleanField(default=False)
     byUser = models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
-    
+    def apply_doc(self):
+        for item in self.items.all():
+            sku = item.sku
+            qyt = item.quantity
+            price = item.price
+            warehouse = self.warehouse
+            warehouseStock = warehouse.stock.filter(sku=sku)
+            if len(warehouseStock) == 0:
+                warehouseStock = WarehouseStock.objects.create(sku=sku, quantity=qyt, avgPrice=price)
+                warehouse.stock.add(warehouseStock)
+            else:
+                warehouseStock = warehouseStock[0]
+                warehouseStock.avgPrice = (warehouseStock.avgPrice * warehouseStock.quantity + price * qyt) / (warehouseStock.quantity + qyt)
+                warehouseStock.quantity += qyt
+                #warehouseStock.save()
+            warehouseStock.buyHistory.add(item)
+            warehouseStock.save()
+            warehouse.save()
+        self.isAplied = True
+        self.save()
+        
     def get_admin_edit_url(self):
         url = ''
         if self.id:
