@@ -56,7 +56,13 @@ def mcrm_lead_register(request):
     form_data = request.data # 4147
     crmObj, is_created = CrmUser.objects.get_or_create(businessName=form_data['business-name'], name=form_data['name'],)
     crmObj.businessType = form_data['business-type']
-    crmObj.phone = form_data.get('phone', crmObj.phone)
+    crmObj.businessTypeCustom = form_data.get('business-type-other', None)
+    phone = form_data.get('phone', crmObj.phone)
+    if (phone.startswith('0')):
+        phone = phone[1:]
+        phone = '+972' + phone
+    phone = phone.replace('-', '')
+    crmObj.phone = phone
     crmObj.email = form_data.get('email', crmObj.email)
     crmObj.want_emails = True if form_data.get('mailing-list', None) == 'on' else False
     crmObj.want_whatsapp = True if form_data.get('whatsapp-list', None) == 'on' else False
