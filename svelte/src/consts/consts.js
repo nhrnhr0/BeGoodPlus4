@@ -27,3 +27,4 @@ export const INV_API_GET_ENTER_DOC_DATA_URL = BASE_URL + '/inv/enter-doc/';
 export const GET_DOC_STOCK_ENTER_PPN_ENTRIES = BASE_URL + '/inv/enter-doc/get-doc-stock-enter-ppn-entries';
 export const DELETE_DOC_STOCK_EnterEntery = BASE_URL + '/inv/enter-doc/delete-doc-stock-enter-ppn-entry';
 export const ADD_DOC_STOCK_ENTER_ENTRY_API_URL = BASE_URL + '/inv/enter-doc/add-doc-stock-enter-ppn-entry';
+export const MORDER_EDIT_API = BASE_URL + '/morders/api-get-order-data/';

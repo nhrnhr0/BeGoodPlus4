@@ -2,6 +2,8 @@ from telnetlib import STATUS
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 
+from morders.models import MOrder
+
 # Create your views here.
 def edit_morder(request, id):
     if not request.user.is_superuser:

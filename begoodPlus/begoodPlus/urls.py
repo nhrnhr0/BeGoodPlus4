@@ -24,7 +24,7 @@ from catalogImages.views import admin_api_get_product_cost_price, all_images_ids
 from clientApi.views import ColorsClientViewSet, ImageClientViewSet, SizesClientViewSet,LogoClientViewSet, get_album_images
 from clientApi.views import AlbumClientViewSet
 from catalogImageDetail.views import SvelteCatalogImageDetailViewSet
-from morders.views import edit_morder
+from morders.views import api_get_order_data, edit_morder
 from packingType.views import SvelteApiPackingTypeViewSet
 from color.views import SvelteColorsViewSet
 from catalogImages.views import SvelteCatalogImageViewSet, create_mini_table
@@ -109,7 +109,10 @@ urlpatterns = [
     path('inv/enter-doc/delete-doc-stock-enter-ppn-entry', delete_doc_stock_enter_ppn_entry, name='admin_delete_doc_stock_enter_ppn_entry'),
     path('inv/enter-doc/add-doc-stock-enter-ppn-entry', add_doc_stock_enter_ppn_entry, name='admin_add_doc_stock_enter_ppn_entry'),
     path('inv/show-stock', show_inventory_stock),
+    # orders
     path('morders/edit-order/<int:id>', edit_morder, name='admin_edit_order'),
+    path('morders/api-get-order-data/<int:id>', api_get_order_data, name='admin_api_get_order_data'),
+    
     path('search-ppn/', search_ppn, name='search_ppn'),
     #path('api/', include(router.urls)),
 
