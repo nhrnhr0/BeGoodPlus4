@@ -1,6 +1,6 @@
-import imp
+from django.urls import reverse
+
 from multiprocessing.connection import Client
-from statistics import variance
 import pandas as pd
 from django.db import models
 from catalogImages.models import CatalogImage
@@ -47,7 +47,10 @@ class MOrder(models.Model):
     status = models.CharField(max_length=100, choices=[('new', 'חדש'), ('in_progress', 'בתהליך'), ('done', 'גמור')])
     products = models.ManyToManyField(to=MOrderItem, blank=True)
     message = models.TextField(null=True, blank=True)
-    
+    def get_edit_url(self):
+        link = reverse('admin_edit_order', args=self.pk)
+        return mark_safe('<a href="{}">{}</a>'.format(link, 'ערוך'))
+
     def products_display(self):
         products = []
         qs = self.products.all().prefetch_related('product', 'size', 'color', 'varient', 'provider')
