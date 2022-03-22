@@ -41,7 +41,7 @@ from django.contrib.auth.models import User
 
 from catalogImages.views import CatalogImageViewSet
 from catalogAlbum.views import CatalogAlbumViewSet
-from client.views import whoAmI, userLogEntryView
+from client.views import get_all_users_by_admin, whoAmI, userLogEntryView
 from color.views import ColorsViewSet
 from productSize.views import SizesViewSet
 router = routers.DefaultRouter()
@@ -97,7 +97,7 @@ urlpatterns = [
     #path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     #path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/get-token/', CustomAuthToken.as_view(), name='get_token'),
-    
+    path('api/get-all-users/', get_all_users_by_admin, name='get_all_users_by_admin'),
     
     path('admin/', admin.site.urls),
     

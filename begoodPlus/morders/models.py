@@ -22,8 +22,8 @@ class MOrderItem(models.Model):
     product = models.ForeignKey(to=CatalogImage, on_delete=models.CASCADE)
     quantity = models.IntegerField(default=1)
     price = models.DecimalField(max_digits=10, decimal_places=2)
-    color = models.ForeignKey(to=Color, on_delete=models.CASCADE)
-    size = models.ForeignKey(to=ProductSize, on_delete=models.CASCADE)
+    color = models.ForeignKey(to=Color, on_delete=models.SET_DEFAULT,default=76, null=True, blank=True)
+    size = models.ForeignKey(to=ProductSize, on_delete=models.SET_DEFAULT, default=108, null=True, blank=True)
     varient = models.ForeignKey(to=CatalogImageVarient, on_delete=models.CASCADE, null=True, blank=True)
     provider = models.ForeignKey(to=Provider, on_delete=models.SET_DEFAULT, default=7)
     clientProvider = models.CharField(max_length=255, null=True, blank=True)
@@ -34,7 +34,7 @@ class MOrderItem(models.Model):
     comment = models.TextField(null=True, blank=True)
     
     def __str__(self):
-        return str(self.product) + " " + str(self.quantity) + " - " + str(self.price) + '₪' #str(self.color) + " " + str(self.size) + (" " + self.varient.name) if self.varient != None else ' ' + str(self.quantity) + " " + str(self.price) + '₪'
+        return str(self.product) + " | " + str(self.quantity) + " - " + str(self.price) + '₪' #str(self.color) + " " + str(self.size) + (" " + self.varient.name) if self.varient != None else ' ' + str(self.quantity) + " " + str(self.price) + '₪'
 # Create your models here.
 class MOrder(models.Model):
     created = models.DateTimeField(auto_now_add=True)
@@ -52,7 +52,10 @@ class MOrder(models.Model):
         products = []
         qs = self.products.all().prefetch_related('product', 'size', 'color', 'varient', 'provider')
         for p in qs:
-            products.append({'product': p.product.title, 'quantity': int(p.quantity), 'price': p.price, 'color': p.color.name, 'size': p.size.size, 'varient': p.varient, 'comment': p.comment, 'clientBuyPrice':p.clientBuyPrice, 'clientProvider': p.clientProvider, 'provider': p.provider.name})
+            size = p.size.size if p.size != None else ' '
+            color = p.color.name if p.color != None else ' '
+            verient = p.varient.name if p.varient != None else ' '
+            products.append({'product': p.product.title, 'quantity': int(p.quantity), 'price': p.price, 'color': color, 'size': size, 'varient': verient, 'comment': p.comment, 'clientBuyPrice':p.clientBuyPrice, 'clientProvider': p.clientProvider, 'provider': p.provider.name})
         try:
             df = pd.DataFrame(products)
         except Exception as e:

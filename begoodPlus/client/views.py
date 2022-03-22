@@ -8,8 +8,15 @@ from campains.views import get_user_campains_serializer_data
 from client.models import UserSessionLogger
 
 from client.models import UserLogEntry
-
-
+from client.serializers import AdminClientSerializer
+from .models import Client
+def get_all_users_by_admin(request):
+    if request.user.is_superuser:
+        clients = Client.objects.all()
+        data = [{'id':client.pk, 'username':client.user.username, 'businessName':client.businessName,} for client in clients]
+        return JsonResponse(data, safe=False)
+    else:
+        return JsonResponse({'status':'error'}, status=status.HTTP_403_FORBIDDEN)
 
 # Create your views here.
 @api_view(['GET', 'POST'])

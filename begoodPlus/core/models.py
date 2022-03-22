@@ -116,7 +116,7 @@ class SvelteCartProductEntery(models.Model):
     amount = models.IntegerField(verbose_name=_('amount'), default=1)
     details = models.JSONField(verbose_name=_('details'), blank=True, null=True)
     #cart = models.ForeignKey(to='SvelteCartModal', on_delete=models.CASCADE, null=True, blank=True)
-
+    unitPrice = models.DecimalField(verbose_name=_('unit price'), max_digits=10, decimal_places=2, default=0)
     
     def __str__(self):
         return str(self.amount) + ' - ' + self.product.title
@@ -145,7 +145,7 @@ class ActiveCartTracker(models.Model):
         return mark_safe(html)
 class SvelteCartModal(models.Model):
     doneOrder = models.BooleanField(default=False, verbose_name=_('done order'))
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, null=True, blank=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, null=True, blank=True, related_name='user_cart')
     device = models.CharField(verbose_name=_('device'), max_length=250)
     uid = models.UUIDField(verbose_name=_('uuid'), null=True, blank=True)
     name = models.CharField(verbose_name=_('name'), max_length=120)
@@ -157,6 +157,7 @@ class SvelteCartModal(models.Model):
     productsRaw = models.TextField(verbose_name=_('raw products'), blank=True, null=True)
     message = models.TextField(verbose_name=_('message'), blank=True, null=True)
     created_date = models.DateTimeField(auto_now_add=True, blank=True, null=True)
+    agent = models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='agent')
     def cart_count(self):
         return self.productEntries.count()
     def products_amount_display(self):
@@ -247,16 +248,22 @@ class SvelteCartModal(models.Model):
             # {'COLOR_ID': {'SIZE_ID': {'VARIANT_ID': {'quantity': 0}...}...}}
             # or 
             # {'COLOR_ID': {'SIZE_ID': {'quantity': 0}...}...}
-            
+            price = i.unitPrice
+            if len(details) == 0:
+                size_id = None
+                color_id = None
+                varient_id = None
+                products_list.append({'product': product,'price':price, 'quantity': quantity, 'color_id': color_id, 'size_id': size_id, 'varient_id': varient_id})
             for color_id in details.keys():
                 for size_id in details[color_id].keys():
                     if 'quantity' in details[color_id][size_id].keys():
                         quantity = details[color_id][size_id]['quantity']
-                        products_list.append({'product': product,'price':product.client_price, 'quantity': quantity, 'color_id': color_id, 'size_id': size_id, 'varient_id': None})
+                        
+                        products_list.append({'product': product,'price':price, 'quantity': quantity, 'color_id': color_id, 'size_id': size_id, 'varient_id': None})
                     else:
                         for varient_id in details[color_id][size_id].keys():
                             quantity = details[color_id][size_id][varient_id]['quantity']
-                            products_list.append({'product': product,'price':product.client_price, 'quantity': quantity, 'color_id': color_id, 'size_id': size_id, 'varient_id': varient_id})
+                            products_list.append({'product': product,'price':price, 'quantity': quantity, 'color_id': color_id, 'size_id': size_id, 'varient_id': varient_id})
         
         order_product = [MOrderItem(product=i['product'], quantity=i['quantity'], color_id=i['color_id'], size_id=i['size_id'], varient_id=i['varient_id'], price=i['price']) for i in products_list]
         MOrderItem.objects.bulk_create(order_product)

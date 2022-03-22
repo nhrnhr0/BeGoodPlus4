@@ -159,13 +159,18 @@ def svelte_cart_form(request):
         uuid = body['uuid'] or ''
         message = body['message']  or ''
         products = body['products'] or ''
-        raw_cart = body['raw_cart'] or '' 
+        raw_cart = body['raw_cart'] or ''
         
         if(request.user.is_anonymous):
-            user = None
+            user_id = None
         else:
-            user = request.user
-        db_cart = SvelteCartModal.objects.create(user=user, device=device,uid=uuid,businessName=business_name, name=name, phone=phone, email=email, message=message)
+            if (request.user.is_superuser):
+                user_id = int(body['asUser']) or request.user.id
+                agent = request.user
+            else:
+                user_id = request.user
+                agent=None
+        db_cart = SvelteCartModal.objects.create(user_id=user_id, device=device,uid=uuid,businessName=business_name, name=name, phone=phone, email=email, message=message, agent=agent)
         #data.products.set(products)
         db_cart.productsRaw = raw_cart
         # products = [{'id': 5, 'amount': 145, 'mentries': {...}}, {'id': 18, 'amount': 0, 'mentries': {...}}, {'id': 138, 'amount': 0}]
@@ -174,7 +179,11 @@ def svelte_cart_form(request):
             pid = p.get('id')
             pamount = p.get('amount')
             pentries = p.get('mentries', None) or {}
-            obj = SvelteCartProductEntery.objects.create(product_id=pid, amount=pamount, details=pentries)
+            if request.user.is_superuser:
+                unitPrice = p.get('price')
+            else:
+                unitPrice = CatalogImage.objects.get(id=pid).client_price
+            obj = SvelteCartProductEntery.objects.create(product_id=pid, amount=pamount, details=pentries,unitPrice=unitPrice)
             data.append(obj)
         #data = [SvelteCartProductEntery(product_id=p['id'],amount=p['amount'] or 1, details = p['mentries'] or {}) for p in products]
         #products_objs = SvelteCartProductEntery.objects.bulk_create(data)

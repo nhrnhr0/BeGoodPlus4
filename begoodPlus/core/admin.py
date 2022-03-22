@@ -97,7 +97,7 @@ class SvelteCartProductEnteryAdmin(admin.ModelAdmin):
 admin.site.register(SvelteCartProductEntery, SvelteCartProductEnteryAdmin)
 
 class SvelteCartModalAdmin(admin.ModelAdmin):
-    list_display = ('id', 'doneOrder', 'user','buiss_display', 'cart_count', 'uniqe_color','name','phone','email','created_date')
+    list_display = ('id', 'doneOrder', 'user','buiss_display', 'cart_count', 'uniqe_color','name','phone','email','created_date', 'agent')
     
     #filter_horizontal = ('products',)
     readonly_fields = ('buiss_display','productsRaw','cart_count')

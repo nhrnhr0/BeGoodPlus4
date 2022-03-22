@@ -11,3 +11,8 @@ class UserLogEntrySerializer(serializers.ModelSerializer):
     class Meta:
         model = UserLogEntry
         fields = '__all__'
+        
+class AdminClientSerializer(serializers.Serializer):
+    class Meta:
+        model = Client
+        fields = ('id', 'user', 'name',)
