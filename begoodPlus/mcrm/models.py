@@ -7,6 +7,8 @@ class CrmTag(models.Model):
         return self.name
 # Create your models here.
 class CrmUser(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     businessName = models.CharField(max_length=100, verbose_name=_('business name'))
     businessType = models.CharField(max_length=100, verbose_name=_('business type'))
     businessTypeCustom = models.CharField(max_length=100, null=True, blank=True, verbose_name=_('business type custom'))

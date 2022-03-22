@@ -58,10 +58,11 @@ def mcrm_lead_register(request):
     crmObj.businessType = form_data['business-type']
     crmObj.businessTypeCustom = form_data.get('business-type-other', None)
     phone = form_data.get('phone', crmObj.phone)
-    if (phone.startswith('0')):
+    if (phone.startswith('05')):
         phone = phone[1:]
         phone = '+972' + phone
     phone = phone.replace('-', '')
+    phone = phone.replace(' ', '')
     crmObj.phone = phone
     crmObj.email = form_data.get('email', crmObj.email)
     crmObj.want_emails = True if form_data.get('mailing-list', None) == 'on' else False
