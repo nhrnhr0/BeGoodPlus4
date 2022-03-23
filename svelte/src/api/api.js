@@ -2,7 +2,8 @@ import {SEARCH_API_URL,MORDER_EDIT_API,GET_ALL_SIZES_API, GET_DOC_STOCK_ENTER_PP
 import {getCookie} from './../utils/utils.js';
 
 export async function apiGetMOrder(order_id) {
-    const response = await fetch(`${MORDER_EDIT_API}/${order_id}`, {
+    const response = await fetch_wraper(`${MORDER_EDIT_API}/${order_id}`, {});
+    return response;
 }
 
 export async function apiAddDocStockEnterEntery(data) {

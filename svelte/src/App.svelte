@@ -8,6 +8,7 @@
 </main>
 
 <style>
+	@import  "tabulator-tables";
 	main {
 		text-align: center;
 		padding: 1em;

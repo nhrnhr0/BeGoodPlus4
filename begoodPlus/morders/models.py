@@ -48,7 +48,7 @@ class MOrder(models.Model):
     products = models.ManyToManyField(to=MOrderItem, blank=True)
     message = models.TextField(null=True, blank=True)
     def get_edit_url(self):
-        link = reverse('admin_edit_order', args=self.pk)
+        link = reverse('admin_edit_order', args=(self.pk,))
         return mark_safe('<a href="{}">{}</a>'.format(link, 'ערוך'))
 
     def products_display(self):

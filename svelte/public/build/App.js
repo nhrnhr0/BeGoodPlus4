@@ -364,12 +364,12 @@ var app = (function () {
     			a = element("a");
     			a.textContent = "Svelte tutorial";
     			t6 = text(" to learn how to build Svelte apps.");
-    			attr_dev(h1, "class", "svelte-1tky8bj");
+    			attr_dev(h1, "class", "svelte-egnz7c");
     			add_location(h1, file, 5, 1, 51);
     			attr_dev(a, "href", "https://svelte.dev/tutorial");
     			add_location(a, file, 6, 14, 89);
     			add_location(p, file, 6, 1, 76);
-    			attr_dev(main, "class", "svelte-1tky8bj");
+    			attr_dev(main, "class", "svelte-egnz7c");
     			add_location(main, file, 4, 0, 42);
     		},
     		l: function claim(nodes) {
