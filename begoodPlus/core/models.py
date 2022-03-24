@@ -229,7 +229,7 @@ class SvelteCartModal(models.Model):
         return mark_safe(ret)
     
     def turn_to_morder(self):
-        from morders.models import MOrder, MOrderItem
+        from morders.models import MOrder, MOrderItem, MOrderItemEntry
         cart= self
         client = self.user.client
         name = self.name if self.name != '' else self.user.client.businessName
@@ -249,42 +249,37 @@ class SvelteCartModal(models.Model):
             # or 
             # {'COLOR_ID': {'SIZE_ID': {'quantity': 0}...}...}
             price = i.unitPrice
+            currentProduct = {'product': product,'price':price}
+            entries_list = []
             if len(details) == 0:
                 size_id = None
                 color_id = None
                 varient_id = None
-                products_list.append({'product': product,'price':price, 'quantity': quantity, 'color_id': color_id, 'size_id': size_id, 'varient_id': varient_id})
+                entries_list.append({'size_id': size_id, 'color_id': color_id, 'varient_id': varient_id, 'quantity': quantity})
             for color_id in details.keys():
                 for size_id in details[color_id].keys():
                     if 'quantity' in details[color_id][size_id].keys():
                         quantity = details[color_id][size_id]['quantity']
                         
-                        products_list.append({'product': product,'price':price, 'quantity': quantity, 'color_id': color_id, 'size_id': size_id, 'varient_id': None})
+                        #products_list.append({'product': product,'price':price, 'quantity': quantity, 'color_id': color_id, 'size_id': size_id, 'varient_id': None})
+                        entries_list.append({'size_id': size_id, 'color_id': color_id, 'varient_id': None, 'quantity': quantity})
+                        
                     else:
                         for varient_id in details[color_id][size_id].keys():
                             quantity = details[color_id][size_id][varient_id]['quantity']
-                            products_list.append({'product': product,'price':price, 'quantity': quantity, 'color_id': color_id, 'size_id': size_id, 'varient_id': varient_id})
-        
-        order_product = [MOrderItem(product=i['product'], quantity=i['quantity'], color_id=i['color_id'], size_id=i['size_id'], varient_id=i['varient_id'], price=i['price']) for i in products_list]
-        MOrderItem.objects.bulk_create(order_product)
+                            #products_list.append({'product': product,'price':price, 'quantity': quantity, 'color_id': color_id, 'size_id': size_id, 'varient_id': varient_id})
+                            entries_list.append({'size_id': size_id, 'color_id': color_id, 'varient_id': varient_id, 'quantity': quantity})
+            currentProduct['entries'] = entries_list
+            products_list.append(currentProduct)
+        #order_product = [MOrderItem(product=i['product'], price=i['price']) for i in products_list]
+        #MOrderItem.objects.bulk_create(order_product)
+        dbProducts = []
+        for product in products_list:
+                dbEntries = [MOrderItemEntry(size_id=entry['size_id'], color_id=entry['color_id'], varient_id=entry['varient_id'], quantity=entry['quantity']) for entry in product['entries']]
+                dbEntries = MOrderItemEntry.objects.bulk_create(dbEntries)
+                
+                dbProduct = MOrderItem.objects.create(product=product['product'], price=product['price'])
+                dbProduct.entries.set(dbEntries)
+                dbProducts.append(dbProduct)
         morder = MOrder.objects.create(cart=cart,client=client,name=name,phone=phone,email=email,status=status, message=message)
-        morder.products.add(*order_product)
-        
-        
-            
-            #price
-            #color
-            #size
-            #varient
-            #provider
-            #clientProvider
-            #clientBuyPrice
-            #ergent
-            #prining
-            #embroidery
-            #comment
-        
-        #return morder
-        
-
-    
+        morder.products.add(*dbProducts)

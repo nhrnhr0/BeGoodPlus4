@@ -36,26 +36,7 @@ import {TabulatorFull as Tabulator} from 'tabulator-tables';
         productsData = data.products;
 
         //groupedProducts = group the productsData by product field (ID: int)
-        let groupedProductsTemp = productsData.reduce(function(r, a) {
-            r[a.product] = r[a.product] || [];
-            r[a.product].push(a);
-            return r;
-        }, Object.create(null));
-        groupedProducts = Object.keys(groupedProductsTemp).map(function(key) {
-            let ret;
-            let value = groupedProductsTemp[key];
-            console.log('value:', value);
-            ret = {
-                'id': key,
-                'name': value[0].product_name,
-                'entries': value,
-            }
-            return ret;
-
-        });
-        
         updateing = false;
-        console.log('groupedProducts:', groupedProducts);
     }
     
     onMount(async ()=> {
@@ -67,9 +48,58 @@ import {TabulatorFull as Tabulator} from 'tabulator-tables';
             textDirection:"rtl", 
             
         });
+
+        productsTable = new Tabulator("#products-table", {
+            data:productsData,
+            //autoColumns:true,
+            layout:"fitDataStretch",
+            textDirection:"rtl",
+            history:true,
+            height:"100%",
+            columnDefaults:{
+                tooltip:true,
+            },
+            columns: [
+                {title:'id', field:'id', visible:false},
+                {title:'שם מוצר', field:'product_name', visible:true},
+                {title:'מזהה מוצר', field:'product', visible:true},
+                {title:'מחיר' , field:'price', visible:true, formatter:"money", formatterParams:{symbol:"₪", decimal:".", thousands:","},editor:true},
+                {title:'רקמה?', field: 'embroidery', hozAlign:"center", formatter:"tickCross", sorter:"boolean", editor:true},
+                {title: 'הדפסה?', field: 'prining', hozAlign:"center", formatter:"tickCross", sorter:"boolean", editor:true},
+                {title: 'דחוף?', field: 'ergent', hozAlign:"center", formatter:"tickCross", sorter:"boolean", editor:true},
+                {title:"פירוט",tooltip:false, field:"entries", formatter:function(cell, formatterParams, onRendered){
+                //create and style holder elements
+                var holderEl = document.createElement("div");
+                var tableEl = document.createElement("div");
+
+                holderEl.style.boxSizing = "border-box";
+                holderEl.style.padding = "10px 30px 10px 10px";
+                holderEl.style.borderTop = "1px solid #333";
+                holderEl.style.borderBotom = "1px solid #333";
+                holderEl.style.background = "#ddd";
+
+                tableEl.style.border = "1px solid #333";
+                holderEl.appendChild(tableEl);
+                cell.getElement().appendChild(holderEl);
+                //console.log(JSON.stringify(cell));
+                let data = cell.getData().entries;
+                console.log(data);
+                //define the table once the cell has been rendered
+                onRendered(function(){
+                    
+                    createPivot(data, tableEl);
+                    
+                });
+
+                //return the element that holds the table
+                return holderEl;
+                }
+            },
+            ]
+        });
         //create a custom formatter for the sub table
         
-        productsTable = new Tabulator("#products-table", {
+        /*productsTable = new Tabulator("#products-table", {
             data:groupedProducts,
             layout:"fitDataStretch",
             height: 1000,
@@ -91,17 +121,6 @@ import {TabulatorFull as Tabulator} from 'tabulator-tables';
 
                 tableEl.style.border = "1px solid #333";
 
-                /*holderEl.css({
-                    "box-sizing":"border-box",
-                    "padding":"10px 30px 10px 10px",
-                    "border-top":"1px solid #333",
-                    "border-bottom":"1px solid #333",
-                    "background":"#ddd",
-                })
-
-                tableEl.css({
-                    "border":"1px solid #333",
-                })*/
 
                 holderEl.append(tableEl);
 
@@ -116,17 +135,43 @@ import {TabulatorFull as Tabulator} from 'tabulator-tables';
                         aggregator: sum(intFormat)(["quantity"]),
                     }
                 )
-                /*let subtable = new Tabulator(tableEl, {
-                    data:row.getData().entries,
-                    layout:"fitDataStretch",
-                    height: 300,
-                    autoColumns:true,
-                });*/
-                //return tableEl.outerHTML;
             }
-        });
+        });*/
         console.log('data:', data);
     });
+
+
+    function createPivot(data,tableEl) {
+        var sum = window.$.pivotUtilities.aggregatorTemplates.sum;
+        var numberFormat = window.$.pivotUtilities.numberFormat;
+        var intFormat = numberFormat({digitsAfterDecimal: 0});
+        let pvt = window.$(tableEl).pivot(
+        data, {
+            rows: ["color_name", "varient_name"],
+            cols: ["size_name"],
+            aggregator: sum(intFormat)(["quantity"]),
+            rendererOptions: {
+            table: {
+                clickCallback: function (e, value, filters, pivotData) {
+                    let size_name = filters['size_name'];
+                    let color_name = filters['color_name'];
+                    let varient_name = filters['varient_name'];
+                    for(let i = 0; i< data.length; i++) {
+                        if (data[i].size_name == size_name &&
+                            data[i].color_name == color_name &&
+                            data[i].varient_name == varient_name) {
+                            console.log(data[i]);   
+                            data[i].quantity = value+1;
+                            createPivot(data, tableEl);
+                            break;
+                    }
+                    
+                    console.log('filters: ',filters);
+                }
+                }
+            }
+        }})
+    }
 </script>
 
 <main>
@@ -136,8 +181,9 @@ import {TabulatorFull as Tabulator} from 'tabulator-tables';
     <hr>
     <div id="products-table"></div>
     {#if updateing}
-        <Loading />
+        <Loading withOverlay={false} />
     {:else}
+
     {/if}
 </main>
 
