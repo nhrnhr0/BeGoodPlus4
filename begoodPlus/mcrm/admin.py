@@ -29,10 +29,10 @@ class AdminCrmTag(admin.ModelAdmin):
 admin.site.register(CrmTag, AdminCrmTag)
 
 class AdminCrmUser(AdminAdvancedFiltersMixin, admin.ModelAdmin):
-    list_display = ('businessName', 'name', 'businessType','businessTypeCustom', 'phone', 'email', 'want_emails', 'want_whatsapp','flashy_contact_id', 'created_at', 'updated_at',)
-    search_fields = ('businessName', 'name', 'businessType','businessTypeCustom', 'phone', 'email', 'tags__name')
+    list_display = ('businessName', 'name', 'businessType','businessTypeCustom', 'phone', 'email', 'want_emails', 'want_whatsapp','flashy_contact_id', 'created_at', 'updated_at','address', )
+    search_fields = ('businessName', 'name', 'businessType','businessTypeCustom', 'phone', 'email', 'tags__name', 'address', )
     readonly_fields = ('tag_display','created_at', 'updated_at',)
-    advanced_filter_fields = ('businessName', 'name', 'phone', 'email', 'want_emails', 'want_whatsapp', ('tags__name', 'tag name'))
+    advanced_filter_fields = ('businessName', 'name', 'phone', 'email', 'want_emails', 'want_whatsapp', ('tags__name', 'tag name'), 'address', 'created_at', 'updated_at',)
     filter_horizontal = ('tags',)
     actions = ['export_as_csv', 'export_xlsx_for_whatsapp']
     

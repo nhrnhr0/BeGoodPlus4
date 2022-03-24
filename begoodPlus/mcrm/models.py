@@ -15,10 +15,12 @@ class CrmUser(models.Model):
     name = models.CharField(max_length=100, verbose_name=_('name'))
     phone = models.CharField(max_length=100, null=True, blank=True, verbose_name=_('phone'))
     email = models.EmailField(max_length=100, null=True, blank=True, verbose_name=_('email'))
+    address = models.CharField(max_length=100, null=True, blank=True, verbose_name=_('address'))
     want_emails = models.BooleanField(default=True, verbose_name=_('want emails'))
     want_whatsapp = models.BooleanField(default=True, verbose_name=_('want whatsapp'))
     flashy_contact_id = models.CharField(max_length=256, null=True, blank=True, verbose_name=_('flashy contact id'))
     tags = models.ManyToManyField('CrmTag', blank=True, verbose_name=_('tags'))
+    
     class Meta():
         unique_together = ('businessName', 'name')
         

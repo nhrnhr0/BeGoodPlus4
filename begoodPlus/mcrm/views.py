@@ -67,6 +67,7 @@ def mcrm_lead_register(request):
     crmObj.email = form_data.get('email', crmObj.email)
     crmObj.want_emails = True if form_data.get('mailing-list', None) == 'on' else False
     crmObj.want_whatsapp = True if form_data.get('whatsapp-list', None) == 'on' else False
+    crmObj.address = form_data.get('address', crmObj.address)
     crmObj.save()
     new_user_subscribed_task.delay(crmObj.id)
     #new_user_subscribed_task(crmObj.id)
