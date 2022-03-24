@@ -109,13 +109,11 @@ import {TabulatorFull as Tabulator} from 'tabulator-tables';
                 var sum = window.$.pivotUtilities.aggregatorTemplates.sum;
                 var numberFormat = window.$.pivotUtilities.numberFormat;
                 var intFormat = numberFormat({digitsAfterDecimal: 0});
-                var renderer = $.pivotUtilities.renderers
                 window.$(tableEl).pivot(
                     row.getData().entries, {
                         rows: ["color_name", "varient_name"],
                         cols: ["size_name"],
                         aggregator: sum(intFormat)(["quantity"]),
-                        rendererOptions: {table: {rowTotals: false, colTotals: false,}},
                     }
                 )
                 /*let subtable = new Tabulator(tableEl, {

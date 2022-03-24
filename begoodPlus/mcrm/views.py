@@ -5,6 +5,7 @@ from rest_framework.decorators import api_view, permission_classes
 from django.http import JsonResponse
 from    mcrm.models import CrmTag
 from mcrm.models import CrmUser
+from mcrm.serializers import CrmIntrestSerializer
 from mcrm.tasks import new_user_subscribed_task
 import pandas as pd
 from django.contrib import messages
@@ -48,6 +49,11 @@ def admin_upload_bulk_crm_exel(request):
     # redirect to mcrm admin view
     
     
+from .models import CrmIntrest
+def get_all_interests(request):
+    intrests = CrmIntrest.objects.all()
+    data = CrmIntrestSerializer(intrests, many=True).data
+    return JsonResponse(data, safe=False)
 
 # Create your views here.
 @api_view(['POST'])

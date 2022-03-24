@@ -3,7 +3,7 @@ from .models import MOrderItem, MOrder
 # Register your models here.
 class MOrderItemAdmin(admin.ModelAdmin):
     model = MOrderItem
-    list_display = ('product','quantity','price','color','size','varient','provider','clientProvider','clientBuyPrice','ergent','prining','embroidery','comment',)
+    list_display = ('product','price','provider','ergent','prining','embroidery','comment',)
 admin.site.register(MOrderItem, MOrderItemAdmin)
 
 

@@ -5,6 +5,11 @@ class CrmTag(models.Model):
     name = models.CharField(max_length=100, verbose_name=_('name'), unique=True)
     def __str__(self):
         return self.name
+
+class CrmIntrest(models.Model):
+    name = models.CharField(max_length=100, verbose_name=_('name'), unique=True)
+    def __str__(self):
+        return self.name
 # Create your models here.
 class CrmUser(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
@@ -20,7 +25,7 @@ class CrmUser(models.Model):
     want_whatsapp = models.BooleanField(default=True, verbose_name=_('want whatsapp'))
     flashy_contact_id = models.CharField(max_length=256, null=True, blank=True, verbose_name=_('flashy contact id'))
     tags = models.ManyToManyField('CrmTag', blank=True, verbose_name=_('tags'))
-    
+    intrested = models.ManyToManyField('CrmIntrest', blank=True, verbose_name=_('intrested'))
     class Meta():
         unique_together = ('businessName', 'name')
         

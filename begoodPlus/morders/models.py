@@ -13,26 +13,31 @@ from provider.models import Provider
 from django.utils.html import mark_safe
 
 
-
+class MOrderItemEntry(models.Model):
+    quantity = models.IntegerField(default=1)
+    color = models.ForeignKey(to=Color, on_delete=models.SET_DEFAULT,default=76, null=True, blank=True)
+    size = models.ForeignKey(to=ProductSize, on_delete=models.SET_DEFAULT, default=108, null=True, blank=True)
+    varient = models.ForeignKey(to=CatalogImageVarient, on_delete=models.CASCADE, null=True, blank=True)
+    pass
 
 class MOrderItem(models.Model):
     """
     This is the model for the items in the order.
     """
     product = models.ForeignKey(to=CatalogImage, on_delete=models.CASCADE)
-    quantity = models.IntegerField(default=1)
     price = models.DecimalField(max_digits=10, decimal_places=2)
-    color = models.ForeignKey(to=Color, on_delete=models.SET_DEFAULT,default=76, null=True, blank=True)
-    size = models.ForeignKey(to=ProductSize, on_delete=models.SET_DEFAULT, default=108, null=True, blank=True)
-    varient = models.ForeignKey(to=CatalogImageVarient, on_delete=models.CASCADE, null=True, blank=True)
+    #quantity = models.IntegerField(default=1)
+    #color = models.ForeignKey(to=Color, on_delete=models.SET_DEFAULT,default=76, null=True, blank=True)
+    #size = models.ForeignKey(to=ProductSize, on_delete=models.SET_DEFAULT, default=108, null=True, blank=True)
+    #varient = models.ForeignKey(to=CatalogImageVarient, on_delete=models.CASCADE, null=True, blank=True)
     provider = models.ForeignKey(to=Provider, on_delete=models.SET_DEFAULT, default=7)
-    clientProvider = models.CharField(max_length=255, null=True, blank=True)
-    clientBuyPrice = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    #clientProvider = models.CharField(max_length=255, null=True, blank=True)
+    #clientBuyPrice = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     ergent = models.BooleanField(default=False)
     prining = models.BooleanField(default=False)
     embroidery = models.BooleanField(default=False)
     comment = models.TextField(null=True, blank=True)
-    
+    entries = models.ManyToManyField(to=MOrderItemEntry, blank=True, related_name='product')
     def __str__(self):
         return str(self.product) + " | " + str(self.quantity) + " - " + str(self.price) + '₪' #str(self.color) + " " + str(self.size) + (" " + self.varient.name) if self.varient != None else ' ' + str(self.quantity) + " " + str(self.price) + '₪'
 # Create your models here.
