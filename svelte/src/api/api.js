@@ -6,6 +6,12 @@ export async function apiGetMOrder(order_id) {
     return response;
 }
 
+
+export async function apiUpdateMOrderProductRow(data) {
+    //const response = await fetch_wraper('')
+    // TODO: update morder product row
+}
+
 export async function apiAddDocStockEnterEntery(data) {
     const response = await fetch_wraper(ADD_DOC_STOCK_ENTER_ENTRY_API_URL, {
         method: 'POST',

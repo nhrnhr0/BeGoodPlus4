@@ -3,24 +3,33 @@
 <script>
 import { onMount } from "svelte";
 import { Loading } from "carbon-components-svelte";
-import { apiGetMOrder } from "./api/api";
+import { apiGetMOrder, apiUpdateMOrderProductRow } from "./api/api";
 import {TabulatorFull as Tabulator} from 'tabulator-tables';
+import {Button} from "carbon-components-svelte";
+import { MultiSelect } from "carbon-components-svelte";
 
     let updateing = false;
     let headersTable;
     let productsTable;
     let data;
+    let serverData;
     let headerData;
     let productsData;
     let groupedProducts;
+    let showUpdateButton = false;
     //Tabulator.registerModule([FormatModule, EditModule]);
-
+    function productCellEdited(cell) {
+        console.log('edited: ', cell);
+        debugger;
+        let newRowData = cell.getData()
+        apiUpdateMOrderProductRow(newRowData);
+    }
     export let id;
     async function load_order_from_server() {
         updateing = true;
         let resp = await apiGetMOrder(id);
         console.log('resp:', resp);
-        data = JSON.parse(JSON.stringify(resp));
+        data = serverData = JSON.parse(JSON.stringify(resp));
         headerData = [{
             'created': data.created,
             'updated': data.updated,
@@ -38,7 +47,86 @@ import {TabulatorFull as Tabulator} from 'tabulator-tables';
         //groupedProducts = group the productsData by product field (ID: int)
         updateing = false;
     }
+
+
+    /*let multiSelectProviderEditor = function(cell, onRendered, success, cancel, editorParams) {
+        let editor = document.createElement("ul");
+        editor.classList.add("editor-list");
+        let values = cell.getValue()//
+        if (values != undefined) {
+            values = values.split(",");
+        }else {
+            values = [];
+        }
+        const providers = [
+            {id:1, name: 'זיווה מדים'},
+            {id:2, name: 'צול'},
+            {id:3, name: 'חנוכה'},
+            {id:4, name: 'חנוכה מקומית'},
+            {id:5, name: 'חנוכה מקומית מסחרית'},
+            {id:6, name: 'חנוכה מקומית מסחרית מקומית'},
+            {id:7, name: 'חנוכה מקומית מסחרית מקומית מקומית'},
+
+        ]
+        providers.forEach(provider => {
+            let item = document.createElement("li");
+            item.classList.add("editor-item");
+            item.innerHTML = provider.name;
+            item.setAttribute('data-id', provider.id);
+            item.setAttribute('data-name', provider.name);
+            item.addEventListener("click", function() {
+                console.log('click: ', this);
+                let value = this.getAttribute('data-name');
+                let index = values.indexOf(value);
+                if (index === -1) {
+                    values.push(value);
+                } else {
+                    values.splice(index, 1);
+                }
+                //cell.setValue(values.join(","));
+                //successFunc();
+            });
+            editor.appendChild(item);
+        });
+        onRendered(function() {
+            editor.focus();
+            editor.style.css = "100%";
+        });
+        function successFunc() {
+            success(values.join(","));
+        }
+        editor.addEventListener("change", successFunc);
+        editor.addEventListener("blur", successFunc);
+        return editor;
+    }*/
     
+    function multiSelectProviderFormatter(cell, formatterParams, onRendered) {
+        let value = cell.getValue();
+        const all_providers = [
+            {id: 1, name: 'זיווה מדים'},
+            {id: 2, name: 'צול'},
+            {id: 3, name: 'חנוכה'},
+        ]
+        let values
+        if(value != undefined) {
+            values = value.split(",");
+        }else {
+            values = [];
+        }
+        let html = "<select class=\"multi\"  data-placeholder='סמן ספקים' multiple>";
+        all_providers.forEach(provider => {
+            let selected = values.indexOf(provider.name) > -1 ? "selected" : "";
+            html += `<option value="${provider.name}" ${selected}>${provider.name}</option>`;
+        });
+        html += "</select>";
+        let el = window.$(html).get(0);
+        window.multiSelect.refresh();
+        onRendered(function() {
+            window.multiSelect.refresh();
+        });
+        //window.$(el).chosen({})
+        return el;
+    }
     onMount(async ()=> {
         await load_order_from_server();
         headersTable = new Tabulator("#headers-table", {
@@ -56,6 +144,7 @@ import {TabulatorFull as Tabulator} from 'tabulator-tables';
             textDirection:"rtl",
             history:true,
             height:"100%",
+            historyUndo:true,
             columnDefaults:{
                 tooltip:true,
             },
@@ -64,80 +153,47 @@ import {TabulatorFull as Tabulator} from 'tabulator-tables';
                 {title:'שם מוצר', field:'product_name', visible:true},
                 {title:'מזהה מוצר', field:'product', visible:true},
                 {title:'מחיר' , field:'price', visible:true, formatter:"money", formatterParams:{symbol:"₪", decimal:".", thousands:","},editor:true},
-                {title:'רקמה?', field: 'embroidery', hozAlign:"center", formatter:"tickCross", sorter:"boolean", editor:true},
-                {title: 'הדפסה?', field: 'prining', hozAlign:"center", formatter:"tickCross", sorter:"boolean", editor:true},
-                {title: 'דחוף?', field: 'ergent', hozAlign:"center", formatter:"tickCross", sorter:"boolean", editor:true},
+                {title:'רקמה?', field: 'embroidery', hozAlign:"center", formatter:"tickCross", sorter:"boolean", editor:true, cellEdited:function(cell){productCellEdited(cell)}},
+                {title: 'הדפסה?', field: 'prining', hozAlign:"center", formatter:"tickCross", sorter:"boolean", editor:true, cellEdited:function(cell){productCellEdited(cell)}},
+                {title: 'דחוף?', field: 'ergent', hozAlign:"center", formatter:"tickCross", sorter:"boolean", editor:true, cellEdited:function(cell){productCellEdited(cell)}},
                 {title:"פירוט",tooltip:false, field:"entries", formatter:function(cell, formatterParams, onRendered){
-                //create and style holder elements
-                var holderEl = document.createElement("div");
-                var tableEl = document.createElement("div");
+                    //create and style holder elements
+                    var holderEl = document.createElement("div");
+                    var tableEl = document.createElement("div");
 
-                holderEl.style.boxSizing = "border-box";
-                holderEl.style.padding = "10px 30px 10px 10px";
-                holderEl.style.borderTop = "1px solid #333";
-                holderEl.style.borderBotom = "1px solid #333";
-                holderEl.style.background = "#ddd";
+                    holderEl.style.boxSizing = "border-box";
+                    holderEl.style.padding = "10px 30px 10px 10px";
+                    holderEl.style.borderTop = "1px solid #333";
+                    holderEl.style.borderBotom = "1px solid #333";
+                    holderEl.style.background = "#ddd";
 
-                tableEl.style.border = "1px solid #333";
-                holderEl.appendChild(tableEl);
-                cell.getElement().appendChild(holderEl);
-                //console.log(JSON.stringify(cell));
-                let data = cell.getData().entries;
-                console.log(data);
-                //define the table once the cell has been rendered
-                onRendered(function(){
-                    
-                    createPivot(data, tableEl);
-                    
-                });
+                    tableEl.style.border = "1px solid #333";
+                    holderEl.appendChild(tableEl);
+                    cell.getElement().appendChild(holderEl);
+                    //console.log(JSON.stringify(cell));
+                    let data = cell.getData().entries;
+                    console.log(data);
+                    //define the table once the cell has been rendered
+                    onRendered(function(){
+                        
+                        createPivot(data, tableEl);
+                        
+                    });
 
-                //return the element that holds the table
-                return holderEl;
-                }
-            },
-            ]
-        });
-        //create a custom formatter for the sub table
-        
-        /*productsTable = new Tabulator("#products-table", {
-            data:groupedProducts,
-            layout:"fitDataStretch",
-            height: 1000,
-            columns:[
-                {field: "id" , title: "product id", width:150},
-                {field: "name" , title: "product name", width:150},
-            ],
-            rowFormatter:function(row){
-                 //create and style holder elements
-                var holderEl = window.$("<div></div>").get(0);
-                var tableEl = window.$("<div></div>").get(0);
-
-                
-                holderEl.style.boxSizing = "border-box";
-                holderEl.style.padding = "10px 30px 10px 10px";
-                holderEl.style.borderTop = "1px solid #333";
-                holderEl.style.borderBotom = "1px solid #333";
-                
-
-                tableEl.style.border = "1px solid #333";
-
-
-                holderEl.append(tableEl);
-
-                row.getElement().append(holderEl);
-                var sum = window.$.pivotUtilities.aggregatorTemplates.sum;
-                var numberFormat = window.$.pivotUtilities.numberFormat;
-                var intFormat = numberFormat({digitsAfterDecimal: 0});
-                window.$(tableEl).pivot(
-                    row.getData().entries, {
-                        rows: ["color_name", "varient_name"],
-                        cols: ["size_name"],
-                        aggregator: sum(intFormat)(["quantity"]),
+                    //return the element that holds the table
+                    return holderEl;
                     }
-                )
-            }
-        });*/
+                },
+                {title:'הערות', field:'comment', visible:true, editor:"textarea"},
+                {title:'ספקים', field:'providers', visible:true, formatter:multiSelectProviderFormatter},
+                ]
+            });
         console.log('data:', data);
+        setInterval(()=>{
+            if (data != serverData){
+                showUpdateButton = true;
+            }
+        }, 5000);
     });
 
 
@@ -161,8 +217,17 @@ import {TabulatorFull as Tabulator} from 'tabulator-tables';
                             data[i].color_name == color_name &&
                             data[i].varient_name == varient_name) {
                             console.log(data[i]);   
-                            data[i].quantity = value+1;
-                            createPivot(data, tableEl);
+                            let newQuantity = prompt("הזן כמות", data[i].quantity);
+                            //let text;
+                            if (newQuantity == null || newQuantity == "") {
+                                //text = "User cancelled the prompt.";
+                            } else {
+                                //text = "Hello " + person + "! How are you today?";
+                                data[i].quantity = parseInt(newQuantity);
+
+                                createPivot(data, tableEl);
+                            }
+                            
                             break;
                     }
                     
@@ -175,19 +240,24 @@ import {TabulatorFull as Tabulator} from 'tabulator-tables';
 </script>
 
 <main>
-    <div id="headers-table">
-        
-    </div>
-    <hr>
-    <div id="products-table"></div>
     {#if updateing}
         <Loading withOverlay={false} />
     {:else}
-
+        <div id="headers-table"></div>
+        <hr>
+        <div id="products-table"></div>
+            <Button class="update-btn" disabled={!showUpdateButton} on:click={()=>{showUpdateButton = false;}}>עדכן עכשיו</Button>
     {/if}
 </main>
 
 <style lang="scss">
+    :global(.update-btn) {
+        position: fixed;
+        bottom: 10px;
+        left: 10px;
+        z-index: 1;
+
+    }
     main {
         padding-top: 35px;
         width: 90%;
