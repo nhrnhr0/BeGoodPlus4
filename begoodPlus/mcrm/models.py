@@ -31,3 +31,9 @@ class CrmUser(models.Model):
         
     def tag_display(self):
         return mark_safe('<br>'.join([tag.name for tag in self.tags.all()]))
+    
+    def execl_tag_display(self):
+        return ','.join([tag.name for tag in self.tags.all()])
+    
+    def execl_intrested_display(self):
+        return ','.join([intrest.name for intrest in self.intrested.all()])

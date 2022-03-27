@@ -1,3 +1,4 @@
+from begoodPlus.secrects import SECRECT_BASE_MY_DOMAIN
 from .base import *
 
 
@@ -24,4 +25,4 @@ INTERNAL_IPS = [
     '127.0.0.1',
 ]
 
-MY_DOMAIN = 'http://localhost:8000'
+MY_DOMAIN = SECRECT_BASE_MY_DOMAIN
