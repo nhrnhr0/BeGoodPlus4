@@ -3,12 +3,13 @@
 <script>
 import { onMount } from "svelte";
 import { Loading } from "carbon-components-svelte";
-import { apiGetMOrder, apiUpdateMOrderProductRow } from "./api/api";
+import { apiGetMOrder,apiGetProviders,apiSaveMOrder } from "./api/api";
 import {TabulatorFull as Tabulator} from 'tabulator-tables';
 import {Button} from "carbon-components-svelte";
 import { MultiSelect } from "carbon-components-svelte";
 
     let updateing = false;
+    let updateing_to_server = false;
     let headersTable;
     let productsTable;
     let data;
@@ -19,10 +20,12 @@ import { MultiSelect } from "carbon-components-svelte";
     let showUpdateButton = false;
     //Tabulator.registerModule([FormatModule, EditModule]);
     function productCellEdited(cell) {
+        /*
         console.log('edited: ', cell);
         debugger;
         let newRowData = cell.getData()
         apiUpdateMOrderProductRow(newRowData);
+        */
     }
     export let id;
     async function load_order_from_server() {
@@ -99,42 +102,105 @@ import { MultiSelect } from "carbon-components-svelte";
         editor.addEventListener("blur", successFunc);
         return editor;
     }*/
+
+    async function save_data() {
+        // move headerData to data
+        data.created = headerData[0].created;
+        data.updated = headerData[0].updated;
+        data.id = headerData[0].id;
+        data.name = headerData[0].name;
+        data.email = headerData[0].email;
+        data.message = headerData[0].message;
+        data.phone = headerData[0].phone;
+        data.status = headerData[0].status;
+        data.client = headerData[0].client_id;
+        data.client_businessName = headerData[0].client_name;
+
+        console.log('save data: ', data);
+        updateing_to_server = true;
+        await apiSaveMOrder(data.id, data);
+        updateing_to_server = false;
+        alert('saved');        
+    }
     
     function multiSelectProviderFormatter(cell, formatterParams, onRendered) {
         let value = cell.getValue();
-        const all_providers = [
-            {id: 1, name: 'זיווה מדים'},
-            {id: 2, name: 'צול'},
-            {id: 3, name: 'חנוכה'},
-        ]
         let values
         if(value != undefined) {
-            values = value.split(",");
+            // if is array do nothing
+            // if string, split by comma
+            if(typeof value == 'string') {
+                values = value.split(",");
+            } else {
+                values = value;
+            }
         }else {
             values = [];
         }
-        let html = "<select class=\"multi\"  data-placeholder='סמן ספקים' multiple>";
-        all_providers.forEach(provider => {
-            let selected = values.indexOf(provider.name) > -1 ? "selected" : "";
-            html += `<option value="${provider.name}" ${selected}>${provider.name}</option>`;
+        let html = "<select class=\"\"  data-placeholder='סמן ספקים' multiple=\"multiple\">";
+        ALL_PROVIDERS.forEach(provider => {
+            /* values = 
+                0: {value: '32', label: 'אחים אשכנזי'}
+                1: {value: '33', label: "אורית אוביץ'"}
+                2: {value: '34', label: 'קשת'}
+                3: {value: '35', label: 'ארטוס'}
+                4: {value: '36', label: 'צעצועי מיכל'}
+                5: {value: '37', label: 'טכנו י.ש'}
+                6: {value: '38', label: 'קראוס'}
+                7: {value: '39', label: 'רוי'}
+                8: {value: '41', label: 'סיינט'}
+            */
+            // provider = {value: '32', label: 'אחים אשכנזי'}
+            let selected = values.find(v => v == provider.value) != undefined? "selected" : "";
+            //let selected = values.indexOf(parseInt(provider.value)) > -1 ? "selected" : "";
+            html += `<option value="${provider.value}" ${selected}>${provider.label}</option>`;
         });
         html += "</select>";
-        let el = window.$(html).get(0);
-        window.multiSelect.refresh();
+        let $el = window.$(html)//.get(0);
+        //window.multiSelect.refresh();
         onRendered(function() {
-            window.multiSelect.refresh();
+                
+            $el.select2({
+                placeholder: 'This is my placeholder',
+                allowClear: true,
+                dropdownAutoWidth: true,
+                width: '100%',
+                closeOnSelect: true,
+            });
+            $el.on('change', function (e) {
+                console.log('change: ', e);
+                let value = $el.val();
+                console.log('value: ', value);
+                console.log('cell value before: ', cell.getValue());
+                cell.setValue(value);
+            });
+            //el.select2('open');
+            //window.multiSelect.refresh();
         });
         //window.$(el).chosen({})
-        return el;
+        return $el.get(0);
     }
+    let ALL_PROVIDERS;
     onMount(async ()=> {
         await load_order_from_server();
+        ALL_PROVIDERS = await apiGetProviders();
+        console.log('ALL_PROVIDERS:', ALL_PROVIDERS);
         headersTable = new Tabulator("#headers-table", {
             data:headerData,
-            autoColumns:true,
+            //autoColumns:true,
             layout:"fitDataStretch",
             textDirection:"rtl", 
-            
+            columns: [
+                {title:'תאריך יצירה', field:'created'},
+                {title:'תאריך שינוי', field:'updated'},
+                {title:'id', field:'id'},
+                {title:'שם', field:'name'},
+                {title:'אימייל', field:'email'},
+                {title:'הודעה', field:'message',editor:true},
+                {title: 'טפלון', field: 'phone'},
+                {title: 'סטטוס', field: 'status', editor:"select", editorParams:{values:['new', 'done'],multiselect:false}},
+                {title: 'שם לקוח', field: 'client_name'},
+            ]
         });
 
         productsTable = new Tabulator("#products-table", {
@@ -189,11 +255,6 @@ import { MultiSelect } from "carbon-components-svelte";
                 ]
             });
         console.log('data:', data);
-        setInterval(()=>{
-            if (data != serverData){
-                showUpdateButton = true;
-            }
-        }, 5000);
     });
 
 
@@ -246,7 +307,13 @@ import { MultiSelect } from "carbon-components-svelte";
         <div id="headers-table"></div>
         <hr>
         <div id="products-table"></div>
-            <Button class="update-btn" disabled={!showUpdateButton} on:click={()=>{showUpdateButton = false;}}>עדכן עכשיו</Button>
+            <Button class="update-btn" disabled={updateing_to_server} on:click={()=>{save_data()}}>
+                {#if updateing_to_server}
+                    <Loading withOverlay={false} />
+                {:else}
+                    עדכן עכשיו
+                {/if}
+            </Button>
     {/if}
 </main>
 
@@ -262,5 +329,14 @@ import { MultiSelect } from "carbon-components-svelte";
         padding-top: 35px;
         width: 90%;
         margin: auto;
+    }
+
+
+    // <div class="tabulator-cell" tabulator-field="providers"
+    :global(div.tabulator-cell[tabulator-field="providers"]) {
+        overflow-y: scroll;
+        /*:global(span.select2-container) {
+            width: 100%;
+        }*/
     }
 </style>

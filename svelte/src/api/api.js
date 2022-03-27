@@ -1,17 +1,30 @@
-import {SEARCH_API_URL,MORDER_EDIT_API,GET_ALL_SIZES_API, GET_DOC_STOCK_ENTER_PPN_ENTRIES, SEARCH_PROVIDERS_API_URL,INV_API_GET_ENTER_DOC_DATA_URL, SEARCH_PPN_API_URL, GET_ALL_COLORS_API, GET_ALL_VARIENTS_API, DELETE_DOC_STOCK_EnterEntery as DELETE_DOC_STOCK_ENTER_ENTRY, ADD_DOC_STOCK_ENTER_ENTRY_API_URL} from './../consts/consts.js';
+import {SEARCH_API_URL,GET_ALL_PROVIDERS_API_URL,MORDER_EDIT_API,GET_ALL_SIZES_API, GET_DOC_STOCK_ENTER_PPN_ENTRIES, SEARCH_PROVIDERS_API_URL,INV_API_GET_ENTER_DOC_DATA_URL, SEARCH_PPN_API_URL, GET_ALL_COLORS_API, GET_ALL_VARIENTS_API, DELETE_DOC_STOCK_EnterEntery as DELETE_DOC_STOCK_ENTER_ENTRY, ADD_DOC_STOCK_ENTER_ENTRY_API_URL} from './../consts/consts.js';
 import {getCookie} from './../utils/utils.js';
+
+
+export async function apiGetProviders() {
+    let response = await fetch_wraper(GET_ALL_PROVIDERS_API_URL);
+    return response;
+}
 
 export async function apiGetMOrder(order_id) {
     const response = await fetch_wraper(`${MORDER_EDIT_API}/${order_id}`, {});
     return response;
 }
+export async function apiSaveMOrder(order_id, data) {
+    const response = await fetch_wraper(`${MORDER_EDIT_API}/${order_id}`, {
+        method: 'POST',
+        body: JSON.stringify(data)
+    });
+    return response;
 
-
+}
+/*
 export async function apiUpdateMOrderProductRow(data) {
     //const response = await fetch_wraper('')
     // TODO: update morder product row
 }
-
+*/
 export async function apiAddDocStockEnterEntery(data) {
     const response = await fetch_wraper(ADD_DOC_STOCK_ENTER_ENTRY_API_URL, {
         method: 'POST',

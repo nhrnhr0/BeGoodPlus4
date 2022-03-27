@@ -1,6 +1,8 @@
 
 
 from rest_framework import serializers
+
+from provider.serializers import SvelteProviderSerializer
 from .models import MOrder, MOrderItem, MOrderItemEntry
 
 class AdminMOrderItemEntrySerializer(serializers.ModelSerializer):
@@ -9,15 +11,22 @@ class AdminMOrderItemEntrySerializer(serializers.ModelSerializer):
     varient_name = serializers.CharField(source='varient.name',default='',)
     class Meta:
         model = MOrderItemEntry
-        fields = ('quantity', 'color', 'size', 'varient', 'color_name', 'size_name', 'varient_name')
+        fields = ('id', 'quantity', 'color', 'size', 'varient', 'color_name', 'size_name', 'varient_name')
     pass
+
+
+        
 
 class AdminMOrderItemSerializer(serializers.ModelSerializer):
     product_name = serializers.CharField(source='product.title')
     entries = AdminMOrderItemEntrySerializer(many=True, read_only=True)
+    providers = serializers.SerializerMethodField('get_providers')
+    def get_providers(self, obj):
+        ids = obj.providers.values_list('id', flat=True)
+        return list(ids)
     class Meta:
         model = MOrderItem
-        fields = ('id', 'product',  'price','provider', 'ergent', 'prining', 'embroidery', 'comment','product_name', 'entries')
+        fields = ('id', 'product',  'price','providers', 'ergent', 'prining', 'embroidery', 'comment','product_name', 'entries')
     
 
 class AdminMOrderSerializer(serializers.ModelSerializer):

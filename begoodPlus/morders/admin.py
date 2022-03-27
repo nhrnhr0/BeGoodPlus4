@@ -1,9 +1,17 @@
 from django.contrib import admin
-from .models import MOrderItem, MOrder
+from .models import MOrderItem, MOrder, MOrderItemEntry
+
+class MOrderItemEntryAdmin(admin.ModelAdmin):
+    list_display = ('id', 'product', 'color', 'size', 'varient', 'quantity')
+    list_filter = ('product', 'color', 'size', 'varient')
+    search_fields = ('product', 'color', 'size', 'varient')
+admin.site.register(MOrderItemEntry, MOrderItemEntryAdmin)
+
 # Register your models here.
 class MOrderItemAdmin(admin.ModelAdmin):
     model = MOrderItem
-    list_display = ('product','price','provider','ergent','prining','embroidery','comment',)
+    list_display = ('id', 'product','price','ergent','prining','embroidery','comment',)
+    filter_horizontal = ('providers','entries','morder')
 admin.site.register(MOrderItem, MOrderItemAdmin)
 
 

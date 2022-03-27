@@ -133,6 +133,8 @@ urlpatterns = [
     path('api/logs/', userLogEntryView),
     path('api/logout/', api_logout),
     path('api/all-image-ids/', all_images_ids),
+    
+    #path('api/get-providers/', api_providers, name='admin_api_providers'),
 
     #path('', catalogView, name="catalogView"),
     

@@ -4328,6 +4328,12 @@ var documentstockenter = (function () {
         return map;
     }
 
+    /*
+    export async function apiUpdateMOrderProductRow(data) {
+        //const response = await fetch_wraper('')
+        // TODO: update morder product row
+    }
+    */
     async function apiAddDocStockEnterEntery(data) {
         const response = await fetch_wraper(ADD_DOC_STOCK_ENTER_ENTRY_API_URL, {
             method: 'POST',

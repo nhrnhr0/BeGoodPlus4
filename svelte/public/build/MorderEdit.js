@@ -1358,7 +1358,7 @@ var morderedit = (function () {
     }
 
     // (147:13) 
-    function create_if_block_1$4(ctx) {
+    function create_if_block_1$5(ctx) {
     	let current;
     	const default_slot_template = /*#slots*/ ctx[19].default;
     	const default_slot = create_slot(default_slot_template, ctx, /*$$scope*/ ctx[18], get_default_slot_context);
@@ -1406,7 +1406,7 @@ var morderedit = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_1$4.name,
+    		id: create_if_block_1$5.name,
     		type: "if",
     		source: "(147:13) ",
     		ctx
@@ -1567,7 +1567,7 @@ var morderedit = (function () {
     	let if_block;
     	let if_block_anchor;
     	let current;
-    	const if_block_creators = [create_if_block$a, create_if_block_1$4, create_if_block_2$2, create_else_block$4];
+    	const if_block_creators = [create_if_block$a, create_if_block_1$5, create_if_block_2$2, create_else_block$4];
     	const if_blocks = [];
 
     	function select_block_type(ctx, dirty) {
@@ -3712,7 +3712,7 @@ var morderedit = (function () {
     const file$a = "node_modules\\carbon-components-svelte\\src\\ListBox\\ListBox.svelte";
 
     // (59:0) {#if invalid}
-    function create_if_block_1$3(ctx) {
+    function create_if_block_1$4(ctx) {
     	let div;
     	let t;
 
@@ -3737,7 +3737,7 @@ var morderedit = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_1$3.name,
+    		id: create_if_block_1$4.name,
     		type: "if",
     		source: "(59:0) {#if invalid}",
     		ctx
@@ -3808,7 +3808,7 @@ var morderedit = (function () {
     		div_data = assign(div_data, div_levels[i]);
     	}
 
-    	let if_block0 = /*invalid*/ ctx[5] && create_if_block_1$3(ctx);
+    	let if_block0 = /*invalid*/ ctx[5] && create_if_block_1$4(ctx);
     	let if_block1 = !/*invalid*/ ctx[5] && /*warn*/ ctx[7] && create_if_block$6(ctx);
 
     	const block = {
@@ -3894,7 +3894,7 @@ var morderedit = (function () {
     				if (if_block0) {
     					if_block0.p(ctx, dirty);
     				} else {
-    					if_block0 = create_if_block_1$3(ctx);
+    					if_block0 = create_if_block_1$4(ctx);
     					if_block0.c();
     					if_block0.m(t1.parentNode, t1);
     				}
@@ -5876,7 +5876,7 @@ var morderedit = (function () {
     	let current;
     	let mounted;
     	let dispose;
-    	let if_block = /*selectionCount*/ ctx[1] !== undefined && create_if_block_1$2(ctx);
+    	let if_block = /*selectionCount*/ ctx[1] !== undefined && create_if_block_1$3(ctx);
     	close16 = new Close16$1({ $$inline: true });
 
     	let div_levels = [
@@ -5929,7 +5929,7 @@ var morderedit = (function () {
     				if (if_block) {
     					if_block.p(ctx, dirty);
     				} else {
-    					if_block = create_if_block_1$2(ctx);
+    					if_block = create_if_block_1$3(ctx);
     					if_block.c();
     					if_block.m(div, t);
     				}
@@ -6090,7 +6090,7 @@ var morderedit = (function () {
     }
 
     // (103:4) {#if selectionCount !== undefined}
-    function create_if_block_1$2(ctx) {
+    function create_if_block_1$3(ctx) {
     	let t;
 
     	const block = {
@@ -6110,7 +6110,7 @@ var morderedit = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_1$2.name,
+    		id: create_if_block_1$3.name,
     		type: "if",
     		source: "(103:4) {#if selectionCount !== undefined}",
     		ctx
@@ -6533,7 +6533,7 @@ var morderedit = (function () {
     	let t2;
     	let circle;
     	let div0_aria_live_value;
-    	let if_block = /*small*/ ctx[0] && create_if_block_1$1(ctx);
+    	let if_block = /*small*/ ctx[0] && create_if_block_1$2(ctx);
     	let div1_levels = [/*$$restProps*/ ctx[6]];
     	let div1_data = {};
 
@@ -6602,7 +6602,7 @@ var morderedit = (function () {
     				if (if_block) {
     					if_block.p(ctx, dirty);
     				} else {
-    					if_block = create_if_block_1$1(ctx);
+    					if_block = create_if_block_1$2(ctx);
     					if_block.c();
     					if_block.m(svg, circle);
     				}
@@ -6690,7 +6690,7 @@ var morderedit = (function () {
     }
 
     // (38:8) {#if small}
-    function create_if_block_1$1(ctx) {
+    function create_if_block_1$2(ctx) {
     	let circle;
 
     	const block = {
@@ -6717,7 +6717,7 @@ var morderedit = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_1$1.name,
+    		id: create_if_block_1$2.name,
     		type: "if",
     		source: "(38:8) {#if small}",
     		ctx
@@ -7608,7 +7608,7 @@ var morderedit = (function () {
     }
 
     // (464:4) {#if open}
-    function create_if_block_1(ctx) {
+    function create_if_block_1$1(ctx) {
     	let listboxmenu;
     	let current;
 
@@ -7658,7 +7658,7 @@ var morderedit = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_1.name,
+    		id: create_if_block_1$1.name,
     		type: "if",
     		source: "(464:4) {#if open}",
     		ctx
@@ -7965,7 +7965,7 @@ var morderedit = (function () {
     	listboxfield.$on("keydown", /*keydown_handler_2*/ ctx[58]);
     	listboxfield.$on("focus", /*focus_handler_1*/ ctx[59]);
     	listboxfield.$on("blur", /*blur_handler_1*/ ctx[60]);
-    	let if_block2 = /*open*/ ctx[0] && create_if_block_1(ctx);
+    	let if_block2 = /*open*/ ctx[0] && create_if_block_1$1(ctx);
 
     	const block = {
     		c: function create() {
@@ -8052,7 +8052,7 @@ var morderedit = (function () {
     						transition_in(if_block2, 1);
     					}
     				} else {
-    					if_block2 = create_if_block_1(ctx);
+    					if_block2 = create_if_block_1$1(ctx);
     					if_block2.c();
     					transition_in(if_block2, 1);
     					if_block2.m(if_block2_anchor.parentNode, if_block2_anchor);
@@ -9176,6 +9176,7 @@ var morderedit = (function () {
     var url = protocol + '//' + host;
     const BASE_URL =  url; //'https://catalog.boost-pop.com'; //'http://127.0.0.1:8000'; // 
     const MORDER_EDIT_API = BASE_URL + '/morders/api-get-order-data';
+    const GET_ALL_PROVIDERS_API_URL =  BASE_URL + '/svelte/api/providers/';
 
     function getCookie(name) {
         let cookieValue = null;
@@ -9193,15 +9194,22 @@ var morderedit = (function () {
         return cookieValue;
     }
 
+    async function apiGetProviders() {
+        let response = await fetch_wraper(GET_ALL_PROVIDERS_API_URL);
+        return response;
+    }
+
     async function apiGetMOrder(order_id) {
         const response = await fetch_wraper(`${MORDER_EDIT_API}/${order_id}`, {});
         return response;
     }
+    async function apiSaveMOrder(order_id, data) {
+        const response = await fetch_wraper(`${MORDER_EDIT_API}/${order_id}`, {
+            method: 'POST',
+            body: JSON.stringify(data)
+        });
+        return response;
 
-
-    async function apiUpdateMOrderProductRow(data) {
-        //const response = await fetch_wraper('')
-        // TODO: update morder product row
     }
     function fetch_wraper(url, requestOptions, custom_fetch, isRetry = false) {
         console.log('fetch_wraper: ', url);
@@ -33455,7 +33463,7 @@ var morderedit = (function () {
     const { console: console_1 } = globals;
     const file = "src\\MorderEdit.svelte";
 
-    // (245:4) {:else}
+    // (306:4) {:else}
     function create_else_block(ctx) {
     	let div0;
     	let t0;
@@ -33469,14 +33477,14 @@ var morderedit = (function () {
     	button = new Button$1({
     			props: {
     				class: "update-btn",
-    				disabled: !/*showUpdateButton*/ ctx[1],
+    				disabled: /*updateing_to_server*/ ctx[1],
     				$$slots: { default: [create_default_slot] },
     				$$scope: { ctx }
     			},
     			$$inline: true
     		});
 
-    	button.$on("click", /*click_handler*/ ctx[3]);
+    	button.$on("click", /*click_handler*/ ctx[4]);
 
     	const block = {
     		c: function create() {
@@ -33488,10 +33496,10 @@ var morderedit = (function () {
     			t2 = space();
     			create_component(button.$$.fragment);
     			attr_dev(div0, "id", "headers-table");
-    			add_location(div0, file, 245, 8, 9866);
-    			add_location(hr, file, 246, 8, 9906);
+    			add_location(div0, file, 306, 8, 12588);
+    			add_location(hr, file, 307, 8, 12628);
     			attr_dev(div1, "id", "products-table");
-    			add_location(div1, file, 247, 8, 9920);
+    			add_location(div1, file, 308, 8, 12642);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div0, anchor);
@@ -33505,9 +33513,9 @@ var morderedit = (function () {
     		},
     		p: function update(ctx, dirty) {
     			const button_changes = {};
-    			if (dirty & /*showUpdateButton*/ 2) button_changes.disabled = !/*showUpdateButton*/ ctx[1];
+    			if (dirty & /*updateing_to_server*/ 2) button_changes.disabled = /*updateing_to_server*/ ctx[1];
 
-    			if (dirty & /*$$scope*/ 8192) {
+    			if (dirty & /*$$scope, updateing_to_server*/ 65538) {
     				button_changes.$$scope = { dirty, ctx };
     			}
 
@@ -33537,14 +33545,14 @@ var morderedit = (function () {
     		block,
     		id: create_else_block.name,
     		type: "else",
-    		source: "(245:4) {:else}",
+    		source: "(306:4) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (243:4) {#if updateing}
+    // (304:4) {#if updateing}
     function create_if_block(ctx) {
     	let loading;
     	let current;
@@ -33581,15 +33589,15 @@ var morderedit = (function () {
     		block,
     		id: create_if_block.name,
     		type: "if",
-    		source: "(243:4) {#if updateing}",
+    		source: "(304:4) {#if updateing}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (249:12) <Button class="update-btn" disabled={!showUpdateButton} on:click={()=>{showUpdateButton = false;}}>
-    function create_default_slot(ctx) {
+    // (313:16) {:else}
+    function create_else_block_1(ctx) {
     	let t;
 
     	const block = {
@@ -33599,6 +33607,8 @@ var morderedit = (function () {
     		m: function mount(target, anchor) {
     			insert_dev(target, t, anchor);
     		},
+    		i: noop,
+    		o: noop,
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(t);
     		}
@@ -33606,9 +33616,128 @@ var morderedit = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
+    		id: create_else_block_1.name,
+    		type: "else",
+    		source: "(313:16) {:else}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (311:16) {#if updateing_to_server}
+    function create_if_block_1(ctx) {
+    	let loading;
+    	let current;
+
+    	loading = new Loading$1({
+    			props: { withOverlay: false },
+    			$$inline: true
+    		});
+
+    	const block = {
+    		c: function create() {
+    			create_component(loading.$$.fragment);
+    		},
+    		m: function mount(target, anchor) {
+    			mount_component(loading, target, anchor);
+    			current = true;
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(loading.$$.fragment, local);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(loading.$$.fragment, local);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			destroy_component(loading, detaching);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_1.name,
+    		type: "if",
+    		source: "(311:16) {#if updateing_to_server}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (310:12) <Button class="update-btn" disabled={updateing_to_server} on:click={()=>{save_data()}}>
+    function create_default_slot(ctx) {
+    	let current_block_type_index;
+    	let if_block;
+    	let if_block_anchor;
+    	let current;
+    	const if_block_creators = [create_if_block_1, create_else_block_1];
+    	const if_blocks = [];
+
+    	function select_block_type_1(ctx, dirty) {
+    		if (/*updateing_to_server*/ ctx[1]) return 0;
+    		return 1;
+    	}
+
+    	current_block_type_index = select_block_type_1(ctx);
+    	if_block = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
+
+    	const block = {
+    		c: function create() {
+    			if_block.c();
+    			if_block_anchor = empty();
+    		},
+    		m: function mount(target, anchor) {
+    			if_blocks[current_block_type_index].m(target, anchor);
+    			insert_dev(target, if_block_anchor, anchor);
+    			current = true;
+    		},
+    		p: function update(ctx, dirty) {
+    			let previous_block_index = current_block_type_index;
+    			current_block_type_index = select_block_type_1(ctx);
+
+    			if (current_block_type_index !== previous_block_index) {
+    				group_outros();
+
+    				transition_out(if_blocks[previous_block_index], 1, 1, () => {
+    					if_blocks[previous_block_index] = null;
+    				});
+
+    				check_outros();
+    				if_block = if_blocks[current_block_type_index];
+
+    				if (!if_block) {
+    					if_block = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
+    					if_block.c();
+    				}
+
+    				transition_in(if_block, 1);
+    				if_block.m(if_block_anchor.parentNode, if_block_anchor);
+    			}
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(if_block);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(if_block);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			if_blocks[current_block_type_index].d(detaching);
+    			if (detaching) detach_dev(if_block_anchor);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
     		id: create_default_slot.name,
     		type: "slot",
-    		source: "(249:12) <Button class=\\\"update-btn\\\" disabled={!showUpdateButton} on:click={()=>{showUpdateButton = false;}}>",
+    		source: "(310:12) <Button class=\\\"update-btn\\\" disabled={updateing_to_server} on:click={()=>{save_data()}}>",
     		ctx
     	});
 
@@ -33635,8 +33764,8 @@ var morderedit = (function () {
     		c: function create() {
     			main = element("main");
     			if_block.c();
-    			attr_dev(main, "class", "svelte-18d2tk0");
-    			add_location(main, file, 241, 0, 9775);
+    			attr_dev(main, "class", "svelte-1qn055f");
+    			add_location(main, file, 302, 0, 12497);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -33699,41 +33828,14 @@ var morderedit = (function () {
     	return block;
     }
 
-    function multiSelectProviderFormatter(cell, formatterParams, onRendered) {
-    	let value = cell.getValue();
-
-    	const all_providers = [
-    		{ id: 1, name: 'זיווה מדים' },
-    		{ id: 2, name: 'צול' },
-    		{ id: 3, name: 'חנוכה' }
-    	];
-
-    	let values;
-
-    	if (value != undefined) {
-    		values = value.split(",");
-    	} else {
-    		values = [];
-    	}
-
-    	let html = "<select class=\"multi\"  data-placeholder='סמן ספקים' multiple>";
-
-    	all_providers.forEach(provider => {
-    		let selected = values.indexOf(provider.name) > -1 ? "selected" : "";
-    		html += `<option value="${provider.name}" ${selected}>${provider.name}</option>`;
-    	});
-
-    	html += "</select>";
-    	let el = window.$(html).get(0);
-    	window.multiSelect.refresh();
-
-    	onRendered(function () {
-    		window.multiSelect.refresh();
-    	});
-
-    	//window.$(el).chosen({})
-    	return el;
-    }
+    function productCellEdited(cell) {
+    	
+    } /*
+    console.log('edited: ', cell);
+    debugger;
+    let newRowData = cell.getData()
+    apiUpdateMOrderProductRow(newRowData);
+    */
 
     function createPivot(data, tableEl) {
     	var sum = window.$.pivotUtilities.aggregatorTemplates.sum;
@@ -33779,6 +33881,7 @@ var morderedit = (function () {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('MorderEdit', slots, []);
     	let updateing = false;
+    	let updateing_to_server = false;
     	let headersTable;
     	let productsTable;
     	let data;
@@ -33787,15 +33890,6 @@ var morderedit = (function () {
     	let productsData;
     	let groupedProducts;
     	let showUpdateButton = false;
-
-    	//Tabulator.registerModule([FormatModule, EditModule]);
-    	function productCellEdited(cell) {
-    		console.log('edited: ', cell);
-    		debugger;
-    		cell.getData();
-    		apiUpdateMOrderProductRow();
-    	}
-
     	let { id } = $$props;
 
     	async function load_order_from_server() {
@@ -33825,15 +33919,178 @@ var morderedit = (function () {
     		$$invalidate(0, updateing = false);
     	}
 
+    	/*let multiSelectProviderEditor = function(cell, onRendered, success, cancel, editorParams) {
+        let editor = document.createElement("ul");
+        editor.classList.add("editor-list");
+        let values = cell.getValue()//
+        if (values != undefined) {
+            values = values.split(",");
+        }else {
+            values = [];
+        }
+        const providers = [
+            {id:1, name: 'זיווה מדים'},
+            {id:2, name: 'צול'},
+            {id:3, name: 'חנוכה'},
+            {id:4, name: 'חנוכה מקומית'},
+            {id:5, name: 'חנוכה מקומית מסחרית'},
+            {id:6, name: 'חנוכה מקומית מסחרית מקומית'},
+            {id:7, name: 'חנוכה מקומית מסחרית מקומית מקומית'},
+
+        ]
+        providers.forEach(provider => {
+            let item = document.createElement("li");
+            item.classList.add("editor-item");
+            item.innerHTML = provider.name;
+            item.setAttribute('data-id', provider.id);
+            item.setAttribute('data-name', provider.name);
+            item.addEventListener("click", function() {
+                console.log('click: ', this);
+                let value = this.getAttribute('data-name');
+                let index = values.indexOf(value);
+                if (index === -1) {
+                    values.push(value);
+                } else {
+                    values.splice(index, 1);
+                }
+                //cell.setValue(values.join(","));
+                //successFunc();
+            });
+            editor.appendChild(item);
+        });
+        onRendered(function() {
+            editor.focus();
+            editor.style.css = "100%";
+        });
+        function successFunc() {
+            success(values.join(","));
+        }
+        editor.addEventListener("change", successFunc);
+        editor.addEventListener("blur", successFunc);
+        return editor;
+    }*/
+    	async function save_data() {
+    		// move headerData to data
+    		data.created = headerData[0].created;
+
+    		data.updated = headerData[0].updated;
+    		data.id = headerData[0].id;
+    		data.name = headerData[0].name;
+    		data.email = headerData[0].email;
+    		data.message = headerData[0].message;
+    		data.phone = headerData[0].phone;
+    		data.status = headerData[0].status;
+    		data.client = headerData[0].client_id;
+    		data.client_businessName = headerData[0].client_name;
+    		console.log('save data: ', data);
+    		$$invalidate(1, updateing_to_server = true);
+    		await apiSaveMOrder(data.id, data);
+    		$$invalidate(1, updateing_to_server = false);
+    		alert('saved');
+    	}
+
+    	function multiSelectProviderFormatter(cell, formatterParams, onRendered) {
+    		let value = cell.getValue();
+    		let values;
+
+    		if (value != undefined) {
+    			// if is array do nothing
+    			// if string, split by comma
+    			if (typeof value == 'string') {
+    				values = value.split(",");
+    			} else {
+    				values = value;
+    			}
+    		} else {
+    			values = [];
+    		}
+
+    		let html = "<select class=\"\"  data-placeholder='סמן ספקים' multiple=\"multiple\">";
+
+    		ALL_PROVIDERS.forEach(provider => {
+    			/* values = 
+        0: {value: '32', label: 'אחים אשכנזי'}
+        1: {value: '33', label: "אורית אוביץ'"}
+        2: {value: '34', label: 'קשת'}
+        3: {value: '35', label: 'ארטוס'}
+        4: {value: '36', label: 'צעצועי מיכל'}
+        5: {value: '37', label: 'טכנו י.ש'}
+        6: {value: '38', label: 'קראוס'}
+        7: {value: '39', label: 'רוי'}
+        8: {value: '41', label: 'סיינט'}
+    */
+    			// provider = {value: '32', label: 'אחים אשכנזי'}
+    			let selected = values.find(v => v == provider.value) != undefined
+    			? "selected"
+    			: "";
+
+    			//let selected = values.indexOf(parseInt(provider.value)) > -1 ? "selected" : "";
+    			html += `<option value="${provider.value}" ${selected}>${provider.label}</option>`;
+    		});
+
+    		html += "</select>";
+    		let $el = window.$(html); //.get(0);
+
+    		//window.multiSelect.refresh();
+    		onRendered(function () {
+    			$el.select2({
+    				placeholder: 'This is my placeholder',
+    				allowClear: true,
+    				dropdownAutoWidth: true,
+    				width: '100%',
+    				closeOnSelect: true
+    			});
+
+    			$el.on('change', function (e) {
+    				console.log('change: ', e);
+    				let value = $el.val();
+    				console.log('value: ', value);
+    				console.log('cell value before: ', cell.getValue());
+    				cell.setValue(value);
+    			});
+    		}); //el.select2('open');
+    		//window.multiSelect.refresh();
+
+    		//window.$(el).chosen({})
+    		return $el.get(0);
+    	}
+
+    	let ALL_PROVIDERS;
+
     	onMount(async () => {
     		await load_order_from_server();
+    		ALL_PROVIDERS = await apiGetProviders();
+    		console.log('ALL_PROVIDERS:', ALL_PROVIDERS);
 
     		headersTable = new TabulatorFull("#headers-table",
     		{
     				data: headerData,
-    				autoColumns: true,
+    				//autoColumns:true,
     				layout: "fitDataStretch",
-    				textDirection: "rtl"
+    				textDirection: "rtl",
+    				columns: [
+    					{ title: 'תאריך יצירה', field: 'created' },
+    					{ title: 'תאריך שינוי', field: 'updated' },
+    					{ title: 'id', field: 'id' },
+    					{ title: 'שם', field: 'name' },
+    					{ title: 'אימייל', field: 'email' },
+    					{
+    						title: 'הודעה',
+    						field: 'message',
+    						editor: true
+    					},
+    					{ title: 'טפלון', field: 'phone' },
+    					{
+    						title: 'סטטוס',
+    						field: 'status',
+    						editor: "select",
+    						editorParams: {
+    							values: ['new', 'done'],
+    							multiselect: false
+    						}
+    					},
+    					{ title: 'שם לקוח', field: 'client_name' }
+    				]
     			});
 
     		productsTable = new TabulatorFull("#products-table",
@@ -33878,7 +34135,6 @@ var morderedit = (function () {
     						sorter: "boolean",
     						editor: true,
     						cellEdited(cell) {
-    							productCellEdited(cell);
     						}
     					},
     					{
@@ -33889,7 +34145,6 @@ var morderedit = (function () {
     						sorter: "boolean",
     						editor: true,
     						cellEdited(cell) {
-    							productCellEdited(cell);
     						}
     					},
     					{
@@ -33900,7 +34155,6 @@ var morderedit = (function () {
     						sorter: "boolean",
     						editor: true,
     						cellEdited(cell) {
-    							productCellEdited(cell);
     						}
     					},
     					{
@@ -33951,15 +34205,6 @@ var morderedit = (function () {
     			});
 
     		console.log('data:', data);
-
-    		setInterval(
-    			() => {
-    				if (data != serverData) {
-    					$$invalidate(1, showUpdateButton = true);
-    				}
-    			},
-    			5000
-    		);
     	});
 
     	const writable_props = ['id'];
@@ -33969,22 +34214,24 @@ var morderedit = (function () {
     	});
 
     	const click_handler = () => {
-    		$$invalidate(1, showUpdateButton = false);
+    		save_data();
     	};
 
     	$$self.$$set = $$props => {
-    		if ('id' in $$props) $$invalidate(2, id = $$props.id);
+    		if ('id' in $$props) $$invalidate(3, id = $$props.id);
     	};
 
     	$$self.$capture_state = () => ({
     		onMount,
     		Loading: Loading$1,
     		apiGetMOrder,
-    		apiUpdateMOrderProductRow,
+    		apiGetProviders,
+    		apiSaveMOrder,
     		Tabulator: TabulatorFull,
     		Button: Button$1,
     		MultiSelect: MultiSelect$1,
     		updateing,
+    		updateing_to_server,
     		headersTable,
     		productsTable,
     		data,
@@ -33996,12 +34243,15 @@ var morderedit = (function () {
     		productCellEdited,
     		id,
     		load_order_from_server,
+    		save_data,
     		multiSelectProviderFormatter,
+    		ALL_PROVIDERS,
     		createPivot
     	});
 
     	$$self.$inject_state = $$props => {
     		if ('updateing' in $$props) $$invalidate(0, updateing = $$props.updateing);
+    		if ('updateing_to_server' in $$props) $$invalidate(1, updateing_to_server = $$props.updateing_to_server);
     		if ('headersTable' in $$props) headersTable = $$props.headersTable;
     		if ('productsTable' in $$props) productsTable = $$props.productsTable;
     		if ('data' in $$props) data = $$props.data;
@@ -34009,21 +34259,22 @@ var morderedit = (function () {
     		if ('headerData' in $$props) headerData = $$props.headerData;
     		if ('productsData' in $$props) productsData = $$props.productsData;
     		if ('groupedProducts' in $$props) groupedProducts = $$props.groupedProducts;
-    		if ('showUpdateButton' in $$props) $$invalidate(1, showUpdateButton = $$props.showUpdateButton);
-    		if ('id' in $$props) $$invalidate(2, id = $$props.id);
+    		if ('showUpdateButton' in $$props) showUpdateButton = $$props.showUpdateButton;
+    		if ('id' in $$props) $$invalidate(3, id = $$props.id);
+    		if ('ALL_PROVIDERS' in $$props) ALL_PROVIDERS = $$props.ALL_PROVIDERS;
     	};
 
     	if ($$props && "$$inject" in $$props) {
     		$$self.$inject_state($$props.$$inject);
     	}
 
-    	return [updateing, showUpdateButton, id, click_handler];
+    	return [updateing, updateing_to_server, save_data, id, click_handler];
     }
 
     class MorderEdit extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance, create_fragment, safe_not_equal, { id: 2 });
+    		init(this, options, instance, create_fragment, safe_not_equal, { id: 3 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
@@ -34035,7 +34286,7 @@ var morderedit = (function () {
     		const { ctx } = this.$$;
     		const props = options.props || {};
 
-    		if (/*id*/ ctx[2] === undefined && !('id' in props)) {
+    		if (/*id*/ ctx[3] === undefined && !('id' in props)) {
     			console_1.warn("<MorderEdit> was created without expected prop 'id'");
     		}
     	}
