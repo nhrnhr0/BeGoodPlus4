@@ -78,8 +78,7 @@ def api_get_order_data(request, id):
                 e.size_id = entry['size']
                 e.varient_id = entry['varient']
                 print('e2', e, 'save')
-                #e.save()
-                all_es.append(e)
+                e.save()
         print('order', order, 'save')
         order.save()
         return JsonResponse({'status':'ok'}, status=status.HTTP_200_OK)
