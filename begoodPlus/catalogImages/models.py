@@ -54,7 +54,7 @@ class CatalogImage(models.Model):
     amountCarton = models.IntegerField(verbose_name=_('amount in carton'), blank=False, null=False, default=0)
     colors = models.ManyToManyField(to=Color, verbose_name=_('colors'))
     sizes = models.ManyToManyField(to=ProductSize, verbose_name=_('sizes'))
-    varients = models.ManyToManyField(to=CatalogImageVarient, verbose_name=_('varients'))
+    varients = models.ManyToManyField(to=CatalogImageVarient, verbose_name=_('varients'), blank=True)
     providers = models.ManyToManyField(to=Provider, verbose_name=_('providers'))
     qyt = models.IntegerField(verbose_name=_('qyt'), blank=False, null=False, default=0)
     show_sizes_popup = models.BooleanField(verbose_name=_('show sizes popup'), default=True)
