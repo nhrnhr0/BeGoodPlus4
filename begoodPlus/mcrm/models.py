@@ -1,6 +1,10 @@
 from django.db import models
 from django.utils.translation import gettext_lazy  as _
 from django.utils.html import mark_safe
+from adminsortable.models import Sortable
+
+
+
 class CrmTag(models.Model):
     name = models.CharField(max_length=100, verbose_name=_('name'), unique=True)
     def __str__(self):
@@ -10,12 +14,22 @@ class CrmIntrest(models.Model):
     name = models.CharField(max_length=100, verbose_name=_('name'), unique=True)
     def __str__(self):
         return self.name
+
+class CrmBusinessTypeSelect(Sortable):
+    name = models.CharField(max_length=100, verbose_name=_('name'), unique=True)
+    my_order = models.PositiveIntegerField(default=0, db_index=True)
+    class Meta(Sortable.Meta):
+        ordering = ('my_order',)
+    def __str__(self):
+        return self.name
 # Create your models here.
 class CrmUser(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    businessName = models.CharField(max_length=100, verbose_name=_('business name'))
-    businessType = models.CharField(max_length=100, verbose_name=_('business type'))
+    businessName = models.CharField(max_length=100, verbose_name=_('business name')) 
+    businessType = models.CharField(max_length=100, verbose_name=_('business type'))# OLD UNUSED
+    businessSelect = models.ForeignKey(to=CrmBusinessTypeSelect, on_delete=models.SET_NULL, verbose_name=_('business'), null=True, blank=True)
+
     businessTypeCustom = models.CharField(max_length=100, null=True, blank=True, verbose_name=_('business type custom'))
     name = models.CharField(max_length=100, verbose_name=_('name'))
     phone = models.CharField(max_length=100, null=True, blank=True, verbose_name=_('phone'))
@@ -27,7 +41,7 @@ class CrmUser(models.Model):
     tags = models.ManyToManyField('CrmTag', blank=True, verbose_name=_('tags'))
     intrested = models.ManyToManyField('CrmIntrest', blank=True, verbose_name=_('intrested'))
     class Meta():
-        unique_together = ('businessName', 'name')
+        unique_together = ('businessName', 'businessType', 'businessTypeCustom', 'name','phone', 'email', 'address',)
         
     def tag_display(self):
         return mark_safe('<br>'.join([tag.name for tag in self.tags.all()]))

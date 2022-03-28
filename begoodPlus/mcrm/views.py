@@ -6,7 +6,7 @@ from rest_framework.decorators import api_view, permission_classes
 from django.http import JsonResponse
 from    mcrm.models import CrmTag
 from mcrm.models import CrmUser
-from mcrm.serializers import CrmIntrestSerializer
+from mcrm.serializers import CrmBusinessTypeSerializer, CrmIntrestSerializer
 from mcrm.tasks import new_user_subscribed_task
 import pandas as pd
 from django.contrib import messages
@@ -50,10 +50,16 @@ def admin_upload_bulk_crm_exel(request):
     # redirect to mcrm admin view
     
     
-from .models import CrmIntrest
+from .models import CrmBusinessTypeSelect, CrmIntrest
+
 def get_all_interests(request):
     intrests = CrmIntrest.objects.all()
     data = CrmIntrestSerializer(intrests, many=True).data
+    return JsonResponse(data, safe=False)
+
+def get_all_business_types(request):
+    businessTypes = CrmBusinessTypeSelect.objects.all()
+    data = CrmBusinessTypeSerializer(businessTypes, many=True).data
     return JsonResponse(data, safe=False)
 
 # Create your views here.
@@ -61,22 +67,32 @@ def get_all_interests(request):
 @permission_classes((AllowAny,))
 def mcrm_lead_register(request):
     form_data = request.data # 4147
-    crmObj, is_created = CrmUser.objects.get_or_create(businessName=form_data['business-name'], name=form_data['name'],)
-    crmObj.businessType = form_data['business-type']
-    crmObj.businessTypeCustom = form_data.get('business-type-other', None)
-    phone = form_data.get('phone', crmObj.phone)
+    
+    phone = form_data.get('phone', '')
     if (phone.startswith('05')):
         phone = phone[1:]
         phone = '+972' + phone
     phone = phone.replace('-', '')
     phone = phone.replace(' ', '')
-    crmObj.phone = phone
-    crmObj.email = form_data.get('email', crmObj.email)
-    crmObj.want_emails = True if form_data.get('mailing-list', None) == 'on' else False
-    crmObj.want_whatsapp = True if form_data.get('whatsapp-list', None) == 'on' else False
-    crmObj.address = form_data.get('address', crmObj.address)
-    crmObj.save()
-    new_user_subscribed_task.delay(crmObj.id)
+    #phone = phone.replace('\u')
+    phone = phone.replace('\u2066', '')
+    
+    
+    businessTypes = form_data['business_types']
+    for businessType in businessTypes:
+        businessType = businessType.strip()
+        businessTypeObj = CrmBusinessTypeSelect.objects.get(name=businessType)
+        crmObj, is_created = CrmUser.objects.get_or_create(businessName=form_data['business-name'], name=form_data['name'], businessSelect=businessTypeObj, phone=phone)
+        if businessType == 'אחר - פרט למטה':
+            crmObj.businessTypeCustom = form_data.get('business-type-other',crmObj.businessTypeCustom)
+        if phone != '':
+            crmObj.phone = phone
+        crmObj.email = form_data.get('email', crmObj.email)
+        crmObj.want_emails = True if form_data.get('mailing-list', None) == 'on' else False
+        crmObj.want_whatsapp = True if form_data.get('whatsapp-list', None) == 'on' else False
+        crmObj.address = form_data.get('address', crmObj.address)
+        crmObj.save()
+        new_user_subscribed_task.delay(crmObj.id)
     #new_user_subscribed_task(crmObj.id)
     return JsonResponse({
         'status': 200,

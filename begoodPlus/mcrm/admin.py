@@ -3,13 +3,15 @@ from datetime import datetime
 from django.contrib import admin
 from django.http import HttpResponse
 from django.conf import settings
-from mcrm.models import CrmTag
+from begoodPlus.secrects import MAPS_API_KEY
+from mcrm.models import CrmBusinessTypeSelect, CrmTag
 from advanced_filters.admin import AdminAdvancedFiltersMixin
 import csv
 from django.http import HttpResponse
 import io
 from mcrm.models import CrmUser, CrmIntrest
 import xlsxwriter
+from adminsortable.admin import SortableAdmin
 
 
 # Register your models here.
@@ -24,22 +26,31 @@ class CrmUser(models.Model):
     want_emails = models.BooleanField(default=True)
     want_whatsapp = models.BooleanField(default=True)
 '''
+class CrmBusinessTypeSelectAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name',)
+admin.site.register(CrmBusinessTypeSelect, CrmBusinessTypeSelectAdmin)
+
 class AdminCrmTag(admin.ModelAdmin):
-    list_display = ('name',)
-    
+    list_display = ('id', 'name',)
 admin.site.register(CrmTag, AdminCrmTag)
+
 class AdminCrmIntrest(admin.ModelAdmin):
-    list_display=('name',)
-    pass
+    list_display=('id', 'name',)
 admin.site.register(CrmIntrest, AdminCrmIntrest)
-class AdminCrmUser(AdminAdvancedFiltersMixin, admin.ModelAdmin):
-    list_display = ('businessName', 'name', 'businessType','businessTypeCustom', 'phone', 'email', 'want_emails', 'want_whatsapp','flashy_contact_id', 'created_at', 'updated_at','address', )
+
+
+class AdminCrmUser(admin.ModelAdmin,AdminAdvancedFiltersMixin):
+    list_display = ('businessName', 'name','businessSelect', 'businessType','businessTypeCustom', 'phone', 'email', 'want_emails', 'want_whatsapp','flashy_contact_id', 'created_at', 'updated_at','address', )
     search_fields = ('businessName', 'name', 'businessType','businessTypeCustom', 'phone', 'email', 'tags__name', 'address', )
     readonly_fields = ('tag_display','created_at', 'updated_at',)
     advanced_filter_fields = ('businessName', 'name', 'phone', 'email','businessType', 'businessTypeCustom' 'want_emails', 'want_whatsapp', ('tags__name', 'tag name'), 'address', 'created_at', 'updated_at',)
     filter_horizontal = ('tags',)
     actions = ['export_as_csv', 'export_xlsx_for_whatsapp', 'export_all_to_execl']
-    
+
+    def change_view(self, request, object_id, form_url='', extra_context=None):
+        extra_context = extra_context or {}
+        extra_context['MAPS_API_KEY'] = MAPS_API_KEY
+        return super().change_view(request, object_id, form_url, extra_context=extra_context)
     def export_xlsx_for_whatsapp(self, request, queryset):
         output = io.BytesIO()
         workbook = xlsxwriter.Workbook(output)

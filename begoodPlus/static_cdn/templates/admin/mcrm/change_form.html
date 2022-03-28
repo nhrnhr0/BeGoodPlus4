@@ -1,0 +1,32 @@
+{% extends "admin/change_form.html" %}
+{% load i18n admin_urls %}
+{%load static%}
+{% load django_svelte %}
+
+
+{% block extrahead %}{{ block.super }}
+    <script type="text/javascript" src="{% url 'admin:jsi18n' %}"></script>
+    {{ media }}
+{% endblock %}
+
+{% block field_sets %}
+    {% for fieldset in adminform %}
+        {% include "admin/includes/fieldset.html" %}
+    {% endfor %}
+    <script src="https://maps.googleapis.com/maps/api/js?key={{MAPS_API_KEY}}&callback=initMap&libraries=places&v=weekly&channel=2" async></script>
+    <script>
+        function initMap() {
+            console.log('initMap');
+            const options = {
+                fields: ["formatted_address", "geometry", "name"],
+                strictBounds: false,
+                types: ['address'],
+                componentRestrictions: {country: 'il'}
+            };
+            const input = document.getElementById("id_address");
+            const autocomplete = new google.maps.places.Autocomplete(input, options);
+            console.log(autocomplete);
+        }
+    </script>
+{% endblock %}
+
