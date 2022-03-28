@@ -56,6 +56,8 @@ class AdminCrmUser(AdminAdvancedFiltersMixin, admin.ModelAdmin):
         for obj in queryset:
             if obj.phone.startswith('+'):
                 data.append([obj.phone, obj.name.split(' ')[0], obj.name.split(' ')[-1], obj.name, ''])
+            elif obj.phone.startswith('\u2066'):
+                data.append(['+'+obj.phone[1:], obj.name.split(' ')[0], obj.name.split(' ')[-1], obj.name, ''])
             else:
                 data.append(['+'+obj.phone, obj.name.split(' ')[0], obj.name.split(' ')[-1], obj.name, ''])
             #data.append(['+' + str(obj.phone), obj.name.split(' ')[0], obj.name.split(' ')[-1], obj.name])
@@ -125,6 +127,9 @@ class AdminCrmUser(AdminAdvancedFiltersMixin, admin.ModelAdmin):
         worksheet = workbook.add_worksheet()
         tags_worksheet = workbook.add_worksheet('תגים')
         intrested_worksheet = workbook.add_worksheet('תחומי_עניין')
+        frontend_worksheet = workbook.add_worksheet('צד_לקוח')
+        frontend_options = ['אבטחה','הייטק','הפקות/ חיי לילה','חברות ניקיון וכוח אדם ','חקלאים/ גדש','לולים','מוסכים','מטבחים/ מסעדות','מלונאות','מנהל חינוך','מנהל תרבות','מנהל קורונה','מסגריות/ רתכים','מפעל/ תעשייה ','נגריות','נוי/ גננים','רפתות', 'בית אריזה', 'טכנאי/מתקין','תחזוקה','נאמן בטיחות', 'אחר - פרט למטה', ]
+
 
         all_tags = CrmTag.objects.all()
         tags = []
@@ -141,7 +146,9 @@ class AdminCrmUser(AdminAdvancedFiltersMixin, admin.ModelAdmin):
         intrested_worksheet.write(0, 0, 'תחומי עניין')
         intrested_worksheet.write_column(1, 0, intrested)
 
-        
+
+        frontend_worksheet.write(0, 0, 'צד לקוח')
+        frontend_worksheet.write_column(1, 0, frontend_options)
         
         all_crm = CrmUser.objects.all()
         # headers:
@@ -158,7 +165,7 @@ class AdminCrmUser(AdminAdvancedFiltersMixin, admin.ModelAdmin):
                 worksheet.write(row_num, col_num, cell_data)
         worksheet.data_validation('L1:L{}'.format(len(data)), {'validate': 'list', 'source': 'תגים!$A$2:$A${}'.format(len(tags)+1)})
         worksheet.data_validation('M1:M{}'.format(len(data)), {'validate': 'list', 'source': 'תחומי_עניין!$A$2:$A${}'.format(len(intrested)+1)})
-        
+        worksheet.data_validation('B1:B{}'.format(len(data)), {'validate': 'list', 'source': 'צד_לקוח!$A$2:$A${}'.format(len(frontend_options)+1)})
         # sheet 4
         # url to uplaod the file
         info_worksheet = workbook.add_worksheet('פרטי העלאה')

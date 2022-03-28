@@ -93,6 +93,8 @@ def upload_crm_execl(request):
             df1 =  pd.read_excel(xls, 'Sheet1')
             df_tags = pd.read_excel(xls, 'תגים')
             df_intrests = pd.read_excel(xls, 'תחומי_עניין')
+
+            
             users_created_counter = 0
             tags_scaned_counter = 0
             intrests_scaned_counter = 0
@@ -114,7 +116,7 @@ def upload_crm_execl(request):
             
             
             for index, row in df1.iterrows():
-                print(index, row)
+                #print(index, row)
                 # data.columns
                 #Index(['שם עסק', 'סוג עסק', 'סוג עסק חדש', 'שם', 'טלפון', 'אימייל', 'רוצה אימיילים', 'רוצה וואצאפ', 'כתוכת', 'תגים', 'תחומי עניין', 'רשימת תגים', 'רשימת תחומי עניין'], dtype='object')
                 userInfo = {
@@ -132,7 +134,7 @@ def upload_crm_execl(request):
                 crm_user.businessType =  userInfo['businessType']
                 crm_user.businessTypeCustom = userInfo['businessTypeCustom'] if isinstance(userInfo['businessTypeCustom'], str) else crm_user.businessTypeCustom
                 phone = userInfo['phone'] if isinstance(userInfo['phone'], str) else userInfo['phone']
-                if phone:
+                if phone and isinstance(phone, str):
                     if (phone.startswith('05')):
                         phone = phone[1:]
                         phone = '+972' + phone
