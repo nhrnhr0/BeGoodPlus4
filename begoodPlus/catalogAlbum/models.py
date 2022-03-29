@@ -44,7 +44,17 @@ class CatalogAlbum(models.Model):
 '''
 from mptt.models import MPTTModel, TreeForeignKey
 import datetime
+
+class TopLevelCategory(models.Model):
+    name = models.CharField(max_length=50, unique=True)
+    my_order = models.PositiveIntegerField(default=0, blank=True, null=True, db_index=True, unique=True)
+    def __str__(self) -> str:
+        return self.name
+    class Meta:
+        ordering = ('my_order',)
+
 class CatalogAlbum(MPTTModel):
+    topLevelCategory = models.ForeignKey(to="TopLevelCategory", on_delete=models.SET_NULL, null=True, blank=True, related_name='topLevelCategory')
     title = models.CharField(max_length=120, verbose_name=_("title"))
     slug = models.SlugField(max_length=120, verbose_name=_("slug"))
     description= models.TextField(verbose_name=_('description'), default='', blank=True)
