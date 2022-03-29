@@ -7,8 +7,8 @@ from celery import shared_task
 
 import time
 
-from client.models import UserSessionLogger
-from core.models import SvelteCartModal
+from client.models import UserQuestion, UserSessionLogger
+from core.models import SvelteCartModal, SvelteContactFormModal
 
 
 @shared_task
@@ -45,10 +45,54 @@ from django.template.loader import render_to_string
 from django.core import mail
 from django.utils.html import strip_tags
 from django.conf import settings
-from begoodPlus.secrects import TELEGRAM_ADMIN_GROUP_CHAT_ID, MAIN_EMAIL_RECEIVER
+from begoodPlus.secrects import TELEGRAM_CHAT_ID_CARTS, MAIN_EMAIL_RECEIVER, TELEGRAM_CHAT_ID_LEADS, TELEGRAM_CHAT_ID_QUESTIONS
 import telegram
 from begoodPlus.celery import telegram_bot
+@shared_task
+def send_cantacts_notificatios(contacts_id):
+    contact_info = SvelteContactFormModal.objects.get(id=contacts_id)
+    info = {
+        'user': contact_info.user,
+        'device': contact_info.device,
+        'uid': contact_info.uid,
+        'name': contact_info.name,
+        'phone': contact_info.phone,
+        'email': contact_info.email,
+        'message': contact_info.message,
+        'created_date': contact_info.created_date
+    }
+    chat_id = TELEGRAM_CHAT_ID_LEADS
+    text = 'טופס לידים בתחתית הדף הוגש'
+    text += '\n'
+    text += '<b> שם: </b> {name}'.format(**info)
+    text += '\n'
+    text += '<b> טלפון: </b> {phone}'.format(**info)
+    text += '\n'
+    text += '<b> אימייל: </b> {email}'.format(**info)
+    text += '\n'
+    text += '<b> הודעה: </b> {message}'.format(**info)
+    text += '\n'
+    text += '<b> תאריך יצירת הטופס: </b> {created_date}'.format(**info)
+    text += '\n'
+    text += '<b> מזהה משתמש: </b> {uid}'.format(**info)
+    text += '\n'
+    text += '<b> מכשיר: </b> {device}'.format(**info)
 
+    telegram_bot.send_message(chat_id=chat_id, text=text, parse_mode=telegram.ParseMode.HTML)
+@shared_task
+def send_question_notification(question_id):
+    obj = UserQuestion.objects.get(id=question_id)
+    info = {
+        'product': obj.product,
+        'question': obj.question,
+        'user': obj.user,
+        'created_at': obj.created_at,
+        'ip':   obj.ip,
+    }
+    chat_id = TELEGRAM_CHAT_ID_QUESTIONS
+    text = 'שאלה חדשה\nנשלחה על ידי <b> {user} </b> בעזרת האתר שלנו בכתובת <b> {ip} </b> בתאריך <b> {created_at} </b> עבור המוצר <b> {product} </b>'.format(**info)
+    text += '\n\n{question}'.format(**info)
+    telegram_bot.send_message(chat_id=chat_id, text=text, parse_mode=telegram.ParseMode.HTML)
 @shared_task
 def send_cart_notification(cart_id):
     print('=================== send_cart_email is running ==========================')
@@ -68,7 +112,7 @@ def send_cart_notification(cart_id):
 
     # sending telegram message
     #for chat_id in self.chat_ids:
-    chat_id = TELEGRAM_ADMIN_GROUP_CHAT_ID
+    chat_id = TELEGRAM_CHAT_ID_CARTS
     telegram_message = '* ' + subject + ' *' + '\n'
     for item in cart.productEntries.all():
         row = str(item.amount) + ' ' + item.product.title + '\n'

@@ -95,6 +95,10 @@ def svelte_contact_form(request):
                 user = request.user
             data = SvelteContactFormModal.objects.create(user=user, device=device,uid=uuid, name=name, phone=phone, email=email,message=message)
             data.save()
+            if(settings.DEBUG):
+                send_cantacts_notificatios(data.id)
+            else:
+                send_cantacts_notificatios.delay(data.id)
             return JsonResponse({
                 'status':'success',
                 'detail':'form sent successfuly'
@@ -139,6 +143,10 @@ def client_product_question(request):
         product = CatalogImage.objects.get(id=product_id),question = question,
         user = user,ip=device,is_answered=False)
     data.save()
+    if (settings.DEBUG):
+        send_question_notification(data.id)
+    else:
+        send_question_notification.delay(data.id)
     return JsonResponse({
         'status':'success',
         'id':data.id,
@@ -231,7 +239,7 @@ def api_logout(request):
 
 
 
-from .tasks import send_cart_notification, test
+from .tasks import send_cantacts_notificatios, send_cart_notification, send_question_notification, test
 
 def test_celery_view(request):
     print('test_celery_view start')

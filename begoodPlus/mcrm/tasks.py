@@ -2,7 +2,7 @@
 
 
 from begoodPlus import secrects
-from begoodPlus.secrects import FLASHY_MAIN_LIST_ID, FLASHY_MY_API_KEY,TELEGRAM_ADMIN_GROUP_CHAT_ID
+from begoodPlus.secrects import FLASHY_MAIN_LIST_ID, FLASHY_MY_API_KEY,TELEGRAM_CHAT_ID_LEADS
 from .models import CrmUser
 import requests
 
@@ -41,7 +41,7 @@ def trigger_welcome_whatsapp_message_to_user(crmUser):
 def send_new_user_telegram_message_to_admin_group(user):
     
     
-    chat_id = TELEGRAM_ADMIN_GROUP_CHAT_ID
+    chat_id = TELEGRAM_CHAT_ID_LEADS
     args = {'user_name': user.name,
             'user_business_name': user.businessName,
             'user_business_type': user.businessType,

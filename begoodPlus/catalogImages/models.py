@@ -58,7 +58,7 @@ class CatalogImage(models.Model):
     providers = models.ManyToManyField(to=Provider, verbose_name=_('providers'))
     qyt = models.IntegerField(verbose_name=_('qyt'), blank=False, null=False, default=0)
     show_sizes_popup = models.BooleanField(verbose_name=_('show sizes popup'), default=True)
-    
+    out_of_stock = models.BooleanField(verbose_name=_('out of stock'), default=False)
     
     detailTabel = models.ManyToManyField(related_name='parent',to=CatalogImageDetail, verbose_name=_('mini-tabel'), blank=True)
 
