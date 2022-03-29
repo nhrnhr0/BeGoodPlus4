@@ -41,8 +41,9 @@ class CrmUser(models.Model):
     tags = models.ManyToManyField('CrmTag', blank=True, verbose_name=_('tags'))
     intrested = models.ManyToManyField('CrmIntrest', blank=True, verbose_name=_('intrested'))
     class Meta():
-        unique_together = ('businessName', 'businessType', 'businessTypeCustom', 'name','phone', 'email', 'address',)
-        
+        #unique_together =('businessName', 'businessType', 'businessTypeCustom',)
+        unique_together=('businessName', 'name'),
+        pass
     def tag_display(self):
         return mark_safe('<br>'.join([tag.name for tag in self.tags.all()]))
     

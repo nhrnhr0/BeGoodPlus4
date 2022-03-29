@@ -101,6 +101,57 @@ def mcrm_lead_register(request):
         'is_created': is_created,
     })
     
+def upload_crm_execl2(request):
+    user_created_counter = 0
+    user_updated_counter = 0
+    if request.user and request.user.is_superuser:
+        
+        if request.method == 'POST':
+            xls = pd.ExcelFile(request.FILES['file'])
+            df1 =  pd.read_excel(xls, 'Sheet1')
+            for index, row in df1.iterrows():
+                bname = row['שם העסק']
+                name = row['שם']
+                select = None
+                if isinstance(row['select'], str):
+                    try:
+                        select = CrmBusinessTypeSelect.objects.get(name=row['select'])
+                    except:
+                        select = None
+                customSelect = None
+                if isinstance(row['עסק לא מוגדר'], str):
+                    customSelect = row['עסק לא מוגדר']
+                phone = row['טלפון']
+                email = row['אימייל']
+                want_emails = True if row['רוצה מיילים'] == 1 else False
+                want_whatsapp = True if row['רוצה וואצאפ'] == 1 else False
+                address = row['כתובת']
+                intrests = row['תחומי עניין']
+                intrests = intrests.split(',')
+                intrests = [x.strip() for x in intrests]
+                intrestsObjs = []
+                for intr in intrests:
+                    intrObj = CrmIntrest.objects.get(name=intr)
+                    intrestsObjs.append(intrObj)
+                crmObjs = CrmUser.objects.filter(businessName=bname, name=name, businessSelect=select)
+                if len(crmObjs) == 0:
+                    crmObj = CrmUser.objects.create(businessName=bname, name=name, businessSelect=select, businessTypeCustom=customSelect, phone=phone, email=email, want_emails=want_emails, want_whatsapp=want_whatsapp, address=address)
+                else:
+                    crmObj = crmObjs[0]
+                    crmObj.businessSelect = select
+                    crmObj.businessTypeCustom = customSelect
+                    crmObj.phone = phone
+                    crmObj.email = email
+                    crmObj.want_emails = want_emails
+                    crmObj.want_whatsapp = want_whatsapp
+                    crmObj.address = address
+                crmObj.intrested.set(intrestsObjs)
+                crmObj.save()
+            messages.add_message(request, messages.INFO, '{} משתמשים נוצרו'.format(user_created_counter))
+            messages.add_message(request, messages.INFO, '{} משתמשים שונו'.format(user_updated_counter))#, businessTypeCustom=customSelect, phone=phone, email=email, want_emails=want_emails, want_whatsapp=want_whatsapp, address=address)
+            return redirect('/admin/mcrm/crmuser/')
+        else:
+            return render(request, 'upload_crm_execl2.html')
 def upload_crm_execl(request):
     if request.user and request.user.is_superuser:
         if request.method == 'POST':

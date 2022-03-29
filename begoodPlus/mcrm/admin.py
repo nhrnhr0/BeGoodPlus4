@@ -45,12 +45,74 @@ class AdminCrmUser(admin.ModelAdmin,AdminAdvancedFiltersMixin):
     readonly_fields = ('tag_display','created_at', 'updated_at',)
     advanced_filter_fields = ('businessName', 'name', 'phone', 'email','businessType', 'businessTypeCustom' 'want_emails', 'want_whatsapp', ('tags__name', 'tag name'), 'address', 'created_at', 'updated_at',)
     filter_horizontal = ('tags',)
-    actions = ['export_as_csv', 'export_xlsx_for_whatsapp', 'export_all_to_execl']
+    actions = ['export_as_csv', 'export_xlsx_for_whatsapp', 'export_all_to_execl', 'download_full_CRM']
 
+    
+    
     def change_view(self, request, object_id, form_url='', extra_context=None):
         extra_context = extra_context or {}
         extra_context['MAPS_API_KEY'] = MAPS_API_KEY
         return super().change_view(request, object_id, form_url, extra_context=extra_context)
+    
+    def download_full_CRM(self, request, queryset):
+        output = io.BytesIO()
+        workbook = xlsxwriter.Workbook(output)
+        worksheet = workbook.add_worksheet()
+        
+        
+        intrested_worksheet = workbook.add_worksheet('תחומי_עניין')
+        all_intrested = CrmIntrest.objects.all()
+        intrested = []
+        for intrest in all_intrested:
+            intrested.append(intrest.name)
+        intrested_worksheet.write(0, 0, 'תחומי_עניין')
+        intrested_worksheet.write_column(1, 0, intrested)
+        
+        buisness_types_worksheet = workbook.add_worksheet('סוגי_עסק')
+        all_buisness_types = CrmBusinessTypeSelect.objects.all()
+        buisness_types = []
+        for buisness_type in all_buisness_types:
+            buisness_types.append(buisness_type.name)
+        buisness_types_worksheet.write(0, 0, 'סוגי_עסק')
+        buisness_types_worksheet.write_column(1, 0, buisness_types)
+        
+        
+        
+        data = []
+        data.append(['שם העסק','שם', 'select','עסק לא מוגדר', 'טלפון', 'אימייל', 'רוצה מיילים', 'רוצה וואצאפ', 'כתובת', 'תחומי עניין', 'רשימת תחומי עניין'])
+        all_users = CrmUser.objects.all()
+        for user in all_users:
+            intrests = ','.join(['{},'.format(intrest.name) for intrest in user.intrested.all()])
+            bname = None
+            if user.businessSelect:
+                bname = user.businessSelect.name
+            entry = [user.businessName, user.name, bname,user.businessTypeCustom, user.phone, user.email, '1' if user.want_emails else '0', '1' if user.want_whatsapp else '0', user.address, intrests]
+            data.append(entry)
+        for row, row_data in enumerate(data):
+            for col, val in enumerate(row_data):
+                worksheet.write(row, col, val)
+        #worksheet.data_validation('C1:C{}'.format(len(data)), {'validate': 'list', 'source': 'תחומי עניין!$A$1:$A${}'.format(len(all_intrested))})
+        worksheet.data_validation('C1:C{}'.format(len(data)), {'validate': 'list', 'source': 'סוגי_עסק!$A$2:$A${}'.format(len(all_buisness_types))})
+        worksheet.data_validation('K1:K{}'.format(len(data)), {'validate': 'list', 'source': 'תחומי_עניין!$A$2:$A${}'.format(len(all_intrested))})
+        # Close the workbook before sending the data.
+        
+        instractions_worksheet = workbook.add_worksheet('הוראות')
+        instractions_worksheet.write(0, 0, 'הוראות')
+        instractions_worksheet.write(1, 0, settings.MY_DOMAIN + '/admin/crm/crmuser/upload_execl2')
+        
+        workbook.close()
+
+        # Rewind the buffer.
+        output.seek(0)
+        
+        # Set up the Http response.
+        filename = 'whatsapp_list.xlsx'
+        response = HttpResponse(
+            output,
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        response['Content-Disposition'] = 'attachment; filename=%s' % filename
+        return response
     def export_xlsx_for_whatsapp(self, request, queryset):
         output = io.BytesIO()
         workbook = xlsxwriter.Workbook(output)
