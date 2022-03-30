@@ -18,7 +18,8 @@ from inventory.views import add_doc_stock_enter_ppn_entry, delete_doc_stock_ente
 from clientApi.views import get_all_colors_api, get_all_sizes_api, main_page_api
 from campains.views import admin_get_all_campains, admin_get_campain_products, get_user_campains
 from inventory.views import DocStockEnterViewSet, doc_stock_enter
-from mcrm.views import get_all_business_types, get_all_interests, mcrm_lead_register, admin_upload_bulk_crm_exel, upload_crm_execl, upload_crm_execl2
+#from mcrm.views import , admin_upload_bulk_crm_exel, upload_crm_execl, upload_crm_execl2
+from msCrm.views import mcrm_lead_register,get_all_business_types, get_all_interests,import_mscrm_from_exel
 from core.views import client_product_question, test_celery_view
 from catalogImages.views import admin_api_get_product_cost_price, all_images_ids, get_product_sizes_colors_martix, admin_remove_product_from_cart,admin_add_to_existing_cart
 from clientApi.views import ColorsClientViewSet, ImageClientViewSet, SizesClientViewSet,LogoClientViewSet, get_album_images
@@ -124,9 +125,9 @@ urlpatterns = [
     path('client-api/lead-distribution/', mcrm_lead_register),
     path('crm-api/get-all-interests/', get_all_interests, name='crm_get_all_interests'),
     path('crm-api/get-all-business-types/', get_all_business_types, name='crm_get_all_business_types'),
-    path('admin/crm/crmuser/upload_execl/', upload_crm_execl, name='crm_upload_execl'),
-    path('admin_upload_bulk_crm_exel', admin_upload_bulk_crm_exel, name='admin_upload_bulk_crm_exel'),
-    path('admin/crm/crmuser/upload_execl2/', upload_crm_execl2, name='crm_upload_execl2'),
+    #path('admin/crm/crmuser/upload_execl/', upload_crm_execl, name='crm_upload_execl'),
+    #path('admin_upload_bulk_crm_exel', admin_upload_bulk_crm_exel, name='admin_upload_bulk_crm_exel'),
+    path('admin/crm/crmuser/upload_execl2/', import_mscrm_from_exel, name='crm_upload_execl2'),
     
     path('client-api/get-all-sizes/', get_all_sizes_api),
     path('client-api/get-all-variants/', get_all_varients_api),

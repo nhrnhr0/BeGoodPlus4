@@ -110,6 +110,7 @@ INSTALLED_APPS = [
     'stock',
     'glofa_types',
     'mcrm',
+    'msCrm',
     ### django modals ###
     'django.contrib.admin',
     'django.contrib.auth',
