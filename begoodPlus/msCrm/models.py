@@ -4,11 +4,15 @@ from django.utils.translation import gettext_lazy  as _
 
 class MsCrmBusinessTypeSelect(models.Model):
     name = models.CharField(max_length=100, unique=True)
+    class Meta():
+        ordering = ['id',]
 
     def __str__(self):
         return self.name
 class MsCrmIntrest(models.Model):
     name = models.CharField(max_length=100, unique=True)
+    class Meta():
+        ordering = ['id',]
 
     def __str__(self):
         return self.name

@@ -10,14 +10,14 @@ class MsCrmUserAdmin(admin.ModelAdmin):
 admin.site.register(MsCrmUser, MsCrmUserAdmin)
 
 class MsCrmBusinessTypeSelectAdmin(admin.ModelAdmin):
-    list_display = ('name',)
+    list_display = ('id', 'name',)
     list_filter = ('name',)
     search_fields = ('name',)
     ordering = ('-name',)
 admin.site.register(MsCrmBusinessTypeSelect, MsCrmBusinessTypeSelectAdmin)
 
 class MsCrmIntrestAdmin(admin.ModelAdmin):
-    list_display = ('name',)
+    list_display = ('id', 'name',)
     list_filter = ('name',)
     search_fields = ('name',)
     ordering = ('-name',)
