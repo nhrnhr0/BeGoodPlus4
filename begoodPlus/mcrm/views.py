@@ -127,24 +127,28 @@ def upload_crm_execl2(request):
                 want_whatsapp = True if row['רוצה וואצאפ'] == 1 else False
                 address = row['כתובת']
                 intrests = row['תחומי עניין']
-                intrests = intrests.split(',')
-                intrests = [x.strip() for x in intrests]
                 intrestsObjs = []
-                for intr in intrests:
-                    intrObj = CrmIntrest.objects.get(name=intr)
-                    intrestsObjs.append(intrObj)
-                crmObjs = CrmUser.objects.filter(businessName=bname, name=name, businessSelect=select)
+                if isinstance(intrests, str):
+                    intrests = intrests.split(',')
+                    intrests = [x.strip() for x in intrests]
+                    for intr in intrests:
+                        intrObj = CrmIntrest.objects.get(name=intr)
+                        intrestsObjs.append(intrObj)
+                crmObjs = CrmUser.objects.filter(businessName=bname, name=name)
                 if len(crmObjs) == 0:
                     crmObj = CrmUser.objects.create(businessName=bname, name=name, businessSelect=select, businessTypeCustom=customSelect, phone=phone, email=email, want_emails=want_emails, want_whatsapp=want_whatsapp, address=address)
                 else:
                     crmObj = crmObjs[0]
                     crmObj.businessSelect = select
                     crmObj.businessTypeCustom = customSelect
-                    crmObj.phone = phone
-                    crmObj.email = email
+                    if isinstance(phone, str):
+                        crmObj.phone = phone
+                    if isinstance(email, str):
+                        crmObj.email = email
                     crmObj.want_emails = want_emails
                     crmObj.want_whatsapp = want_whatsapp
-                    crmObj.address = address
+                    if isinstance(address, str):
+                        crmObj.address = address
                 crmObj.intrested.set(intrestsObjs)
                 crmObj.save()
             messages.add_message(request, messages.INFO, '{} משתמשים נוצרו'.format(user_created_counter))

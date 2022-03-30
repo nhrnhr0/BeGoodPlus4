@@ -27,7 +27,7 @@ class CrmUser(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     businessName = models.CharField(max_length=100, verbose_name=_('business name')) 
-    businessType = models.CharField(max_length=100, verbose_name=_('business type'))# OLD UNUSED
+    businessType = models.CharField(max_length=100, verbose_name=_('business type'), blank=True, null=True)# OLD UNUSED
     businessSelect = models.ForeignKey(to=CrmBusinessTypeSelect, on_delete=models.SET_NULL, verbose_name=_('business'), null=True, blank=True)
 
     businessTypeCustom = models.CharField(max_length=100, null=True, blank=True, verbose_name=_('business type custom'))
@@ -41,9 +41,9 @@ class CrmUser(models.Model):
     tags = models.ManyToManyField('CrmTag', blank=True, verbose_name=_('tags'))
     intrested = models.ManyToManyField('CrmIntrest', blank=True, verbose_name=_('intrested'))
     class Meta():
-        #unique_together =('businessName', 'businessType', 'businessTypeCustom',)
-        unique_together = ('businessName', 'businessType', 'businessTypeCustom',)# 'name', 'phone', 'email', 'address')
-        #unique_together=('businessName', 'businessType', 'businessTypeCustom', 'name', 'phone', 'email', 'address')('businessName', 'name'),
+        # TODO: remove 'businessType' when crmusers is clean
+        unique_together = ('businessName','businessSelect', 'businessType', 'businessTypeCustom','name')
+        
         pass
     def tag_display(self):
         return mark_safe('<br>'.join([tag.name for tag in self.tags.all()]))
