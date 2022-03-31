@@ -1,6 +1,8 @@
 from django.db import models
 from django.utils.translation import gettext_lazy  as _
 
+from catalogAlbum.models import CatalogAlbum
+
 
 class MsCrmBusinessTypeSelect(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -31,5 +33,5 @@ class MsCrmUser(models.Model):
     want_emails = models.BooleanField(default=True, verbose_name=_('want emails'))
     want_whatsapp = models.BooleanField(default=True, verbose_name=_('want whatsapp'))
     flashy_contact_id = models.CharField(max_length=256, null=True, blank=True, verbose_name=_('flashy contact id'))
-    intrests = models.ManyToManyField(MsCrmIntrest, blank=True, verbose_name=_('intrested'))
+    intrests = models.ManyToManyField(CatalogAlbum, blank=True, verbose_name=_('intrested'))
     

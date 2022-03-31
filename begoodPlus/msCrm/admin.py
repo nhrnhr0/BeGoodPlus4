@@ -6,7 +6,7 @@ class MsCrmUserAdmin(admin.ModelAdmin):
     list_filter = ('created_at', 'updated_at')
     search_fields = ('name', 'businessName', 'phone', 'email', 'address', 'want_emails', 'want_whatsapp')
     ordering = ('-created_at',)
-    filter_horazontal = ('intrests',)
+    filter_horizontal = ('intrests',)
 admin.site.register(MsCrmUser, MsCrmUserAdmin)
 
 class MsCrmBusinessTypeSelectAdmin(admin.ModelAdmin):

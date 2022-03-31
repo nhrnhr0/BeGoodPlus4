@@ -2,6 +2,8 @@ from django.shortcuts import render
 from rest_framework.decorators import api_view, permission_classes
 from django.http import JsonResponse
 from rest_framework.permissions import AllowAny
+
+from catalogAlbum.models import CatalogAlbum
 from .models import MsCrmBusinessTypeSelect, MsCrmIntrest, MsCrmUser
 from .tasks import new_user_subscribed_task
 from .serializers import MsCrmIntrestSerializer, MsCrmBusinessTypeSerializer
@@ -16,6 +18,9 @@ def import_mscrm_from_exel(request):
         if request.method == 'POST':
             xls = pd.ExcelFile(request.FILES['file'])
             df1 =  pd.read_excel(xls, 'Sheet1')
+            
+            all_categories = CatalogAlbum.objects.filter(is_public=True)#.values_list('title', flat=True)
+            
             for index, row in df1.iterrows():
                 bname = row['שם העסק']
                 name = row['שם']
@@ -33,14 +38,20 @@ def import_mscrm_from_exel(request):
                 want_emails = True if row['רוצה מיילים'] == 1 else False
                 want_whatsapp = True if row['רוצה וואצאפ'] == 1 else False
                 address = row['כתובת']
-                intrests = row['תחומי עניין']
+                userSelectedCategories = []
+                for category in all_categories:
+                    if row[category.title] != 'לא':
+                        userSelectedCategories.append(category)
+                
+                
+                '''intrests = row['תחומי עניין']
                 intrestsObjs = []
                 if isinstance(intrests, str):
                     intrests = intrests.split(',')
                     intrests = [x.strip() for x in intrests]
                     for intr in intrests:
                         intrObj = MsCrmIntrest.objects.get(name=intr)
-                        intrestsObjs.append(intrObj)
+                        intrestsObjs.append(intrObj)'''
                 crmObjs = MsCrmUser.objects.filter(businessName=bname, name=name)
                 if len(crmObjs) == 0:
                     crmObj = MsCrmUser.objects.create(businessName=bname, name=name, businessSelect=select, businessTypeCustom=customSelect, phone=phone, email=email, want_emails=want_emails, want_whatsapp=want_whatsapp, address=address)
@@ -56,7 +67,9 @@ def import_mscrm_from_exel(request):
                     crmObj.want_whatsapp = want_whatsapp
                     if isinstance(address, str):
                         crmObj.address = address
-                crmObj.intrests.set(intrestsObjs)
+                        
+                crmObj.intrests.set(userSelectedCategories)
+                #crmObj.intrests.set(intrestsObjs)
                 crmObj.save()
             #messages.add_message(request, messages.INFO, '{} משתמשים נוצרו'.format(user_created_counter))
             #messages.add_message(request, messages.INFO, '{} משתמשים שונו'.format(user_updated_counter))#, businessTypeCustom=customSelect, phone=phone, email=email, want_emails=want_emails, want_whatsapp=want_whatsapp, address=address)

@@ -13,7 +13,7 @@ docker volume create --name postgres-volume
 docker run -p 5432:5432 --name postgres -e POSTGRES_PASSWORD=password -v postgres-volume:/var/lib/postgresql/data -d postgres
 
 docker cp msdb_04-01-2022-21_01_01.sql postgres:/tmp/db.sql
-        docker exec -it pg /bin/bash
+        docker exec -it postgres /bin/bash
 # create new database
         psql -h localhost -U postgres
         DROP DATABASE testdb5;

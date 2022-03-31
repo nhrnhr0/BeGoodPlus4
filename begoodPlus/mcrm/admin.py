@@ -5,6 +5,7 @@ from django.http import HttpResponse
 from django.conf import settings
 from numpy import NaN
 from begoodPlus.secrects import MAPS_API_KEY
+from catalogAlbum.models import CatalogAlbum
 from mcrm.models import CrmBusinessTypeSelect, CrmTag
 from advanced_filters.admin import AdminAdvancedFiltersMixin
 import csv
@@ -59,13 +60,15 @@ class AdminCrmUser(admin.ModelAdmin,AdminAdvancedFiltersMixin):
         output = io.BytesIO()
         workbook = xlsxwriter.Workbook(output)
         worksheet = workbook.add_worksheet()
-        
+        yesNoSheet = workbook.add_worksheet('YesNo')
+        headers = ['שם העסק','שם', 'select','עסק לא מוגדר', 'טלפון', 'אימייל', 'רוצה מיילים', 'רוצה וואצאפ', 'כתובת', 'שם עסק ישן']
         
         intrested_worksheet = workbook.add_worksheet('תחומי_עניין')
-        all_intrested = CrmIntrest.objects.all()
+        all_intrests = CatalogAlbum.objects.filter(is_public=True).values_list('title', flat=True)
         intrested = []
-        for intrest in all_intrested:
-            intrested.append(intrest.name)
+        for intrest in all_intrests:
+            intrested.append(intrest)
+            headers.append(intrest)
         intrested_worksheet.write(0, 0, 'תחומי_עניין')
         intrested_worksheet.write_column(1, 0, intrested)
         
@@ -77,25 +80,51 @@ class AdminCrmUser(admin.ModelAdmin,AdminAdvancedFiltersMixin):
         buisness_types_worksheet.write(0, 0, 'סוגי_עסק')
         buisness_types_worksheet.write_column(1, 0, buisness_types)
         
-        
+        yesNoSheet.write(0, 0, 'YesNo')
+        yesno = ['', 'לא']
+        yesNoSheet.write_column(1, 0, yesno)
         
         data = []
-        data.append(['שם העסק','שם', 'select','עסק לא מוגדר', 'טלפון', 'אימייל', 'רוצה מיילים', 'רוצה וואצאפ', 'כתובת', 'תחומי עניין', 'רשימת תחומי עניין', 'שם עסק ישן'])
+        
+        
+        data.append(headers)
+        
         all_users = CrmUser.objects.all()
         for user in all_users:
-            intrests = ','.join(['{},'.format(intrest.name) for intrest in user.intrested.all()])
+            #intrests = ','.join(['{},'.format(intrest.name) for intrest in user.intrested.all()])
             bname = None
             if user.businessSelect:
                 bname = user.businessSelect.name
-            entry = [user.businessName, user.name, bname,user.businessTypeCustom, user.phone, user.email, '1' if user.want_emails else '0', '1' if user.want_whatsapp else '0', user.address, intrests, '',user.businessType]
+            entry = [user.businessName, user.name, bname,user.businessTypeCustom, user.phone, user.email, '1' if user.want_emails else '0', '1' if user.want_whatsapp else '0', user.address,user.businessType]
+            user_intrests = user.intrested.all().values_list('name', flat=True)
+            for intrest in intrested:
+                # intrested = [cat1Txt, cat2Txt, cat3Txt]
+                # example 1
+                # user.intrested = [cat3Txt]
+                # mintrests =  [0,0,1]
+                # example 2
+                # user.intrested = [cat1Txt, cat2Txt]
+                # mintrests =  [1,1,0]
+                if intrest in user_intrests:
+                    entry.append('')
+                else:
+                    entry.append('לא')
             data.append(entry)
         for row, row_data in enumerate(data):
             for col, val in enumerate(row_data):
                 worksheet.write(row, col, val)
-        #worksheet.data_validation('C1:C{}'.format(len(data)), {'validate': 'list', 'source': 'תחומי עניין!$A$1:$A${}'.format(len(all_intrested))})
+        
         worksheet.data_validation('C1:C{}'.format(len(data)), {'validate': 'list', 'source': 'סוגי_עסק!$A$2:$A${}'.format(len(all_buisness_types))})
-        worksheet.data_validation('K1:K{}'.format(len(data)), {'validate': 'list', 'source': 'תחומי_עניין!$A$2:$A${}'.format(len(all_intrested))})
+        
+        excel_col_num = lambda a: 0 if a == '' else 1 + ord(a[-1]) - ord('A') + 26 * excel_col_num(a[:-1])
+
+        excel_col_name = lambda n: '' if n <= 0 else excel_col_name((n - 1) // 26) + chr((n - 1) % 26 + ord('A'))
         # Close the workbook before sending the data.
+        # create a data validation from M:1 to M + len(intrested) X len(data) of yes/no
+        startLetter = excel_col_name(len(headers) - len(intrested)+1)
+        endLetter = excel_col_name(len(headers))
+        cell = '{}2:{}{}'.format(startLetter, endLetter, len(data))
+        worksheet.data_validation(cell, {'validate': 'list', 'source': 'YesNo!$A$2:$A$3'})
         
         instractions_worksheet = workbook.add_worksheet('הוראות')
         instractions_worksheet.write(0, 0, 'הוראות')
