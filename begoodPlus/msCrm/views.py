@@ -78,9 +78,14 @@ def import_mscrm_from_exel(request):
             return render(request, 'upload_crm_execl2.html')
 
 def get_all_interests(request):
-    intrests = MsCrmIntrest.objects.all()
-    data = MsCrmIntrestSerializer(intrests, many=True).data
-    return JsonResponse(data, safe=False)
+    #intrests = MsCrmIntrest.objects.all()
+    #data = MsCrmIntrestSerializer(intrests, many=True).data
+    intrests = CatalogAlbum.objects.filter(is_public=True)
+    data = intrests.values_list('title', flat=True)
+    ret = []
+    for d in data:
+        ret.append({"name":d})
+    return JsonResponse(ret, safe=False)
 
 def get_all_business_types(request):
     businessTypes = MsCrmBusinessTypeSelect.objects.all()
@@ -116,6 +121,10 @@ def mcrm_lead_register(request):
         crmObj.want_emails = True if form_data.get('mailing-list', None) == 'on' else False
         crmObj.want_whatsapp = True if form_data.get('whatsapp-list', None) == 'on' else False
         crmObj.address = form_data.get('address', crmObj.address)
+        intrestObjs=[]
+        for intrest in form_data['intrests']:
+            intrestObjs.append(CatalogAlbum.objects.get(title=intrest))
+        crmObj.intrests.set(intrestObjs)
         crmObj.save()
         new_user_subscribed_task.delay(crmObj.id)
     #new_user_subscribed_task(crmObj.id)
