@@ -114,7 +114,7 @@ class AdminCrmUser(admin.ModelAdmin,AdminAdvancedFiltersMixin):
             for col, val in enumerate(row_data):
                 worksheet.write(row, col, val)
         
-        worksheet.data_validation('C1:C{}'.format(len(data)), {'validate': 'list', 'source': 'סוגי_עסק!$A$2:$A${}'.format(len(all_buisness_types))})
+        worksheet.data_validation('C1:C{}'.format(len(data)), {'validate': 'list', 'source': 'סוגי_עסק!$A$2:$A${}'.format(len(all_buisness_types) +1)})
         
         excel_col_num = lambda a: 0 if a == '' else 1 + ord(a[-1]) - ord('A') + 26 * excel_col_num(a[:-1])
 
