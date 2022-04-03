@@ -32,16 +32,12 @@ class MsCrmUserAdmin(AdminAdvancedFiltersMixin, admin.ModelAdmin):
         data.append(['WhatsApp Number(with country code)', 'First Name', 'Last Name', 'Other'])
         queryset = queryset.filter(want_whatsapp=True)
         for obj in queryset:
-            if obj.phone.startswith('⁩'):
-                obj.phone = obj.phone[1:]
-            if obj.phone.endswith('⁩'):
-                obj.phone = obj.phone[:-1]
-            if obj.phone.startswith('+'):
-                data.append([obj.phone, obj.name.split(' ')[0], obj.name.split(' ')[-1], obj.name, ''])
-            elif obj.phone.startswith('\u2066'):
-                data.append(['+'+obj.phone[1:], obj.name.split(' ')[0], obj.name.split(' ')[-1], obj.name, ''])
-            else:
-                data.append(['+'+obj.phone, obj.name.split(' ')[0], obj.name.split(' ')[-1], obj.name, ''])
+            phone = obj.get_clean_phonenumber()
+            data.append([phone, obj.name.split(' ')[0], obj.name.split(' ')[-1], obj.name, ''])
+            #elif obj.phone.startswith('\u2066'):
+            #    data.append(['+'+obj.phone[1:], obj.name.split(' ')[0], obj.name.split(' ')[-1], obj.name, ''])
+            #else:
+            #    data.append(['+'+obj.phone, obj.name.split(' ')[0], obj.name.split(' ')[-1], obj.name, ''])
             #data.append(['+' + str(obj.phone), obj.name.split(' ')[0], obj.name.split(' ')[-1], obj.name])
         
         # Write some test data.

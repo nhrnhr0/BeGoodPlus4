@@ -39,3 +39,18 @@ class MsCrmUser(models.Model):
     flashy_contact_id = models.CharField(max_length=256, null=True, blank=True, verbose_name=_('flashy contact id'))
     intrests = models.ManyToManyField(CatalogAlbum, blank=True, verbose_name=_('intrested'))
     
+    def get_clean_phonenumber(self):
+        # remove \u2066 and ⁩ and '+'
+        # then add one + at the begining and return
+        phone = self.phone
+        phone = phone.replace('\u200f', '')
+        phone = phone.replace('\u202a', '')
+        phone = phone.replace('\u202c', '')
+        phone = phone.replace('\u200f', '')
+        phone = phone.replace('\u2066', '')
+        phone = phone.replace('⁩', '')
+        phone = phone.replace('+', '')
+        if phone.startswith('05'):
+            phone = '972' + phone[1:]
+        
+        return '+' + phone
