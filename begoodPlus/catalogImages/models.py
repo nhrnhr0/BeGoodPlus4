@@ -1,3 +1,4 @@
+from email.policy import default
 from django.db import models
 from django.utils.translation import gettext_lazy  as _
 from PIL import Image
@@ -59,7 +60,7 @@ class CatalogImage(models.Model):
     qyt = models.IntegerField(verbose_name=_('qyt'), blank=False, null=False, default=0)
     show_sizes_popup = models.BooleanField(verbose_name=_('show sizes popup'), default=True)
     out_of_stock = models.BooleanField(verbose_name=_('out of stock'), default=False)
-    
+    has_physical_barcode = models.BooleanField(verbose_name=_('has physical barcode'), default=False)
     detailTabel = models.ManyToManyField(related_name='parent',to=CatalogImageDetail, verbose_name=_('mini-tabel'), blank=True)
 
     can_tag = models.BooleanField(default=False, verbose_name=_('can tag'))
