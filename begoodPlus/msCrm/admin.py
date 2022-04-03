@@ -14,7 +14,7 @@ class MsCrmUserAdmin(AdminAdvancedFiltersMixin, admin.ModelAdmin):
         return qs
     search_fields = ('name', 'businessName', 'phone', 'email', 'address', 'want_emails', 'want_whatsapp')
     #advanced_filter_fields = (('מתי נוצר', 'created_at'), ('מתי עודכן', 'updated_at'), ('בחירת שם עסק', 'businessName__name'), ('שם עסק לא מוגדר', 'businessTypeCustom'), 'name', 'phone', 'email', 'address', 'want_emails', 'want_whatsapp')
-    advanced_filter_fields = (( 'created_at','מתי נוצר'), ( 'updated_at','מתי עודכן'), ( 'businessName','שם העסק'), ('businessSelect', 'בחירת שם עסק מספר'),('businessSelect__name', 'בחירת שם עסק'),('businessTypeCustom','שם עסק לא מוגדר',), 'name', 'phone', 'email', 'address', 'want_emails', 'want_whatsapp', ('intrests__title', 'תחומי עניין'))
+    advanced_filter_fields = (( 'created_at','מתי נוצר'), ( 'updated_at','מתי עודכן'), ( 'businessName','שם העסק'), ('businessSelect', 'בחירת סוג עסק מספר'),('businessSelect__name', 'בחירת סוג עסק'),('businessTypeCustom','סוג עסק לא מוגדר',), 'name', 'phone', 'email', 'address', 'want_emails', 'want_whatsapp', ('intrests__title', 'תחומי עניין'))
     ordering = ('-created_at',)
     filter_horizontal = ('intrests',)
     actions = ['export_xlsx_for_whatsapp',]
