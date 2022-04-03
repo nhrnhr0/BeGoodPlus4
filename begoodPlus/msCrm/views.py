@@ -9,6 +9,8 @@ from .tasks import new_user_subscribed_task
 from .serializers import MsCrmIntrestSerializer, MsCrmBusinessTypeSerializer
 import pandas as pd
 from django.shortcuts import render,redirect
+from django.contrib import messages
+
 # Create your views here.
 
 
@@ -18,7 +20,8 @@ def import_mscrm_from_exel(request):
         if request.method == 'POST':
             xls = pd.ExcelFile(request.FILES['file'])
             df1 =  pd.read_excel(xls, 'Sheet1')
-            
+            users_created_counter = 0
+            users_updated_counter = 0
             all_categories = CatalogAlbum.objects.filter(is_public=True)#.values_list('title', flat=True)
             
             for index, row in df1.iterrows():
@@ -34,10 +37,22 @@ def import_mscrm_from_exel(request):
                 if isinstance(row['עסק לא מוגדר'], str):
                     customSelect = row['עסק לא מוגדר']
                 phone = row['טלפון']
-                email = row['אימייל']
+                if isinstance(phone, str):
+                    phone = phone.replace('-','')
+                    phone= phone.replace(' ','')
+                    phone = phone.replace('\u2069','')
+                else:
+                    phone = None
+                if isinstance(row['אימייל'], str):
+                    email = row['אימייל']
+                else:
+                    email = None
                 want_emails = True if row['רוצה מיילים'] == 1 else False
                 want_whatsapp = True if row['רוצה וואצאפ'] == 1 else False
-                address = row['כתובת']
+                if isinstance(row['כתובת'], str):
+                    address = row['כתובת']
+                else:
+                    address = None
                 userSelectedCategories = []
                 for category in all_categories:
                     if row[category.title] != 'לא':
@@ -55,7 +70,9 @@ def import_mscrm_from_exel(request):
                 crmObjs = MsCrmUser.objects.filter(businessName=bname, name=name)
                 if len(crmObjs) == 0:
                     crmObj = MsCrmUser.objects.create(businessName=bname, name=name, businessSelect=select, businessTypeCustom=customSelect, phone=phone, email=email, want_emails=want_emails, want_whatsapp=want_whatsapp, address=address)
+                    users_created_counter += 1
                 else:
+                    users_updated_counter += 1
                     crmObj = crmObjs[0]
                     crmObj.businessSelect = select
                     crmObj.businessTypeCustom = customSelect
@@ -71,8 +88,8 @@ def import_mscrm_from_exel(request):
                 crmObj.intrests.set(userSelectedCategories)
                 #crmObj.intrests.set(intrestsObjs)
                 crmObj.save()
-            #messages.add_message(request, messages.INFO, '{} משתמשים נוצרו'.format(user_created_counter))
-            #messages.add_message(request, messages.INFO, '{} משתמשים שונו'.format(user_updated_counter))#, businessTypeCustom=customSelect, phone=phone, email=email, want_emails=want_emails, want_whatsapp=want_whatsapp, address=address)
+            messages.add_message(request, messages.INFO, '{} משתמשים נוצרו'.format(users_created_counter))
+            messages.add_message(request, messages.INFO, '{} משתמשים שונו'.format(users_updated_counter))#, businessTypeCustom=customSelect, phone=phone, email=email, want_emails=want_emails, want_whatsapp=want_whatsapp, address=address)
             return redirect('/admin/msCrm/mscrmuser/')
         else:
             return render(request, 'upload_crm_execl2.html')
