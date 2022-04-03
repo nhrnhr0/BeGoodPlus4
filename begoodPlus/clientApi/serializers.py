@@ -44,7 +44,7 @@ class ImageClientApi(serializers.ModelSerializer):
     varients = VarientSerializer(read_only=True, many=True)
     class Meta:
         model = CatalogImage
-        fields = ('id','title','description','cimage','colors','sizes','varients','can_tag','discount', 'albums','amountSinglePack','amountCarton', 'show_sizes_popup', 'client_price', 'out_of_stock')
+        fields = ('id','title','description','cimage','colors','sizes','varients','can_tag','discount', 'albums','amountSinglePack','amountCarton', 'show_sizes_popup', 'client_price', 'out_of_stock', 'barcode', 'has_physical_barcode')
         filter_backends = [DjangoFilterBackend]
         filterset_fields = ['albums']
 
