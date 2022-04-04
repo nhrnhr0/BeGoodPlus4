@@ -10,6 +10,7 @@ from client.models import UserSessionLogger
 from client.models import UserLogEntry
 from client.serializers import AdminClientSerializer
 from .models import Client
+@api_view(['GET'])
 def get_all_users_by_admin(request):
     if request.user.is_superuser:
         clients = Client.objects.all()
