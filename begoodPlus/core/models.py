@@ -204,7 +204,7 @@ class SvelteCartModal(models.Model):
                         else:
                             for varient_id in details[color_id][size_id].keys():
                                 varient = get_varient_name(varient_id)
-                                qyt = details[color_id][size_id][varient_id].get('quantity') or 0
+                                qyt = details[color_id][size_id][varient_id].get('quantity',None)
                                 tableData.append({'size': size, 'color': color, 'varient': varient, 'qyt': qyt})
                     
                     
@@ -267,7 +267,7 @@ class SvelteCartModal(models.Model):
                         
                     else:
                         for varient_id in details[color_id][size_id].keys():
-                            quantity = details[color_id][size_id][varient_id]['quantity']
+                            quantity = details[color_id][size_id][varient_id].get('quantity', None)
                             #products_list.append({'product': product,'price':price, 'quantity': quantity, 'color_id': color_id, 'size_id': size_id, 'varient_id': varient_id})
                             entries_list.append({'size_id': size_id, 'color_id': color_id, 'varient_id': varient_id, 'quantity': quantity})
             currentProduct['entries'] = entries_list
