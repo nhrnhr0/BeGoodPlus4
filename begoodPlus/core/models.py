@@ -205,7 +205,8 @@ class SvelteCartModal(models.Model):
                             for varient_id in details[color_id][size_id].keys():
                                 varient = get_varient_name(varient_id)
                                 qyt = details[color_id][size_id][varient_id].get('quantity',None)
-                                tableData.append({'size': size, 'color': color, 'varient': varient, 'qyt': qyt})
+                                if qyt != None and qyt != 0:
+                                    tableData.append({'size': size, 'color': color, 'varient': varient, 'qyt': qyt})
                     
                     
                     #detail_table += f'<tr><td>{size.size}</td><td>{color.name}</td><td>{str(qyt)}</td></tr>'
@@ -260,16 +261,19 @@ class SvelteCartModal(models.Model):
             for color_id in details.keys():
                 for size_id in details[color_id].keys():
                     if 'quantity' in details[color_id][size_id].keys():
-                        quantity = details[color_id][size_id]['quantity']
+                        quantity = details[color_id][size_id].get('quantity',None)
+                        
                         
                         #products_list.append({'product': product,'price':price, 'quantity': quantity, 'color_id': color_id, 'size_id': size_id, 'varient_id': None})
-                        entries_list.append({'size_id': size_id, 'color_id': color_id, 'varient_id': None, 'quantity': quantity})
+                        if quantity != None and quantity != 0:
+                            entries_list.append({'size_id': size_id, 'color_id': color_id, 'varient_id': None, 'quantity': quantity})
                         
                     else:
                         for varient_id in details[color_id][size_id].keys():
                             quantity = details[color_id][size_id][varient_id].get('quantity', None)
                             #products_list.append({'product': product,'price':price, 'quantity': quantity, 'color_id': color_id, 'size_id': size_id, 'varient_id': varient_id})
-                            entries_list.append({'size_id': size_id, 'color_id': color_id, 'varient_id': varient_id, 'quantity': quantity})
+                            if quantity != None and quantity != 0:
+                                entries_list.append({'size_id': size_id, 'color_id': color_id, 'varient_id': varient_id, 'quantity': quantity})
             currentProduct['entries'] = entries_list
             products_list.append(currentProduct)
         #order_product = [MOrderItem(product=i['product'], price=i['price']) for i in products_list]
