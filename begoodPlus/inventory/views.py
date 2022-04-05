@@ -1,6 +1,6 @@
 from audioop import reverse
 from html import entities
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from catalogImages.models import CatalogImageVarient
 from color.models import Color
@@ -13,7 +13,37 @@ from inventory.serializers import DocStockEnterSerializer
 from django.contrib.auth.decorators import permission_required
 from django.contrib.auth.decorators import login_required
 
+@api_view(['GET'])
+def get_product_inventory(request):
+    if not request.user.is_superuser:
+        return HttpResponseRedirect('/admin/login/?next=' + request.path)
+    if request.method == 'GET':
+        productId =  int(request.GET.get('product_id'))
+        providers = request.GET.get('providers')
+        qs = ProductEnterItems.objects.filter(sku__ppn__product = productId)
+        if providers == '7':
+            pass
+        else:
+            providerIds = [int(x) for x in providers.split(',')]
+            qs = qs.filter(sku__ppn__provider__id__in = providerIds)
+        context = {}
+        # get all products in the first warehouse
+        
+        context['products'] = ProductEnterItemsSerializer(qs, many=True).data
+        
+        return JsonResponse(context)
+
 # Create your views here.
+def doc_stock_list(request):
+    if not request.user.is_superuser:
+        return HttpResponseRedirect('/admin/login/?next=' + request.path)
+
+    context = {}
+    #context['my_data'] = {'doc_stock_list': DocStockEnter.objects.all()}
+    data = DocStockEnterSerializerList(DocStockEnter.objects.all(), many=True).data
+    context['my_data'] = {'doc_stock_list': data}
+    return render(request, 'doc_stock_list.html', context=context)
+
 #@permission_required('inventory.view_docstockenter')
 def doc_stock_enter(request, id):
     # if the user is not superuser:
@@ -134,7 +164,7 @@ class DocStockEnterViewSet(RetrieveUpdateDestroyAPIView):
     lookup_field = "id"
     
     
-from .serializers import PPNSerializer, ProductEnterItemsSerializer
+from .serializers import DocStockEnterSerializerList, PPNSerializer, ProductEnterItemsSerializer
 import json
 def search_ppn(request):
     # if the user is not superuser:

@@ -1,4 +1,4 @@
-import {SEARCH_API_URL,GET_ALL_PROVIDERS_API_URL,MORDER_EDIT_API,GET_ALL_SIZES_API, GET_DOC_STOCK_ENTER_PPN_ENTRIES, SEARCH_PROVIDERS_API_URL,INV_API_GET_ENTER_DOC_DATA_URL, SEARCH_PPN_API_URL, GET_ALL_COLORS_API, GET_ALL_VARIENTS_API, DELETE_DOC_STOCK_EnterEntery as DELETE_DOC_STOCK_ENTER_ENTRY, ADD_DOC_STOCK_ENTER_ENTRY_API_URL} from './../consts/consts.js';
+import {SEARCH_API_URL,GET_ALL_PROVIDERS_API_URL,MORDER_EDIT_API,GET_ALL_SIZES_API, GET_DOC_STOCK_ENTER_PPN_ENTRIES, SEARCH_PROVIDERS_API_URL,INV_API_GET_ENTER_DOC_DATA_URL, SEARCH_PPN_API_URL, GET_ALL_COLORS_API, GET_ALL_VARIENTS_API, DELETE_DOC_STOCK_EnterEntery as DELETE_DOC_STOCK_ENTER_ENTRY, ADD_DOC_STOCK_ENTER_ENTRY_API_URL,INV_API_GET_PRODUCT_INVENTORY} from './../consts/consts.js';
 import {getCookie} from './../utils/utils.js';
 
 
@@ -18,6 +18,16 @@ export async function apiSaveMOrder(order_id, data) {
     });
     return response;
 
+}
+
+export async function apiRequestStockInventory(sendData) {
+    // slugify(all the data)
+    let url = INV_API_GET_PRODUCT_INVENTORY + '?product_id=' + encodeURIComponent(sendData.product_id) + '&providers=' + encodeURIComponent(sendData.providers);
+
+    const response = await fetch_wraper(url, {
+        method: 'GET',
+    });
+    return response;
 }
 /*
 export async function apiUpdateMOrderProductRow(data) {

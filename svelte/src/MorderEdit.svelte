@@ -3,7 +3,7 @@
 <script>
 import { onMount } from "svelte";
 import { Loading } from "carbon-components-svelte";
-import { apiGetMOrder,apiGetProviders,apiSaveMOrder } from "./api/api";
+import { apiGetMOrder,apiGetProviders,apiSaveMOrder, apiRequestStockInventory } from "./api/api";
 import {TabulatorFull as Tabulator} from 'tabulator-tables';
 import {Button} from "carbon-components-svelte";
 import { MultiSelect } from "carbon-components-svelte";
@@ -156,29 +156,41 @@ import { MultiSelect } from "carbon-components-svelte";
             html += `<option value="${provider.value}" ${selected}>${provider.label}</option>`;
         });
         html += "</select>";
-        let $el = window.$(html)//.get(0);
+        let $selectElement = window.$(html)//.get(0);
         //window.multiSelect.refresh();
         onRendered(function() {
                 
-            $el.select2({
+            $selectElement.select2({
                 placeholder: 'This is my placeholder',
                 allowClear: true,
                 dropdownAutoWidth: true,
                 width: '100%',
                 closeOnSelect: true,
             });
-            $el.on('change', function (e) {
+            $selectElement.on('change', function (e) {
                 console.log('change: ', e);
-                let value = $el.val();
+                let value = $selectElement.val();
                 console.log('value: ', value);
                 console.log('cell value before: ', cell.getValue());
                 cell.setValue(value);
+
+                // request stock inventory of the product from the selected providers from server
+                let row = cell.getRow();
+                
+                let rowData = row.getData();
+                console.log('row: ', rowData);
+                let sendData = {
+                    'product_id': rowData.product,
+                    'providers': value,
+                }
+                console.log('sendData: ', sendData);
+                apiRequestStockInventory(sendData);
             });
             //el.select2('open');
             //window.multiSelect.refresh();
         });
         //window.$(el).chosen({})
-        return $el.get(0);
+        return $selectElement.get(0);
     }
     let ALL_PROVIDERS;
     onMount(async ()=> {

@@ -14,7 +14,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from clientApi.views import get_all_varients_api
-from inventory.views import add_doc_stock_enter_ppn_entry, delete_doc_stock_enter_ppn_entry, get_doc_stock_enter_ppn_entries, search_ppn, show_inventory_stock
+from inventory.views import add_doc_stock_enter_ppn_entry, delete_doc_stock_enter_ppn_entry, get_doc_stock_enter_ppn_entries, search_ppn, show_inventory_stock,get_product_inventory,doc_stock_list
 from clientApi.views import get_all_colors_api, get_all_sizes_api, main_page_api
 from campains.views import admin_get_all_campains, admin_get_campain_products, get_user_campains
 from inventory.views import DocStockEnterViewSet, doc_stock_enter
@@ -104,12 +104,14 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     
     # inventory:
+    path('inv/doc-stock-list', doc_stock_list, name='admin_doc_stock_list'),
     path('inv/doc-stock-enter/<int:id>', doc_stock_enter, name='admin_edit_doc_stock_enter'),
     path('inv/enter-doc/<int:id>', DocStockEnterViewSet.as_view(), name='admin_enter_doc'),
     path('inv/enter-doc/get-doc-stock-enter-ppn-entries/', get_doc_stock_enter_ppn_entries, name='admin_get_doc_stock_enter_ppn_entries'),
     path('inv/enter-doc/delete-doc-stock-enter-ppn-entry', delete_doc_stock_enter_ppn_entry, name='admin_delete_doc_stock_enter_ppn_entry'),
     path('inv/enter-doc/add-doc-stock-enter-ppn-entry', add_doc_stock_enter_ppn_entry, name='admin_add_doc_stock_enter_ppn_entry'),
     path('inv/show-stock', show_inventory_stock),
+    path('inv/get-product-inventory/', get_product_inventory, name='admin_get_product_inventory'),
     # orders
     path('morders/edit-order/<int:id>', edit_morder, name='admin_edit_order'),
     path('morders/api-get-order-data/<int:id>', api_get_order_data, name='admin_api_get_order_data'),

@@ -90,6 +90,7 @@ let exportable = [];
 	"MorderEdit",
 	"ShowInventory",
 	"DocumentStockEnter",
+	"DocumentStockList",
 	"App",
 	"CampainEditor",
 	"AdminCartEditor"

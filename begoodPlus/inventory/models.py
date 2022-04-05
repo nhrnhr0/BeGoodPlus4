@@ -69,7 +69,7 @@ class DocStockEnter(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     provider = models.ForeignKey(to=Provider, on_delete=models.SET_DEFAULT, default=7)
     warehouse = models.ForeignKey(to=Warehouse, on_delete=models.SET_DEFAULT, default=1)
-    items = models.ManyToManyField(to='ProductEnterItems', related_name='doc')
+    items = models.ManyToManyField(to='ProductEnterItems', related_name='doc', blank=True)
     isAplied = models.BooleanField(default=False)
     byUser = models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
     def apply_doc(self):

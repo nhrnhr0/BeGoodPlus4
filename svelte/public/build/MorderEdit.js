@@ -9175,6 +9175,7 @@ var morderedit = (function () {
 
     var url = protocol + '//' + host;
     const BASE_URL =  url; //'https://catalog.boost-pop.com'; //'http://127.0.0.1:8000'; // 
+    const INV_API_GET_PRODUCT_INVENTORY = BASE_URL + '/inv/get-product-inventory/';
     const MORDER_EDIT_API = BASE_URL + '/morders/api-get-order-data';
     const GET_ALL_PROVIDERS_API_URL =  BASE_URL + '/svelte/api/providers/';
 
@@ -9210,6 +9211,16 @@ var morderedit = (function () {
         });
         return response;
 
+    }
+
+    async function apiRequestStockInventory(sendData) {
+        // slugify(all the data)
+        let url = INV_API_GET_PRODUCT_INVENTORY + '?product_id=' + encodeURIComponent(sendData.product_id) + '&providers=' + encodeURIComponent(sendData.providers);
+
+        const response = await fetch_wraper(url, {
+            method: 'GET',
+        });
+        return response;
     }
     function fetch_wraper(url, requestOptions, custom_fetch, isRetry = false) {
         console.log('fetch_wraper: ', url);
@@ -33463,7 +33474,7 @@ var morderedit = (function () {
     const { console: console_1 } = globals;
     const file = "src\\MorderEdit.svelte";
 
-    // (306:4) {:else}
+    // (318:4) {:else}
     function create_else_block(ctx) {
     	let div0;
     	let t0;
@@ -33496,10 +33507,10 @@ var morderedit = (function () {
     			t2 = space();
     			create_component(button.$$.fragment);
     			attr_dev(div0, "id", "headers-table");
-    			add_location(div0, file, 306, 8, 12588);
-    			add_location(hr, file, 307, 8, 12628);
+    			add_location(div0, file, 318, 8, 13177);
+    			add_location(hr, file, 319, 8, 13217);
     			attr_dev(div1, "id", "products-table");
-    			add_location(div1, file, 308, 8, 12642);
+    			add_location(div1, file, 320, 8, 13231);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div0, anchor);
@@ -33545,14 +33556,14 @@ var morderedit = (function () {
     		block,
     		id: create_else_block.name,
     		type: "else",
-    		source: "(306:4) {:else}",
+    		source: "(318:4) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (304:4) {#if updateing}
+    // (316:4) {#if updateing}
     function create_if_block(ctx) {
     	let loading;
     	let current;
@@ -33589,14 +33600,14 @@ var morderedit = (function () {
     		block,
     		id: create_if_block.name,
     		type: "if",
-    		source: "(304:4) {#if updateing}",
+    		source: "(316:4) {#if updateing}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (313:16) {:else}
+    // (325:16) {:else}
     function create_else_block_1(ctx) {
     	let t;
 
@@ -33618,14 +33629,14 @@ var morderedit = (function () {
     		block,
     		id: create_else_block_1.name,
     		type: "else",
-    		source: "(313:16) {:else}",
+    		source: "(325:16) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (311:16) {#if updateing_to_server}
+    // (323:16) {#if updateing_to_server}
     function create_if_block_1(ctx) {
     	let loading;
     	let current;
@@ -33661,14 +33672,14 @@ var morderedit = (function () {
     		block,
     		id: create_if_block_1.name,
     		type: "if",
-    		source: "(311:16) {#if updateing_to_server}",
+    		source: "(323:16) {#if updateing_to_server}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (310:12) <Button class="update-btn" disabled={updateing_to_server} on:click={()=>{save_data()}}>
+    // (322:12) <Button class="update-btn" disabled={updateing_to_server} on:click={()=>{save_data()}}>
     function create_default_slot(ctx) {
     	let current_block_type_index;
     	let if_block;
@@ -33737,7 +33748,7 @@ var morderedit = (function () {
     		block,
     		id: create_default_slot.name,
     		type: "slot",
-    		source: "(310:12) <Button class=\\\"update-btn\\\" disabled={updateing_to_server} on:click={()=>{save_data()}}>",
+    		source: "(322:12) <Button class=\\\"update-btn\\\" disabled={updateing_to_server} on:click={()=>{save_data()}}>",
     		ctx
     	});
 
@@ -33765,7 +33776,7 @@ var morderedit = (function () {
     			main = element("main");
     			if_block.c();
     			attr_dev(main, "class", "svelte-1qn055f");
-    			add_location(main, file, 302, 0, 12497);
+    			add_location(main, file, 314, 0, 13086);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -34029,11 +34040,11 @@ var morderedit = (function () {
     		});
 
     		html += "</select>";
-    		let $el = window.$(html); //.get(0);
+    		let $selectElement = window.$(html); //.get(0);
 
     		//window.multiSelect.refresh();
     		onRendered(function () {
-    			$el.select2({
+    			$selectElement.select2({
     				placeholder: 'This is my placeholder',
     				allowClear: true,
     				dropdownAutoWidth: true,
@@ -34041,18 +34052,32 @@ var morderedit = (function () {
     				closeOnSelect: true
     			});
 
-    			$el.on('change', function (e) {
+    			$selectElement.on('change', function (e) {
     				console.log('change: ', e);
-    				let value = $el.val();
+    				let value = $selectElement.val();
     				console.log('value: ', value);
     				console.log('cell value before: ', cell.getValue());
     				cell.setValue(value);
+
+    				// request stock inventory of the product from the selected providers from server
+    				let row = cell.getRow();
+
+    				let rowData = row.getData();
+    				console.log('row: ', rowData);
+
+    				let sendData = {
+    					'product_id': rowData.product,
+    					'providers': value
+    				};
+
+    				console.log('sendData: ', sendData);
+    				apiRequestStockInventory(sendData);
     			});
     		}); //el.select2('open');
     		//window.multiSelect.refresh();
 
     		//window.$(el).chosen({})
-    		return $el.get(0);
+    		return $selectElement.get(0);
     	}
 
     	let ALL_PROVIDERS;
@@ -34227,6 +34252,7 @@ var morderedit = (function () {
     		apiGetMOrder,
     		apiGetProviders,
     		apiSaveMOrder,
+    		apiRequestStockInventory,
     		Tabulator: TabulatorFull,
     		Button: Button$1,
     		MultiSelect: MultiSelect$1,
