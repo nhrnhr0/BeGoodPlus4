@@ -29,9 +29,10 @@ class AlbumClientApi(serializers.ModelSerializer):
         return serializer.data
     '''
     topLevelCategory = serializers.CharField(source='topLevelCategory.name', read_only=True)
+    topLevelCategoryOrder = serializers.IntegerField(source='topLevelCategory.my_order', read_only=True)
     class Meta:
         model = CatalogAlbum
-        fields = ('id', 'title','slug','description','fotter','is_public','is_campain', 'cimage', 'topLevelCategory')#, 'first_image',)
+        fields = ('id', 'title','slug','description','fotter','is_public','is_campain', 'cimage', 'topLevelCategory','topLevelCategoryOrder')#, 'first_image',)
 
 from catalogImages.models import CatalogImageVarient
 class VarientSerializer(serializers.ModelSerializer):
