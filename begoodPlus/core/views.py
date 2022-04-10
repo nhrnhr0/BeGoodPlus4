@@ -166,6 +166,7 @@ def svelte_cart_form(request):
         business_name = body['business_name']  or ''
         uuid = body['uuid'] or ''
         message = body['message']  or ''
+        order_type = body['order_type']  or ''
         products = body['products'] or ''
         raw_cart = body['raw_cart'] or ''
         
@@ -182,7 +183,7 @@ def svelte_cart_form(request):
             else:
                 user_id = request.user
                 agent=None
-        db_cart = SvelteCartModal.objects.create(user_id=user_id, device=device,uid=uuid,businessName=business_name, name=name, phone=phone, email=email, message=message, agent=agent)
+        db_cart = SvelteCartModal.objects.create(user_id=user_id, device=device,uid=uuid,businessName=business_name, name=name, phone=phone, email=email, message=message, agent=agent, order_type=order_type)
         #data.products.set(products)
         db_cart.productsRaw = raw_cart
         # products = [{'id': 5, 'amount': 145, 'mentries': {...}}, {'id': 18, 'amount': 0, 'mentries': {...}}, {'id': 138, 'amount': 0}]
@@ -195,7 +196,9 @@ def svelte_cart_form(request):
                 unitPrice = p.get('price')
             else:
                 unitPrice = CatalogImage.objects.get(id=pid).client_price
-            obj = SvelteCartProductEntery.objects.create(product_id=pid, amount=pamount, details=pentries,unitPrice=unitPrice)
+            print = p.get('print', False)
+            embro = p.get('embro', False)
+            obj = SvelteCartProductEntery.objects.create(product_id=pid, amount=pamount, details=pentries,unitPrice=unitPrice, print=print, embro=embro)
             data.append(obj)
         #data = [SvelteCartProductEntery(product_id=p['id'],amount=p['amount'] or 1, details = p['mentries'] or {}) for p in products]
         #products_objs = SvelteCartProductEntery.objects.bulk_create(data)

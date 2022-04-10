@@ -14,7 +14,7 @@ from .models import Client
 def get_all_users_by_admin(request):
     if request.user.is_superuser:
         clients = Client.objects.all()
-        data = [{'id':client.pk, 'username':client.user.username, 'businessName':client.businessName,} for client in clients]
+        data = [{'id':client.pk, 'username':client.user.username, 'businessName':client.businessName,'email': client.email, 'privateCompany': client.privateCompany, } for client in clients]
         return JsonResponse(data, safe=False)
     else:
         return JsonResponse({'status':'error'}, status=status.HTTP_403_FORBIDDEN)

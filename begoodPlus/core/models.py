@@ -117,7 +117,8 @@ class SvelteCartProductEntery(models.Model):
     details = models.JSONField(verbose_name=_('details'), blank=True, null=True)
     #cart = models.ForeignKey(to='SvelteCartModal', on_delete=models.CASCADE, null=True, blank=True)
     unitPrice = models.DecimalField(verbose_name=_('unit price'), max_digits=10, decimal_places=2, default=0)
-    
+    print = models.BooleanField(verbose_name=_('print'), default=False)
+    embro = models.BooleanField(verbose_name=_('embro'), default=False)
     def __str__(self):
         return str(self.amount) + ' - ' + self.product.title
     class Meta:
@@ -158,6 +159,7 @@ class SvelteCartModal(models.Model):
     message = models.TextField(verbose_name=_('message'), blank=True, null=True)
     created_date = models.DateTimeField(auto_now_add=True, blank=True, null=True)
     agent = models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='agent')
+    order_type = models.CharField(verbose_name=_('order type'), max_length=120, null=True, blank=True)
     def cart_count(self):
         return self.productEntries.count()
     def products_amount_display(self):
@@ -221,7 +223,10 @@ class SvelteCartModal(models.Model):
                     except Exception as e:
                         print(e)
                     ret += '<td>' + df.to_html(index=True, header=True, table_id='table_id', na_rep='-') + '</td>'
-        
+            if i.print:
+                ret += f'<td>הדפסה</td>'
+            if i.embro:
+                ret += f'<td>רקמה</td>'
             #ret += '<td id="cart-entry-'+str(i.id)+'">'  + '<input type="hidden" name="product_id" value="' + str(i.product.id) + '">' + '<input type="hidden" name="cart_id" value="' + str(self.id) + '">' + '<input type="hidden" name="entry_id" value="' + str(i.id) + '"><button type="button" onclick="remove_product_from_cart(' + str(self.id) + ',' +str(i.id)+')">' + 'מחק' + '</button>' + '</td>'
             ret += '</tr>'
         ret+= '</table>'
