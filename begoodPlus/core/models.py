@@ -124,7 +124,17 @@ class SvelteCartProductEntery(models.Model):
     class Meta:
         pass
         #unique_together = ('cart', 'product')
-    
+
+class UserProductPhoto(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
+    photo = models.ImageField(upload_to='user_product_photos/', blank=True, null=True)
+    buy_price = models.DecimalField(verbose_name=_('buy price'), max_digits=10, decimal_places=2, default=0)
+    description = models.TextField(verbose_name=_('description'), max_length=1500, blank=True, null=True)
+    created_date = models.DateTimeField(auto_now_add=True, blank=True, null=True)
+    def __str__(self):
+        return self.description
+    class Meta:
+        pass
     
 class ActiveCartTracker(models.Model):
     data = models.JSONField(verbose_name=_('data'), blank=True, null=True)

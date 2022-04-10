@@ -11,7 +11,7 @@ from client.views import get_user_info
 from clientApi.serializers import ImageClientApi
 from .models import ActiveCartTracker, SvelteCartModal, SvelteCartProductEntery, SvelteContactFormModal, UserSearchData
 from django.urls import reverse
-
+from core.models import UserProductPhoto
 # Create your views here.
 '''
 def json_user_tasks(customer):
@@ -125,7 +125,20 @@ def track_cart(request):
     response = HttpResponse(json.dumps({'status':'ok','active_cart_id':active_cart_id}), content_type='application/json')
     #response.set_cookie('active_cart', active_cart_id, max_age=60*60*24*365*10, httponly=True)
     return response
-
+@api_view(['POST'])
+@permission_classes((IsAuthenticated,))
+def send_product_photo(request):
+    data = request.data
+    print(data)
+    buy_price = data.get('buy_price')
+    want_price = data.get('want_price')
+    description = data.get('description')
+    obj = UserProductPhoto.objects.create(user=request.user, photo=data['file'], buy_price=buy_price, description=description)
+    print(obj)
+    return JsonResponse({
+        'status':'success',
+        'detail':'form sent successfuly'
+        })
 @api_view(['POST'])
 @permission_classes((AllowAny,))
 def client_product_question(request):
