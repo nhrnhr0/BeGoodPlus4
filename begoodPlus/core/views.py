@@ -280,7 +280,7 @@ def autocompleteModel(request):
     
     products_qs = CatalogImage.objects.filter(
         Q(title__icontains=q) | 
-        Q(description__icontains=q) |  
+        #Q(description__icontains=q) |  
         Q(albums__title__icontains=q) |
         Q(albums__keywords__icontains=q)
         ).distinct()
