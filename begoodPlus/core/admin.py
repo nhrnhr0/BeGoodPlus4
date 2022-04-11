@@ -93,8 +93,8 @@ def cart_to_dict(obj: SvelteCartModal):
 from core.tasks import send_cart_notification
 from core.models import UserProductPhoto
 class UserProductPhotoAdmin(admin.ModelAdmin):
-    list_display = ('user', 'photo', 'created_date')
-    
+    list_display = ('user', 'photo_display', 'created_date', 'buy_price', 'want_price','description',)
+    readonly_fields = ('photo_display',)
 admin.site.register(UserProductPhoto, UserProductPhotoAdmin)
 class SvelteCartProductEnteryAdmin(admin.ModelAdmin):
     list_display = ('id', 'product', 'amount', 'details')

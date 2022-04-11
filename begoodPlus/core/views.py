@@ -133,8 +133,11 @@ def send_product_photo(request):
     buy_price = data.get('buy_price')
     want_price = data.get('want_price')
     description = data.get('description')
-    obj = UserProductPhoto.objects.create(user=request.user, photo=data['file'], buy_price=buy_price, description=description)
+    file = data.get('file')
+    obj = UserProductPhoto.objects.create(user=request.user, photo=file, buy_price=buy_price, description=description,want_price=want_price)
     print(obj)
+    #product_photo_send_notification.delay(obj.id)
+    product_photo_send_notification(obj.id)
     return JsonResponse({
         'status':'success',
         'detail':'form sent successfuly'
@@ -255,7 +258,7 @@ def api_logout(request):
 
 
 
-from .tasks import send_cantacts_notificatios, send_cart_notification, send_question_notification, test
+from .tasks import product_photo_send_notification, send_cantacts_notificatios, send_cart_notification, send_question_notification, test
 
 def test_celery_view(request):
     print('test_celery_view start')

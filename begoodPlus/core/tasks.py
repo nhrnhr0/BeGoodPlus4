@@ -8,7 +8,7 @@ from celery import shared_task
 import time
 
 from client.models import UserQuestion, UserSessionLogger
-from core.models import SvelteCartModal, SvelteContactFormModal
+from core.models import SvelteCartModal, SvelteContactFormModal, UserProductPhoto
 
 
 @shared_task
@@ -45,7 +45,7 @@ from django.template.loader import render_to_string
 from django.core import mail
 from django.utils.html import strip_tags
 from django.conf import settings
-from begoodPlus.secrects import TELEGRAM_CHAT_ID_CARTS, MAIN_EMAIL_RECEIVER, TELEGRAM_CHAT_ID_LEADS, TELEGRAM_CHAT_ID_QUESTIONS
+from begoodPlus.secrects import TELEGRAM_CHAT_ID_CARTS, MAIN_EMAIL_RECEIVER, TELEGRAM_CHAT_ID_LEADS, TELEGRAM_CHAT_ID_PRODUCT_PHOTO, TELEGRAM_CHAT_ID_QUESTIONS
 import telegram
 from begoodPlus.celery import telegram_bot
 @shared_task
@@ -79,6 +79,20 @@ def send_cantacts_notificatios(contacts_id):
     text += '<b> מכשיר: </b> {device}'.format(**info)
 
     telegram_bot.send_message(chat_id=chat_id, text=text, parse_mode=telegram.ParseMode.HTML)
+@shared_task
+def product_photo_send_notification(user_product_photo, rety = 0):
+    obj = UserProductPhoto.objects.get(id=user_product_photo)
+    chat_id = TELEGRAM_CHAT_ID_PRODUCT_PHOTO
+    image = obj.photo.url
+    caption = '<b> משתמש: </b> ' + str(obj.user) + '\n<b> הודעה: </b> ' + obj.description + '\n<b> מחיר קנייה: </b> '+str(obj.buy_price)+'\n<b> מחיר רצוי: </b> '+ str(obj.want_price) +' '
+    try:
+        telegram_bot.send_photo(chat_id, image, caption=caption, parse_mode=telegram.ParseMode.HTML)
+    except:
+        if rety < 3:
+            product_photo_send_notification(user_product_photo, rety + 1)
+        else:
+            print('error sending photo to telegram')
+    
 @shared_task
 def send_question_notification(question_id):
     obj = UserQuestion.objects.get(id=question_id)
