@@ -136,8 +136,8 @@ def send_product_photo(request):
     file = data.get('file')
     obj = UserProductPhoto.objects.create(user=request.user, photo=file, buy_price=buy_price, description=description,want_price=want_price)
     print(obj)
-    #product_photo_send_notification.delay(obj.id)
-    product_photo_send_notification(obj.id)
+    product_photo_send_notification.delay(obj.id)
+    #product_photo_send_notification(obj.id)
     return JsonResponse({
         'status':'success',
         'detail':'form sent successfuly'
