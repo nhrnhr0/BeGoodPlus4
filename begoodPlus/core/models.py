@@ -163,7 +163,7 @@ class ActiveCartTracker(models.Model):
         return mark_safe(html)
 class SvelteCartModal(models.Model):
     doneOrder = models.BooleanField(default=False, verbose_name=_('done order'))
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, null=True, blank=True, related_name='user_cart')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, null=True, blank=True, related_name='user_cart', verbose_name=_('user'))
     device = models.CharField(verbose_name=_('device'), max_length=250)
     uid = models.UUIDField(verbose_name=_('uuid'), null=True, blank=True)
     name = models.CharField(verbose_name=_('name'), max_length=120)
@@ -174,11 +174,12 @@ class SvelteCartModal(models.Model):
     productEntries = models.ManyToManyField(to=SvelteCartProductEntery, blank=True)
     productsRaw = models.TextField(verbose_name=_('raw products'), blank=True, null=True)
     message = models.TextField(verbose_name=_('message'), blank=True, null=True)
-    created_date = models.DateTimeField(auto_now_add=True, blank=True, null=True)
-    agent = models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='agent')
+    created_date = models.DateTimeField(auto_now_add=True, blank=True, null=True, verbose_name=_('created date'))
+    agent = models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='agent', verbose_name=_('agent'))
     order_type = models.CharField(verbose_name=_('order type'), max_length=120, null=True, blank=True)
     def cart_count(self):
         return self.productEntries.count()
+    cart_count.short_description = _('cart count')
     def products_amount_display(self):
         ret = '<ul>'
         for i in self.productEntries.all():
@@ -251,7 +252,7 @@ class SvelteCartModal(models.Model):
     def uniqe_color(self):
         ret = f'<span width="25px" height="25px" style="color:black;background-color: {ColorHash(str(self.uid)).hex}">{self.device}</span>'
         return mark_safe(ret)
-    
+    uniqe_color.short_description = _('uniqe color')
     def turn_to_morder(self):
         from morders.models import MOrder, MOrderItem, MOrderItemEntry
         cart= self
