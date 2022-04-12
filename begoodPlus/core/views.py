@@ -1,3 +1,4 @@
+from decimal import Decimal
 import celery
 from django.shortcuts import render,redirect, HttpResponse
 from django.http import JsonResponse
@@ -130,10 +131,15 @@ def track_cart(request):
 def send_product_photo(request):
     data = request.data
     print(data)
-    buy_price = data.get('buy_price')
-    want_price = data.get('want_price')
-    description = data.get('description')
-    file = data.get('file')
+    buy_price = data.get('buy_price', '')
+    want_price = data.get('want_price','')
+    description = data.get('description','')
+    dzero = Decimal(0)
+    if buy_price == '':
+        buy_price = dzero
+    if want_price == '':
+        want_price = dzero
+    file = data.get('file',None)
     obj = UserProductPhoto.objects.create(user=request.user, photo=file, buy_price=buy_price, description=description,want_price=want_price)
     print(obj)
     product_photo_send_notification.delay(obj.id)
