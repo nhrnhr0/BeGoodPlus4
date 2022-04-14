@@ -185,7 +185,7 @@ class CatalogImageAdmin(AdminAdvancedFiltersMixin, admin.ModelAdmin):
         ret += '</ul>'
         return mark_safe(ret)
         #return ",".join([a.title for a in obj.albums.all()])
-    
+    get_albums.short_description = _('categories')
     def url_to_edit_object(obj):
         url = reverse('admin:%s_%s_change' % (obj._meta.app_label,  obj._meta.model_name),  args=[obj.id] )
         return u'<a href="%s">%s</a>' % (url,  obj.__str__())

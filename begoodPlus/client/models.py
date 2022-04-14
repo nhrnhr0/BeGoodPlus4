@@ -513,7 +513,7 @@ class Client(models.Model):
     extraName = models.CharField(verbose_name=_('extra name'), max_length=120, null=True,blank=True)
     storeType = models.ForeignKey( verbose_name=_('store type'), to=ClientType,on_delete=models.SET_NULL, null=True)
     categorys = models.ManyToManyField(verbose_name=_('categories'), to=CatalogAlbum, blank=True)
-    tariff = models.SmallIntegerField(verbose_name=_('tariff (%)'), default=0)
+    tariff = models.FloatField(verbose_name=_('tariff (%)'), default=0)
     privateCompany = models.CharField(max_length=254, verbose_name=_('P.C.'))
     clientType = models.CharField(max_length=50, choices=CLIENT_TYPES, verbose_name=_('client type'), default=CLIENT_TYPE_ND)
     address = models.CharField(verbose_name=_('address'), max_length=511)

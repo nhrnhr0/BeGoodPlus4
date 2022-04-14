@@ -463,7 +463,7 @@ msgstr "ניכוי מס במקור"
 
 #: .\client\models.py:532
 msgid "show prices"
-msgstr "מחיר חנות"
+msgstr "הצג מחירים"
 
 #: .\client\models.py:536
 msgid "sunday"

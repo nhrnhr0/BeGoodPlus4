@@ -47,8 +47,8 @@ class CatalogImage(models.Model):
     cost_price = models.FloatField(verbose_name=_('cost price'), blank=False, null=False, default=1)
     client_price = models.FloatField(verbose_name=_('store price'),  blank=False, null=False, default=1)
     recomended_price = models.FloatField(verbose_name=_('private client price'),  blank=False, null=False, default=1)
-    date_modified = models.DateTimeField(auto_now=True)
-    date_created = models.DateTimeField(auto_now_add=True)
+    date_modified = models.DateTimeField(auto_now=True, verbose_name=_('date modified'))
+    date_created = models.DateTimeField(auto_now_add=True, verbose_name=_('date created'))
     packingTypeProvider = models.ForeignKey(to=PackingType,related_name='PTprovider', on_delete=models.SET_DEFAULT, default=9, verbose_name=_('packing type from provider'))
     packingTypeClient = models.ForeignKey(to=PackingType,related_name='PTclient', on_delete=models.SET_DEFAULT, default=9, verbose_name=_('packing type for client'))
     amountSinglePack = models.IntegerField(verbose_name=_('amount in single pack'), blank=False, null=False, default=0)
@@ -61,6 +61,7 @@ class CatalogImage(models.Model):
     show_sizes_popup = models.BooleanField(verbose_name=_('show sizes popup'), default=True)
     out_of_stock = models.BooleanField(verbose_name=_('out of stock'), default=False)
     has_physical_barcode = models.BooleanField(verbose_name=_('has physical barcode'), default=False)
+    is_active = models.BooleanField(default=True, verbose_name=_('is active'))
     detailTabel = models.ManyToManyField(related_name='parent',to=CatalogImageDetail, verbose_name=_('mini-tabel'), blank=True)
 
     can_tag = models.BooleanField(default=False, verbose_name=_('can tag'))

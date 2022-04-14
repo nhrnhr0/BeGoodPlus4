@@ -25,10 +25,14 @@ class AlbumClientViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticatedOrReadOnly]
     
 class ImageClientViewSet(viewsets.ModelViewSet):
-    queryset = CatalogImage.objects.all()#.prefetch_related('colors','sizes','providers','detailTabel')
+    queryset = CatalogImage.objects.all().prefetch_related('colors','sizes','providers','varients')
     serializer_class = ImageClientApi
     permission_classes = [IsAuthenticatedOrReadOnly]
-
+    def get(self, request, *args, **kwargs):
+        super(ImageClientViewSet, self).get(request, *args, **kwargs)
+        return Response(self.serializer_class(self.queryset, many=True, context={
+            'request':request,
+            }).data)
 
 
 class ColorsClientViewSet(viewsets.ModelViewSet):
@@ -51,17 +55,19 @@ from django.db import connection
 @renderer_classes((JSONRenderer,))
 def get_album_images(request, pk):
     album = CatalogAlbum.objects.get(id=pk)
-    ser = images_from_album_serializer(album)
+    ser = images_from_album_serializer(album,request)
     data = ser.data
     #print(connection.queries)
     #print(len(connection.queries))
     
     return Response(data)
 
-def images_from_album_serializer(album):
-    images = album.images.order_by('throughimage__image_order')
+def images_from_album_serializer(album,request):
+    images = album.images.filter(is_active=True).order_by('throughimage__image_order')
     images = images.prefetch_related('colors','sizes','albums','varients').select_related('packingTypeClient')
-    ser = ImageClientApi(images, many=True)
+    ser = ImageClientApi(images, many=True,context={
+        'request': request
+    })
     return ser
 
 from catalogImages.models import CatalogImageVarient

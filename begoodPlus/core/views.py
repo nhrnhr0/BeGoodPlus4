@@ -284,18 +284,17 @@ def autocompleteModel(request):
     #if request.is_ajax():
     q = request.GET.get('q', '')
     
-    products_qs = CatalogImage.objects.filter(
-        Q(title__icontains=q) | 
-        #Q(description__icontains=q) |  
-        Q(albums__title__icontains=q) |
-        Q(albums__keywords__icontains=q)
-        ).distinct()
-
-
+    products_qs = CatalogImage.objects.filter(Q(title__icontains=q) | Q(albums__title__icontains=q) | Q(albums__keywords__icontains=q)).distinct()
+    products_qs = products_qs.filter(Q(is_active=True) & ~Q(albums=None) & Q(albums__is_public=True))
+    #  & (~Q(albums=None) & Q(is_active = True)
+#
+    #is_hidden=False
     ser_context={'request': request}
     products_qs_short = products_qs[0:20]
     products_qs_short = products_qs_short.prefetch_related('colors','sizes', 'albums')
-    products = ImageClientApi(products_qs_short, many=True)
+    products = ImageClientApi(products_qs_short, many=True,context={
+        'request': request
+    })
     #products = SearchCatalogImageSerializer(products_qs,context=ser_context, many=True)
     session = get_session_key(request)
     
@@ -306,7 +305,8 @@ def autocompleteModel(request):
     context = {'all':all,
                 'q':q,
                 'id': search_history.id}
-
+    print('autocompleteModel', time.time() - start)
+    print('autocompleteModel', len(all))
     
     
     end=time.time() - start

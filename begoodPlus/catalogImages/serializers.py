@@ -17,7 +17,7 @@ class CatalogImageApiSerializer(serializers.ModelSerializer):
         fields = ('id','date_modified','title', 'description', 'barcode',
                   'whatsapp_text', 'image', 'albums',
                   'packingTypeProvider', 'packingTypeClient',
-                  'colors', 'sizes', 'providers', 'can_tag', 'detailTabel')
+                  'colors', 'sizes', 'providers', 'can_tag', 'detailTabel','is_active')
         extra_kwargs = {"image": {"required": False, "allow_null": True}}
         
     '''def to_internal_value(self, data):

@@ -15,8 +15,8 @@ from client.models import UserQuestion
 from .models import ActiveCartTracker, SvelteCartModal, SvelteCartProductEntery, UserSearchData
 class ActiveCartTrackerAdmin(admin.ModelAdmin):
     list_display = ('last_updated','created_at','last_ip','active_cart_id','cart_products_size')
-    readonly_fields = ('last_updated','created_at','last_ip','active_cart_id','cart_products_html_table','cart_products_size')
-    
+    readonly_fields = ('last_updated','created_at','last_ip','active_cart_id','products_amount_display_with_sizes_and_colors','cart_products_size')
+    ordering = ('-last_updated',)
 admin.site.register(ActiveCartTracker, ActiveCartTrackerAdmin)
 
 class UserSearchDataAdmin(admin.ModelAdmin):
