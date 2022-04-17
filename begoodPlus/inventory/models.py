@@ -6,6 +6,7 @@ from catalogImages.models import CatalogImage, CatalogImageVarient
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from productSize.models import ProductSize
+from django.utils.translation import gettext_lazy  as _
 from color.models import Color
 from django.db.models.signals import post_save
 
@@ -19,11 +20,13 @@ from django.utils.html import mark_safe
 # - fastProductTitle - text - autofill with product->title
 # provider_id & providerProductName are unique together
 class PPN(models.Model):
-    product = models.ForeignKey(to=CatalogImage, on_delete=models.DO_NOTHING)
-    provider = models.ForeignKey(to=Provider, on_delete=models.SET_DEFAULT, default=7)
-    providerProductName = models.CharField(max_length=100)
+    product = models.ForeignKey(to=CatalogImage, on_delete=models.DO_NOTHING, verbose_name=_('product'))
+    provider = models.ForeignKey(to=Provider, on_delete=models.SET_DEFAULT, default=7, verbose_name=_('provider'))
+    buy_price = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name=_('Buy Price (no tax)'))
+    store_price = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name=_('Store Price (no tax)'))
+    providerProductName = models.CharField(max_length=100, verbose_name=_('product provider name'))
     #fastProductTitle = models.CharField(max_length=100, null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_('created at'))
     class Meta:
         unique_together = ('provider', 'providerProductName')
     def __str__(self):

@@ -6,6 +6,8 @@ from django.utils.translation import gettext_lazy  as _
 from django.urls import reverse
 import csv
 import io
+
+from inventory.models import PPN
 from .models import CatalogImage, CatalogImageVarient
 from django.http import FileResponse
 from xlwt.Style import XFStyle
@@ -87,12 +89,18 @@ class albumsInline(admin.TabularInline):
     #readonly_fields = ['id','provider','dis_colors', 'dis_sizes', 'dis_cost_price', 'dis_client_price', 'dis_recomended_price']
     extra=1
 # Register your models here.
+
+class ppnInline(admin.TabularInline):
+    model = PPN
+    classes = ['ppn-cls',]
+    extra=0
+
 class CatalogImageAdmin(AdminAdvancedFiltersMixin, admin.ModelAdmin):
     list_display = ('id', 'show_sizes_popup','render_thumbnail','title','cost_price_dis','client_price_dis','recomended_price_dis','get_albums','cost_price','client_price','recomended_price','date_created', 'date_modified','barcode', 'show_sizes_popup')
     list_editable = ('cost_price','client_price','recomended_price')
     list_display_links = ('title',)
     actions = ['download_images_csv','download_images_exel_slim',]
-    inlines = (albumsInline, tableInline)#
+    inlines = (albumsInline, tableInline, ppnInline)#
     readonly_fields = ('id', 'render_thumbnail', 'render_image',)
     search_fields = ('title','description', 'barcode', 'detailTabel__providerMakat')
     list_filter = ('albums', 'providers','sizes','colors',)

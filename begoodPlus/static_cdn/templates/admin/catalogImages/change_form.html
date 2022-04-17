@@ -23,6 +23,55 @@
     
     <div id="export_report"></div>
     <script>
+        function update_ppns_eventlistener() {
+            let ppns_sets_elements = document.getElementsByClassName('dynamic-ppn_set');
+            for (let i = 0; i < ppns_sets_elements.length; i++) {
+                let buyPriceTd = ppns_sets_elements[i].getElementsByClassName('field-buy_price')[0];
+                let buyPriceInput = buyPriceTd.getElementsByTagName('input')[0];
+
+                let storePriceTd = ppns_sets_elements[i].getElementsByClassName('field-store_price')[0];
+                let storePriceInput = storePriceTd.getElementsByTagName('input')[0];
+                buyPriceInput.removeEventListener('input', buyPriceChanged, true);
+                buyPriceInput.addEventListener('input', buyPriceChanged, true);
+                storePriceInput.removeEventListener('input', storePriceChanged, true);
+                storePriceInput.addEventListener('input', storePriceChanged, true);
+            }
+        }
+        function storePriceChanged(e) {
+            console.log('storePriceChanged: ', e.target.value);
+            let buy = e.target.parentElement.parentElement.getElementsByClassName('field-buy_price')[0].getElementsByTagName('input')[0].value;
+            let store = e.target.value;
+            
+            let prcent = ((store / buy) - 1)*100
+            let prcent_td = e.target.parentElement.parentElement.getElementsByClassName('field-buy_price')[0];
+            let precent_element = document.createElement('span');
+            console.log('buy: ', buy, ' store:', store, ' prcent:', prcent);
+            let color = prcent > 0 ? 'green' : 'red';
+            precent_element.innerHTML = `<span style="color:${color}">` + prcent.toFixed(2) + '%</span>';
+            if(prcent_td.getElementsByTagName('span').length > 0) {
+                prcent_td.getElementsByTagName('span')[0].remove();
+            }
+            
+            prcent_td.appendChild(precent_element);
+        }
+        function buyPriceChanged(e) {
+            console.log('buyPriceChanged: ' + e.target.value);
+            let buy = e.target.value;
+            let store = e.target.parentElement.parentElement.getElementsByClassName('field-store_price')[0].getElementsByTagName('input')[0].value;
+            
+            let prcent = ((store / buy) - 1)*100
+            let prcent_td = e.target.parentElement.parentElement.getElementsByClassName('field-buy_price')[0];
+            let precent_element = document.createElement('span');
+            console.log('buy: ', buy, ' store:', store, ' prcent:', prcent);
+            let color = prcent > 0 ? 'green' : 'red';
+            precent_element.innerHTML = `<span style="color:${color}">` + prcent.toFixed(2) + '%</span>';
+            if(prcent_td.getElementsByTagName('span').length > 0) {
+                prcent_td.getElementsByTagName('span')[0].remove();
+            }
+
+            prcent_td.appendChild(precent_element);
+        }
+        setInterval(update_ppns_eventlistener, 1000);
         function getCookie(name) {
             let cookieValue = null;
             if (document.cookie && document.cookie !== '') {
