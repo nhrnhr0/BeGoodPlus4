@@ -328,6 +328,7 @@ class SvelteCartModal(models.Model):
         phone = self.phone if self.phone != '' else self.user.client.contactManPhone
         email = self.email if self.email != '' else self.user.client.email
         message = self.message if self.message != '' else ''
+        agent = self.agent if self.agent != '' else ''
         status = 'new'
         products = self.productEntries.all()
         products_list = []
@@ -376,5 +377,5 @@ class SvelteCartModal(models.Model):
                 dbProduct = MOrderItem.objects.create(product=product['product'], price=product['price'])
                 dbProduct.entries.set(dbEntries)
                 dbProducts.append(dbProduct)
-        morder = MOrder.objects.create(cart=cart,client=client,name=name,phone=phone,email=email,status=status, message=message)
+        morder = MOrder.objects.create(cart=cart,client=client,name=name,phone=phone,email=email,status=status, message=message, agent=agent)
         morder.products.add(*dbProducts)

@@ -7,7 +7,7 @@ from catalogImages.models import CatalogImage
 from catalogAlbum.models import CatalogAlbum
 from rest_framework import serializers
 from django_filters.rest_framework import DjangoFilterBackend
-
+import decimal
 from productColor.models import ProductColor
 from productSize.models import ProductSize
 from catalogLogos.models import CatalogLogo
@@ -66,7 +66,8 @@ class ImageClientApi(serializers.ModelSerializer):
                 if request.user.client:
                     tariff = request.user.client.tariff
                     price = obj.client_price + (obj.client_price * (tariff/100))
-                    return round(price * 2) / 2 if price > 50 else "{:.2f}".format(price)
+                    price = round(price * 2) / 2 if price > 50 else "{:.2f}".format(price)
+                    return decimal.Decimal(price).normalize()
                 return obj.client_price
         return 0
 class ColorClientApi(serializers.ModelSerializer):

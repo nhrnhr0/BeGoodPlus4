@@ -35,6 +35,7 @@ class CatalogImage(models.Model):
     title = models.CharField(max_length=120, verbose_name=_("title"), unique=False)
     description = models.TextField(verbose_name=_("description"))
     barcode = models.CharField(verbose_name=_('barcode'),max_length=50, blank=True, null=True)
+    has_physical_barcode = models.BooleanField(verbose_name=_('has physical barcode'), default=False)
     free_text = models.TextField(verbose_name=_('free text'), null=True, blank=True)
     whatsapp_text = models.TextField(verbose_name=_('whatsapp text'), blank=True, null=True)
     def desc(self):
@@ -60,7 +61,7 @@ class CatalogImage(models.Model):
     qyt = models.IntegerField(verbose_name=_('qyt'), blank=False, null=False, default=0)
     show_sizes_popup = models.BooleanField(verbose_name=_('show sizes popup'), default=True)
     out_of_stock = models.BooleanField(verbose_name=_('out of stock'), default=False)
-    has_physical_barcode = models.BooleanField(verbose_name=_('has physical barcode'), default=False)
+    
     is_active = models.BooleanField(default=True, verbose_name=_('is active'))
     detailTabel = models.ManyToManyField(related_name='parent',to=CatalogImageDetail, verbose_name=_('mini-tabel'), blank=True)
 

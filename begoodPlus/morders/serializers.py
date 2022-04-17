@@ -21,21 +21,23 @@ class AdminMOrderItemSerializer(serializers.ModelSerializer):
     product_name = serializers.CharField(source='product.title')
     entries = AdminMOrderItemEntrySerializer(many=True, read_only=True)
     providers = serializers.SerializerMethodField('get_providers')
+    pbarcode = serializers.CharField(source='product.barcode')
     def get_providers(self, obj):
         ids = obj.providers.values_list('id', flat=True)
         return list(ids)
     class Meta:
         model = MOrderItem
-        fields = ('id', 'product',  'price','providers', 'ergent', 'prining', 'embroidery', 'comment','product_name', 'entries')
+        fields = ('id', 'product',  'price','providers', 'ergent', 'prining', 'embroidery', 'comment','product_name', 'entries','pbarcode',)
     
 
 class AdminMOrderSerializer(serializers.ModelSerializer):
     products = AdminMOrderItemSerializer(many=True, read_only=True)
     client_businessName = serializers.CharField(source='client.businessName', read_only=False)
+    agent_name = serializers.CharField(source='agent.username', read_only=False)
     #client_id = serializers.IntegerField(source='client.user.id', read_only=False)
     class Meta:
         model = MOrder
-        fields = ('id','client', 'status', 'created', 'updated','message','name', 'phone', 'email', 'client_businessName', 'products')
+        fields = ('id','agent','agent_name', 'client', 'status', 'created', 'updated','message','name', 'phone', 'email', 'client_businessName', 'products')
     
 
 '''

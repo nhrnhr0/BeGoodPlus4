@@ -7,6 +7,7 @@ import { apiGetMOrder,apiGetProviders,apiSaveMOrder, apiRequestStockInventory } 
 import {TabulatorFull as Tabulator} from 'tabulator-tables';
 import {Button} from "carbon-components-svelte";
 import { MultiSelect } from "carbon-components-svelte";
+import ProductAmountEditModel from "./components/ProductAmountEditModel.svelte";
 
     let updateing = false;
     let updateing_to_server = false;
@@ -44,6 +45,7 @@ import { MultiSelect } from "carbon-components-svelte";
             'status': data.status,
             'client_id': data.client,
             'client_name': data.client_businessName,
+            'agent': data.agent_name,
         }]
         productsData = data.products;
 
@@ -115,7 +117,6 @@ import { MultiSelect } from "carbon-components-svelte";
         data.status = headerData[0].status;
         data.client = headerData[0].client_id;
         data.client_businessName = headerData[0].client_name;
-
         console.log('save data: ', data);
         updateing_to_server = true;
         await apiSaveMOrder(data.id, data);
@@ -212,6 +213,7 @@ import { MultiSelect } from "carbon-components-svelte";
                 {title: 'טפלון', field: 'phone'},
                 {title: 'סטטוס', field: 'status', editor:"select", editorParams:{values:['new', 'done'],multiselect:false}},
                 {title: 'שם לקוח', field: 'client_name'},
+                {title: 'סוכן', field:'agent'},
             ]
         });
 
@@ -264,11 +266,71 @@ import { MultiSelect } from "carbon-components-svelte";
                 },
                 {title:'הערות', field:'comment', visible:true, editor:"textarea"},
                 {title:'ספקים', field:'providers', visible:true, formatter:multiSelectProviderFormatter},
+                {title: 'ברקוד' , field: 'pbarcode'},
+                {title: 'פעולות', formatter:function(cell, formatterParams, onRendered){
+                        //create and style holder elements
+                        // 2 buttons => 1. מחק 2. ערוך כמות
+                        var holderEl = document.createElement("div");
+                        var button1 = document.createElement("button");
+                        var button2 = document.createElement("button");
+
+                        holderEl.style.boxSizing = "border-box";
+                        holderEl.style.padding = "10px 30px 10px 10px";
+                        holderEl.style.borderTop = "1px solid #333";
+                        holderEl.style.borderBotom = "1px solid #333";
+                        holderEl.style.background = "#ddd";
+
+                        button1.style.border = "1px solid #333";
+                        button1.style.background = "#ddd";
+                        button1.style.color = "#333";
+                        button1.style.padding = "5px";
+                        button1.style.margin = "5px";
+                        button1.style.borderRadius = "5px";
+                        button1.style.cursor = "pointer";   
+                        button1.innerHTML = "מחק";
+                        button1.addEventListener('click', function(){
+                            let row = cell.getRow();
+                            let rowData = row.getData();
+                            console.log('row: ', rowData);
+                            let sendData = {
+                                'id': rowData.id,
+                            }
+                            //console.log('sendData: ', sendData);
+                            alert('TODO');
+                            //apiDeleteOrder(sendData);
+                        });
+
+
+                        button2.style.border = "1px solid #333";
+                        button2.style.background = "#ddd";
+                        button2.style.color = "#333";
+                        button2.style.padding = "5px";
+                        button2.style.margin = "5px";
+                        button2.style.borderRadius = "5px";
+                        button2.style.cursor = "pointer";
+                        button2.innerHTML = "ערוך כמות";
+                        button2.addEventListener('click', function(){
+                            let row = cell.getRow();
+                            let rowData = row.getData();
+                            console.log('row: ', rowData);
+                            let data = {
+                                'title': rowData.product_name,
+                                'entry_id': rowData.id,
+                            }
+                            productAmountEditModel.show(data);
+                            //apiDeleteOrder(sendData);
+
+                        });
+                        
+                        holderEl.appendChild(button1);
+                        holderEl.appendChild(button2);
+                        return holderEl;
+                    }
+                },
                 ]
             });
         console.log('data:', data);
     });
-
 
     function createPivot(data,tableEl) {
         var sum = window.$.pivotUtilities.aggregatorTemplates.sum;
@@ -310,9 +372,16 @@ import { MultiSelect } from "carbon-components-svelte";
             }
         }})
     }
+
+
+    let productAmountEditModel;
+    let is_modal_open = false;
+    let amount_modal_row_id = undefined;
 </script>
 
 <main>
+
+    <ProductAmountEditModel bind:this={productAmountEditModel} is_open={is_modal_open} row_id={amount_modal_row_id}></ProductAmountEditModel>
     {#if updateing}
         <Loading withOverlay={false} />
     {:else}

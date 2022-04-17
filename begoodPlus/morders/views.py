@@ -17,7 +17,7 @@ def edit_morder(request, id):
 def api_get_order_data(request, id):
     if not request.user.is_superuser:
         return JsonResponse({'status':'error'}, status=status.HTTP_403_FORBIDDEN)
-    order = MOrder.objects.select_related('client',).prefetch_related('products','products__entries', 'products__entries__color', 'products__entries__size', 'products__entries__varient').get(id=id)
+    order = MOrder.objects.select_related('client','agent').prefetch_related('products','products__entries', 'products__entries__color', 'products__entries__size', 'products__entries__varient').get(id=id)
     if request.method == 'POST':
         data = json.loads(request.body)
         order.status = data['status']

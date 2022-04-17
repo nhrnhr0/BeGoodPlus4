@@ -3,6 +3,7 @@ from django.urls import reverse
 from multiprocessing.connection import Client
 import pandas as pd
 from django.db import models
+from django.contrib.auth.models import User
 from catalogImages.models import CatalogImage
 from client.models import Client
 from color.models import Color
@@ -47,12 +48,14 @@ class MOrder(models.Model):
     updated = models.DateTimeField(auto_now=True)
     cart = models.ForeignKey(to=SvelteCartModal, on_delete=models.SET_NULL, null=True)
     client = models.ForeignKey(to=Client, on_delete=models.SET_NULL, null=True)
+    agent = models.ForeignKey(to=User, on_delete=models.SET_NULL, null=True)
     name = models.CharField(max_length=100)
     phone = models.CharField(max_length=100)
     email = models.CharField(max_length=100)
     status = models.CharField(max_length=100, choices=[('new', 'חדש'), ('in_progress', 'בתהליך'), ('done', 'גמור')])
     products = models.ManyToManyField(to=MOrderItem, blank=True, related_name='morder')
     message = models.TextField(null=True, blank=True)
+    
     def get_edit_url(self):
         link = reverse('admin_edit_order', args=(self.pk,))
         return mark_safe('<a href="{}">{}</a>'.format(link, 'ערוך'))

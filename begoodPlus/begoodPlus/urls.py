@@ -59,7 +59,7 @@ svelteRouter.register(r'sizes', SvelteApiSizesViewSet)
 svelteRouter.register(r'products', SvelteCatalogImageViewSet)
 svelteRouter.register(r'packing',  SvelteApiPackingTypeViewSet)
 svelteRouter.register(r'providers', SvelteApiProviderViewSet)
-svelteRouter.register(r'productTabel', SvelteCatalogImageDetailViewSet)
+svelteRouter.register(r'productTabel', SvelteCatalogImageDetailViewSet, basename='catalogImageDetail')
 
 clientRouter = routers.DefaultRouter()
 clientRouter.register(r'albums', AlbumClientViewSet)
