@@ -7,7 +7,6 @@ from django.urls import reverse
 import csv
 import io
 from .models import CatalogImage, CatalogImageVarient
-
 from django.http import FileResponse
 from xlwt.Style import XFStyle
 from catalogAlbum.models import ThroughImage
@@ -15,7 +14,7 @@ import xlwt
 from PIL import Image
 import requests
 from io import BytesIO
-
+from django.conf import settings
 from core.utils import url_to_edit_object
 
 class CatalogImageVarientAdmin(AdminAdvancedFiltersMixin, admin.ModelAdmin):
@@ -92,7 +91,7 @@ class CatalogImageAdmin(AdminAdvancedFiltersMixin, admin.ModelAdmin):
     list_display = ('id', 'show_sizes_popup','render_thumbnail','title','cost_price_dis','client_price_dis','recomended_price_dis','get_albums','cost_price','client_price','recomended_price','date_created', 'date_modified','barcode', 'show_sizes_popup')
     list_editable = ('cost_price','client_price','recomended_price')
     list_display_links = ('title',)
-    actions = ['download_images_csv',]
+    actions = ['download_images_csv','download_images_exel_slim',]
     inlines = (albumsInline, tableInline)#
     readonly_fields = ('id', 'render_thumbnail', 'render_image',)
     search_fields = ('title','description', 'barcode', 'detailTabel__providerMakat')
@@ -176,8 +175,55 @@ class CatalogImageAdmin(AdminAdvancedFiltersMixin, admin.ModelAdmin):
         buffer.seek(0)
         return FileResponse(buffer, as_attachment=True, filename=file_name + '.xls')
         
-    
-    
+    def download_images_exel_slim(modeladmin, request, queryset):
+        # export title, description, const_price, first provider_name, barcode, first category,
+        buffer = io.BytesIO()
+        wb = xlwt.Workbook()
+        file_name='data'
+        ws = wb.add_sheet('sheet1',cell_overwrite_ok=True)
+        ws.cols_right_to_left = True
+        title_style = XFStyle()
+        value_style = XFStyle()
+        alignment_center = xlwt.Alignment()
+        alignment_center.horz = xlwt.Alignment.HORZ_CENTER
+        alignment_center.vert = xlwt.Alignment.VERT_CENTER
+        title_style.alignment = alignment_center
+        value_style.alignment = alignment_center
+        title_style.font.bold = True
+        ws.write(0,0,'כותרת',title_style)
+        ws.write(0,1,'תיאור',title_style)
+        ws.write(0,2,'מחיר עלות ללא מע"מ',title_style)
+        ws.write(0,3,'ספקים',title_style)
+        ws.write(0,4,'ברקוד',title_style)
+        ws.write(0,5,'קטגוריות',title_style)
+        i= 1
+        queryset = queryset.prefetch_related('albums', 'providers')
+        for value in queryset:
+            vals = [value.title, value.description, value.cost_price, value.providers.all(), value.barcode, value.albums.all()]
+            ws.write(i,0,vals[0],value_style)
+            ws.write(i,1,vals[1],value_style)
+            ws.write(i,2,vals[2],value_style)
+            ws.write(i,3,','.join([provider.name for provider in vals[3]]),value_style)
+            ws.write(i,4,vals[4],value_style)
+            ws.write(i,5,','.join([album.title for album in vals[5]]),value_style)
+            i+=1
+            pass
+        # write upload instructions to sheet2
+        ws = wb.add_sheet('sheet2',cell_overwrite_ok=True)
+        ws.cols_right_to_left = True
+        title_style = XFStyle()
+        value_style = XFStyle()
+        alignment_center = xlwt.Alignment()
+        alignment_center.horz = xlwt.Alignment.HORZ_CENTER
+        alignment_center.vert = xlwt.Alignment.VERT_CENTER
+        instractions = 'ניתן להעלות את הטופס בקישור הבא:'
+        url = settings.MY_DOMAIN + reverse('catalog_catalogimage_upload_slim_excel')
+        ws.write(0,0,instractions,title_style)
+        ws.write(1,0,url,value_style)
+
+        wb.save(buffer)
+        buffer.seek(0)
+        return FileResponse(buffer, as_attachment=True, filename=file_name + '.xls')
     def get_albums(self, obj):
         ret = '<ul style="background-color:#ddd;">'
         for a in obj.albums.all():

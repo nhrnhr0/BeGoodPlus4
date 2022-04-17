@@ -28,7 +28,7 @@ from catalogImageDetail.views import SvelteCatalogImageDetailViewSet
 from morders.views import api_get_order_data, edit_morder
 from packingType.views import SvelteApiPackingTypeViewSet
 from color.views import SvelteColorsViewSet
-from catalogImages.views import SvelteCatalogImageViewSet, create_mini_table
+from catalogImages.views import SvelteCatalogImageViewSet, create_mini_table, catalogimage_upload_slim_excel
 from productSize.views import SvelteApiSizesViewSet
 from django.contrib import admin
 import debug_toolbar
@@ -130,7 +130,7 @@ urlpatterns = [
     #path('admin/crm/crmuser/upload_execl/', upload_crm_execl, name='crm_upload_execl'),
     #path('admin_upload_bulk_crm_exel', admin_upload_bulk_crm_exel, name='admin_upload_bulk_crm_exel'),
     path('admin/crm/crmuser/upload_execl2/', import_mscrm_from_exel, name='crm_upload_execl2'),
-    
+    path('admin/catalogImage/upload_slim_exel', catalogimage_upload_slim_excel, name='catalog_catalogimage_upload_slim_excel'),
     path('client-api/get-all-sizes/', get_all_sizes_api),
     path('client-api/get-all-variants/', get_all_varients_api),
     path('client-api/get-all-colors/', get_all_colors_api),

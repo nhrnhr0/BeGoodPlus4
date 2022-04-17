@@ -1,5 +1,6 @@
 from django.http.response import JsonResponse
-from django.shortcuts import render
+from django.shortcuts import redirect, render
+from catalogAlbum.models import CatalogAlbum
 
 from core.models import SvelteCartProductEntery
 from .models import CatalogImage
@@ -12,6 +13,56 @@ from catalogImageDetail.models import CatalogImageDetail
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view
 import json
+from django.contrib import messages
+
+import pandas as pd
+from provider.models import Provider
+def catalogimage_upload_slim_excel(request):
+    if request.method == "GET":
+        return render(request, 'catalogImages/catalogimage_upload_slim_excel.html')
+    elif request.method == "POST":
+        print(request.FILES)
+        file = request.FILES['file']
+        print(file)
+        df = pd.read_excel(file)
+        df = df.fillna('')
+        #print(df.columns) #Index(['כותרת', 'תיאור', 'מחיר עלות ללא מע"מ', 'ספקים', 'ברקוד', 'קטגוריות'], dtype='object')
+        for index, row in df.iterrows():
+            title = row['כותרת']
+            description = row['תיאור']
+            cost_price = row['מחיר עלות ללא מע"מ']
+            providers = [x.strip() for x in row['ספקים'].split(',')]
+            barcode = row['ברקוד']
+            categories = [x.strip() for x in  row['קטגוריות'].split(',')]
+            obj, is_created = CatalogImage.objects.get_or_create(title=title)
+            obj.description = description
+            obj.cost_price = cost_price
+            obj.barcode = barcode
+            providers_objs = []
+            if providers is not None:
+                for provider in providers:
+                    p = Provider.objects.filter(name=provider)
+                    if(p.count() != 0):
+                        providers_objs.append(p[0])
+                obj.providers.set(providers_objs)
+            
+            categories_objs = []
+            if categories is not None:
+                for category in categories:
+                    c = CatalogAlbum.objects.filter(title=category)
+                    if(c.count() != 0):
+                        categories_objs.append(c[0])
+                print('title: ', title, 'categories: ', categories_objs)
+                obj.albums.set(categories_objs)
+                obj.save()
+            if(is_created):
+                messages.add_message(request, messages.INFO, f'[חדש\t, {title}\t, {provider}\t]')
+            else:
+                messages.add_message(request, messages.INFO, f'[קיים\t, {title}\t, {provider}\t]')
+
+        return redirect('/admin/catalogImages/catalogimage/')
+
+
 @csrf_exempt
 def admin_remove_product_from_cart(request):
     ret = {}
