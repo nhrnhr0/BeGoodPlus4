@@ -197,7 +197,7 @@ def svelte_cart_form(request):
         else:
             if (request.user.is_superuser):
                 if body.get('asUser', None):
-                    user_id = int(body['asUser'])
+                    user_id = int(body['asUser']['id'])
                 else:
                     user_id = request.user.id
                 #user_id = int(body.get('asUser') or request.user.id)
