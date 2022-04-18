@@ -21,7 +21,7 @@ from inventory.views import DocStockEnterViewSet, doc_stock_enter
 #from mcrm.views import , admin_upload_bulk_crm_exel, upload_crm_execl, upload_crm_execl2
 from msCrm.views import mcrm_lead_register,get_all_business_types, get_all_interests,import_mscrm_from_exel
 from core.views import client_product_question,send_product_photo, test_celery_view
-from catalogImages.views import admin_api_get_product_cost_price, all_images_ids, get_product_sizes_colors_martix, admin_remove_product_from_cart,admin_add_to_existing_cart
+from catalogImages.views import admin_api_get_product_cost_price, all_images_ids, catalogimage_upload_warehouse_excel, get_product_sizes_colors_martix, admin_remove_product_from_cart,admin_add_to_existing_cart
 from clientApi.views import ColorsClientViewSet, ImageClientViewSet, SizesClientViewSet,LogoClientViewSet, get_album_images
 from clientApi.views import AlbumClientViewSet
 from catalogImageDetail.views import SvelteCatalogImageDetailViewSet
@@ -131,6 +131,7 @@ urlpatterns = [
     #path('admin_upload_bulk_crm_exel', admin_upload_bulk_crm_exel, name='admin_upload_bulk_crm_exel'),
     path('admin/crm/crmuser/upload_execl2/', import_mscrm_from_exel, name='crm_upload_execl2'),
     path('admin/catalogImage/upload_slim_exel', catalogimage_upload_slim_excel, name='catalog_catalogimage_upload_slim_excel'),
+    path('admin/catalogImage/upload_warehouse_excel', catalogimage_upload_warehouse_excel,name='catalog_catalogimage_upload_warehouse_excel'),
     path('client-api/get-all-sizes/', get_all_sizes_api),
     path('client-api/get-all-variants/', get_all_varients_api),
     path('client-api/get-all-colors/', get_all_colors_api),

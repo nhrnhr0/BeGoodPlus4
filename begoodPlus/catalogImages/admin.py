@@ -99,7 +99,7 @@ class CatalogImageAdmin(AdminAdvancedFiltersMixin, admin.ModelAdmin):
     list_display = ('id', 'show_sizes_popup','render_thumbnail','title','cost_price_dis','client_price_dis','recomended_price_dis','get_albums','cost_price','client_price','recomended_price','date_created', 'date_modified','barcode', 'show_sizes_popup')
     list_editable = ('cost_price','client_price','recomended_price')
     list_display_links = ('title',)
-    actions = ['download_images_csv','download_images_exel_slim',]
+    actions = ['download_images_csv','download_images_exel_slim','download_images_exel_warehouse']
     inlines = (albumsInline, tableInline, ppnInline)#
     readonly_fields = ('id', 'render_thumbnail', 'render_image',)
     search_fields = ('title','description', 'barcode', 'detailTabel__providerMakat')
@@ -179,6 +179,72 @@ class CatalogImageAdmin(AdminAdvancedFiltersMixin, admin.ModelAdmin):
             ws.insert_bitmap('imagetoadd.bmp', i, 6)
             '''
             i += 1
+        wb.save(buffer)
+        buffer.seek(0)
+        return FileResponse(buffer, as_attachment=True, filename=file_name + '.xls')
+    
+    def download_images_exel_warehouse(modeladmin, request, queryset):
+        
+        buffer = io.BytesIO()
+        wb = xlwt.Workbook()
+        file_name='data'
+        ws = wb.add_sheet('sheet1',cell_overwrite_ok=True)
+        ws.cols_right_to_left = True
+        title_style = XFStyle()
+        value_style = XFStyle()
+        alignment_center = xlwt.Alignment()
+        alignment_center.horz = xlwt.Alignment.HORZ_CENTER
+        alignment_center.vert = xlwt.Alignment.VERT_CENTER
+        title_style.alignment = alignment_center
+        value_style.alignment = alignment_center
+        title_style.font.bold = True
+        
+        ws.write(0,0,'קטגוריה',title_style)
+        ws.write(0,1,'שם מוצר',title_style)
+        ws.write(0,2,'מחיר עלות ללא מע"מ',title_style)
+        ws.write(0,3,'מחיר חנות ללא מע"מ',title_style)
+        ws.write(0,4,'ברקוד',title_style)
+        ws.write(0,5,'האם יש ברקוד פיזי (כן/לא)',title_style)
+        ws.write(0,6,'האם ניתן למיתוג (כן/לא)',title_style)
+        ws.write(0,7,'ספק-1',title_style)
+        ws.write(0,8,'מקט אצל הספק-1',title_style)
+        ws.write(0,9,'ספק-2',title_style)
+        ws.write(0,10,'מקט אצל הספק-2',title_style)
+        ws.write(0,11,'ספק-3',title_style)
+        ws.write(0,12,'מקט אצל הספק-3',title_style)
+        i = 1
+        for product in queryset:
+            if product.albums.all().count() > 0:
+                ws.write(i,0,product.albums.first().title,value_style)
+            ws.write(i,1,product.title,value_style)
+            ws.write(i,2,product.cost_price,value_style)
+            ws.write(i,3,product.client_price,value_style)
+            ws.write(i,4,product.barcode,value_style)
+            ws.write(i,5, 'כן' if product.has_physical_barcode == True else 'לא', value_style)
+            ws.write(i,6, 'כן' if product.can_tag == True else 'לא', value_style)
+            ppns = PPN.objects.filter(product=product)
+            ppn_offset = 7
+            for ppn in ppns:
+                ws.write(i,ppn_offset, ppn.provider.name, value_style)
+                ws.write(i,ppn_offset+1, ppn.providerProductName, value_style)
+                ppn_offset += 2
+            
+            i+=1
+        
+        
+        ws = wb.add_sheet('sheet2',cell_overwrite_ok=True)
+        ws.cols_right_to_left = True
+        title_style = XFStyle()
+        value_style = XFStyle()
+        alignment_center = xlwt.Alignment()
+        alignment_center.horz = xlwt.Alignment.HORZ_CENTER
+        alignment_center.vert = xlwt.Alignment.VERT_CENTER
+        instractions = 'ניתן להעלות את הטופס בקישור הבא:'
+        url = settings.MY_DOMAIN + reverse('catalog_catalogimage_upload_warehouse_excel')
+        ws.write(0,0,instractions,title_style)
+        ws.write(1,0,url,value_style)
+        
+        
         wb.save(buffer)
         buffer.seek(0)
         return FileResponse(buffer, as_attachment=True, filename=file_name + '.xls')
