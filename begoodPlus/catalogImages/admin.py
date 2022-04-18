@@ -99,7 +99,7 @@ class CatalogImageAdmin(AdminAdvancedFiltersMixin, admin.ModelAdmin):
     list_display = ('id', 'show_sizes_popup','render_thumbnail','title','cost_price_dis','client_price_dis','recomended_price_dis','get_albums','cost_price','client_price','recomended_price','date_created', 'date_modified','barcode', 'show_sizes_popup')
     list_editable = ('cost_price','client_price','recomended_price')
     list_display_links = ('title',)
-    actions = ['download_images_csv','download_images_exel_slim','download_images_exel_warehouse', 'turn_sizes_popup_active', 'turn_sizes_popup_inactive']
+    actions = ['download_images_csv','download_images_exel_slim','download_images_exel_warehouse', 'turn_sizes_popup_active', 'turn_sizes_popup_inactive', 'upload_images_to_cloudinary_bool_active', 'upload_images_to_cloudinary_bool_inactive']
     inlines = (albumsInline, tableInline, ppnInline)#
     readonly_fields = ('id', 'render_thumbnail', 'render_image',)
     search_fields = ('title','description', 'barcode', 'detailTabel__providerMakat')
@@ -123,7 +123,16 @@ class CatalogImageAdmin(AdminAdvancedFiltersMixin, admin.ModelAdmin):
 
     def turn_sizes_popup_inactive(modeladmin, request, queryset):
         queryset.update(show_sizes_popup=False)
+    turn_sizes_popup_inactive.short_description = _('turn sizes popup inactive')
     
+    def upload_images_to_cloudinary_bool_active(modeladmin, request, queryset):
+        queryset.update(update_image_to_cloudinary=True)
+    upload_images_to_cloudinary_bool_active.short_description = _('upload images to cloudinary active')
+    
+    
+    def upload_images_to_cloudinary_bool_inactive(modeladmin, request, queryset):
+        queryset.update(update_image_to_cloudinary=False)
+    upload_images_to_cloudinary_bool_inactive.short_description = _('upload images to cloudinary inactive')
     def download_images_csv(modeladmin, request, queryset):
         buffer = io.BytesIO()
         wb = xlwt.Workbook()
