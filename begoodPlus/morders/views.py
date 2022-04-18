@@ -1,9 +1,51 @@
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
-from .serializers import AdminMOrderSerializer
+from .serializers import AdminMOrderItemSerializer, AdminMOrderSerializer
 from morders.models import MOrder, MOrderItem, MOrderItemEntry
 from rest_framework import status
 import json
+from rest_framework.decorators import api_view
+
+
+@api_view(["POST"])
+def morder_edit_order_add_product_entries(request):
+    print(request)
+    if not request.user.is_superuser:
+        return JsonResponse({'error': 'You are not authorized to perform this action'}, status=status.HTTP_401_UNAUTHORIZED)
+    else:
+        data = request.data
+        arr = [0,1,2,3,4]
+        entry_id = data.get('entry_id')
+        orderObj = MOrderItem.objects.get(id=int(entry_id))
+        for index in arr:
+            color_id = data['color_' + str(index)] # color_0
+            size_id = data['size_' + str(index)] # size_0
+            varient_id = data['varient_' + str(index)] # varient_0
+            amount = data['amount_' + str(index)] # amount_0
+            color_id = color_id if color_id != '' and color_id != 'undefined' else None
+            size_id = size_id if size_id != '' and size_id != 'undefined' else None
+            varient_id = varient_id if varient_id != '' and varient_id != 'undefined' else None
+            print(color_id, size_id, varient_id, amount)
+            if size_id != None and color_id != None:
+                objs = MOrderItemEntry.objects.filter(
+                    product=orderObj,
+                    color_id=int(color_id) if color_id != None else None,
+                    size_id=int(size_id) if size_id != None else None,
+                    varient_id=int(varient_id) if varient_id != None else None,
+                )
+                if objs.count() == 0:
+                    obj = MOrderItemEntry.objects.create(
+                        color_id=int(color_id) if color_id != None else None,
+                        size_id=int(size_id) if size_id != None else None,
+                        varient_id=int(varient_id) if varient_id != None else None,
+                    )
+                    obj.product.set([orderObj])
+                else:
+                    obj = objs.first()
+                obj.quantity = int(amount)
+                print(obj)
+        new_entries = AdminMOrderItemSerializer(orderObj).data
+        return JsonResponse({'success': 'success', 'data': new_entries}, status=status.HTTP_200_OK)
 
 # Create your views here.
 def edit_morder(request, id):

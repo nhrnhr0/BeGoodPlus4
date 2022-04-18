@@ -9403,7 +9403,7 @@ var morderedit = (function () {
     const MORDER_EDIT_API = BASE_URL + '/morders/api-get-order-data';
     const GET_ALL_PROVIDERS_API_URL =  BASE_URL + '/svelte/api/providers/';
 
-    function getCookie(name) {
+    function getCookie$1(name) {
         let cookieValue = null;
         if (document.cookie && document.cookie !== '') {
             const cookies = document.cookie.split(';');
@@ -9462,7 +9462,7 @@ var morderedit = (function () {
         let headers_json= {
             'Content-Type': 'application/json',
             'Content-Type': 'application/json; charset=UTF-8',
-            'X-CSRFToken': getCookie('csrftoken'),
+            'X-CSRFToken': getCookie$1('csrftoken'),
         };
         var myHeaders = new Headers(headers_json);
         var requestOptions = Object.assign({}, {
@@ -33734,7 +33734,7 @@ var morderedit = (function () {
     	return child_ctx;
     }
 
-    // (40:8) {#if isModalOpen}
+    // (93:8) {#if isModalOpen}
     function create_if_block$1(ctx) {
     	let div3;
     	let div1;
@@ -33755,6 +33755,8 @@ var morderedit = (function () {
     	let input1;
     	let input1_value_value;
     	let t8;
+    	let t9;
+    	let button2;
     	let div3_intro;
     	let mounted;
     	let dispose;
@@ -33791,31 +33793,37 @@ var morderedit = (function () {
     				each_blocks[i].c();
     			}
 
+    			t9 = space();
+    			button2 = element("button");
+    			button2.textContent = "שמור";
     			attr_dev(button0, "title", "Close");
     			attr_dev(button0, "class", "close-btn right");
-    			add_location(button0, file$1, 42, 16, 1583);
+    			add_location(button0, file$1, 95, 16, 3372);
     			attr_dev(div0, "class", "modal-title svelte-1glfn9q");
-    			add_location(div0, file$1, 43, 16, 1679);
+    			add_location(div0, file$1, 96, 16, 3468);
     			attr_dev(button1, "title", "Close");
     			attr_dev(button1, "class", "close-btn left");
-    			add_location(button1, file$1, 44, 16, 1760);
+    			add_location(button1, file$1, 97, 16, 3549);
     			attr_dev(div1, "class", "modal-header svelte-1glfn9q");
-    			add_location(div1, file$1, 41, 12, 1539);
+    			add_location(div1, file$1, 94, 12, 3328);
     			attr_dev(input0, "type", "hidden");
     			attr_dev(input0, "name", "product_id");
-    			input0.value = input0_value_value = /*rowData*/ ctx[0]['product_id'];
-    			add_location(input0, file$1, 49, 18, 1971);
+    			input0.value = input0_value_value = /*rowData*/ ctx[0]['product'];
+    			add_location(input0, file$1, 102, 18, 3786);
     			attr_dev(input1, "type", "hidden");
     			attr_dev(input1, "name", "entry_id");
     			input1.value = input1_value_value = /*rowData*/ ctx[0]['entry_id'];
-    			add_location(input1, file$1, 50, 18, 2062);
+    			add_location(input1, file$1, 103, 18, 3874);
+    			attr_dev(button2, "type", "submit");
+    			attr_dev(button2, "class", "btn btn-primary");
+    			add_location(button2, file$1, 135, 18, 5672);
     			attr_dev(form, "method", "post");
-    			add_location(form, file$1, 48, 16, 1931);
+    			add_location(form, file$1, 101, 16, 3720);
     			attr_dev(div2, "class", "modal-body svelte-1glfn9q");
-    			add_location(div2, file$1, 47, 12, 1889);
+    			add_location(div2, file$1, 100, 12, 3678);
     			attr_dev(div3, "class", "modal_content svelte-1glfn9q");
-    			set_style(div3, "z-index", /*modal_zIndex*/ ctx[3] + 10);
-    			add_location(div3, file$1, 40, 8, 1389);
+    			set_style(div3, "z-index", /*modal_zIndex*/ ctx[4] + 10);
+    			add_location(div3, file$1, 93, 8, 3178);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div3, anchor);
@@ -33839,10 +33847,14 @@ var morderedit = (function () {
     				each_blocks[i].m(form, null);
     			}
 
+    			append_dev(form, t9);
+    			append_dev(form, button2);
+
     			if (!mounted) {
     				dispose = [
     					listen_dev(button0, "click", /*closeModal*/ ctx[2], false, false, false),
     					listen_dev(button1, "click", /*closeModal*/ ctx[2], false, false, false),
+    					listen_dev(form, "submit", submit_form, false, false, false),
     					listen_dev(div3, "click", stop_propagation(click_handler), false, false, true)
     				];
 
@@ -33852,7 +33864,7 @@ var morderedit = (function () {
     		p: function update(ctx, dirty) {
     			if (dirty & /*rowData*/ 1 && t3_value !== (t3_value = /*rowData*/ ctx[0]['title'] + "")) set_data_dev(t3, t3_value);
 
-    			if (dirty & /*rowData*/ 1 && input0_value_value !== (input0_value_value = /*rowData*/ ctx[0]['product_id'])) {
+    			if (dirty & /*rowData*/ 1 && input0_value_value !== (input0_value_value = /*rowData*/ ctx[0]['product'])) {
     				prop_dev(input0, "value", input0_value_value);
     			}
 
@@ -33860,7 +33872,7 @@ var morderedit = (function () {
     				prop_dev(input1, "value", input1_value_value);
     			}
 
-    			if (dirty & /*all_varients, all_sizes, all_colors*/ 112) {
+    			if (dirty & /*all_varients, all_sizes, all_colors*/ 224) {
     				each_value = [1, 2, 3, 4, 5];
     				validate_each_argument(each_value);
     				let i;
@@ -33873,7 +33885,7 @@ var morderedit = (function () {
     					} else {
     						each_blocks[i] = create_each_block(child_ctx);
     						each_blocks[i].c();
-    						each_blocks[i].m(form, null);
+    						each_blocks[i].m(form, t9);
     					}
     				}
 
@@ -33882,8 +33894,8 @@ var morderedit = (function () {
     				}
     			}
 
-    			if (dirty & /*modal_zIndex*/ 8) {
-    				set_style(div3, "z-index", /*modal_zIndex*/ ctx[3] + 10);
+    			if (dirty & /*modal_zIndex*/ 16) {
+    				set_style(div3, "z-index", /*modal_zIndex*/ ctx[4] + 10);
     			}
     		},
     		i: function intro(local) {
@@ -33907,14 +33919,14 @@ var morderedit = (function () {
     		block,
     		id: create_if_block$1.name,
     		type: "if",
-    		source: "(40:8) {#if isModalOpen}",
+    		source: "(93:8) {#if isModalOpen}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (57:28) {#each all_colors as color}
+    // (110:28) {#each all_colors as color}
     function create_each_block_3(ctx) {
     	let option;
     	let t_value = /*color*/ ctx[19]['name'] + "";
@@ -33927,16 +33939,16 @@ var morderedit = (function () {
     			t = text(t_value);
     			option.__value = option_value_value = /*color*/ ctx[19]['id'];
     			option.value = option.__value;
-    			add_location(option, file$1, 57, 30, 2540);
+    			add_location(option, file$1, 110, 30, 4358);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, option, anchor);
     			append_dev(option, t);
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*all_colors*/ 16 && t_value !== (t_value = /*color*/ ctx[19]['name'] + "")) set_data_dev(t, t_value);
+    			if (dirty & /*all_colors*/ 32 && t_value !== (t_value = /*color*/ ctx[19]['name'] + "")) set_data_dev(t, t_value);
 
-    			if (dirty & /*all_colors*/ 16 && option_value_value !== (option_value_value = /*color*/ ctx[19]['id'])) {
+    			if (dirty & /*all_colors*/ 32 && option_value_value !== (option_value_value = /*color*/ ctx[19]['id'])) {
     				prop_dev(option, "__value", option_value_value);
     				option.value = option.__value;
     			}
@@ -33950,14 +33962,14 @@ var morderedit = (function () {
     		block,
     		id: create_each_block_3.name,
     		type: "each",
-    		source: "(57:28) {#each all_colors as color}",
+    		source: "(110:28) {#each all_colors as color}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (65:28) {#each all_sizes as size}
+    // (118:28) {#each all_sizes as size}
     function create_each_block_2(ctx) {
     	let option;
     	let t_value = /*size*/ ctx[16]['size'] + "";
@@ -33970,16 +33982,16 @@ var morderedit = (function () {
     			t = text(t_value);
     			option.__value = option_value_value = /*size*/ ctx[16]['id'];
     			option.value = option.__value;
-    			add_location(option, file$1, 65, 30, 2974);
+    			add_location(option, file$1, 118, 30, 4798);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, option, anchor);
     			append_dev(option, t);
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*all_sizes*/ 32 && t_value !== (t_value = /*size*/ ctx[16]['size'] + "")) set_data_dev(t, t_value);
+    			if (dirty & /*all_sizes*/ 64 && t_value !== (t_value = /*size*/ ctx[16]['size'] + "")) set_data_dev(t, t_value);
 
-    			if (dirty & /*all_sizes*/ 32 && option_value_value !== (option_value_value = /*size*/ ctx[16]['id'])) {
+    			if (dirty & /*all_sizes*/ 64 && option_value_value !== (option_value_value = /*size*/ ctx[16]['id'])) {
     				prop_dev(option, "__value", option_value_value);
     				option.value = option.__value;
     			}
@@ -33993,14 +34005,14 @@ var morderedit = (function () {
     		block,
     		id: create_each_block_2.name,
     		type: "each",
-    		source: "(65:28) {#each all_sizes as size}",
+    		source: "(118:28) {#each all_sizes as size}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (73:28) {#each all_varients as varient}
+    // (126:28) {#each all_varients as varient}
     function create_each_block_1(ctx) {
     	let option;
     	let t_value = /*varient*/ ctx[13]['name'] + "";
@@ -34013,16 +34025,16 @@ var morderedit = (function () {
     			t = text(t_value);
     			option.__value = option_value_value = /*varient*/ ctx[13]['id'];
     			option.value = option.__value;
-    			add_location(option, file$1, 73, 30, 3421);
+    			add_location(option, file$1, 126, 30, 5251);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, option, anchor);
     			append_dev(option, t);
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*all_varients*/ 64 && t_value !== (t_value = /*varient*/ ctx[13]['name'] + "")) set_data_dev(t, t_value);
+    			if (dirty & /*all_varients*/ 128 && t_value !== (t_value = /*varient*/ ctx[13]['name'] + "")) set_data_dev(t, t_value);
 
-    			if (dirty & /*all_varients*/ 64 && option_value_value !== (option_value_value = /*varient*/ ctx[13]['id'])) {
+    			if (dirty & /*all_varients*/ 128 && option_value_value !== (option_value_value = /*varient*/ ctx[13]['id'])) {
     				prop_dev(option, "__value", option_value_value);
     				option.value = option.__value;
     			}
@@ -34036,14 +34048,14 @@ var morderedit = (function () {
     		block,
     		id: create_each_block_1.name,
     		type: "each",
-    		source: "(73:28) {#each all_varients as varient}",
+    		source: "(126:28) {#each all_varients as varient}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (52:18) {#each [1,2,3,4,5] as item, index}
+    // (105:18) {#each [1,2,3,4,5] as item, index}
     function create_each_block(ctx) {
     	let div;
     	let label0;
@@ -34061,7 +34073,10 @@ var morderedit = (function () {
     	let select2;
     	let option2;
     	let t11;
-    	let each_value_3 = /*all_colors*/ ctx[4];
+    	let label3;
+    	let t13;
+    	let input;
+    	let each_value_3 = /*all_colors*/ ctx[5];
     	validate_each_argument(each_value_3);
     	let each_blocks_2 = [];
 
@@ -34069,7 +34084,7 @@ var morderedit = (function () {
     		each_blocks_2[i] = create_each_block_3(get_each_context_3(ctx, each_value_3, i));
     	}
 
-    	let each_value_2 = /*all_sizes*/ ctx[5];
+    	let each_value_2 = /*all_sizes*/ ctx[6];
     	validate_each_argument(each_value_2);
     	let each_blocks_1 = [];
 
@@ -34077,7 +34092,7 @@ var morderedit = (function () {
     		each_blocks_1[i] = create_each_block_2(get_each_context_2(ctx, each_value_2, i));
     	}
 
-    	let each_value_1 = /*all_varients*/ ctx[6];
+    	let each_value_1 = /*all_varients*/ ctx[7];
     	validate_each_argument(each_value_1);
     	let each_blocks = [];
 
@@ -34124,38 +34139,49 @@ var morderedit = (function () {
     			}
 
     			t11 = space();
+    			label3 = element("label");
+    			label3.textContent = "כמות";
+    			t13 = space();
+    			input = element("input");
     			attr_dev(label0, "for", "color");
-    			add_location(label0, file$1, 53, 22, 2253);
+    			add_location(label0, file$1, 106, 22, 4065);
     			attr_dev(option0, "default", "");
     			option0.__value = "undefined";
     			option0.value = option0.__value;
-    			add_location(option0, file$1, 55, 28, 2403);
+    			add_location(option0, file$1, 108, 28, 4221);
     			attr_dev(select0, "class", "form-control");
-    			attr_dev(select0, "name", "color[]");
+    			attr_dev(select0, "name", "color_" + /*index*/ ctx[12]);
     			attr_dev(select0, "id", "color-" + /*index*/ ctx[12]);
-    			add_location(select0, file$1, 54, 24, 2309);
+    			add_location(select0, file$1, 107, 24, 4121);
     			attr_dev(label1, "for", "size");
-    			add_location(label1, file$1, 61, 22, 2690);
+    			add_location(label1, file$1, 114, 22, 4508);
     			attr_dev(option1, "default", "");
     			option1.__value = "undefined";
     			option1.value = option1.__value;
-    			add_location(option1, file$1, 63, 28, 2838);
+    			add_location(option1, file$1, 116, 28, 4662);
     			attr_dev(select1, "class", "form-control");
-    			attr_dev(select1, "name", "size[]");
+    			attr_dev(select1, "name", "size_" + /*index*/ ctx[12]);
     			attr_dev(select1, "id", "size-" + /*index*/ ctx[12]);
-    			add_location(select1, file$1, 62, 24, 2746);
+    			add_location(select1, file$1, 115, 24, 4564);
     			attr_dev(label2, "for", "varient");
-    			add_location(label2, file$1, 69, 22, 3122);
+    			add_location(label2, file$1, 122, 22, 4946);
     			attr_dev(option2, "default", "");
     			option2.__value = "undefined";
     			option2.value = option2.__value;
-    			add_location(option2, file$1, 71, 28, 3279);
+    			add_location(option2, file$1, 124, 28, 5109);
     			attr_dev(select2, "class", "form-control");
-    			attr_dev(select2, "name", "varient[]");
+    			attr_dev(select2, "name", "varient_" + /*index*/ ctx[12]);
     			attr_dev(select2, "id", "varient-" + /*index*/ ctx[12]);
-    			add_location(select2, file$1, 70, 24, 3181);
+    			add_location(select2, file$1, 123, 24, 5005);
+    			attr_dev(label3, "for", "amount");
+    			add_location(label3, file$1, 130, 22, 5427);
+    			attr_dev(input, "class", "form-control");
+    			attr_dev(input, "type", "number");
+    			attr_dev(input, "name", "amount_" + /*index*/ ctx[12]);
+    			attr_dev(input, "id", "amount-" + /*index*/ ctx[12]);
+    			add_location(input, file$1, 131, 24, 5485);
     			attr_dev(div, "class", "form-group");
-    			add_location(div, file$1, 52, 20, 2205);
+    			add_location(div, file$1, 105, 20, 4017);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -34189,10 +34215,13 @@ var morderedit = (function () {
     			}
 
     			append_dev(div, t11);
+    			append_dev(div, label3);
+    			append_dev(div, t13);
+    			append_dev(div, input);
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*all_colors*/ 16) {
-    				each_value_3 = /*all_colors*/ ctx[4];
+    			if (dirty & /*all_colors*/ 32) {
+    				each_value_3 = /*all_colors*/ ctx[5];
     				validate_each_argument(each_value_3);
     				let i;
 
@@ -34215,8 +34244,8 @@ var morderedit = (function () {
     				each_blocks_2.length = each_value_3.length;
     			}
 
-    			if (dirty & /*all_sizes*/ 32) {
-    				each_value_2 = /*all_sizes*/ ctx[5];
+    			if (dirty & /*all_sizes*/ 64) {
+    				each_value_2 = /*all_sizes*/ ctx[6];
     				validate_each_argument(each_value_2);
     				let i;
 
@@ -34239,8 +34268,8 @@ var morderedit = (function () {
     				each_blocks_1.length = each_value_2.length;
     			}
 
-    			if (dirty & /*all_varients*/ 64) {
-    				each_value_1 = /*all_varients*/ ctx[6];
+    			if (dirty & /*all_varients*/ 128) {
+    				each_value_1 = /*all_varients*/ ctx[7];
     				validate_each_argument(each_value_1);
     				let i;
 
@@ -34275,7 +34304,7 @@ var morderedit = (function () {
     		block,
     		id: create_each_block.name,
     		type: "each",
-    		source: "(52:18) {#each [1,2,3,4,5] as item, index}",
+    		source: "(105:18) {#each [1,2,3,4,5] as item, index}",
     		ctx
     	});
 
@@ -34295,13 +34324,13 @@ var morderedit = (function () {
     			div0 = element("div");
     			if (if_block) if_block.c();
     			attr_dev(div0, "class", "overlay svelte-1glfn9q");
-    			set_style(div0, "z-index", /*modal_zIndex*/ ctx[3] + 5);
-    			add_location(div0, file$1, 38, 4, 1274);
+    			set_style(div0, "z-index", /*modal_zIndex*/ ctx[4] + 5);
+    			add_location(div0, file$1, 91, 4, 3063);
     			attr_dev(div1, "id", "singleAmountModal");
-    			set_style(div1, "z-index", /*modal_zIndex*/ ctx[3]);
+    			set_style(div1, "z-index", /*modal_zIndex*/ ctx[4]);
     			attr_dev(div1, "class", "modal svelte-1glfn9q");
     			toggle_class(div1, "active", /*isModalOpen*/ ctx[1]);
-    			add_location(div1, file$1, 37, 0, 1166);
+    			add_location(div1, file$1, 90, 0, 2955);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -34335,12 +34364,12 @@ var morderedit = (function () {
     				if_block = null;
     			}
 
-    			if (dirty & /*modal_zIndex*/ 8) {
-    				set_style(div0, "z-index", /*modal_zIndex*/ ctx[3] + 5);
+    			if (dirty & /*modal_zIndex*/ 16) {
+    				set_style(div0, "z-index", /*modal_zIndex*/ ctx[4] + 5);
     			}
 
-    			if (dirty & /*modal_zIndex*/ 8) {
-    				set_style(div1, "z-index", /*modal_zIndex*/ ctx[3]);
+    			if (dirty & /*modal_zIndex*/ 16) {
+    				set_style(div1, "z-index", /*modal_zIndex*/ ctx[4]);
     			}
 
     			if (dirty & /*isModalOpen*/ 2) {
@@ -34370,6 +34399,71 @@ var morderedit = (function () {
     	return block;
     }
 
+    function getCookie(name) {
+    	let cookieValue = null;
+
+    	if (document.cookie && document.cookie !== '') {
+    		const cookies = document.cookie.split(';');
+
+    		for (let i = 0; i < cookies.length; i++) {
+    			const cookie = cookies[i].trim();
+
+    			// Does this cookie string begin with the name we want?
+    			if (cookie.substring(0, name.length + 1) === name + '=') {
+    				cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+    				break;
+    			}
+    		}
+    	}
+
+    	return cookieValue;
+    }
+
+    function submit_form(e) {
+    	e.preventDefault();
+    	console.log('submit_form', e);
+    	let form = e.target;
+    	let formData = new FormData(form);
+    	let data = {};
+
+    	formData.forEach((value, key) => {
+    		data[key] = value;
+    	});
+
+    	console.log('submit_form', data);
+
+    	// morders/edit-order-add-product-entries
+    	let url = '/morders/edit-order-add-product-entries';
+
+    	let method = 'POST';
+    	let body = data;
+    	debugger;
+    	const csrftoken = getCookie('csrftoken');
+
+    	let headers = {
+    		'Content-Type': 'application/json',
+    		'X-CSRFToken': csrftoken
+    	};
+
+    	let options = {
+    		method,
+    		headers,
+    		body: JSON.stringify(body)
+    	};
+
+    	fetch(url, options).then(response => response.json()).then(data => {
+    		console.log('submit_form', data);
+
+    		if (data.status === 'ok') {
+    			form.reset();
+    		}
+    	}).catch(error => {
+    		console.log('submit_form', error);
+    	});
+
+    	form.reset();
+    }
+
     const click_handler = () => {
     	
     };
@@ -34383,19 +34477,16 @@ var morderedit = (function () {
     	let all_colors = undefined;
     	let all_sizes = undefined;
     	let all_varients = undefined;
-    	let added_list = [];
 
     	onMount(async () => {
-    		added_list = [];
-
     		// get all colors: /client-api/get-all-colors/
-    		$$invalidate(4, all_colors = await apiGetAllColors());
+    		$$invalidate(5, all_colors = await apiGetAllColors());
 
     		// get all sizes: /client-api/get-all-sizes/
-    		$$invalidate(5, all_sizes = await apiGetAllSizes());
+    		$$invalidate(6, all_sizes = await apiGetAllSizes());
 
     		// get all products: /client-api/get-all-variants/
-    		$$invalidate(6, all_varients = await apiGetAllVariants());
+    		$$invalidate(7, all_varients = await apiGetAllVariants());
     	});
 
     	function closeModal(e) {
@@ -34404,7 +34495,7 @@ var morderedit = (function () {
     	}
 
     	function openModal(_product_id, _product_title) {
-    		$$invalidate(3, modal_zIndex = 1200 + +979797979 * 15);
+    		$$invalidate(4, modal_zIndex = 1200 + +979797979 * 15);
     		$$invalidate(1, isModalOpen = true);
     	}
 
@@ -34437,20 +34528,20 @@ var morderedit = (function () {
     		all_colors,
     		all_sizes,
     		all_varients,
-    		added_list,
     		closeModal,
     		openModal,
-    		show
+    		show,
+    		getCookie,
+    		submit_form
     	});
 
     	$$self.$inject_state = $$props => {
     		if ('rowData' in $$props) $$invalidate(0, rowData = $$props.rowData);
     		if ('isModalOpen' in $$props) $$invalidate(1, isModalOpen = $$props.isModalOpen);
-    		if ('modal_zIndex' in $$props) $$invalidate(3, modal_zIndex = $$props.modal_zIndex);
-    		if ('all_colors' in $$props) $$invalidate(4, all_colors = $$props.all_colors);
-    		if ('all_sizes' in $$props) $$invalidate(5, all_sizes = $$props.all_sizes);
-    		if ('all_varients' in $$props) $$invalidate(6, all_varients = $$props.all_varients);
-    		if ('added_list' in $$props) added_list = $$props.added_list;
+    		if ('modal_zIndex' in $$props) $$invalidate(4, modal_zIndex = $$props.modal_zIndex);
+    		if ('all_colors' in $$props) $$invalidate(5, all_colors = $$props.all_colors);
+    		if ('all_sizes' in $$props) $$invalidate(6, all_sizes = $$props.all_sizes);
+    		if ('all_varients' in $$props) $$invalidate(7, all_varients = $$props.all_varients);
     	};
 
     	if ($$props && "$$inject" in $$props) {
@@ -34461,6 +34552,7 @@ var morderedit = (function () {
     		rowData,
     		isModalOpen,
     		closeModal,
+    		submit_form,
     		modal_zIndex,
     		all_colors,
     		all_sizes,
@@ -34478,8 +34570,9 @@ var morderedit = (function () {
     			rowData: 0,
     			isModalOpen: 1,
     			closeModal: 2,
-    			openModal: 7,
-    			show: 8
+    			openModal: 8,
+    			show: 9,
+    			submit_form: 3
     		});
 
     		dispatch_dev("SvelteRegisterComponent", {
@@ -34526,7 +34619,7 @@ var morderedit = (function () {
     	}
 
     	get openModal() {
-    		return this.$$.ctx[7];
+    		return this.$$.ctx[8];
     	}
 
     	set openModal(value) {
@@ -34534,10 +34627,18 @@ var morderedit = (function () {
     	}
 
     	get show() {
-    		return this.$$.ctx[8];
+    		return this.$$.ctx[9];
     	}
 
     	set show(value) {
+    		throw new Error("<ProductAmountEditModel>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get submit_form() {
+    		return submit_form;
+    	}
+
+    	set submit_form(value) {
     		throw new Error("<ProductAmountEditModel>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
     }

@@ -9,9 +9,7 @@ import { apiGetAllColors, apiGetAllSizes, apiGetAllVariants } from '../api/api';
     let all_colors = undefined;
     let all_sizes = undefined;
     let all_varients = undefined;
-    let added_list = [];
     onMount(async () => {
-        added_list = [];
         // get all colors: /client-api/get-all-colors/
         all_colors = await apiGetAllColors();
         // get all sizes: /client-api/get-all-sizes/
@@ -34,6 +32,61 @@ import { apiGetAllColors, apiGetAllSizes, apiGetAllVariants } from '../api/api';
         rowData = data;
         isModalOpen = true;
     }
+    function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+    export function submit_form(e) {
+        e.preventDefault();
+        console.log('submit_form', e);
+        let form = e.target;
+        let formData = new FormData(form);
+        let data = {};
+        formData.forEach((value, key) => {
+            data[key] = value;
+        });
+        console.log('submit_form', data);
+        // morders/edit-order-add-product-entries
+        let url = '/morders/edit-order-add-product-entries';
+        let method = 'POST';
+        let body = data;
+        debugger;
+        const csrftoken = getCookie('csrftoken');
+        let headers = {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrftoken
+        };
+        let options = {
+            method: method,
+            headers: headers,
+            body: JSON.stringify(body),
+        };
+        fetch(url, options)
+            .then(response => response.json())
+            .then(data => {
+                console.log('submit_form', data);
+                if (data.status === 'ok') {
+                    form.reset();
+                }
+            })
+            .catch(error => {
+                console.log('submit_form', error);
+            });
+        
+        
+        form.reset();
+    }
 </script>
 <div id="singleAmountModal" style="z-index: {modal_zIndex};" class="modal" class:active={isModalOpen}>
     <div class="overlay" style="z-index: {modal_zIndex+5};" on:click={closeModal}>
@@ -46,13 +99,13 @@ import { apiGetAllColors, apiGetAllSizes, apiGetAllVariants } from '../api/api';
                 
             </div>
             <div class="modal-body">
-                <form method="post">
-                  <input type="hidden" name="product_id" value={rowData['product_id']} />
+                <form method="post" on:submit="{submit_form}">
+                  <input type="hidden" name="product_id" value={rowData['product']} />
                   <input type="hidden" name="entry_id" value={rowData['entry_id']} />
                   {#each [1,2,3,4,5] as item, index}
                     <div class="form-group">
                       <label for="color">צבע</label>
-                        <select class="form-control" name="color[]" id="color-{index}" >
+                        <select class="form-control" name="color_{index}" id="color-{index}" >
                             <option default value=undefined>בחר צבע</option>
                             {#each all_colors as color}
                               <option value={color['id']}>{color['name']}</option>
@@ -60,7 +113,7 @@ import { apiGetAllColors, apiGetAllSizes, apiGetAllVariants } from '../api/api';
                         </select>
 
                       <label for="size">מידה</label>
-                        <select class="form-control" name="size[]" id="size-{index}" >
+                        <select class="form-control" name="size_{index}" id="size-{index}" >
                             <option default value=undefined>בחר מידה</option>
                             {#each all_sizes as size}
                               <option value={size['id']}>{size['size']}</option>
@@ -68,16 +121,19 @@ import { apiGetAllColors, apiGetAllSizes, apiGetAllVariants } from '../api/api';
                         </select>
 
                       <label for="varient">מודל</label>
-                        <select class="form-control" name="varient[]" id="varient-{index}" >
+                        <select class="form-control" name="varient_{index}" id="varient-{index}" >
                             <option default value=undefined>בחר מודל</option>
                             {#each all_varients as varient}
                               <option value={varient['id']}>{varient['name']}</option>
                             {/each}
                         </select>
                       
+                      <label for="amount">כמות</label>
+                        <input class="form-control" type="number" name="amount_{index}" id="amount-{index}" />
                       
                       </div>
                   {/each}
+                  <button type="submit" class="btn btn-primary">שמור</button>
                 </form>
             </div>
         </div>
