@@ -26,8 +26,12 @@ import { apiGetAllColors, apiGetAllSizes, apiGetAllVariants } from '../api/api';
         modal_zIndex = 1200 + (+979797979 * 15);
         isModalOpen = true;
     }
-
-    export function show(data) {
+    let _productsTable;
+    let _originalRowData;
+    export function show(data, originalRowData,productsTable) {
+      _originalRowData = originalRowData;
+      _productsTable = productsTable;
+      console.log('rowData: => ', originalRowData)
         console.log('show', data);
         rowData = data;
         isModalOpen = true;
@@ -49,14 +53,14 @@ import { apiGetAllColors, apiGetAllSizes, apiGetAllVariants } from '../api/api';
 }
     export function submit_form(e) {
         e.preventDefault();
-        console.log('submit_form', e);
+        //console.log('submit_form', e);
         let form = e.target;
         let formData = new FormData(form);
         let data = {};
         formData.forEach((value, key) => {
             data[key] = value;
         });
-        console.log('submit_form', data);
+        //console.log('submit_form', data);
         // morders/edit-order-add-product-entries
         let url = '/morders/edit-order-add-product-entries';
         let method = 'POST';
@@ -74,18 +78,18 @@ import { apiGetAllColors, apiGetAllSizes, apiGetAllVariants } from '../api/api';
         };
         fetch(url, options)
             .then(response => response.json())
-            .then(data => {
-                console.log('submit_form', data);
-                if (data.status === 'ok') {
+            .then(responseData => {
+                console.log('response: ',responseData.data);  
                     form.reset();
-                }
+                    debugger;
+                    _productsTable.updateData([_originalRowData, responseData.data]);
+                    alert('form saved');
+                    closeModal();
             })
             .catch(error => {
-                console.log('submit_form', error);
+                alert('form error' + error);
+                console.log('form error', error);
             });
-        
-        
-        form.reset();
     }
 </script>
 <div id="singleAmountModal" style="z-index: {modal_zIndex};" class="modal" class:active={isModalOpen}>

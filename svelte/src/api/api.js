@@ -1,4 +1,4 @@
-import {SEARCH_API_URL,GET_ALL_PROVIDERS_API_URL,MORDER_EDIT_API,GET_ALL_SIZES_API, GET_DOC_STOCK_ENTER_PPN_ENTRIES, SEARCH_PROVIDERS_API_URL,INV_API_GET_ENTER_DOC_DATA_URL, SEARCH_PPN_API_URL, GET_ALL_COLORS_API, GET_ALL_VARIENTS_API, DELETE_DOC_STOCK_EnterEntery as DELETE_DOC_STOCK_ENTER_ENTRY, ADD_DOC_STOCK_ENTER_ENTRY_API_URL,INV_API_GET_PRODUCT_INVENTORY} from './../consts/consts.js';
+import {MORDER_DELETE_PRODUCT,SEARCH_API_URL,GET_ALL_PROVIDERS_API_URL,MORDER_GET_API,GET_ALL_SIZES_API, GET_DOC_STOCK_ENTER_PPN_ENTRIES, SEARCH_PROVIDERS_API_URL,INV_API_GET_ENTER_DOC_DATA_URL, SEARCH_PPN_API_URL, GET_ALL_COLORS_API, GET_ALL_VARIENTS_API, DELETE_DOC_STOCK_EnterEntery as DELETE_DOC_STOCK_ENTER_ENTRY, ADD_DOC_STOCK_ENTER_ENTRY_API_URL,INV_API_GET_PRODUCT_INVENTORY, MORDER_EDIT_API} from './../consts/consts.js';
 import {getCookie} from './../utils/utils.js';
 
 
@@ -8,16 +8,24 @@ export async function apiGetProviders() {
 }
 
 export async function apiGetMOrder(order_id) {
-    const response = await fetch_wraper(`${MORDER_EDIT_API}/${order_id}`, {});
+    const response = await fetch_wraper(`${MORDER_GET_API}/${order_id}`, {});
     return response;
 }
 export async function apiSaveMOrder(order_id, data) {
-    const response = await fetch_wraper(`${MORDER_EDIT_API}/${order_id}`, {
+    const response = await fetch_wraper(`${MORDER_GET_API}/${order_id}`, {
         method: 'POST',
         body: JSON.stringify(data)
     });
     return response;
 
+}
+
+export async function apiAddNewProductToMorder(data) {
+    const response = await fetch_wraper(`${MORDER_EDIT_API}/add-new-product`, {
+        method: 'POST',
+        body: JSON.stringify(data)
+    });
+    return response;
 }
 
 export async function apiRequestStockInventory(sendData) {
@@ -26,6 +34,13 @@ export async function apiRequestStockInventory(sendData) {
 
     const response = await fetch_wraper(url, {
         method: 'GET',
+    });
+    return response;
+}
+
+export async function apiDeleteMOrderItem(row_id) {
+    const response = await fetch_wraper(`${MORDER_DELETE_PRODUCT}/${row_id}`, {
+        method: 'DELETE',
     });
     return response;
 }

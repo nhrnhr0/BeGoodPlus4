@@ -43,6 +43,7 @@ def morder_edit_order_add_product_entries(request):
                 else:
                     obj = objs.first()
                 obj.quantity = int(amount)
+                obj.save()
                 print(obj)
         new_entries = AdminMOrderItemSerializer(orderObj).data
         return JsonResponse({'success': 'success', 'data': new_entries}, status=status.HTTP_200_OK)
@@ -54,6 +55,45 @@ def edit_morder(request, id):
     context = {}
     context['my_data'] = {'id': id}
     return render(request, 'morder_edit.html', context=context)
+
+def api_delete_order_data_item(request, row_id):
+    if not request.user.is_superuser:
+        return JsonResponse({'error': 'You are not authorized to perform this action'}, status=status.HTTP_401_UNAUTHORIZED)
+    else:
+        if request.method != "DELETE":
+            return JsonResponse({'error': 'You are not authorized to perform this action'}, status=status.HTTP_401_UNAUTHORIZED)
+        else:
+            try:
+                obj = MOrderItem.objects.get(id=int(row_id))
+                obj.delete()
+                return JsonResponse({'success': 'success'}, status=status.HTTP_200_OK)
+            except:
+                return JsonResponse({'error': 'You are not authorized to perform this action'}, status=status.HTTP_401_UNAUTHORIZED)
+
+
+def api_edit_order_add_product(request):
+    if not request.user.is_superuser:
+        return JsonResponse({'error': 'You are not authorized to perform this action'}, status=status.HTTP_401_UNAUTHORIZED)
+    else:
+        if request.method != "POST":
+            return JsonResponse({'error': 'You are not authorized to perform this action'}, status=status.HTTP_401_UNAUTHORIZED)
+        else:
+            data = json.loads(request.body)
+            print(data)
+            order_id = data.get('order_id')
+            product_id = data.get('product_id')
+            objs = MOrderItem.objects.filter(morder=order_id, product_id=product_id)
+            print(objs)
+            if objs.count() == 0:
+                obj = MOrderItem.objects.create(
+                    morder_id=order_id,
+                    product_id=product_id,
+                )
+                obj.save()
+                new_entries = AdminMOrderItemSerializer(obj).data
+                return JsonResponse({'success': 'success', 'data': new_entries}, status=status.HTTP_200_OK)
+            else:
+                # TODO: continue from here
 
 
 def api_get_order_data(request, id):
@@ -81,7 +121,7 @@ def api_get_order_data(request, id):
                 p = p.first()
             else:
                 p = MOrderItem()
-                p.morder = order
+                p.morder.set(order)
                 p.product = product['product']
                 print('p1', p, 'save')
                 p.save()

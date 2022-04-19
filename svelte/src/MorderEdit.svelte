@@ -3,11 +3,14 @@
 <script>
 import { onMount } from "svelte";
 import { Loading } from "carbon-components-svelte";
-import { apiGetMOrder,apiGetProviders,apiSaveMOrder, apiRequestStockInventory } from "./api/api";
+import {CLOUDINARY_BASE_URL} from './consts/consts';
+import { apiAddNewProductToMorder,apiSearchProducts, apiGetMOrder,apiGetProviders,apiSaveMOrder, apiRequestStockInventory,apiDeleteMOrderItem } from "./api/api";
 import {TabulatorFull as Tabulator} from 'tabulator-tables';
 import {Button} from "carbon-components-svelte";
 import { MultiSelect } from "carbon-components-svelte";
 import ProductAmountEditModel from "./components/ProductAmountEditModel.svelte";
+import AutoComplete from "simple-svelte-autocomplete";
+
 
     let updateing = false;
     let updateing_to_server = false;
@@ -19,6 +22,22 @@ import ProductAmountEditModel from "./components/ProductAmountEditModel.svelte";
     let productsData;
     let groupedProducts;
     let showUpdateButton = false;
+
+
+    function autocompleteItemSelected(val) {
+        console.log('autocompleteItemSelected: ' , val);
+        selectedProduct = val;
+    }
+
+    let selectedProduct;
+
+    async function searchProducts(keyword) {
+            let json = await apiSearchProducts(keyword);
+            let data = json;
+            return data.all
+        }
+
+
     //Tabulator.registerModule([FormatModule, EditModule]);
     function productCellEdited(cell) {
         /*
@@ -291,13 +310,12 @@ import ProductAmountEditModel from "./components/ProductAmountEditModel.svelte";
                         button1.addEventListener('click', function(){
                             let row = cell.getRow();
                             let rowData = row.getData();
-                            console.log('row: ', rowData);
-                            let sendData = {
-                                'id': rowData.id,
-                            }
                             //console.log('sendData: ', sendData);
-                            alert('TODO');
-                            //apiDeleteOrder(sendData);
+                            apiDeleteMOrderItem(rowData.id);
+                            data.products = data.products.filter(item=>item.id!=rowData.id);
+                            row.delete();
+                            
+                            console.log('row ', row, ' deleted')
                         });
 
 
@@ -312,12 +330,13 @@ import ProductAmountEditModel from "./components/ProductAmountEditModel.svelte";
                         button2.addEventListener('click', function(){
                             let row = cell.getRow();
                             let rowData = row.getData();
-                            console.log('row: ', rowData);
+                            //console.log('row: ', rowData);
                             let data = {
                                 'title': rowData.product_name,
                                 'entry_id': rowData.id,
                             }
-                            productAmountEditModel.show(data);
+                            let row_data = rowData;
+                            productAmountEditModel.show(data, row_data, productsTable);
                             //apiDeleteOrder(sendData);
 
                         });
@@ -377,6 +396,21 @@ import ProductAmountEditModel from "./components/ProductAmountEditModel.svelte";
     let productAmountEditModel;
     let is_modal_open = false;
     let amount_modal_row_id = undefined;
+
+    function addNewProductFormSubmit(e) {
+        e.preventDefault();
+        let sendData = {};
+        sendData['order_id'] = data.id;
+        sendData['product_id'] = selectedProduct.id;
+        console.log('data: ', sendData);
+        apiAddNewProductToMorder(sendData).then(()=> {
+            form.reset();
+        }).catch(err=>{
+            console.log(err);
+        });
+        
+        //productAmountEditModel.hide();
+    }
 </script>
 
 <main>
@@ -388,6 +422,42 @@ import ProductAmountEditModel from "./components/ProductAmountEditModel.svelte";
         <div id="headers-table"></div>
         <hr>
         <div id="products-table"></div>
+        <hr>
+
+        <div id="new-product-form">
+            <h3>הוסף מוצר</h3>
+            <form method="post" on:submit="{addNewProductFormSubmit}">
+                <div class="form-group">
+                    <label for="product_name">שם מוצר</label>
+                    <div class="search-wraper">
+                        
+                        <AutoComplete id="search_input" on:focus loadingText="מחפש מוצרים..." createText="לא נמצאו תוצאות חיפוש" showLoadingIndicator=true noResultsText="" onChange={autocompleteItemSelected} create=true placeholder="חיפוש..." className="autocomplete-cls" searchFunction={searchProducts} delay=200 localFiltering="{false}" labelFieldName="title" valueFieldName="value">
+                            <div slot="item" let:item={item} let:label={label}>
+                                <div class="search-item">
+                                    <div class="inner">
+                                        <img alt="{item.title}" style="height:25px;" src="{CLOUDINARY_BASE_URL}f_auto,w_auto/{item.cimage}" />
+                                        {@html label}
+                                    </div>
+                                </div>
+                            </div>
+                        </AutoComplete>
+                    {#if selectedProduct}
+                        <div class="selected-product">
+                            <div class="inner">
+                                <img alt="{selectedProduct?.title}" style="height:25px;" src="{CLOUDINARY_BASE_URL}f_auto,w_auto/{selectedProduct?.cimage}" />
+                                {@html selectedProduct?.title}
+                            </div>
+                        </div>
+                    
+                        <button>הוסף</button>
+                    {:else}
+                        <button disabled>הוסף</button>
+                    {/if}
+                    </div>
+                </div>
+            </form>
+        </div>
+
             <Button class="update-btn" disabled={updateing_to_server} on:click={()=>{save_data()}}>
                 {#if updateing_to_server}
                     <Loading withOverlay={false} />

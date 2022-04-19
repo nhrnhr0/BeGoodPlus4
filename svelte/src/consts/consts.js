@@ -28,6 +28,7 @@ export const GET_DOC_STOCK_ENTER_PPN_ENTRIES = BASE_URL + '/inv/enter-doc/get-do
 export const DELETE_DOC_STOCK_EnterEntery = BASE_URL + '/inv/enter-doc/delete-doc-stock-enter-ppn-entry';
 export const ADD_DOC_STOCK_ENTER_ENTRY_API_URL = BASE_URL + '/inv/enter-doc/add-doc-stock-enter-ppn-entry';
 export const INV_API_GET_PRODUCT_INVENTORY = BASE_URL + '/inv/get-product-inventory/';
-export const MORDER_EDIT_API = BASE_URL + '/morders/api-get-order-data';
+export const MORDER_GET_API = BASE_URL + '/morders/api-get-order-data';
+export const MORDER_EDIT_API = BASE_URL + '/morders/api-edit-order';
 export const GET_ALL_PROVIDERS_API_URL =  BASE_URL + '/svelte/api/providers/';
-
+export const MORDER_DELETE_PRODUCT = BASE_URL + '/morders/delete-product';
