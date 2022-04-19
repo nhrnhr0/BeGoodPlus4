@@ -38230,7 +38230,7 @@ var morderedit = (function () {
     const { console: console_1 } = globals;
     const file = "src\\MorderEdit.svelte";
 
-    // (421:4) {:else}
+    // (423:4) {:else}
     function create_else_block(ctx) {
     	let div0;
     	let t0;
@@ -38243,7 +38243,7 @@ var morderedit = (function () {
     	let div4;
     	let h3;
     	let t5;
-    	let form_1;
+    	let form;
     	let div3;
     	let label;
     	let t7;
@@ -38320,7 +38320,7 @@ var morderedit = (function () {
     			h3 = element("h3");
     			h3.textContent = "הוסף מוצר";
     			t5 = space();
-    			form_1 = element("form");
+    			form = element("form");
     			div3 = element("div");
     			label = element("label");
     			label.textContent = "שם מוצר";
@@ -38332,22 +38332,22 @@ var morderedit = (function () {
     			t9 = space();
     			create_component(button.$$.fragment);
     			attr_dev(div0, "id", "headers-table");
-    			add_location(div0, file, 421, 8, 17817);
-    			add_location(hr0, file, 422, 8, 17857);
+    			add_location(div0, file, 423, 8, 17930);
+    			add_location(hr0, file, 424, 8, 17970);
     			attr_dev(div1, "id", "products-table");
-    			add_location(div1, file, 423, 8, 17871);
-    			add_location(hr1, file, 424, 8, 17912);
-    			add_location(h3, file, 427, 12, 17969);
+    			add_location(div1, file, 425, 8, 17984);
+    			add_location(hr1, file, 426, 8, 18025);
+    			add_location(h3, file, 429, 12, 18082);
     			attr_dev(label, "for", "product_name");
-    			add_location(label, file, 430, 20, 18123);
+    			add_location(label, file, 432, 20, 18236);
     			attr_dev(div2, "class", "search-wraper");
-    			add_location(div2, file, 431, 20, 18186);
+    			add_location(div2, file, 433, 20, 18299);
     			attr_dev(div3, "class", "form-group");
-    			add_location(div3, file, 429, 16, 18077);
-    			attr_dev(form_1, "method", "post");
-    			add_location(form_1, file, 428, 12, 18001);
+    			add_location(div3, file, 431, 16, 18190);
+    			attr_dev(form, "method", "post");
+    			add_location(form, file, 430, 12, 18114);
     			attr_dev(div4, "id", "new-product-form");
-    			add_location(div4, file, 426, 8, 17928);
+    			add_location(div4, file, 428, 8, 18041);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div0, anchor);
@@ -38361,8 +38361,8 @@ var morderedit = (function () {
     			insert_dev(target, div4, anchor);
     			append_dev(div4, h3);
     			append_dev(div4, t5);
-    			append_dev(div4, form_1);
-    			append_dev(form_1, div3);
+    			append_dev(div4, form);
+    			append_dev(form, div3);
     			append_dev(div3, label);
     			append_dev(div3, t7);
     			append_dev(div3, div2);
@@ -38374,7 +38374,7 @@ var morderedit = (function () {
     			current = true;
 
     			if (!mounted) {
-    				dispose = listen_dev(form_1, "submit", /*addNewProductFormSubmit*/ ctx[9], false, false, false);
+    				dispose = listen_dev(form, "submit", /*addNewProductFormSubmit*/ ctx[9], false, false, false);
     				mounted = true;
     			}
     		},
@@ -38442,14 +38442,14 @@ var morderedit = (function () {
     		block,
     		id: create_else_block.name,
     		type: "else",
-    		source: "(421:4) {:else}",
+    		source: "(423:4) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (419:4) {#if updateing}
+    // (421:4) {#if updateing}
     function create_if_block(ctx) {
     	let loading;
     	let current;
@@ -38486,14 +38486,14 @@ var morderedit = (function () {
     		block,
     		id: create_if_block.name,
     		type: "if",
-    		source: "(419:4) {#if updateing}",
+    		source: "(421:4) {#if updateing}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (435:28) 
+    // (437:28) 
     function create_item_slot(ctx) {
     	let div2;
     	let div1;
@@ -38516,14 +38516,14 @@ var morderedit = (function () {
     			attr_dev(img, "alt", img_alt_value = /*item*/ ctx[26].title);
     			set_style(img, "height", "25px");
     			if (!src_url_equal(img.src, img_src_value = "" + (CLOUDINARY_BASE_URL + "f_auto,w_auto/" + /*item*/ ctx[26].cimage))) attr_dev(img, "src", img_src_value);
-    			add_location(img, file, 437, 40, 18865);
+    			add_location(img, file, 439, 40, 18978);
     			html_tag.a = null;
     			attr_dev(div0, "class", "inner");
-    			add_location(div0, file, 436, 36, 18804);
+    			add_location(div0, file, 438, 36, 18917);
     			attr_dev(div1, "class", "search-item");
-    			add_location(div1, file, 435, 32, 18741);
+    			add_location(div1, file, 437, 32, 18854);
     			attr_dev(div2, "slot", "item");
-    			add_location(div2, file, 434, 28, 18656);
+    			add_location(div2, file, 436, 28, 18769);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div2, anchor);
@@ -38553,14 +38553,14 @@ var morderedit = (function () {
     		block,
     		id: create_item_slot.name,
     		type: "slot",
-    		source: "(435:28) ",
+    		source: "(437:28) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (453:20) {:else}
+    // (455:20) {:else}
     function create_else_block_2(ctx) {
     	let button;
 
@@ -38569,7 +38569,7 @@ var morderedit = (function () {
     			button = element("button");
     			button.textContent = "הוסף";
     			button.disabled = true;
-    			add_location(button, file, 453, 24, 19747);
+    			add_location(button, file, 455, 24, 19860);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, button, anchor);
@@ -38584,14 +38584,14 @@ var morderedit = (function () {
     		block,
     		id: create_else_block_2.name,
     		type: "else",
-    		source: "(453:20) {:else}",
+    		source: "(455:20) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (444:20) {#if selectedProduct}
+    // (446:20) {#if selectedProduct}
     function create_if_block_2(ctx) {
     	let div1;
     	let div0;
@@ -38617,13 +38617,13 @@ var morderedit = (function () {
     			attr_dev(img, "alt", img_alt_value = /*selectedProduct*/ ctx[2]?.title);
     			set_style(img, "height", "25px");
     			if (!src_url_equal(img.src, img_src_value = "" + (CLOUDINARY_BASE_URL + "f_auto,w_auto/" + /*selectedProduct*/ ctx[2]?.cimage))) attr_dev(img, "src", img_src_value);
-    			add_location(img, file, 446, 32, 19365);
+    			add_location(img, file, 448, 32, 19478);
     			html_tag.a = null;
     			attr_dev(div0, "class", "inner");
-    			add_location(div0, file, 445, 28, 19312);
+    			add_location(div0, file, 447, 28, 19425);
     			attr_dev(div1, "class", "selected-product");
-    			add_location(div1, file, 444, 24, 19252);
-    			add_location(button, file, 451, 24, 19671);
+    			add_location(div1, file, 446, 24, 19365);
+    			add_location(button, file, 453, 24, 19784);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div1, anchor);
@@ -38656,14 +38656,14 @@ var morderedit = (function () {
     		block,
     		id: create_if_block_2.name,
     		type: "if",
-    		source: "(444:20) {#if selectedProduct}",
+    		source: "(446:20) {#if selectedProduct}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (464:16) {:else}
+    // (466:16) {:else}
     function create_else_block_1(ctx) {
     	let t;
 
@@ -38685,14 +38685,14 @@ var morderedit = (function () {
     		block,
     		id: create_else_block_1.name,
     		type: "else",
-    		source: "(464:16) {:else}",
+    		source: "(466:16) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (462:16) {#if updateing_to_server}
+    // (464:16) {#if updateing_to_server}
     function create_if_block_1(ctx) {
     	let loading;
     	let current;
@@ -38728,14 +38728,14 @@ var morderedit = (function () {
     		block,
     		id: create_if_block_1.name,
     		type: "if",
-    		source: "(462:16) {#if updateing_to_server}",
+    		source: "(464:16) {#if updateing_to_server}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (461:12) <Button class="update-btn" disabled={updateing_to_server} on:click={()=>{save_data()}}>
+    // (463:12) <Button class="update-btn" disabled={updateing_to_server} on:click={()=>{save_data()}}>
     function create_default_slot(ctx) {
     	let current_block_type_index;
     	let if_block;
@@ -38804,7 +38804,7 @@ var morderedit = (function () {
     		block,
     		id: create_default_slot.name,
     		type: "slot",
-    		source: "(461:12) <Button class=\\\"update-btn\\\" disabled={updateing_to_server} on:click={()=>{save_data()}}>",
+    		source: "(463:12) <Button class=\\\"update-btn\\\" disabled={updateing_to_server} on:click={()=>{save_data()}}>",
     		ctx
     	});
 
@@ -38848,7 +38848,7 @@ var morderedit = (function () {
     			t = space();
     			if_block.c();
     			attr_dev(main, "class", "svelte-1qn055f");
-    			add_location(main, file, 415, 0, 17581);
+    			add_location(main, file, 417, 0, 17694);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -39403,8 +39403,10 @@ var morderedit = (function () {
     		sendData['product_id'] = selectedProduct.id;
     		console.log('data: ', sendData);
 
-    		apiAddNewProductToMorder(sendData).then(() => {
-    			form.reset();
+    		apiAddNewProductToMorder(sendData).then(newEntry => {
+    			e.target.reset();
+    			data.products.push(newEntry.data);
+    			productsTable.addData([newEntry.data]);
     		}).catch(err => {
     			console.log(err);
     		});

@@ -403,8 +403,10 @@ import AutoComplete from "simple-svelte-autocomplete";
         sendData['order_id'] = data.id;
         sendData['product_id'] = selectedProduct.id;
         console.log('data: ', sendData);
-        apiAddNewProductToMorder(sendData).then(()=> {
-            form.reset();
+        apiAddNewProductToMorder(sendData).then((newEntry)=> {
+            e.target.reset();
+            data.products.push(newEntry.data);
+            productsTable.addData([newEntry.data]);
         }).catch(err=>{
             console.log(err);
         });
