@@ -1,5 +1,8 @@
+from gettext import Catalog
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
+
+from catalogImages.models import CatalogImage
 from .serializers import AdminMOrderItemSerializer, AdminMOrderSerializer
 from morders.models import MOrder, MOrderItem, MOrderItemEntry
 from rest_framework import status
@@ -85,14 +88,23 @@ def api_edit_order_add_product(request):
             objs = MOrderItem.objects.filter(morder=order_id, product_id=product_id)
             print(objs)
             if objs.count() == 0:
+                product = CatalogImage.objects.get(id=product_id)
+                price = product.client_price
                 obj = MOrderItem.objects.create(
-                    morder_id=order_id,
                     product_id=product_id,
+                    price = price,
                 )
+                
+                obj.morder.set([MOrder.objects.get(id=order_id)])
                 obj.save()
                 new_entries = AdminMOrderItemSerializer(obj).data
                 return JsonResponse({'success': 'success', 'data': new_entries}, status=status.HTTP_200_OK)
+            elif objs.count() == 1:
+                obj = objs.first()
+                new_entries = AdminMOrderItemSerializer(obj).data
+                return JsonResponse({'success': 'success', 'data': new_entries}, status=status.HTTP_200_OK)
             else:
+                return JsonResponse({'error': 'You are not authorized to perform this action'}, status=status.HTTP_401_UNAUTHORIZED)
                 # TODO: continue from here
 
 

@@ -1,5 +1,6 @@
 
 
+from email.policy import default
 from rest_framework import serializers
 
 from provider.serializers import SvelteProviderSerializer
@@ -32,8 +33,8 @@ class AdminMOrderItemSerializer(serializers.ModelSerializer):
 
 class AdminMOrderSerializer(serializers.ModelSerializer):
     products = AdminMOrderItemSerializer(many=True, read_only=True)
-    client_businessName = serializers.CharField(source='client.businessName', read_only=False)
-    agent_name = serializers.CharField(source='agent.username', read_only=False)
+    client_businessName = serializers.CharField(source='client.businessName', read_only=False, default='')
+    agent_name = serializers.CharField(source='agent.username', read_only=False, default='')
     #client_id = serializers.IntegerField(source='client.user.id', read_only=False)
     class Meta:
         model = MOrder
