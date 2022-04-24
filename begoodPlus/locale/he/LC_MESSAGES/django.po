@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-04-18 12:57+0300\n"
+"POT-Creation-Date: 2022-04-24 13:38+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -190,15 +190,14 @@ msgid "sizes"
 msgstr "גדלים"
 
 #: .\catalogImageDetail\models.py:17 .\catalogImages\admin.py:72
-#: .\catalogImages\models.py:48
 msgid "cost price"
 msgstr "מחיר עלות"
 
-#: .\catalogImageDetail\models.py:18 .\catalogImages\models.py:49
+#: .\catalogImageDetail\models.py:18
 msgid "store price"
 msgstr "מחיר חנות"
 
-#: .\catalogImageDetail\models.py:19 .\catalogImages\models.py:50
+#: .\catalogImageDetail\models.py:19
 msgid "private client price"
 msgstr "מחיר לקוח פרטי"
 
@@ -218,33 +217,35 @@ msgstr "מחיר לקוח"
 msgid "recomended price"
 msgstr "מחיר מומלץ"
 
-#: .\catalogImages\admin.py:121
+#: .\catalogImages\admin.py:120
+msgid "turn out of stock active"
+msgstr "הפוך אזל מלאי לפעיל"
+
+#: .\catalogImages\admin.py:127
 msgid "turn can tag active"
 msgstr "הפוך ניתן למיתוג לפעיל"
 
-#: .\catalogImages\admin.py:125
-#, fuzzy
-#| msgid "make prining inactive"
+#: .\catalogImages\admin.py:131
 msgid "turn can tag inactive"
 msgstr "הפוך ניתן למיתוג ללא פעיל"
 
-#: .\catalogImages\admin.py:130
+#: .\catalogImages\admin.py:136
 msgid "turn sizes popup active"
 msgstr "הפוך פופאפ מידות לפעיל"
 
-#: .\catalogImages\admin.py:134
+#: .\catalogImages\admin.py:140
 msgid "turn sizes popup inactive"
 msgstr "הפוך פופאפ מידות ללא פעיל"
 
-#: .\catalogImages\admin.py:138
+#: .\catalogImages\admin.py:144
 msgid "upload images to cloudinary active"
 msgstr "הפוך העלאת תמונה לקלאודינרי לפעיל"
 
-#: .\catalogImages\admin.py:143
+#: .\catalogImages\admin.py:149
 msgid "upload images to cloudinary inactive"
 msgstr "הפוך העלאת תמונה לקלאודינרי ללא פעיל"
 
-#: .\catalogImages\admin.py:332 .\category\models.py:14 .\client\models.py:515
+#: .\catalogImages\admin.py:338 .\category\models.py:14 .\client\models.py:515
 msgid "categories"
 msgstr "קטגוריות"
 
@@ -286,6 +287,24 @@ msgstr "תמונה"
 #: .\catalogImages\models.py:47
 msgid "local image"
 msgstr "תמונת מקומית"
+
+#: .\catalogImages\models.py:48
+#, fuzzy
+#| msgid "cost price (no VAT)"
+msgid "cost price, before tax"
+msgstr "מחיר עלות (ללא מע'מ)"
+
+#: .\catalogImages\models.py:49
+#, fuzzy
+#| msgid "store price  (no VAT)"
+msgid "store price, before tax"
+msgstr "מחיר חנות (ללא מע'מ)"
+
+#: .\catalogImages\models.py:50
+#, fuzzy
+#| msgid "private client price"
+msgid "private client price, after tax"
+msgstr "מחיר לקוח פרטי (כולל מע'מ)"
 
 #: .\catalogImages\models.py:51
 msgid "date modified"
@@ -691,7 +710,7 @@ msgstr "סוג הזמנה"
 msgid "cart count"
 msgstr "מוצרים בעגלה"
 
-#: .\core\models.py:322
+#: .\core\models.py:324
 msgid "uniqe color"
 msgstr "צבע ייחודי"
 
