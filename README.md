@@ -10,7 +10,7 @@ docker run --name postgres -d -p 5432:5432 -e POSTGRES_PASSWORD=password postgre
 
 ```
 docker cp db.sql postgres:/tmp/db.sql
-docker exec -it postgres /bin/bashdocker exec -it postgres /bin/bash
+docker exec -it postgres /bin/bash
 psql -h localhost -U postgres
 DROP DATABASE testdb5;
 CREATE DATABASE testdb5;
