@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-04-24 13:38+0300\n"
+"POT-Creation-Date: 2022-04-24 14:28+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -289,20 +289,14 @@ msgid "local image"
 msgstr "תמונת מקומית"
 
 #: .\catalogImages\models.py:48
-#, fuzzy
-#| msgid "cost price (no VAT)"
 msgid "cost price, before tax"
 msgstr "מחיר עלות (ללא מע'מ)"
 
 #: .\catalogImages\models.py:49
-#, fuzzy
-#| msgid "store price  (no VAT)"
 msgid "store price, before tax"
 msgstr "מחיר חנות (ללא מע'מ)"
 
 #: .\catalogImages\models.py:50
-#, fuzzy
-#| msgid "private client price"
 msgid "private client price, after tax"
 msgstr "מחיר לקוח פרטי (כולל מע'מ)"
 
