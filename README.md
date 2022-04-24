@@ -24,7 +24,7 @@ PGPASSWORD=password psql -h localhost -U postgres -d testdb5 < /tmp/db.sql
 cp example-secrects.py secrects.py
 ```
 
-4) install python env
+4) install python env and requirements
    ```
    python3 -m venv env
    source env/bin/activate
