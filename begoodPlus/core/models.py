@@ -312,6 +312,8 @@ class SvelteCartModal(models.Model):
                 ret += f'<td>הדפסה</td>'
             if i.embro:
                 ret += f'<td>רקמה</td>'
+            if i.unitPrice:
+                ret += f'<td>{i.unitPrice} ש"ח ליח</td>'
             #ret += '<td id="cart-entry-'+str(i.id)+'">'  + '<input type="hidden" name="product_id" value="' + str(i.product.id) + '">' + '<input type="hidden" name="cart_id" value="' + str(self.id) + '">' + '<input type="hidden" name="entry_id" value="' + str(i.id) + '"><button type="button" onclick="remove_product_from_cart(' + str(self.id) + ',' +str(i.id)+')">' + 'מחק' + '</button>' + '</td>'
             ret += '</tr>'
         ret+= '</table>'

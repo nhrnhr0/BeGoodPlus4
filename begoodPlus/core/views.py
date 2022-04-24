@@ -191,7 +191,7 @@ def svelte_cart_form(request):
         order_type = body['order_type']  or ''
         products = body['products'] or ''
         raw_cart = body['raw_cart'] or ''
-        
+        agent=None
         if(request.user.is_anonymous):
             user_id = None
         else:
@@ -204,7 +204,6 @@ def svelte_cart_form(request):
                 agent = request.user
             else:
                 user_id = request.user
-                agent=None
         db_cart = SvelteCartModal.objects.create(user_id=user_id, device=device,uid=uuid,businessName=business_name, name=name, phone=phone, email=email, message=message, agent=agent, order_type=order_type)
         #data.products.set(products)
         db_cart.productsRaw = raw_cart
