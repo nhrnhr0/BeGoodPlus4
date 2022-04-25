@@ -259,8 +259,46 @@ def api_logout(request):
 
 
 
+import pandas as pd
+import io
+import xlsxwriter
 
-
+def verify_unique_field_by_field_excel(request):
+    #     <input type="file" name="main_excel_file" id="main_excel_file" accept=".xlsx, .xls" required>
+    #     <input type="file" name="subtract_excel_file" id="subtract_excel_file" accept=".xlsx, .xls" multiple required>
+    #     <input type="text" name="unique_field" id="unique_field" required value="WhatsApp Number(with country code)">
+    #     <input type="submit" id="submit-btn" value="submit">
+    if request.method == "POST":
+        print(request.POST)
+        main_excel_file = request.FILES.get('main_excel_file', None)
+        subtract_excel_file = request.FILES.getlist('subtract_excel_file', None)
+        unique_field = request.POST.get('unique_field', None)
+        main_df = pd.read_excel(main_excel_file)
+        subtracts_dfs = []
+        for f in subtract_excel_file:
+            subtracts_dfs.append(pd.read_excel(f))
+        # remove from main df all rows that are in subtracts dfs based on colum 'unique_field'
+        for df in subtracts_dfs:
+            main_df = main_df[~main_df[unique_field].isin(df[unique_field])]
+            
+        
+        # convert to excel to send
+        output = io.BytesIO()
+        workbook = xlsxwriter.Workbook(output)
+        worksheet = workbook.add_worksheet()
+        data = []
+        data.append(['WhatsApp Number(with country code)', 'First Name', 'Last Name', 'Other'])
+        for index, row in main_df.iterrows():
+            data.append([row['WhatsApp Number(with country code)'], row['First Name'], row['Last Name'], row['Other']])
+        for i, row in enumerate(data):
+            for j, col in enumerate(row):
+                worksheet.write(i, j, col)
+        workbook.close()
+        output.seek(0)
+        response = HttpResponse(output.read(), content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        response['Content-Disposition'] = "attachment; filename=output.xlsx"
+        return response
+    return render(request, 'verify_unique_field_by_field_excel.html')
 
 
 from .tasks import product_photo_send_notification, send_cantacts_notificatios, send_cart_notification, send_question_notification, test
