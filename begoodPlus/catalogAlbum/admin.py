@@ -31,12 +31,12 @@ class TopLevelCategoryAdmin(admin.ModelAdmin):
     ordering = ('my_order',)
 admin.site.register(TopLevelCategory, TopLevelCategoryAdmin)
 
-class CatalogAlbumAdmin(SortableAdmin):
+class CatalogAlbumAdmin(DraggableMPTTAdmin):
     inlines = (CatalogImageInline,)
-    list_display = ('title','topLevelCategory', 'render_cimage_thumbnail', 'slug' ,'related_images_count','is_public','is_campain','album_order')#'get_absolute_url')
+    list_display = ('tree_actions','indented_title','topLevelCategory', 'render_cimage_thumbnail', 'slug' ,'related_images_count','is_public','is_campain')#'get_absolute_url')
     readonly_fields = ('related_images_count',)
     #readonly_fields = ('get_absolute_url',)
-    list_editable = ('album_order',)
+    #list_editable = ('album_order',)
     prepopulated_fields = {'slug': ('title',),}
     
     def make_public(modeladmin, request, queryset):

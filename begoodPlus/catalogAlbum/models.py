@@ -54,7 +54,7 @@ class TopLevelCategory(models.Model):
     class Meta:
         ordering = ('my_order',)
 
-class CatalogAlbum(MPTTModel,Sortable):
+class CatalogAlbum(MPTTModel):
     topLevelCategory = models.ForeignKey(to="TopLevelCategory", on_delete=models.SET_NULL, null=True, blank=True, related_name='topLevelCategory')
     title = models.CharField(max_length=120, verbose_name=_("title"))
     slug = models.SlugField(max_length=120, verbose_name=_("slug"))
