@@ -278,19 +278,21 @@ def verify_unique_field_by_field_excel(request):
         for f in subtract_excel_file:
             subtracts_dfs.append(pd.read_excel(f))
         # remove from main df all rows that are in subtracts dfs based on colum 'unique_field'
+        to_remove_numbers = []
         for df in subtracts_dfs:
-            main_df = main_df[~main_df[unique_field].isin(df[unique_field])]
-            
-        
+            to_remove_numbers.extend(df[unique_field].tolist())
+
+        df_data = main_df.values.tolist()
+        for i,val  in enumerate(df_data):
+            if val[0] in to_remove_numbers:
+                del df_data[i]
         # convert to excel to send
         output = io.BytesIO()
         workbook = xlsxwriter.Workbook(output)
         worksheet = workbook.add_worksheet()
-        data = []
-        data.append(['WhatsApp Number(with country code)', 'First Name', 'Last Name', 'Other'])
-        for index, row in main_df.iterrows():
-            data.append([row['WhatsApp Number(with country code)'], row['First Name'], row['Last Name'], row['Other']])
-        for i, row in enumerate(data):
+        
+        df_data.insert(0,['WhatsApp Number(with country code)', 'First Name', 'Last Name', 'Other'])
+        for i, row in enumerate(df_data):
             for j, col in enumerate(row):
                 worksheet.write(i, j, col)
         workbook.close()
