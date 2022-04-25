@@ -230,7 +230,7 @@ class ActiveCartTracker(models.Model):
     
 class SvelteCartModal(models.Model):
     doneOrder = models.BooleanField(default=False, verbose_name=_('done order'))
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, null=True, blank=True, related_name='user_cart', verbose_name=_('user'))
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='user_cart', verbose_name=_('user'))
     device = models.CharField(verbose_name=_('device'), max_length=250)
     uid = models.UUIDField(verbose_name=_('uuid'), null=True, blank=True)
     name = models.CharField(verbose_name=_('name'), max_length=120)
