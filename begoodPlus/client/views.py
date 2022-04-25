@@ -69,7 +69,7 @@ def whoAmI(request):
     return JsonResponse({'status':'error', 'detail':'user not loged in'})
 
 def get_user_info(user):
-    if user.id != None:
+    if user.id != None and user.client:
         return {
             'status':'success',
             #'first_name': request.user.first_name,

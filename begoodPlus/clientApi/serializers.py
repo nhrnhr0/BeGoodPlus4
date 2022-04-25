@@ -62,7 +62,7 @@ class ImageClientApi(serializers.ModelSerializer):
     def _get_price(self, obj):
         request = self.context.get('request', None)
         if request:
-            if request.user.is_authenticated:
+            if request.user.is_authenticated and request.user.client:
                 if request.user.client:
                     tariff = request.user.client.tariff
                     price = obj.client_price + (obj.client_price * (tariff/100))
