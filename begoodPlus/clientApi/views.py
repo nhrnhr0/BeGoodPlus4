@@ -93,6 +93,7 @@ def main_page_api(request):
         all_products: products
     '''
     all_albums_qs = CatalogAlbum.objects.filter(is_public=True)#.prefetch_related('images')
+    all_albums_qs = all_albums_qs.order_by('album_order')
     albums = AlbumClientApi(all_albums_qs, many=True).data
     sizes = SizeClientApi(ProductSize.objects.all(), many=True).data
     colors = ColorClientApi(ProductColor.objects.all(), many=True).data
