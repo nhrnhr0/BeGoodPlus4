@@ -273,20 +273,23 @@ def verify_unique_field_by_field_excel(request):
         main_excel_file = request.FILES.get('main_excel_file', None)
         subtract_excel_file = request.FILES.getlist('subtract_excel_file', None)
         unique_field = request.POST.get('unique_field', None)
-        main_df = pd.read_excel(main_excel_file)
+        main_df = pd.read_excel(main_excel_file, dtype=str)
         subtracts_dfs = []
         for f in subtract_excel_file:
-            subtracts_dfs.append(pd.read_excel(f))
+            subtracts_dfs.append(pd.read_excel(f, dtype=str))
         # remove from main df all rows that are in subtracts dfs based on colum 'unique_field'
         to_remove_numbers = []
         for df in subtracts_dfs:
             to_remove_numbers.extend(df[unique_field].tolist())
 
         df_data = main_df.values.tolist()
-        for i,val  in enumerate(df_data):
-            if val[0] in to_remove_numbers:
-                del df_data[i]
+        print('len data before: ', len(df_data))
+        df_data = list(filter(lambda x: (x[0] not in to_remove_numbers),df_data))
+        #for i,val  in enumerate(df_data):
+            #if val[0] in to_remove_numbers:
+                #del df_data[i]
         # convert to excel to send
+        print('len data after: ', len(df_data))
         output = io.BytesIO()
         workbook = xlsxwriter.Workbook(output)
         worksheet = workbook.add_worksheet()
