@@ -13,5 +13,5 @@ class SvelteColorSerializer(serializers.ModelSerializer):
     #color = serializers.CharField(source='color')
     class Meta:
         model = Color
-        fields = ('label', 'value', 'color')
+        fields = ('value', 'label', 'color')
     pass

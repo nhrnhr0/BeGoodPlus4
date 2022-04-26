@@ -8,3 +8,4 @@ class SvelteProviderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Provider
         fields = ('value', 'label')
+        

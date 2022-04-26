@@ -8,9 +8,13 @@ class Color(models.Model):
     class Meta:
         verbose_name = _('Color')
         verbose_name_plural = _('Colors')
-    
+    COLOR_PALETTE = [
+        ('#FFFFFF', 'white', ),
+        ('#000000', 'black', ),
+        ('#FFFFFF00', 'transparent', ),
+    ]
     name = models.CharField(max_length=30, verbose_name=_('color name'), unique=True)
-    color = ColorField(verbose_name=_('color'), default='#FF0000')
+    color = ColorField(verbose_name=_('color'), default='#FFFFFF00', format='hexa', samples=COLOR_PALETTE)
 
     
 

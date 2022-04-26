@@ -44,7 +44,18 @@ class CatalogAlbum(models.Model):
 '''
 from mptt.models import MPTTModel, TreeForeignKey
 import datetime
+from adminsortable.models import Sortable
+
+class TopLevelCategory(models.Model):
+    name = models.CharField(max_length=50, unique=True)
+    my_order = models.PositiveIntegerField(default=0, blank=True, null=True, db_index=True, unique=True)
+    def __str__(self) -> str:
+        return self.name
+    class Meta:
+        ordering = ('my_order',)
+
 class CatalogAlbum(MPTTModel):
+    topLevelCategory = models.ForeignKey(to="TopLevelCategory", on_delete=models.SET_NULL, null=True, blank=True, related_name='topLevelCategory')
     title = models.CharField(max_length=120, verbose_name=_("title"))
     slug = models.SlugField(max_length=120, verbose_name=_("slug"))
     description= models.TextField(verbose_name=_('description'), default='', blank=True)
@@ -59,6 +70,7 @@ class CatalogAlbum(MPTTModel):
     #renew_for = models.DurationField(null=True, blank=True, default=datetime.timedelta(days=3))
     #renew_after = models.DurationField(null=True, blank=True, default=datetime.timedelta(days=1))
     #timer = models.DateTimeField(null=True, blank=True)
+    album_order = models.PositiveIntegerField(default=0, blank=True, null=True)
     def save(self, *args, **kwargs):
         if self.cimage == '' and self.id != None:
             img = self.images.order_by('throughimage__image_order').first()
@@ -81,8 +93,9 @@ class CatalogAlbum(MPTTModel):
     class MPTTMeta:
         order_insertion_by = ['title']
         
-    class Meta:
+    class Meta(Sortable.Meta):
         unique_together = ('slug', 'parent',)
+        ordering = ['album_order']
         #ordering = ['throughimage__image_order'] 
         #ordering = ('throughimage__image_order',)
 

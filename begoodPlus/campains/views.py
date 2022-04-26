@@ -18,7 +18,9 @@ from django.utils import timezone
 def get_user_campains_serializer_data(user):
     if(user.is_anonymous):
         return {}
+    print('get_user_campains_serializer_data')
     campains = MonthCampain.objects.filter(is_shown=True, users__in=[user.client], endTime__gte=timezone.now(), startTime__lte=timezone.now())
+    campains = campains.prefetch_related('products', 'users', 'products__colors', 'products__sizes').select_related('album')
     serializer = ClientMonthCampainSerializer(campains, many=True)
     return serializer.data
 

@@ -1,3 +1,4 @@
+from email.policy import default
 from django.db import models
 from django.utils.translation import gettext_lazy  as _
 from PIL import Image
@@ -7,6 +8,7 @@ from django.utils.html import mark_safe
 from django.conf import settings
 from django.urls import reverse
 from begoodPlus.settings.base import CLOUDINARY_BASE_URL
+from catalogImageAttrs.models import ProductPrices
 
 from color.models import Color
 from provider.models import Provider
@@ -19,36 +21,54 @@ from cloudinary.models import CloudinaryField
 import cloudinary
 from pathlib import Path
 from django.core.files.uploadedfile import InMemoryUploadedFile
+
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+class CatalogImageVarient(models.Model):
+    name = models.CharField(max_length=255, verbose_name=_('Name'), unique=True)
+    def __str__(self):
+        return self.name
+
 # Create your models here.
 class CatalogImage(models.Model):
     title = models.CharField(max_length=120, verbose_name=_("title"), unique=False)
     description = models.TextField(verbose_name=_("description"))
     barcode = models.CharField(verbose_name=_('barcode'),max_length=50, blank=True, null=True)
+    has_physical_barcode = models.BooleanField(verbose_name=_('has physical barcode'), default=False)
     free_text = models.TextField(verbose_name=_('free text'), null=True, blank=True)
     whatsapp_text = models.TextField(verbose_name=_('whatsapp text'), blank=True, null=True)
     def desc(self):
         return self.description[0:30]
     desc.short_description= _('short description')
+    update_image_to_cloudinary = models.BooleanField(default=True)
     cimage = models.CharField(verbose_name=_('cloudinary image url'), null=True, blank=True, max_length=2047)#CloudinaryField('product_image', overwrite=True,resource_type="image",null=True, blank=True)
     image = models.ImageField(verbose_name=_("image"), null=True, blank=True)
     image_thumbnail = models.ImageField(verbose_name=_("local image"), null=True, blank=True)
-    cost_price = models.FloatField(verbose_name=_('cost price'), blank=False, null=False, default=1)
-    client_price = models.FloatField(verbose_name=_('store price'),  blank=False, null=False, default=1)
-    recomended_price = models.FloatField(verbose_name=_('private client price'),  blank=False, null=False, default=1)
-    date_modified = models.DateTimeField(auto_now=True)
-    date_created = models.DateTimeField(auto_now_add=True)
+    cost_price = models.FloatField(verbose_name=_('cost price, before tax'), blank=False, null=False, default=1)
+    client_price = models.FloatField(verbose_name=_('store price, before tax'),  blank=False, null=False, default=1)
+    recomended_price = models.FloatField(verbose_name=_('private client price, after tax'),  blank=False, null=False, default=1)
+    date_modified = models.DateTimeField(auto_now=True, verbose_name=_('date modified'))
+    date_created = models.DateTimeField(auto_now_add=True, verbose_name=_('date created'))
     packingTypeProvider = models.ForeignKey(to=PackingType,related_name='PTprovider', on_delete=models.SET_DEFAULT, default=9, verbose_name=_('packing type from provider'))
     packingTypeClient = models.ForeignKey(to=PackingType,related_name='PTclient', on_delete=models.SET_DEFAULT, default=9, verbose_name=_('packing type for client'))
     amountSinglePack = models.IntegerField(verbose_name=_('amount in single pack'), blank=False, null=False, default=0)
     amountCarton = models.IntegerField(verbose_name=_('amount in carton'), blank=False, null=False, default=0)
     colors = models.ManyToManyField(to=Color, verbose_name=_('colors'))
     sizes = models.ManyToManyField(to=ProductSize, verbose_name=_('sizes'))
+    varients = models.ManyToManyField(to=CatalogImageVarient, verbose_name=_('varients'), blank=True)
     providers = models.ManyToManyField(to=Provider, verbose_name=_('providers'))
+    qyt = models.IntegerField(verbose_name=_('qyt'), blank=False, null=False, default=0)
+    show_sizes_popup = models.BooleanField(verbose_name=_('show sizes popup'), default=True)
+    out_of_stock = models.BooleanField(verbose_name=_('out of stock'), default=False)
     
+    is_active = models.BooleanField(default=True, verbose_name=_('is active'))
     detailTabel = models.ManyToManyField(related_name='parent',to=CatalogImageDetail, verbose_name=_('mini-tabel'), blank=True)
 
     can_tag = models.BooleanField(default=False, verbose_name=_('can tag'))
     #big_discount = models.BooleanField(default=False)
+    
+    clientPrices = models.OneToOneField(to=ProductPrices, on_delete=models.SET_NULL, null=True, blank=True)
     
     NO_DISCOUNT = ''
     DISCOUNT_10_PRES = '/static/assets/catalog/imgs/discount_10.gif'
@@ -143,9 +163,16 @@ class CatalogImage(models.Model):
         output.seek(0)
         return output 
     
+    
+    def update_show_sizes_popup(self):
+        if self.sizes.count() > 1:
+            self.show_sizes_popup = True
+        else:
+            self.show_sizes_popup = False
+        self.save()
+    
     def save(self, *args, **kwargs):
-        
-        if bool(self.image.name):
+        if self.update_image_to_cloudinary:
             # fails if your don't upload an image, so don't upload image to cloudinary
             mfile = None
             try:
@@ -165,76 +192,9 @@ class CatalogImage(models.Model):
                     self.image = None
             except Exception as e:
                 print(e)
-            
-            
-        super(CatalogImage, self).save(*args,**kwargs)
-        '''
-            try:
-                output = CatalogImage.optimize_image(self.image, size=(923, 715))
-                self.image = InMemoryUploadedFile(output, 'ImageField', "%s.png" % self.image.name.split('.')[0], 'image/PNG',
-                                            sys.getsizeof(output), None)
-                output2 = CatalogImage.optimize_tubmail(self.image, size=(250,250))
-                self.image_thumbnail = InMemoryUploadedFile(output2, 'ImageField', "image_thumbnail_%s.png" % self.image.name.split('.')[0], 'image/PNG',
-                                            sys.getsizeof(output2), None)
-            except:
-                pass
-            
-        super(CatalogImage, self).save(*args,**kwargs)
-        if not self.cimage:
-            fname = Path(self.image.file.name).with_suffix('').name
-            #fname = fname.substring(0, fname.lastIndexOf('.'))
-            res = cloudinary.uploader.upload(self.image.file,
-                folder = "site/products/", 
-                public_id = fname
-                )#public_id = self.title + '_' + str(self.id))
-            self.cimage = 'v' + str(res['version']) +'/'+ res['public_id']
-            self.save()
-            pass
-            '''
-        # if the image is set and and squere image we will generate one
-        '''
-        im = Image.open(self.image)
-        im2 = Image.open(self.image)
-        output = BytesIO()
-        output2 = BytesIO()
-
-        # Resize/modify the image
-        im = im.resize((923, 715))
-        im2 = im2.resize((450, 450))
-        im = im.convert('RGB')
-        im2 = im2.convert('RGB')
-
-        # after modifications, save it to the output
-        im.save(output, format='JPEG', quality=75)
-        im2.save(output2, format='JPEG', quality=75)
-        output.seek(0)
-        output2.seek(0)
-
-        # change the imagefield value to be the newley modifed image value
-        self.image = InMemoryUploadedFile(output, 'ImageField', "%s.jpg" % self.image.name.split('.')[0], 'image/jpeg',
-                                        sys.getsizeof(output), None)
-        self.image_thumbnail = InMemoryUploadedFile(output2, 'ImageField', "image_thumbnail_%s.jpg" % self.image.name.split('.')[0], 'image/jpeg',
-                                        sys.getsizeof(output2), None)
-        print(self.image, self.image.size)
-        print(self.image_thumbnail, self.image_thumbnail.size)
-        '''
-        '''
-        if self.image and not self.image_thumbnail:
-            thub = Image.open(self.image)
-            #thub.thumbnail(size)
-            thub = thub.resize((450,450), Image.BILINEAR)
-            f = BytesIO()
-            try:
-                thub.save(f, format='png')
-                self.image_thumbnail.save('thunbnail_' + self.image.name,
-                                                ContentFile(f.getvalue()))
             finally:
-                f.close()
-        '''
-        
-        
-        
-
+                self.update_image_to_cloudinary = False
+        super(CatalogImage, self).save(*args,**kwargs)
         
     def render_thumbnail(self, *args, **kwargs):
         ret = ''

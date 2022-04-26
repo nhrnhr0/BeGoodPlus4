@@ -1,6 +1,7 @@
 from rest_framework.response import Response
 from django.http.response import JsonResponse
 from django.shortcuts import render
+from clientApi.serializers import VarientSerializer
 from catalogImages.models import CatalogImage
 from client.views import get_user_info, whoAmI
 from clientApi.serializers import ColorClientApi, ImageClientApi, SizeClientApi
@@ -24,10 +25,14 @@ class AlbumClientViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticatedOrReadOnly]
     
 class ImageClientViewSet(viewsets.ModelViewSet):
-    queryset = CatalogImage.objects.all()#.prefetch_related('colors','sizes','providers','detailTabel')
+    queryset = CatalogImage.objects.all().prefetch_related('colors','sizes','providers','varients')
     serializer_class = ImageClientApi
     permission_classes = [IsAuthenticatedOrReadOnly]
-
+    def get(self, request, *args, **kwargs):
+        super(ImageClientViewSet, self).get(request, *args, **kwargs)
+        return Response(self.serializer_class(self.queryset, many=True, context={
+            'request':request,
+            }).data)
 
 
 class ColorsClientViewSet(viewsets.ModelViewSet):
@@ -50,19 +55,31 @@ from django.db import connection
 @renderer_classes((JSONRenderer,))
 def get_album_images(request, pk):
     album = CatalogAlbum.objects.get(id=pk)
-    ser = images_from_album_serializer(album)
+    ser = images_from_album_serializer(album,request)
     data = ser.data
     #print(connection.queries)
     #print(len(connection.queries))
     
     return Response(data)
 
-def images_from_album_serializer(album):
-    images = album.images.order_by('throughimage__image_order')
-    images = images.prefetch_related('colors','sizes','albums').select_related('packingTypeClient')
-    ser = ImageClientApi(images, many=True)
+def images_from_album_serializer(album,request):
+    images = album.images.filter(is_active=True).order_by('throughimage__image_order')
+    images = images.prefetch_related('colors','sizes','albums','varients').select_related('packingTypeClient')
+    ser = ImageClientApi(images, many=True,context={
+        'request': request
+    })
     return ser
 
+from catalogImages.models import CatalogImageVarient
+def get_all_sizes_api(request):
+    sizes = SizeClientApi(ProductSize.objects.all(), many=True).data
+    return JsonResponse(sizes, safe=False)
+def get_all_colors_api(request):
+    colors = ColorClientApi(ProductColor.objects.all(), many=True).data
+    return JsonResponse(colors, safe=False)
+def get_all_varients_api(request):
+    varients = VarientSerializer(CatalogImageVarient.objects.all(), many=True).data
+    return JsonResponse(varients, safe=False)
 import time
 import random
 @permission_classes((AllowAny,))

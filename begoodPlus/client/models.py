@@ -513,7 +513,7 @@ class Client(models.Model):
     extraName = models.CharField(verbose_name=_('extra name'), max_length=120, null=True,blank=True)
     storeType = models.ForeignKey( verbose_name=_('store type'), to=ClientType,on_delete=models.SET_NULL, null=True)
     categorys = models.ManyToManyField(verbose_name=_('categories'), to=CatalogAlbum, blank=True)
-    tariff = models.SmallIntegerField(verbose_name=_('tariff (%)'), default=0)
+    tariff = models.FloatField(verbose_name=_('tariff (%)'), default=0)
     privateCompany = models.CharField(max_length=254, verbose_name=_('P.C.'))
     clientType = models.CharField(max_length=50, choices=CLIENT_TYPES, verbose_name=_('client type'), default=CLIENT_TYPE_ND)
     address = models.CharField(verbose_name=_('address'), max_length=511)
@@ -528,6 +528,8 @@ class Client(models.Model):
     howPay = models.ForeignKey(verbose_name=_('payment way'), to=PaymantWay, on_delete=models.PROTECT, null=True,blank=True)
     whenPay = models.ForeignKey(verbose_name=_('payment time'), to=PaymentTime, on_delete=models.PROTECT, null=True,blank=True)
     isWithholdingTax = models.BooleanField(verbose_name=_('IsWithholdingTax'), default=False)
+    
+    show_prices = models.BooleanField(verbose_name=_('show prices'), default=False)
     #availabilityHours = models.TextField(verbose_name=_('availability hours'), blank=True)
     #availabilityDays = models.TextField(verbose_name=_('availability days'), blank=True)
     
@@ -642,3 +644,14 @@ class Client(models.Model):
         wb.save(buffer)
         buffer.seek(0)
         return buffer
+    
+    
+
+class UserQuestion(models.Model):
+    is_answered = models.BooleanField(verbose_name=_('is answered'), default=False)
+    product = models.ForeignKey(to=CatalogImage, verbose_name=_('product'), on_delete=models.SET_NULL, null=True, blank=True)    
+    question = models.TextField(verbose_name=_('question'), blank=True, null=True)
+    user = models.ForeignKey(to=User, verbose_name=_('user'), on_delete=models.SET_NULL, null=True, blank=True)
+    created_at = models.DateTimeField(verbose_name=_('created at'), auto_now_add=True)
+    ip = models.CharField(verbose_name=_('ip'), max_length=50, blank=True, null=True)
+    answer = models.TextField(verbose_name=_('answer'), blank=True, null=True)

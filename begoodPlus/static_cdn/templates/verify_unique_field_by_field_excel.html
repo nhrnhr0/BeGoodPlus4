@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" integrity="sha512-r22gChDnGvBylk90+2e/ycr3RVrDi8DIOkIGNhJlKfuyQM4tIRAI062MaV8sfjQKYVGjOBaZBOA87z+IhZE9DA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <title>merge excel by unique field</title>
+</head>
+<body>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <!--
+            file input the main excel file to subtract the others from
+            file input multiple excel files to subtract from the main excel file
+            text input the unique field to use to subtract the others from the main excel file
+            submit button
+        -->
+        <input type="file" name="main_excel_file" id="main_excel_file" accept=".xlsx, .xls" required>
+        <input type="file" name="subtract_excel_file" id="subtract_excel_file" accept=".xlsx, .xls" multiple required>
+        <input type="text" name="unique_field" id="unique_field" required value="WhatsApp Number(with country code)">
+        <input type="submit" id="submit-btn" value="submit">
+    </form>
+    <script>
+    </script>
+</body>
+</html>

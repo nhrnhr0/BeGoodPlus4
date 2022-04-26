@@ -18,6 +18,7 @@ from .. import secrects
 import cloudinary
 import cloudinary.uploader
 import cloudinary.api
+from begoodPlus.secrects import FULL_DOMAIN, SECRECT_BASE_MY_DOMAIN
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -36,7 +37,6 @@ SECRET_KEY = secrects.SECRET_KEY
 
 ALLOWED_HOSTS = ['*']
 
-MY_DOMAIN = 'https://ms-global.co.il' #'http://127.0.0.1:8000'
 '''
 from celery.schedules import crontab
 
@@ -97,6 +97,9 @@ INSTALLED_APPS = [
     'clientApi',
     'client',
     'campains',
+    'catalogImageAttrs',
+    'morders',
+    'inventory',
     
     #### old unused modals ####
     'clientLikedImages',
@@ -107,6 +110,7 @@ INSTALLED_APPS = [
     'stock',
     'glofa_types',
     'mcrm',
+    'msCrm',
     ### django modals ###
     'django.contrib.admin',
     'django.contrib.auth',
@@ -361,3 +365,6 @@ WEBPUSH_SETTINGS = {
 
 BROKER_USER = secrects.BROKER_USER
 BROKER_PASSWOD = secrects.BROKER_PASSWORD
+
+MY_DOMAIN = FULL_DOMAIN  # '127.0.0.1:8000'
+CSRF_COOKIE_DOMAIN = '.' +  SECRECT_BASE_MY_DOMAIN

@@ -1,3 +1,4 @@
+from calendar import c
 import requests
 from django.contrib import admin
 from django.utils.translation import gettext_lazy  as _
@@ -8,8 +9,16 @@ from openpyxl.worksheet.datavalidation import DataValidation
 import client
 from openpyxl.drawing import image
 from openpyxl.utils.cell import get_column_letter
+
+from client.models import UserQuestion
 # Register your models here.
-from .models import SvelteCartModal, UserSearchData
+from .models import ActiveCartTracker, SvelteCartModal, SvelteCartProductEntery, UserSearchData
+class ActiveCartTrackerAdmin(admin.ModelAdmin):
+    list_display = ('last_updated','created_at','last_ip','active_cart_id','cart_products_size')
+    readonly_fields = ('last_updated','created_at','last_ip','active_cart_id','products_amount_display_with_sizes_and_colors','cart_products_size')
+    ordering = ('-last_updated',)
+admin.site.register(ActiveCartTracker, ActiveCartTrackerAdmin)
+
 class UserSearchDataAdmin(admin.ModelAdmin):
     list_display = ('id', 'created_date', 'term', 'resultCount', 'session')
 
@@ -82,18 +91,56 @@ def cart_to_dict(obj: SvelteCartModal):
     return ret
 
 from core.tasks import send_cart_notification
+from core.models import UserProductPhoto
+class UserProductPhotoAdmin(admin.ModelAdmin):
+    list_display = ('user', 'photo_display', 'created_date', 'buy_price', 'want_price','description',)
+    readonly_fields = ('photo_display',)
+admin.site.register(UserProductPhoto, UserProductPhotoAdmin)
+class SvelteCartProductEnteryAdmin(admin.ModelAdmin):
+    list_display = ('id', 'product', 'amount', 'details')
+admin.site.register(SvelteCartProductEntery, SvelteCartProductEnteryAdmin)
+
 class SvelteCartModalAdmin(admin.ModelAdmin):
-    list_display = ('id', 'user', 'uniqe_color','device','name','phone','email','created_date')
+    list_display = ('id', 'doneOrder', 'user','buiss_display', 'cart_count', 'uniqe_color','name','phone','email','created_date', 'agent')
+    
     #filter_horizontal = ('products',)
+    readonly_fields = ('buiss_display','productsRaw','cart_count')
+    readonly_fields = ('productsRaw',)
     exclude = ('products','productEntries')
-    readonly_fields =('products_amount_display',)
-    actions = ['resend_email_action','download_cart_excel',]
+    
+    def change_view(self, request, object_id, form_url='', extra_context=None):
+        extra_context = extra_context or {}
+        extra_context['my_data'] = {'object_id':object_id}
+        return super(SvelteCartModalAdmin, self).change_view(
+            request, object_id, form_url, extra_context=extra_context,
+        )
+    
+    def buiss_display(self, obj):
+        if obj.user:
+            if obj.user.is_anonymous == False:
+                return obj.user.client.businessName
+            else:
+                return 'anonymous'
+    buiss_display.short_description = _('Business Name')
+    
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        qs = qs.select_related('user').select_related('user__client').prefetch_related('productEntries')
+        return qs
+    readonly_fields =('products_amount_display_with_sizes_and_colors',)
+    actions = ['resend_email_action','download_cart_excel','turn_to_morder',]
+    list_select_related = ['user']
     def resend_email_action(modeladmin, request, queryset):
         for obj in queryset:
             send_cart_notification.delay(obj.id)
     resend_email_action.short_description = _("resend selected carts email")
     
-    
+    def turn_to_morder(self, request, queryset):
+        for obj in queryset:
+            obj.doneOrder = True
+            obj.turn_to_morder()
+            obj.save()
+    turn_to_morder.short_description = _("turn selected carts to order")
     
     def data_to_excel(self, data, filename):
         wb = Workbook()
@@ -260,3 +307,9 @@ class SvelteCartModalAdmin(admin.ModelAdmin):
         return FileResponse(buffer, as_attachment=True, filename=file_name + '.xls')
     download_cart_excel.short_description = _("download selected carts excel")
 admin.site.register(SvelteCartModal, SvelteCartModalAdmin)
+
+
+class UserQuestionAdmin(admin.ModelAdmin):
+    list_display = ('id','is_answered', 'user', 'product', 'question', 'answer', 'created_at', 'ip',)
+    search_fields = ('user', 'question', 'answer', 'product')
+admin.site.register(UserQuestion, UserQuestionAdmin)

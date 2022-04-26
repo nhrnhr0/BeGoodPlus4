@@ -1,0 +1,42 @@
+{% extends "admin/change_form.html" %}
+{% load i18n admin_urls %}
+{%load static%}
+{% load django_svelte %}
+
+
+{% block extrahead %}{{ block.super }}
+    <script type="text/javascript" src="{% url 'admin:jsi18n' %}"></script>
+    {{ media }}
+{% endblock %}
+
+{% block field_sets %}
+
+    {% for fieldset in adminform %}
+        {% include "admin/includes/fieldset.html" %}
+    {% endfor %}
+    <!--
+    {% display_svelte "AdminCartEditor.svelte" my_data %}
+    <script>
+        function remove_product_from_cart(product_id, entry_id) {
+            console.log("Removing product " + product_id + " from cart entery_id" + entry_id);
+            let resp = fetch('/admin-api/remove-product-from-cart/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    product_id: product_id,
+                    entry_id: entry_id
+                })
+            }).then(function (response) {
+                return response.json();
+            }).then(function (data) {
+                if (data.success) {
+                    document.getElementById('cart-entry-' + entry_id).remove();
+                }
+            });
+            console.log(resp);
+        }
+    </script>
+    -->
+{% endblock %}

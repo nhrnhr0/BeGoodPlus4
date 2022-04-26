@@ -1,11 +1,107 @@
-import {SEARCH_API_URL} from './../consts/consts.js';
+import {MORDER_DELETE_PRODUCT,SEARCH_API_URL,GET_ALL_PROVIDERS_API_URL,MORDER_GET_API,GET_ALL_SIZES_API, GET_DOC_STOCK_ENTER_PPN_ENTRIES, SEARCH_PROVIDERS_API_URL,INV_API_GET_ENTER_DOC_DATA_URL, SEARCH_PPN_API_URL, GET_ALL_COLORS_API, GET_ALL_VARIENTS_API, DELETE_DOC_STOCK_EnterEntery as DELETE_DOC_STOCK_ENTER_ENTRY, ADD_DOC_STOCK_ENTER_ENTRY_API_URL,INV_API_GET_PRODUCT_INVENTORY, MORDER_EDIT_API} from './../consts/consts.js';
 import {getCookie} from './../utils/utils.js';
+
+
+export async function apiGetProviders() {
+    let response = await fetch_wraper(GET_ALL_PROVIDERS_API_URL);
+    return response;
+}
+
+export async function apiGetMOrder(order_id) {
+    const response = await fetch_wraper(`${MORDER_GET_API}/${order_id}`, {});
+    return response;
+}
+export async function apiSaveMOrder(order_id, data) {
+    const response = await fetch_wraper(`${MORDER_GET_API}/${order_id}`, {
+        method: 'POST',
+        body: JSON.stringify(data)
+    });
+    return response;
+
+}
+
+export async function apiAddNewProductToMorder(data) {
+    const response = await fetch_wraper(`${MORDER_EDIT_API}/add-new-product`, {
+        method: 'POST',
+        body: JSON.stringify(data)
+    });
+    return response;
+}
+
+export async function apiRequestStockInventory(sendData) {
+    // slugify(all the data)
+    let url = INV_API_GET_PRODUCT_INVENTORY + '?product_id=' + encodeURIComponent(sendData.product_id) + '&providers=' + encodeURIComponent(sendData.providers);
+
+    const response = await fetch_wraper(url, {
+        method: 'GET',
+    });
+    return response;
+}
+
+export async function apiDeleteMOrderItem(row_id) {
+    const response = await fetch_wraper(`${MORDER_DELETE_PRODUCT}/${row_id}`, {
+        method: 'DELETE',
+    });
+    return response;
+}
+/*
+export async function apiUpdateMOrderProductRow(data) {
+    //const response = await fetch_wraper('')
+    // TODO: update morder product row
+}
+*/
+export async function apiAddDocStockEnterEntery(data) {
+    const response = await fetch_wraper(ADD_DOC_STOCK_ENTER_ENTRY_API_URL, {
+        method: 'POST',
+        body: JSON.stringify(data),
+    });
+    return response;
+}
+export async function apiDeleteDocStockEnterPPnEntry(docId, ppnId, entryId) {
+    const response = await fetch_wraper(DELETE_DOC_STOCK_ENTER_ENTRY, {
+        method: 'POST',
+        body: JSON.stringify({
+            docId: docId,
+            ppnId: ppnId,
+            entryId: entryId
+        })
+    });
+    return response;
+}
+export async function apiGetDocStockEnterPPnEntries(doc_id, ppnId){
+    const response = await fetch(GET_DOC_STOCK_ENTER_PPN_ENTRIES + '?docId=' + encodeURIComponent(doc_id) + '&ppnId=' + encodeURIComponent(ppnId) , {
+        method: 'GET',
+    });
+    return await response.json();
+}
+export async function apiGetAllSizes() {
+    return await fetch_wraper(GET_ALL_SIZES_API);
+}
+
+export async function apiGetAllColors() {
+    return await fetch_wraper(GET_ALL_COLORS_API);
+}
+
+export async function apiGetAllVariants() {
+    return await fetch_wraper(GET_ALL_VARIENTS_API);
+}
+
+export function apiLoadEnterDocData(docId) {
+    return fetch_wraper(`${INV_API_GET_ENTER_DOC_DATA_URL}${docId}`);
+}
+
 export function apiSearchProducts(keyword) {
     const url = SEARCH_API_URL + '?q=' + encodeURIComponent(keyword);
     return fetch_wraper(url);
 }
-
-
+export function apiSearchProviders(keyword) {
+    const url = SEARCH_PROVIDERS_API_URL + '?q=' + encodeURIComponent(keyword);
+    return fetch_wraper(url);
+}
+export function apiSearchPPN(keyword, provider) {
+    const url = SEARCH_PPN_API_URL + '?q=' + encodeURIComponent(keyword) + '&provider=' + encodeURIComponent(provider);
+    return fetch_wraper(url);
+}
 export function fetch_wraper(url, requestOptions, custom_fetch, isRetry = false) {
     console.log('fetch_wraper: ', url);
     let headers_json= {

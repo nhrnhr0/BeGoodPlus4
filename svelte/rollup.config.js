@@ -4,6 +4,7 @@ import resolve from '@rollup/plugin-node-resolve';
 import livereload from 'rollup-plugin-livereload';
 import { terser } from 'rollup-plugin-terser';
 import css from 'rollup-plugin-css-only';
+import preprocess from 'svelte-preprocess';
 
 const production = !process.env.ROLLUP_WATCH;
 console.log('========================================');
@@ -44,7 +45,9 @@ function componentExportDetails(componentName) {
 				compilerOptions: {
 					// enable run-time checks when not in production
 					dev: !production
-				}
+				},
+				preprocess: preprocess()
+
 			}),
 			
 			// we'll extract any component CSS out into
@@ -84,8 +87,13 @@ let exportable = [];
 
 // Add your component names here!
 [
-  "App",
-  "CampainEditor",
+	"MorderEdit",
+	"ShowInventory",
+	"DocumentStockEnter",
+	"DocumentStockList",
+	"App",
+	"CampainEditor",
+	"AdminCartEditor"
   // "MyComponent",
 ].forEach((d) => exportable.push(componentExportDetails(d)));
 

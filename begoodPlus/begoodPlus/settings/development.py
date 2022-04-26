@@ -1,3 +1,4 @@
+from begoodPlus.secrects import SECRECT_BASE_MY_DOMAIN
 from .base import *
 
 

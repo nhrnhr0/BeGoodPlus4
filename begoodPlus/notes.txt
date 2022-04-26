@@ -8,13 +8,17 @@ docker cp <src-path> <container>:/tmp/db.sql
 docker exec -it <container name> /bin/bash
 
 ## example 
-docker cp msdb_04-01-2022-21_01_01.sql pg:/tmp/db.sql
-docker exec -it pg /bin/bash
+https://kingsor.github.io/2019/03/23/using-postgres-with-docker-on-windows/
+docker volume create --name postgres-volume
+docker run -p 5432:5432 --name postgres -e POSTGRES_PASSWORD=password -v postgres-volume:/var/lib/postgresql/data -d postgres
+
+docker cp msdb_04-01-2022-21_01_01.sql postgres:/tmp/db.sql
+        docker exec -it postgres /bin/bash
 # create new database
         psql -h localhost -U postgres
         DROP DATABASE testdb5;
         CREATE DATABASE testdb5;
-        exit
+        \q
 PGPASSWORD=password psql -h localhost -U postgres -d testdb5 < /tmp/db.sql 
 
 CELERY:
@@ -33,7 +37,13 @@ SMTP Password:
 BOISBR/TRfYsLzTyjxtxs15KTRfx1lCJLPqbwDbpLoNW
 
 
-
+# new migration code:
+python manage.py shell
+from catalogImages.models import CatalogImage
+all = CatalogImage.objects.all()
+for obj in all:
+        obj.update_image_to_cloudinary = False
+        obj.update_show_sizes_popup()
 
 
 - הוספת מוצרים מרובים: לא לאפשר מידה 36 לחולצות לדוגמא

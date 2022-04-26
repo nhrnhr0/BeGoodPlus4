@@ -2,7 +2,7 @@
 
 
 from begoodPlus import secrects
-from begoodPlus.secrects import FLASHY_MAIN_LIST_ID, FLASHY_MY_API_KEY,TELEGRAM_ADMIN_GROUP_CHAT_ID
+from begoodPlus.secrects import FLASHY_MAIN_LIST_ID, FLASHY_MY_API_KEY,TELEGRAM_CHAT_ID_LEADS
 from .models import CrmUser
 import requests
 
@@ -41,10 +41,11 @@ def trigger_welcome_whatsapp_message_to_user(crmUser):
 def send_new_user_telegram_message_to_admin_group(user):
     
     
-    chat_id = TELEGRAM_ADMIN_GROUP_CHAT_ID
+    chat_id = TELEGRAM_CHAT_ID_LEADS
     args = {'user_name': user.name,
             'user_business_name': user.businessName,
             'user_business_type': user.businessType,
+            'user_business_typeCustom': user.businessTypeCustom or '',
             'user_phone': user.phone,
             'user_email': user.email,
             'user_want_emails': 'כן' if user.want_emails else 'לא',
@@ -59,10 +60,15 @@ def send_new_user_telegram_message_to_admin_group(user):
         שם העסק: {user_business_name}
         סוג העסק: {user_business_type}
     '''.format(**args)
+    if args['user_business_typeCustom']:
+        message += '''
+        סוג העסק מותאם אישית: {user_business_typeCustom}
+        '''.format(**args)
     #telegram_bot.sendMessage(chat_id=chat_id, text=message)
     
     res = telegram_bot.sendMessage(chat_id=chat_id, text=message)
     print('done sending telegram message: ', res)
+    
 def flashyCreateContact(user):
     print('=========== start flashyCreateContact ===========')
     response = requests.post(f'https://flashyapp.com/api/lists/{FLASHY_MAIN_LIST_ID}/subscribe',

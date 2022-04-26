@@ -8,8 +8,16 @@ from campains.views import get_user_campains_serializer_data
 from client.models import UserSessionLogger
 
 from client.models import UserLogEntry
-
-
+from client.serializers import AdminClientSerializer
+from .models import Client
+@api_view(['GET'])
+def get_all_users_by_admin(request):
+    if request.user.is_superuser:
+        clients = Client.objects.all()
+        data = [{'id':client.pk, 'username':client.user.username, 'businessName':client.businessName,'email': client.email, 'privateCompany': client.privateCompany, } for client in clients]
+        return JsonResponse(data, safe=False)
+    else:
+        return JsonResponse({'status':'error'}, status=status.HTTP_403_FORBIDDEN)
 
 # Create your views here.
 @api_view(['GET', 'POST'])
@@ -61,7 +69,7 @@ def whoAmI(request):
     return JsonResponse({'status':'error', 'detail':'user not loged in'})
 
 def get_user_info(user):
-    if user.id != None:
+    if user.id != None and user.client:
         return {
             'status':'success',
             #'first_name': request.user.first_name,
@@ -72,6 +80,7 @@ def get_user_info(user):
             'businessName': user.client.businessName,
             'is_superuser': user.is_superuser,
             'campains': get_user_campains_serializer_data(user),
+            'show_prices': user.client.show_prices,
         }
     return {}
 
