@@ -127,7 +127,7 @@ def track_cart(request):
     #response.set_cookie('active_cart', active_cart_id, max_age=60*60*24*365*10, httponly=True)
     return response
 @api_view(['POST'])
-@permission_classes((IsAuthenticated,))
+@permission_classes((AllowAny,))
 def send_product_photo(request):
     data = request.data
     print(data)
@@ -140,7 +140,11 @@ def send_product_photo(request):
     if want_price == '':
         want_price = dzero
     file = data.get('file',None)
-    obj = UserProductPhoto.objects.create(user=request.user, photo=file, buy_price=buy_price, description=description,want_price=want_price)
+    if request.user.is_anonymous:
+        user = None
+    else:
+        user = request.user
+    obj = UserProductPhoto.objects.create(user=user, photo=file, buy_price=buy_price, description=description,want_price=want_price)
     print(obj)
     product_photo_send_notification.delay(obj.id)
     #product_photo_send_notification(obj.id)
