@@ -31,7 +31,7 @@ class TopLevelCategoryAdmin(admin.ModelAdmin):
     ordering = ('my_order',)
 admin.site.register(TopLevelCategory, TopLevelCategoryAdmin)
 
-class CatalogAlbumAdmin(DraggableMPTTAdmin):
+class CatalogAlbumAdmin(SortableAdmin, DraggableMPTTAdmin):
     inlines = (CatalogImageInline,)
     list_display = ('tree_actions','indented_title','topLevelCategory', 'render_cimage_thumbnail', 'slug' ,'related_images_count','is_public','is_campain')#'get_absolute_url')
     readonly_fields = ('related_images_count',)
