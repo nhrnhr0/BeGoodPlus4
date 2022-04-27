@@ -146,7 +146,10 @@ def send_product_photo(request):
         user = request.user
     obj = UserProductPhoto.objects.create(user=user, photo=file, buy_price=buy_price, description=description,want_price=want_price)
     print(obj)
-    product_photo_send_notification.delay(obj.id)
+    if(settings.DEBUG):
+        product_photo_send_notification(obj.id)
+    else:
+        product_photo_send_notification.delay(obj.id)
     #product_photo_send_notification(obj.id)
     return JsonResponse({
         'status':'success',
