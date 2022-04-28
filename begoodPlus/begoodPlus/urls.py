@@ -13,6 +13,7 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
 from clientApi.views import get_all_varients_api
 from inventory.views import add_doc_stock_enter_ppn_entry, delete_doc_stock_enter_ppn_entry, get_doc_stock_enter_ppn_entries, search_ppn, show_inventory_stock,get_product_inventory,doc_stock_list
 from clientApi.views import get_all_colors_api, get_all_sizes_api, main_page_api
@@ -25,7 +26,7 @@ from catalogImages.views import admin_api_get_product_cost_price, all_images_ids
 from clientApi.views import ColorsClientViewSet, ImageClientViewSet, SizesClientViewSet,LogoClientViewSet, get_album_images
 from clientApi.views import AlbumClientViewSet
 from catalogImageDetail.views import SvelteCatalogImageDetailViewSet
-from morders.views import api_edit_order_add_product, api_get_order_data, edit_morder, morder_edit_order_add_product_entries,api_delete_order_data_item
+from morders.views import api_edit_order_add_product, api_get_order_data, edit_morder, morder_edit_order_add_product_entries,api_delete_order_data_item,view_morder_pdf
 from packingType.views import SvelteApiPackingTypeViewSet
 from color.views import SvelteColorsViewSet
 from catalogImages.views import SvelteCatalogImageViewSet, create_mini_table, catalogimage_upload_slim_excel
@@ -120,6 +121,7 @@ urlpatterns = [
     path('morders/api-edit-order/add-new-product', api_edit_order_add_product, name="admin_api_edit_order_add_product"),
     path('morders/delete-product/<int:row_id>', api_delete_order_data_item, name='admin_api_delete_order_data_item'),
     path('morders/edit-order-add-product-entries', morder_edit_order_add_product_entries,name="morder_edit_order_add_product_entries"),
+    path('morders/view-order-pdf/<int:id>', view_morder_pdf, name='view_morder_pdf'),
     path('search-ppn/', search_ppn, name='search_ppn'),
     #path('api/', include(router.urls)),
 

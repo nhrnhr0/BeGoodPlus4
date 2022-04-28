@@ -8,7 +8,29 @@ from morders.models import MOrder, MOrderItem, MOrderItemEntry
 from rest_framework import status
 import json
 from rest_framework.decorators import api_view
+from django.shortcuts import render
+from io import BytesIO
+from django.http import HttpResponse
+from xhtml2pdf import pisa
+from django.template.loader import get_template
 
+
+def render_to_pdf(template_src, context_dict={}):
+        template = get_template(template_src)
+        html  = template.render(context_dict)
+        result = BytesIO()
+        pdf =  pisa.pisaDocument(BytesIO(html.encode("ISO-8859-1")), result)
+        if not pdf.err:
+            return HttpResponse(result.getvalue(), content_type='application/pdf')
+        return None
+    
+def view_morder_pdf(request, id):
+    if not request.user.is_superuser:
+        return HttpResponseRedirect('/admin/login/?next=' + request.path)
+    
+    obj = MOrder.objects.get(id=id)
+    pdf = render_to_pdf('morder_pdf.html', {'order': obj,})
+    return HttpResponse(pdf, content_type='application/pdf')
 
 @api_view(["POST"])
 def morder_edit_order_add_product_entries(request):
