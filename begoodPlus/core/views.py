@@ -58,7 +58,7 @@ from catalogAlbum.serializers import CatalogImageSerializer
 from django.views.decorators.csrf import ensure_csrf_cookie
 import uuid
 from django.conf import settings
-
+from django.contrib.auth.models import User
 from rest_framework.decorators import api_view, permission_classes
 @api_view(['POST', 'GET'])
 @ensure_csrf_cookie
@@ -202,8 +202,12 @@ def svelte_cart_form(request):
             if (request.user.is_superuser):
                 if body.get('asUser', None):
                     user_id = int(body['asUser']['id'])
+                    try:
+                        user_id = User.objects.get(id=user_id)
+                    except  User.DoesNotExist:
+                        user_id = None
                 else:
-                    user_id = request.user.id
+                    user_id = request.user
                 #user_id = int(body.get('asUser') or request.user.id)
                 agent = request.user
             else:
