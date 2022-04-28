@@ -211,23 +211,30 @@ def svelte_cart_form(request):
                 agent = request.user
             else:
                 user_id = request.user
-        db_cart = SvelteCartModal.objects.create(user_id=user_id, device=device,uid=uuid,businessName=business_name, name=name, phone=phone, email=email, message=message, agent=agent, order_type=order_type)
+        db_cart = SvelteCartModal.objects.create(user=user_id, device=device,uid=uuid,businessName=business_name, name=name, phone=phone, email=email, message=message, agent=agent, order_type=order_type)
         #data.products.set(products)
         db_cart.productsRaw = raw_cart
         # products = [{'id': 5, 'amount': 145, 'mentries': {...}}, {'id': 18, 'amount': 0, 'mentries': {...}}, {'id': 138, 'amount': 0}]
         data = []
         for p in products:
+            
             pid = p.get('id')
             pamount = p.get('amount')
             pentries = p.get('mentries', None) or {}
             if request.user.is_superuser:
                 unitPrice = p.get('price')
             else:
-                unitPrice = CatalogImage.objects.get(id=pid).client_price
-            print = p.get('print', False)
+                try:
+                    unitPrice = CatalogImage.objects.get(id=pid).client_price
+                except:
+                    unitPrice = 0
+            print_desition = p.get('print', False)
             embro = p.get('embro', False)
-            obj = SvelteCartProductEntery.objects.create(product_id=pid, amount=pamount, details=pentries,unitPrice=unitPrice, print=print, embro=embro)
-            data.append(obj)
+            try:
+                obj = SvelteCartProductEntery.objects.create(product_id=pid, amount=pamount, details=pentries,unitPrice=unitPrice, print=print_desition, embro=embro)
+                data.append(obj)
+            except:
+                pass
         #data = [SvelteCartProductEntery(product_id=p['id'],amount=p['amount'] or 1, details = p['mentries'] or {}) for p in products]
         #products_objs = SvelteCartProductEntery.objects.bulk_create(data)
         db_cart.productEntries.set(data)
