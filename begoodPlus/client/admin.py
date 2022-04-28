@@ -9,11 +9,22 @@ from .models import Client, ClientOrganizations, PaymentTime, PaymantWay, Client
 import zipfile
 
 class ClientAdmin(admin.ModelAdmin):
-    list_display = ('created_at','__str__', 'user', 'businessName', 'extraName')
-    actions = ['generate_user_products_from_sessions']
+    list_display = ('created_at','__str__', 'user', 'businessName', 'extraName','show_prices','tariff')
+    actions = ['generate_user_products_from_sessions', 'make_show_prices_active', 'make_show_prices_inactive']
     filter_horizontal = ('categorys',)
     search_fields = ('businessName', 'user__username', 'email','howPay__name','whenPay__name',)
     list_filter = ('storeType', 'clientType',)
+    
+    def make_show_prices_inactive(self, request, queryset):
+        queryset.update(show_prices=False)
+        self.message_user(request, _("Show prices was set to False"))
+    make_show_prices_inactive.short_description = _("Make show prices inactive")
+    
+    def make_show_prices_active(self, request, queryset):
+        queryset.update(show_prices=True)
+        self.message_user(request, _("Show prices was set to True"))
+    make_show_prices_active.short_description = _("Make show prices active")
+    
     def generate_user_products_from_sessions(self, request, queryset):
         all_file_buffers = []
         for client in queryset:
