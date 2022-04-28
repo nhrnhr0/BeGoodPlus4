@@ -23,6 +23,8 @@ class MOrderItemEntry(models.Model):
         return str(self.quantity) + ' ' + str(self.color) + ' ' + str(self.size) + ' ' + str(self.varient)
     pass
 
+    
+
 class MOrderItem(models.Model):
     """
     This is the model for the items in the order.
@@ -57,6 +59,35 @@ class MOrder(models.Model):
     status = models.CharField(max_length=100, choices=[('new', 'חדש'), ('in_progress', 'בתהליך'), ('done', 'גמור')])
     products = models.ManyToManyField(to=MOrderItem, blank=True, related_name='morder')
     message = models.TextField(null=True, blank=True)
+    
+    def export_to_excel(self):
+        headers = ['שם המוצר','כמות','מחיר', 'ברקוד','colorsSizes',]
+        data = pd.DataFrame(columns=headers)
+        created_at_str = self.created.strftime("%m/%d/%Y, %H:%M")
+        filename = (self.client.businessName if self.client else 'אורח') + ' ' + created_at_str
+        for item in self.products.all():
+            row = []
+            row.append(item.product.title)
+            #row.append(item.quantity)
+            row.append(item.price)
+            row.append(item.product.barcode)
+            quantity = 0
+            colorsSizes = []
+            for entry in item.entries.all():
+                quantity += entry.quantity
+                colorsSizes.append({
+                    'quantity': entry.quantity,
+                    'color': entry.color.name,
+                    'size': entry.size.size,
+                    'varient': entry.varient.name,
+                })
+            row.append(quantity)
+            row.append(colorsSizes)
+            data = data.append(pd.Series(row, index=headers), ignore_index=True)
+        
+        
+        
+        return {filename, filedata}
     
     def get_edit_url(self):
         link = reverse('admin_edit_order', args=(self.pk,))
