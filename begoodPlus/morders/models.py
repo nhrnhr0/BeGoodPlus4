@@ -44,6 +44,7 @@ class MOrderItem(models.Model):
     embroidery = models.BooleanField(default=False)
     comment = models.TextField(null=True, blank=True)
     entries = models.ManyToManyField(to=MOrderItemEntry, blank=True, related_name='product')
+    totalEntriesQuantity = property(lambda self: sum([entry.quantity for entry in self.entries.all()]))
     def __str__(self):
         return str(self.product) + " | " + str(self.price) + '₪' #str(self.color) + " " + str(self.size) + (" " + self.varient.name) if self.varient != None else ' ' + str(self.quantity) + " " + str(self.price) + '₪'
 # Create your models here.

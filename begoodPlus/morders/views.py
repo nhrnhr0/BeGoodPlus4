@@ -19,7 +19,7 @@ def render_to_pdf(template_src, context_dict={}):
         template = get_template(template_src)
         html  = template.render(context_dict)
         result = BytesIO()
-        pdf =  pisa.pisaDocument(BytesIO(html.encode("ISO-8859-1")), result)
+        pdf =  pisa.pisaDocument(BytesIO(html.encode("UTF-8")), result) #ISO-8859-1
         if not pdf.err:
             return HttpResponse(result.getvalue(), content_type='application/pdf')
         return None
@@ -29,8 +29,10 @@ def view_morder_pdf(request, id):
         return HttpResponseRedirect('/admin/login/?next=' + request.path)
     
     obj = MOrder.objects.get(id=id)
-    pdf = render_to_pdf('morder_pdf.html', {'order': obj,})
-    return HttpResponse(pdf, content_type='application/pdf')
+    #pdf = render_to_pdf('morder_pdf.html', {'order': obj,})
+    products = MOrderItem.objects.filter(morder=obj)
+    html = render(request, 'morder_pdf.html', {'order': obj,'products': products})
+    return HttpResponse(html)
 
 @api_view(["POST"])
 def morder_edit_order_add_product_entries(request):
@@ -117,7 +119,7 @@ def api_edit_order_add_product(request):
                     price = price,
                 )
                 
-                obj.morder.set([MOrder.objects.get(id=order_id)])
+                obj.morder.set([MOrder.objects.get(id=order_id)]) # TODO: is it important to save the items inside the morder
                 obj.save()
                 new_entries = AdminMOrderItemSerializer(obj).data
                 return JsonResponse({'success': 'success', 'data': new_entries}, status=status.HTTP_200_OK)
