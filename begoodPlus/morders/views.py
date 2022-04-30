@@ -11,25 +11,15 @@ from rest_framework.decorators import api_view
 from django.shortcuts import render
 from io import BytesIO
 from django.http import HttpResponse
-from xhtml2pdf import pisa
+
 from django.template.loader import get_template
 
 
-def render_to_pdf(template_src, context_dict={}):
-        template = get_template(template_src)
-        html  = template.render(context_dict)
-        result = BytesIO()
-        pdf =  pisa.pisaDocument(BytesIO(html.encode("UTF-8")), result) #ISO-8859-1
-        if not pdf.err:
-            return HttpResponse(result.getvalue(), content_type='application/pdf')
-        return None
     
 def view_morder_pdf(request, id):
     if not request.user.is_superuser:
         return HttpResponseRedirect('/admin/login/?next=' + request.path)
-    
     obj = MOrder.objects.get(id=id)
-    #pdf = render_to_pdf('morder_pdf.html', {'order': obj,})
     products = MOrderItem.objects.filter(morder=obj)
     products = products.select_related('product',).prefetch_related('entries',)
     html = render(request, 'morder_pdf.html', {'order': obj,'products': products})
