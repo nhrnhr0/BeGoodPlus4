@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>M.S. Global הזמנה</title>
     <meta http-equiv=Content-Type content="text/html;charset=utf-8">
     <!--
     <link href="//db.onlinewebfonts.com/c/9798f64007ae3426b2336e57dae4149c?family=Microsoft+YaHei+Mono" rel="stylesheet" type="text/css"/>
@@ -39,9 +39,26 @@
         height: auto;
         background: #f0f0f0;
         text-align: center;
-        font-size: 20px;
+        
         font-weight: bold;
         padding-top: 20px;
+        
+    }
+    .header .main-title {
+        font-size: 20px;
+        font-family: 'Microsoft YaHei Mono';
+        font-weight: bold;
+        color: #000;
+        margin: 0px;
+        padding:0px;
+    }
+    .header .sub-title {
+        font-size: 14px;
+        font-family: 'Microsoft YaHei Mono';
+        font-weight: bold;
+        color: #000;
+        margin: 0px;
+        padding:0px;
     }
 
     .footer {
@@ -58,7 +75,6 @@
         width: 100%;
         border-collapse: collapse;
         border-spacing: 0;
-        margin-top: 20px;
         text-align: center;
     }
     .products-table th, .products-table td {
@@ -70,42 +86,52 @@
         background: #f0f0f0;
         text-align: center;
     }
+
+    .limit-cell-size {
+        max-width: 250px;
+    }
+    .product-name-cell {
+        text-align: start;
+    }
 </style>
 </head>
 <body>
     <div class="page">
         <div class="header">
-            מספר הזמנה: {{order.id}}
+            <h3 class="main-title">
+                מספר הזמנה: {{order.id}}
+            </h3>
+            <h4 class="sub-title">
+                {{order.name}}
+            </h4>
         </div>
         <br>
         <Table class="products-table">
             <thead>
                 <tr>
-                        <td>
-                            שם מוצר
-                        </td>
-                        <td>
-                            כמות
-                        </td>
-                        <td>
-                            מחיר ליחידה (ללא מע"מ)
-                        </td>
-                        <td>
-                            ברקוד
-                        </td>
+                    <td> # </td>
+                    <td> שם מוצר </td>
+                    <td> כמות </td>
+                    <td> מחיר ליחידה (ללא מע"מ) </td>
+                    <td> סה"כ מחיר (ללא מע"מ)</td>
+                    <td> ברקוד </td>
                 </tr>
             </thead>
             <tbody>
                 {% for item in products %}
                 <tr>
-                    <td>
+                    <td>{{ forloop.counter}}</td>
+                    <td class="product-name-cell limit-cell-size">
                         {{item.product.title}}
                     </td>
                     <td>
-                        {{item.totalEntriesQuantity}}
+                        {{item.prop_totalEntriesQuantity}}
                     </td>
                     <td>
-                        {{item.price}} ש"ח
+                        ₪ {{item.price}} 
+                    </td>
+                    <td>
+                        ₪ {% widthratio item.price 1 item.prop_totalEntriesQuantity %} 
                     </td>
                     <td>
                         {% if item.product.barcode %}
@@ -116,6 +142,16 @@
                     </td>
                 </tr>
                 {% endfor %}
+                <tr>
+                    <td colspan="4">
+                        סה"כ מחיר לפריטים (ללא מע"מ):
+                    </td>
+                    <td>
+                        ₪ {{order.prop_totalPrice}}
+                    </td>
+                </tr>
+            </tbody>
+            
         </Table>
     </div>
 </body>

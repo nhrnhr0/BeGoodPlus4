@@ -325,10 +325,16 @@ class SvelteCartModal(models.Model):
     def turn_to_morder(self):
         from morders.models import MOrder, MOrderItem, MOrderItemEntry
         cart= self
-        client = self.user.client
-        name = self.name if self.name != '' else self.user.client.businessName
-        phone = self.phone if self.phone != '' else self.user.client.contactManPhone
-        email = self.email if self.email != '' else self.user.client.email
+        if self.user and self.user.is_authenticated:
+            client = self.user.client
+            name = self.name if self.name != '' else self.user.client.businessName
+            phone = self.phone if self.phone != '' else self.user.client.contactManPhone
+            email = self.email if self.email != '' else self.user.client.email
+        else:
+            client = None
+            name = self.name
+            phone = self.phone
+            email = self.email
         message = self.message if self.message != '' else ''
         agent = self.agent if self.agent != '' else ''
         status = 'new'
