@@ -31,6 +31,7 @@ def view_morder_pdf(request, id):
     obj = MOrder.objects.get(id=id)
     #pdf = render_to_pdf('morder_pdf.html', {'order': obj,})
     products = MOrderItem.objects.filter(morder=obj)
+    products = products.select_related('product',).prefetch_related('entries',)
     html = render(request, 'morder_pdf.html', {'order': obj,'products': products})
     return HttpResponse(html)
 

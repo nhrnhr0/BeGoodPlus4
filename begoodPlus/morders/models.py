@@ -44,7 +44,8 @@ class MOrderItem(models.Model):
     embroidery = models.BooleanField(default=False)
     comment = models.TextField(null=True, blank=True)
     entries = models.ManyToManyField(to=MOrderItemEntry, blank=True, related_name='product')
-    totalEntriesQuantity = property(lambda self: sum([entry.quantity for entry in self.entries.all()]))
+    prop_totalEntriesQuantity = property(lambda self: sum([entry.quantity for entry in self.entries.all()]))
+    prop_totalPrice = property(lambda self: self.prop_totalEntriesQuantity * self.price)
     def __str__(self):
         return str(self.product) + " | " + str(self.price) + '₪' #str(self.color) + " " + str(self.size) + (" " + self.varient.name) if self.varient != None else ' ' + str(self.quantity) + " " + str(self.price) + '₪'
 # Create your models here.
@@ -60,7 +61,7 @@ class MOrder(models.Model):
     status = models.CharField(max_length=100, choices=[('new', 'חדש'), ('in_progress', 'בתהליך'), ('done', 'גמור')])
     products = models.ManyToManyField(to=MOrderItem, blank=True, related_name='morder')
     message = models.TextField(null=True, blank=True)
-    
+    prop_totalPrice = property(lambda self: sum([item.prop_totalPrice for item in self.products.all()]))
     def view_morder_pdf_link(self):
         link = reverse('view_morder_pdf', args=(self.pk,))
         return mark_safe('<a href="{}">{}</a>'.format(link, 'הצג הזמנה'))
