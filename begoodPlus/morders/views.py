@@ -8,7 +8,22 @@ from morders.models import MOrder, MOrderItem, MOrderItemEntry
 from rest_framework import status
 import json
 from rest_framework.decorators import api_view
+from django.shortcuts import render
+from io import BytesIO
+from django.http import HttpResponse
 
+from django.template.loader import get_template
+
+
+    
+def view_morder_pdf(request, id):
+    if not request.user.is_superuser:
+        return HttpResponseRedirect('/admin/login/?next=' + request.path)
+    obj = MOrder.objects.get(id=id)
+    products = MOrderItem.objects.filter(morder=obj)
+    products = products.select_related('product',).prefetch_related('entries',)
+    html = render(request, 'morder_pdf.html', {'order': obj,'products': products})
+    return HttpResponse(html)
 
 @api_view(["POST"])
 def morder_edit_order_add_product_entries(request):
@@ -95,7 +110,7 @@ def api_edit_order_add_product(request):
                     price = price,
                 )
                 
-                obj.morder.set([MOrder.objects.get(id=order_id)])
+                obj.morder.set([MOrder.objects.get(id=order_id)]) # TODO: is it important to save the items inside the morder
                 obj.save()
                 new_entries = AdminMOrderItemSerializer(obj).data
                 return JsonResponse({'success': 'success', 'data': new_entries}, status=status.HTTP_200_OK)
