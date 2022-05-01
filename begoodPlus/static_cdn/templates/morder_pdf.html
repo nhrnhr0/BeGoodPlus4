@@ -110,17 +110,25 @@
             <thead>
                 <tr>
                     <td> # </td>
+                    <td> ברקוד </td>
                     <td> שם מוצר </td>
                     <td> כמות </td>
                     <td> מחיר ליחידה (ללא מע"מ) </td>
                     <td> סה"כ מחיר (ללא מע"מ)</td>
-                    <td> ברקוד </td>
+                    
                 </tr>
             </thead>
             <tbody>
                 {% for item in products %}
                 <tr>
                     <td>{{ forloop.counter}}</td>
+                    <td>
+                        {% if item.product.barcode %}
+                            {{item.product.barcode}}
+                        {%else%}
+                            
+                        {%endif %}
+                    </td>
                     <td class="product-name-cell limit-cell-size">
                         {{item.product.title}}
                     </td>
@@ -133,21 +141,21 @@
                     <td>
                         ₪ {% widthratio item.price 1 item.prop_totalEntriesQuantity %} 
                     </td>
-                    <td>
-                        {% if item.product.barcode %}
-                            {{item.product.barcode}}
-                        {%else%}
-                            
-                        {%endif %}
-                    </td>
+                    
                 </tr>
                 {% endfor %}
                 <tr>
-                    <td colspan="4">
-                        סה"כ מחיר לפריטים (ללא מע"מ):
+                    <td colspan="2">
+                        סה"כ (ללא מע"מ):
                     </td>
                     <td>
-                        ₪ {{order.prop_totalPrice}}
+                        ₪ {{order.prop_totalPrice|floatformat:2}}
+                    </td>
+                    <td colspan="2">
+                        סה"כ (עם מע"מ)
+                    </td>
+                    <td>
+                        ₪ {{order.prop_totalPricePlusTax|floatformat:2}}
                     </td>
                 </tr>
             </tbody>

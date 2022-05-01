@@ -340,8 +340,7 @@ def autocompleteModel(request):
     start = time.time()
     #if request.is_ajax():
     q = request.GET.get('q', '')
-    
-    products_qs = CatalogImage.objects.filter(Q(title__icontains=q) | Q(albums__title__icontains=q) | Q(albums__keywords__icontains=q)).distinct()
+    products_qs = CatalogImage.objects.filter(Q(title__icontains=q) | Q(albums__title__icontains=q) | Q(albums__keywords__icontains=q) | Q(barcode__icontains=q)).distinct()
     products_qs = products_qs.filter(Q(is_active=True) & ~Q(albums=None) & Q(albums__is_public=True))
     #  & (~Q(albums=None) & Q(is_active = True)
 #
