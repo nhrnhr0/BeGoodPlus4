@@ -163,11 +163,26 @@ def client_product_question(request):
     question = body.get('question', None)
     if(request.user.is_anonymous):
         user = None
+        buissnes_name = body.get('buissnes_name', None)
+        phone = body.get('phone', None)
+        email = body.get('email', None)
+        name = body.get('name', None)
+        
     else:
         user = request.user
+        if user.client:
+            buissnes_name = user.client.businessName
+            phone = None
+            email = user.client.email
+            name = user.username
+        else:
+            buissnes_name = None
+            phone = None
+            email = None
+            name = None
     data = UserQuestion.objects.create(
         product = CatalogImage.objects.get(id=product_id),question = question,
-        user = user,ip=device,is_answered=False)
+        user = user,ip=device,is_answered=False, buissnes_name=buissnes_name,phone=phone,email=email,name=name)
     data.save()
     if (settings.DEBUG):
         send_question_notification(data.id)

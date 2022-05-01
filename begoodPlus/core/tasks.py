@@ -102,10 +102,21 @@ def send_question_notification(question_id):
         'user': obj.user,
         'created_at': obj.created_at,
         'ip':   obj.ip,
+        'name': obj.name,
+        'buissnes_name': obj.buissnes_name,
+        'phone': obj.phone,
+        'email': obj.email,
     }
     chat_id = TELEGRAM_CHAT_ID_QUESTIONS
-    text = 'שאלה חדשה\nנשלחה על ידי <b> {user} </b> בעזרת האתר שלנו בכתובת <b> {ip} </b> בתאריך <b> {created_at} </b> עבור המוצר <b> {product} </b>'.format(**info)
-    text += '\n\n{question}'.format(**info)
+    
+    text = 'שאלה חדשה\n IP: <b> {ip} </b>\n :תאריך <b> {created_at} </b> :מוצר <b> {product} </b>\n'.format(**info)
+    text += 'פרטי משתמש:\n'
+    text += 'משתמש: <b>{user}</b>\n'.format(**info)
+    text += 'שם: <b>{name}</b>\n'.format(**info)
+    text += 'עסק: <b>{buissnes_name}</b>\n'.format(**info)
+    text += 'טלפון: <b>{phone}</b>\n'.format(**info)
+    text += 'אימייל: <b>{email}</b>\n'.format(**info)
+    text += '\n\nהשאלה: <b>{question}</b>\n'.format(**info)
     telegram_bot.send_message(chat_id=chat_id, text=text, parse_mode=telegram.ParseMode.HTML)
 @shared_task
 def send_cart_notification(cart_id):
