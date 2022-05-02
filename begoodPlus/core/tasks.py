@@ -83,10 +83,16 @@ def send_cantacts_notificatios(contacts_id):
 def product_photo_send_notification(user_product_photo, rety = 0):
     obj = UserProductPhoto.objects.get(id=user_product_photo)
     chat_id = TELEGRAM_CHAT_ID_PRODUCT_PHOTO
-    image = obj.photo.url
+    if obj.photo:
+        image = obj.photo.url
+    else:
+        image= None
     caption = '<b> משתמש: </b> ' + str(obj.user) + '\n<b> הודעה: </b> ' + obj.description + '\n<b> מחיר קנייה: </b> '+str(obj.buy_price)+'\n<b> מחיר רצוי: </b> '+ str(obj.want_price) +' '
     try:
-        telegram_bot.send_photo(chat_id, image, caption=caption, parse_mode=telegram.ParseMode.HTML)
+        if image:
+            telegram_bot.send_photo(chat_id, image, caption=caption, parse_mode=telegram.ParseMode.HTML)
+        else:
+            telegram_bot.send_message(chat_id, caption, parse_mode=telegram.ParseMode.HTML)
     except:
         if rety < 3:
             product_photo_send_notification(user_product_photo, rety + 1)
