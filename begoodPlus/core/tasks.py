@@ -1,4 +1,5 @@
 from __future__ import absolute_import, unicode_literals
+import email
 
 from begoodPlus.celery import app
 
@@ -77,10 +78,14 @@ def send_cantacts_notificatios(contacts_id):
     text += '<b> מזהה משתמש: </b> {uid}'.format(**info)
     text += '\n'
     text += '<b> מכשיר: </b> {device}'.format(**info)
-
+    subject = 'טופס לידים בתחתית הדף הוגש'
+    from_email = 'טופס לידים בתחתית הדף <Main@ms-global.co.il>'
+    to = MAIN_EMAIL_RECEIVER
+    html_text = text.replace('\n', '<br>')
+    mail.send_mail(subject, text, from_email, [to], html_message=html_text)
     telegram_bot.send_message(chat_id=chat_id, text=text, parse_mode=telegram.ParseMode.HTML)
 @shared_task
-def product_photo_send_notification(user_product_photo, rety = 0):
+def product_photo_send_notification(user_product_photo):
     obj = UserProductPhoto.objects.get(id=user_product_photo)
     chat_id = TELEGRAM_CHAT_ID_PRODUCT_PHOTO
     if obj.photo:
@@ -96,8 +101,19 @@ def product_photo_send_notification(user_product_photo, rety = 0):
     except:
         if rety < 3:
             product_photo_send_notification(user_product_photo, rety + 1)
-        else:
-            print('error sending photo to telegram')
+    except:
+        pass
+    try:
+        email_html = caption.replace('\n', '<br>')
+        email_text = strip_tags(email_html)
+        if image:
+            email_html += '<img src="'+image+'" width="100%">'
+        subject = 'משתמש רוצה את המוצר הזה באתר' + str(obj.id)
+        from_email = 'מוצר רצוי <Main@ms-global.co.il>'
+        to = MAIN_EMAIL_RECEIVER
+        mail.send_mail(subject, email_text, from_email, [to], html_message=email_html)
+    except:
+        pass
     
 @shared_task
 def send_question_notification(question_id):
@@ -114,7 +130,6 @@ def send_question_notification(question_id):
         'email': obj.email,
     }
     chat_id = TELEGRAM_CHAT_ID_QUESTIONS
-    
     text = 'שאלה חדשה\n IP: <b> {ip} </b>\n :תאריך <b> {created_at} </b> :מוצר <b> {product} </b>\n'.format(**info)
     text += 'פרטי משתמש:\n'
     text += 'משתמש: <b>{user}</b>\n'.format(**info)
