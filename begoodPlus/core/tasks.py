@@ -99,9 +99,6 @@ def product_photo_send_notification(user_product_photo):
         else:
             telegram_bot.send_message(chat_id, caption, parse_mode=telegram.ParseMode.HTML)
     except:
-        if rety < 3:
-            product_photo_send_notification(user_product_photo, rety + 1)
-    except:
         pass
     try:
         email_html = caption.replace('\n', '<br>')
