@@ -88,18 +88,13 @@ def send_cantacts_notificatios(contacts_id):
 def product_photo_send_notification(user_product_photo):
     obj = UserProductPhoto.objects.get(id=user_product_photo)
     chat_id = TELEGRAM_CHAT_ID_PRODUCT_PHOTO
+    caption = '<b> משתמש: </b> ' + str(obj.user) + '\n<b> הודעה: </b> ' + obj.description + '\n<b> מחיר קנייה: </b> '+str(obj.buy_price)+'\n<b> מחיר רצוי: </b> '+ str(obj.want_price) +' '
     if obj.photo:
         image = obj.photo.url
+        telegram_bot.send_photo(chat_id, image, caption=caption, parse_mode=telegram.ParseMode.HTML)
     else:
-        image= None
-    caption = '<b> משתמש: </b> ' + str(obj.user) + '\n<b> הודעה: </b> ' + obj.description + '\n<b> מחיר קנייה: </b> '+str(obj.buy_price)+'\n<b> מחיר רצוי: </b> '+ str(obj.want_price) +' '
-    try:
-        if image:
-            telegram_bot.send_photo(chat_id, image, caption=caption, parse_mode=telegram.ParseMode.HTML)
-        else:
-            telegram_bot.send_message(chat_id, caption, parse_mode=telegram.ParseMode.HTML)
-    except:
-        pass
+        telegram_bot.send_message(chat_id, caption, parse_mode=telegram.ParseMode.HTML)
+    
     try:
         email_html = caption.replace('\n', '<br>')
         email_text = strip_tags(email_html)
