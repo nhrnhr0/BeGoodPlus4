@@ -89,12 +89,12 @@ def product_photo_send_notification(user_product_photo):
     obj = UserProductPhoto.objects.get(id=user_product_photo)
     chat_id = TELEGRAM_CHAT_ID_PRODUCT_PHOTO
     caption = '<b> משתמש: </b> ' + str(obj.user) + '\n<b> הודעה: </b> ' + obj.description + '\n<b> מחיר קנייה: </b> '+str(obj.buy_price)+'\n<b> מחיר רצוי: </b> '+ str(obj.want_price) +' '
+
     if obj.photo:
         image = obj.photo.url
         telegram_bot.send_photo(chat_id, image, caption=caption, parse_mode=telegram.ParseMode.HTML)
     else:
         telegram_bot.send_message(chat_id, caption, parse_mode=telegram.ParseMode.HTML)
-    
     try:
         email_html = caption.replace('\n', '<br>')
         email_text = strip_tags(email_html)
@@ -131,6 +131,13 @@ def send_question_notification(question_id):
     text += 'אימייל: <b>{email}</b>\n'.format(**info)
     text += '\n\nהשאלה: <b>{question}</b>\n'.format(**info)
     telegram_bot.send_message(chat_id=chat_id, text=text, parse_mode=telegram.ParseMode.HTML)
+    
+    subject = 'שאלה חדשה נשלחה על ידי ' + str(obj.user) + ' בעזרת האתר שלנו בכתובת ' + str(obj.ip) + ' בתאריך ' + str(obj.created_at) + ' עבור המוצר ' + str(obj.product)
+    from_email = 'שאלה חדשה <Main@ms-global.co.il>'
+    to = MAIN_EMAIL_RECEIVER
+    html_text = text.replace('\n', '<br>')
+    mail.send_mail(subject, text, from_email, [to], html_message=html_text)
+
 @shared_task
 def send_cart_notification(cart_id):
     print('=================== send_cart_email is running ==========================')
