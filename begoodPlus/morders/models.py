@@ -64,6 +64,11 @@ class MOrder(models.Model):
     message = models.TextField(null=True, blank=True)
     prop_totalPrice = property(lambda self: sum([item.prop_totalPrice for item in self.products.all()]))
     prop_totalPricePlusTax = property(lambda self: self.prop_totalPrice * Decimal('1.17'))
+    
+    def view_morder_stock_document_link(self):
+        link = reverse('view_morder_stock_document', args=(self.pk,))
+        return mark_safe('<a href="{}">{}</a>'.format(link, 'הצג מסמך הוצאה מהמלאי'))
+    
     def view_morder_pdf_link(self):
         link = reverse('view_morder_pdf', args=(self.pk,))
         return mark_safe('<a href="{}">{}</a>'.format(link, 'הצג הזמנה'))

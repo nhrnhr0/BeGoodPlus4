@@ -14,6 +14,14 @@ from django.http import HttpResponse
 
 from django.template.loader import get_template
 
+def view_morder_stock_document(request, id):
+    if not request.user.is_superuser:
+        return HttpResponseRedirect('/admin/login/?next=' + request.path)
+    obj = MOrder.objects.get(id=id)
+    products = MOrderItem.objects.filter(morder=obj)
+    products = products.select_related('product',).prefetch_related('entries',)
+    html = render(request, 'morder_stock_document.html', {'order': obj,'products': products})
+    return HttpResponse(html)
 
     
 def view_morder_pdf(request, id):

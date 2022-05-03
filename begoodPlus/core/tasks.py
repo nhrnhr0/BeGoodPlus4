@@ -137,7 +137,6 @@ def send_question_notification(question_id):
     to = MAIN_EMAIL_RECEIVER
     html_text = text.replace('\n', '<br>')
     mail.send_mail(subject, text, from_email, [to], html_message=html_text)
-
 @shared_task
 def send_cart_notification(cart_id):
     print('=================== send_cart_email is running ==========================')
