@@ -655,3 +655,7 @@ class UserQuestion(models.Model):
     created_at = models.DateTimeField(verbose_name=_('created at'), auto_now_add=True)
     ip = models.CharField(verbose_name=_('ip'), max_length=50, blank=True, null=True)
     answer = models.TextField(verbose_name=_('answer'), blank=True, null=True)
+    name = models.CharField(verbose_name=_('name'), max_length=50, blank=True, null=True)
+    email = models.CharField(verbose_name=_('email'), max_length=50, blank=True, null=True)
+    phone = models.CharField(verbose_name=_('phone'), max_length=50, blank=True, null=True)
+    buissnes_name = models.CharField(verbose_name=_('buissnes name'), max_length=50, blank=True, null=True)
