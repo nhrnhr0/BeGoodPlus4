@@ -27,7 +27,26 @@ class MOrderAdmin(admin.ModelAdmin):
     list_display = ('id', 'client', 'status', 'created', 'updated','get_edit_url', 'view_morder_pdf_link','view_morder_stock_document_link',)
     #filter_horizontal = ('products',)
     actions = ('export_to_excel',)
-    
+    def export_to_excel(self, request, queryset):
+        filesbuffers = []
+        orders = []
+        for morder in queryset:
+            order_data = morder.get_exel_data()
+            orders.append(order_data)
+        total_data = {}
+        for order in orders:
+            # create total of quantity, total price,   the products by name
+            pass
+        zip_buffer = io.BytesIO()
+        with zipfile.ZipFile(zip_buffer, "a", zipfile.ZIP_DEFLATED, False) as zip_file:
+            for d in filesbuffers:
+                file_name = d['name'] + '.xls'
+                data = d['data']
+                zip_file.writestr(file_name , data.getvalue())
+        zip_buffer.seek(0)
+        response = HttpResponse(zip_buffer.read(), content_type="application/zip")
+        response['Content-Disposition'] = 'attachment; filename="products.zip"'
+        return response
     '''
     def export_to_excel(self, request, queryset):
         filesbuffers = []

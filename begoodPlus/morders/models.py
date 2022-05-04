@@ -65,6 +65,23 @@ class MOrder(models.Model):
     prop_totalPrice = property(lambda self: sum([item.prop_totalPrice for item in self.products.all()]))
     prop_totalPricePlusTax = property(lambda self: self.prop_totalPrice * Decimal('1.17'))
     
+    def get_exel_data(self):
+        # שם	כמות	מחיר מכירה ללא מע"מ	ספקים
+        products = []
+        for item in self.products.all():
+            # Entry: quantity,color,size, varient
+            entries = []
+            for entry in item.entries.all():
+                entries.append([entry.quantity, entry.color, entry.size, entry.varient])
+            item_data = [item.product.title, item.prop_totalEntriesQuantity, item.price, item.price * Decimal('1.17'), ','.join([provider.name for provider in item.providers.all()]), entries]
+            products.append(item_data)
+        data = {
+            'name': self.name if self.name != None else self.client.business_name if self.client.business_name != None else '',
+            'products': products,
+            'message': self.message if self.message != None else '',
+        }
+        return data
+    
     def view_morder_stock_document_link(self):
         link = reverse('view_morder_stock_document', args=(self.pk,))
         return mark_safe('<a href="{}">{}</a>'.format(link, 'הצג מסמך הוצאה מהמלאי'))
