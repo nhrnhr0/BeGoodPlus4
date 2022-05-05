@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>M.S Global הוצאה מהמחסן</title>
+</head>
+<body>
+    <main>
+        <h3 class="doc-title">טופס הוצאה מהמלאי</h3>
+        <div class="doc-subtitles">
+            <div class="sub sub-1">
+                <span>ללקוח</span>
+                <div class="empty-underline"></div>
+            </div>
+            <div class="sub sub-2">
+                <span>תאריך</span>
+                <div class="sm-empty-underline"></div> / 
+                <div class="sm-empty-underline"></div> / 
+                <div class="sm-empty-underline"></div>
+            </div>
+            
+            <div class="sub sub-3">
+                <span>שם המוציא</span>
+                <div class="empty-underline"></div>
+            </div>
+        </div>
+
+        <div class="top-products">
+            <table>
+                <thead>
+                    <!-- headers #, פריט, צבע, ספק,-->
+                    <!-- רשימת מידות -->
+                </thead>
+            </table>
+        </div>
+    </main>
+</body>
+</html>
+
+<style>
+    main {
+        text-align: center;
+    }
+    .doc-title {
+        font-size: 20px;
+        font-family: 'Microsoft YaHei Mono';
+        font-weight: bold;
+        color: #000;
+        margin: 0px;
+        padding:0px;
+    }
+    .doc-subtitles {
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        margin-top: 20px;
+
+    }
+    .doc-subtitles .sub {
+        display: flex;
+        flex-direction: row-reverse;
+    }
+    .doc-subtitles .sub .empty-underline {
+        width: 200px;
+        border-bottom: 1px solid black;
+    }
+    .doc-subtitles .sub .sm-empty-underline {
+        width: 35px;
+        border-bottom: 1px solid black;
+    }
+</style>

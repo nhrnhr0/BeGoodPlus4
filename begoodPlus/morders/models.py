@@ -64,6 +64,46 @@ class MOrder(models.Model):
     message = models.TextField(null=True, blank=True)
     prop_totalPrice = property(lambda self: sum([item.prop_totalPrice for item in self.products.all()]))
     prop_totalPricePlusTax = property(lambda self: self.prop_totalPrice * Decimal('1.17'))
+    
+    def get_exel_data(self):
+        # שם	כמות	מחיר מכירה ללא מע"מ	ספקים
+        products = []
+        qs = self.products.all().select_related('product').prefetch_related('entries', 'providers', 'entries__color', 'entries__size', 'entries__varient')
+        for item in qs:
+            # Entry: quantity,color,size, varient
+            entries = {}
+            defualt_color = Color.objects.get(pk=76)
+            defualt_size = ProductSize.objects.get(pk=108)
+            for entry in item.entries.all():
+                color = entry.color.name if entry.color != None else defualt_color.name
+                color_order = entry.color.name if entry.color != None else defualt_color.name
+                size = entry.size.size if entry.size != None else defualt_size.size
+                size_order = entry.size.code if entry.size != None else defualt_size.code
+                varient = entry.varient.name if entry.varient != None else ''
+                key = tuple([color, size, varient,color_order,size_order])
+                #entries.append([color, size,varient,entry.quantity])
+                entries[key] = entry.quantity
+            item_data = {'title': item.product.title, 'total_quantity':item.prop_totalEntriesQuantity,
+                        'price': item.price,
+                        'price_tax': item.price * Decimal('1.17'),
+                        'providers': ','.join([provider.name for provider in item.providers.all()]), 
+                        'comment': item.comment if item.comment != None else '',
+                        'barcode': item.product.barcode if item.product.barcode != None else '',
+                        'entries': entries}
+            products.append(item_data)
+        data = {
+            'name': self.name if self.name != None else self.client.business_name if self.client.business_name != None else '',
+            'products': products,
+            'message': self.message if self.message != None else '',
+            'date': self.created.strftime('%d_%m_%Y'),
+            'id': self.id,
+        }
+        return data
+    
+    def view_morder_stock_document_link(self):
+        link = reverse('view_morder_stock_document', args=(self.pk,))
+        return mark_safe('<a href="{}">{}</a>'.format(link, 'הצג מסמך הוצאה מהמלאי'))
+    
     def view_morder_pdf_link(self):
         link = reverse('view_morder_pdf', args=(self.pk,))
         return mark_safe('<a href="{}">{}</a>'.format(link, 'הצג הזמנה'))
