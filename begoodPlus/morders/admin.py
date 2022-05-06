@@ -12,6 +12,13 @@ from django.utils.translation import gettext_lazy  as _
 import zipfile
 from openpyxl.styles import PatternFill
 
+from openpyxl.styles import Alignment
+from openpyxl.styles import Font
+import copy
+from openpyxl.styles.borders import Border, Side
+from openpyxl import Workbook
+
+
 
 class MOrderItemEntryAdmin(admin.ModelAdmin):
     list_display = ('id', 'product', 'color', 'size', 'varient', 'quantity')
@@ -36,6 +43,17 @@ class MOrderAdmin(admin.ModelAdmin):
     actions = ('export_to_excel',)
     def export_to_excel(self, request, queryset):
         filesbuffers = []
+        
+        yellow = "00FFFF00"
+        grey = "00808080"
+        light_blue = "00FFCCFF"
+        header_font = Font(size=10, bold=True,)
+        center_align = Alignment(horizontal='center', vertical='center')
+        align_rtl = Alignment(horizontal='right', vertical='center')
+        header_fill = PatternFill(start_color=light_blue, end_color=light_blue, fill_type='solid')
+        
+        bottom_border = Border( bottom=Side(style='thin'))
+        
         orders = []
         for morder in queryset:
             order_data = morder.get_exel_data()
@@ -48,7 +66,7 @@ class MOrderAdmin(admin.ModelAdmin):
                 product_name = order_product['title']
                 if product_name not in all_products:
                     all_products[product_name] = {
-                        'entries': order_product['entries'],
+                        'entries': copy.deepcopy(order_product['entries']),
                         'comment': (name + ': '  + order_product['comment'] + '\n') if order_product['comment'] else '',
                         'barcode': order_product['barcode'],
                         'total_quantity':0 ,
@@ -74,8 +92,7 @@ class MOrderAdmin(admin.ModelAdmin):
         # פריט, הערות, ברקוד, כמות כוללת
         # פירוט מידות צבעים
         headers = ['ברקוד','פריט', 'כמות כוללת','הערות']
-        from openpyxl.styles import Alignment
-        from openpyxl.styles import Font
+        
 
         wb = Workbook()
         main_ws = wb.active
@@ -88,85 +105,6 @@ class MOrderAdmin(admin.ModelAdmin):
         main_ws.column_dimensions['D'].width = 20
         # set the header
         ws_rows_counter = 1
-        yellow = "00FFFF00"
-        grey = "00808080"
-        light_blue = "00FFCCFF"
-        # Add headers in bold
-        for i in range(len(headers)):
-            main_ws.cell(row=ws_rows_counter, column=i+1).value = headers[i]
-            main_ws.cell(row=ws_rows_counter, column=i+1).font = main_ws.cell(row=ws_rows_counter, column=i+1).font.copy(bold=True)
-        ws_rows_counter += 1
-        header_font = Font(size=10, bold=True,)
-        center_align = Alignment(horizontal='center', vertical='center')
-        align_rtl = Alignment(horizontal='right', vertical='center')
-        header_fill = PatternFill(start_color=light_blue, end_color=light_blue, fill_type='solid')
-        for product_name in all_products:
-            
-            product = all_products[product_name]
-            main_ws.cell(row=ws_rows_counter, column=1).value = product['barcode']
-            
-            #main_ws.cell(row=ws_rows_counter, column=1).font = main_ws.cell(row=ws_rows_counter, column=1).font.copy(bold=True)
-            main_ws.cell(row=ws_rows_counter, column=1).fill = header_fill
-            main_ws.cell(row=ws_rows_counter, column=1).alignment = align_rtl
-            main_ws.cell(row=ws_rows_counter, column=1).font = header_font
-            
-            main_ws.cell(row=ws_rows_counter, column=2).value = product_name
-            main_ws.cell(row=ws_rows_counter, column=2).fill = header_fill
-            main_ws.cell(row=ws_rows_counter, column=2).alignment = align_rtl
-            main_ws.cell(row=ws_rows_counter, column=2).font = header_font
-            
-            main_ws.cell(row=ws_rows_counter, column=3).value = product['total_quantity']
-            main_ws.cell(row=ws_rows_counter, column=3).fill = header_fill
-            main_ws.cell(row=ws_rows_counter, column=3).alignment = align_rtl
-            main_ws.cell(row=ws_rows_counter, column=3).font = header_font
-
-            main_ws.cell(row=ws_rows_counter, column=4).value = product['comment']
-            main_ws.cell(row=ws_rows_counter, column=4).fill = header_fill
-            main_ws.cell(row=ws_rows_counter, column=4).alignment = align_rtl
-            main_ws.cell(row=ws_rows_counter, column=4).font =  header_font
-            
-            
-            # ws_rows_counter += 1
-            # main_ws.cell(row=ws_rows_counter, column=1).value = 'צבע'
-            # main_ws.cell(row=ws_rows_counter, column=1).font = main_ws.cell(row=ws_rows_counter, column=1).font.copy(bold=True)
-            # main_ws.cell(row=ws_rows_counter, column=1).alignment = align_rtl
-            # main_ws.cell(row=ws_rows_counter, column=2).value = 'מידה'
-            # main_ws.cell(row=ws_rows_counter, column=2).font = main_ws.cell(row=ws_rows_counter, column=2).font.copy(bold=True)
-            # main_ws.cell(row=ws_rows_counter, column=2).alignment = align_rtl
-            # main_ws.cell(row=ws_rows_counter, column=3).value = 'ווריאנט'
-            # main_ws.cell(row=ws_rows_counter, column=3).font = main_ws.cell(row=ws_rows_counter, column=3).font.copy(bold=True)
-            # main_ws.cell(row=ws_rows_counter, column=3).alignment = align_rtl
-            # main_ws.cell(row=ws_rows_counter, column=4).value = 'כמות'
-            # main_ws.cell(row=ws_rows_counter, column=4).font = main_ws.cell(row=ws_rows_counter, column=4).font.copy(bold=True)
-            # main_ws.cell(row=ws_rows_counter, column=4).alignment = align_rtl
-            ws_rows_counter += 1
-            entries = product['entries']
-            # entry = ('color_name', 'size_name', 'varient_name', color_order, size_order): quantity
-            # sort the entries by color name, size name, varient name based on the order of the colors and sizes
-            sorted_entries = sorted(entries.items(), key=lambda x: (x[0][3], x[0][4]))
-            if len(sorted_entries) == 1 and sorted_entries[0][0][0] == 'no color' and sorted_entries[0][0][1] == 'ONE SIZE':
-                continue
-            sorted_entries = dict(sorted_entries)
-            
-            for entry in sorted_entries:#product['entries']:
-                # entry = ('color_name', 'size_name', 'varient_name'): quantity
-                color = entry[0]
-                size = entry[1]
-                varient = entry[2]
-                quantity = product['entries'][entry]
-                main_ws.cell(row=ws_rows_counter, column=1).value = color
-                main_ws.cell(row=ws_rows_counter, column=1).alignment = align_rtl
-                #main_ws.cell(row=ws_rows_counter, column=1).font = main_ws.cell(row=ws_rows_counter, column=1).font.copy(bold=True)
-                main_ws.cell(row=ws_rows_counter, column=2).value = size
-                main_ws.cell(row=ws_rows_counter, column=2).alignment = align_rtl
-                #main_ws.cell(row=ws_rows_counter, column=2).font = main_ws.cell(row=ws_rows_counter, column=2).font.copy(bold=True)
-                main_ws.cell(row=ws_rows_counter, column=3).value = varient
-                main_ws.cell(row=ws_rows_counter, column=3).alignment = align_rtl
-                #main_ws.cell(row=ws_rows_counter, column=3).font = main_ws.cell(row=ws_rows_counter, column=3).font.copy(bold=True)
-                main_ws.cell(row=ws_rows_counter, column=4).value = quantity
-                main_ws.cell(row=ws_rows_counter, column=4).alignment = align_rtl
-                #main_ws.cell(row=ws_rows_counter, column=4).font = main_ws.cell(row=ws_rows_counter, column=4).font.copy(bold=True)
-                ws_rows_counter += 1
         
         # create sheet for each order
         for order in orders:
@@ -215,21 +153,25 @@ class MOrderAdmin(admin.ModelAdmin):
                 order_ws.cell(row=order_ws_rows_counter, column=1).fill = header_fill
                 order_ws.cell(row=order_ws_rows_counter, column=1).alignment = align_rtl
                 order_ws.cell(row=order_ws_rows_counter, column=1).font = header_font
+                order_ws.cell(row=order_ws_rows_counter, column=1).border = bottom_border
                 
                 order_ws.cell(row=order_ws_rows_counter, column=2).value = product_name
                 order_ws.cell(row=order_ws_rows_counter, column=2).fill = header_fill
                 order_ws.cell(row=order_ws_rows_counter, column=2).alignment = align_rtl
                 order_ws.cell(row=order_ws_rows_counter, column=2).font = header_font
+                order_ws.cell(row=order_ws_rows_counter, column=2).border = bottom_border
                 
                 order_ws.cell(row=order_ws_rows_counter, column=3).value = product['total_quantity']
                 order_ws.cell(row=order_ws_rows_counter, column=3).fill = header_fill
                 order_ws.cell(row=order_ws_rows_counter, column=3).alignment = align_rtl
                 order_ws.cell(row=order_ws_rows_counter, column=3).font = header_font
+                order_ws.cell(row=order_ws_rows_counter, column=3).border = bottom_border
 
                 order_ws.cell(row=order_ws_rows_counter, column=4).value = product['comment']
                 order_ws.cell(row=order_ws_rows_counter, column=4).fill = header_fill
                 order_ws.cell(row=order_ws_rows_counter, column=4).alignment = align_rtl
                 order_ws.cell(row=order_ws_rows_counter, column=4).font =  header_font
+                order_ws.cell(row=order_ws_rows_counter, column=4).border = bottom_border
 
                 order_ws_rows_counter += 1
 
@@ -267,7 +209,83 @@ class MOrderAdmin(admin.ModelAdmin):
             # for order_product in order_products:
             #     product_name = order_product['title']
 
+# Add headers in bold
+        for i in range(len(headers)):
+            main_ws.cell(row=ws_rows_counter, column=i+1).value = headers[i]
+            main_ws.cell(row=ws_rows_counter, column=i+1).font = main_ws.cell(row=ws_rows_counter, column=i+1).font.copy(bold=True)
+        ws_rows_counter += 1
+        for product_name in all_products:
+            
+            product = all_products[product_name]
+            main_ws.cell(row=ws_rows_counter, column=1).value = product['barcode']
+            
+            #main_ws.cell(row=ws_rows_counter, column=1).font = main_ws.cell(row=ws_rows_counter, column=1).font.copy(bold=True)
+            main_ws.cell(row=ws_rows_counter, column=1).fill = header_fill
+            main_ws.cell(row=ws_rows_counter, column=1).alignment = align_rtl
+            main_ws.cell(row=ws_rows_counter, column=1).font = header_font
+            main_ws.cell(row=ws_rows_counter, column=1).border = bottom_border
+            
+            main_ws.cell(row=ws_rows_counter, column=2).value = product_name
+            main_ws.cell(row=ws_rows_counter, column=2).fill = header_fill
+            main_ws.cell(row=ws_rows_counter, column=2).alignment = align_rtl
+            main_ws.cell(row=ws_rows_counter, column=2).font = header_font
+            main_ws.cell(row=ws_rows_counter, column=2).border = bottom_border
+            
+            main_ws.cell(row=ws_rows_counter, column=3).value = product['total_quantity']
+            main_ws.cell(row=ws_rows_counter, column=3).fill = header_fill
+            main_ws.cell(row=ws_rows_counter, column=3).alignment = align_rtl
+            main_ws.cell(row=ws_rows_counter, column=3).font = header_font
+            main_ws.cell(row=ws_rows_counter, column=3).border = bottom_border
 
+            main_ws.cell(row=ws_rows_counter, column=4).value = product['comment']
+            main_ws.cell(row=ws_rows_counter, column=4).fill = header_fill
+            main_ws.cell(row=ws_rows_counter, column=4).alignment = align_rtl
+            main_ws.cell(row=ws_rows_counter, column=4).font =  header_font
+            main_ws.cell(row=ws_rows_counter, column=4).border = bottom_border
+            
+            
+            # ws_rows_counter += 1
+            # main_ws.cell(row=ws_rows_counter, column=1).value = 'צבע'
+            # main_ws.cell(row=ws_rows_counter, column=1).font = main_ws.cell(row=ws_rows_counter, column=1).font.copy(bold=True)
+            # main_ws.cell(row=ws_rows_counter, column=1).alignment = align_rtl
+            # main_ws.cell(row=ws_rows_counter, column=2).value = 'מידה'
+            # main_ws.cell(row=ws_rows_counter, column=2).font = main_ws.cell(row=ws_rows_counter, column=2).font.copy(bold=True)
+            # main_ws.cell(row=ws_rows_counter, column=2).alignment = align_rtl
+            # main_ws.cell(row=ws_rows_counter, column=3).value = 'ווריאנט'
+            # main_ws.cell(row=ws_rows_counter, column=3).font = main_ws.cell(row=ws_rows_counter, column=3).font.copy(bold=True)
+            # main_ws.cell(row=ws_rows_counter, column=3).alignment = align_rtl
+            # main_ws.cell(row=ws_rows_counter, column=4).value = 'כמות'
+            # main_ws.cell(row=ws_rows_counter, column=4).font = main_ws.cell(row=ws_rows_counter, column=4).font.copy(bold=True)
+            # main_ws.cell(row=ws_rows_counter, column=4).alignment = align_rtl
+            ws_rows_counter += 1
+            entries = product['entries']
+            # entry = ('color_name', 'size_name', 'varient_name', color_order, size_order): quantity
+            # sort the entries by color name, size name, varient name based on the order of the colors and sizes
+            sorted_entries = sorted(entries.items(), key=lambda x: (x[0][3], x[0][4]))
+            if len(sorted_entries) == 1 and sorted_entries[0][0][0] == 'no color' and sorted_entries[0][0][1] == 'ONE SIZE':
+                continue
+            sorted_entries = dict(sorted_entries)
+            
+            for entry in sorted_entries:#product['entries']:
+                # entry = ('color_name', 'size_name', 'varient_name'): quantity
+                color = entry[0]
+                size = entry[1]
+                varient = entry[2]
+                quantity = product['entries'][entry]
+                main_ws.cell(row=ws_rows_counter, column=1).value = color
+                main_ws.cell(row=ws_rows_counter, column=1).alignment = align_rtl
+                #main_ws.cell(row=ws_rows_counter, column=1).font = main_ws.cell(row=ws_rows_counter, column=1).font.copy(bold=True)
+                main_ws.cell(row=ws_rows_counter, column=2).value = size
+                main_ws.cell(row=ws_rows_counter, column=2).alignment = align_rtl
+                #main_ws.cell(row=ws_rows_counter, column=2).font = main_ws.cell(row=ws_rows_counter, column=2).font.copy(bold=True)
+                main_ws.cell(row=ws_rows_counter, column=3).value = varient
+                main_ws.cell(row=ws_rows_counter, column=3).alignment = align_rtl
+                #main_ws.cell(row=ws_rows_counter, column=3).font = main_ws.cell(row=ws_rows_counter, column=3).font.copy(bold=True)
+                main_ws.cell(row=ws_rows_counter, column=4).value = quantity
+                main_ws.cell(row=ws_rows_counter, column=4).alignment = align_rtl
+                #main_ws.cell(row=ws_rows_counter, column=4).font = main_ws.cell(row=ws_rows_counter, column=4).font.copy(bold=True)
+                ws_rows_counter += 1
+        
         
         # save file
         
