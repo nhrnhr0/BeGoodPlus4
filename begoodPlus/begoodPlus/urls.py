@@ -15,7 +15,7 @@ Including another URLconf
 """
 
 from clientApi.views import get_all_varients_api
-from inventory.views import add_doc_stock_enter_ppn_entry, delete_doc_stock_enter_ppn_entry, get_doc_stock_enter_ppn_entries, search_ppn, show_inventory_stock,get_product_inventory,doc_stock_list
+from inventory.views import add_doc_stock_enter_ppn_entry, delete_doc_stock_enter_ppn_entry, doc_stock_detail_api, doc_stock_list_api, get_doc_stock_enter_ppn_entries, search_ppn, show_inventory_stock,get_product_inventory,doc_stock_list
 from clientApi.views import get_all_colors_api, get_all_sizes_api, main_page_api
 from campains.views import admin_get_all_campains, admin_get_campain_products, get_user_campains
 from inventory.views import DocStockEnterViewSet, doc_stock_enter
@@ -108,6 +108,8 @@ urlpatterns = [
     
     # inventory:
     path('inv/doc-stock-list', doc_stock_list, name='admin_doc_stock_list'),
+    path('inv/doc-stock-list-api', doc_stock_list_api, name='doc_stock_list_api'),
+    path('inv/doc-stock-detail-api/<int:id>', doc_stock_detail_api, name='doc_stock_detail_api'),
     path('inv/doc-stock-enter/<int:id>', doc_stock_enter, name='admin_edit_doc_stock_enter'),
     path('inv/enter-doc/<int:id>', DocStockEnterViewSet.as_view(), name='admin_enter_doc'),
     path('inv/enter-doc/get-doc-stock-enter-ppn-entries/', get_doc_stock_enter_ppn_entries, name='admin_get_doc_stock_enter_ppn_entries'),

@@ -22,6 +22,8 @@ class SKUMSerializer(serializers.ModelSerializer):
         model = SKUM
         fields = ('id', 'ppn', 'ppn_name','size', 'size_name','color', 'color_name','verient', 'verient_name', 'created_at','product_name', 'product_id')
 
+
+
 class ProductEnterItemsSerializer(serializers.ModelSerializer):
     #sku = SKUMSerializer(many=False)
     sku_id = serializers.CharField(source='sku.id')
@@ -37,10 +39,11 @@ class ProductEnterItemsSerializer(serializers.ModelSerializer):
     sku_ppn_provider_name = serializers.CharField(source='sku.ppn.provider.name')
     sku_product_id = serializers.CharField(source='sku.ppn.product.id')
     sku_product_name = serializers.CharField(source='sku.ppn.product.title')
+    sku_product_image = serializers.CharField(source='sku.ppn.product.cimage')
     class Meta:
         model = ProductEnterItems
         #fields = ('id', 'sku','quantity','price','created_at',)
-        fields = ('id', 'quantity','price','created_at', 'sku_id', 'sku_size_id', 'sku_size_name', 'sku_color_id', 'sku_color_name', 'sku_verient_id', 'sku_verient_name', 'sku_ppn_id', 'sku_ppn_name', 'sku_product_id', 'sku_product_name','sku_ppn_provider_id','sku_ppn_provider_name')
+        fields = ('id', 'quantity','price','created_at', 'sku_id', 'sku_size_id', 'sku_size_name', 'sku_color_id', 'sku_color_name', 'sku_verient_id', 'sku_verient_name', 'sku_ppn_id', 'sku_ppn_name', 'sku_product_id', 'sku_product_name','sku_product_image', 'sku_ppn_provider_id','sku_ppn_provider_name')
 
 class DocStockEnterSerializer(serializers.ModelSerializer):
     items = ProductEnterItemsSerializer(many=True)
@@ -53,6 +56,7 @@ class DocStockEnterSerializer(serializers.ModelSerializer):
 class DocStockEnterSerializerList(serializers.ModelSerializer):
     provider_name = serializers.CharField(source='provider.name')
     warehouse_name = serializers.CharField(source='warehouse.name')
+    username = serializers.CharField(source='byUser.username', default='None')
     class Meta:
         model = DocStockEnter
-        fields = ('id','docNumber', 'description','created_at','provider_name', 'warehouse_name','isAplied',)
+        fields = ('id','docNumber', 'description','created_at','provider_name', 'warehouse_name','isAplied','byUser')

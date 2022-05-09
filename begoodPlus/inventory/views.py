@@ -43,7 +43,14 @@ def doc_stock_list(request):
     data = DocStockEnterSerializerList(DocStockEnter.objects.all(), many=True).data
     context['my_data'] = {'doc_stock_list': data}
     return render(request, 'doc_stock_list.html', context=context)
-
+def doc_stock_list_api(request):
+    if not request.user.is_superuser:
+        return JsonResponse({'error': 'You are not authorized'})
+    
+    if request.method == 'GET':
+        doc_stock_list = DocStockEnter.objects.all()
+        serializer = DocStockEnterSerializer(doc_stock_list, many=True)
+        return JsonResponse(serializer.data, safe=False)
 #@permission_required('inventory.view_docstockenter')
 def doc_stock_enter(request, id):
     # if the user is not superuser:
@@ -54,6 +61,13 @@ def doc_stock_enter(request, id):
     context['my_data'] = {'id': id}
     return render(request, 'doc_stock_enter.html', context=context)
 
+def doc_stock_detail_api(request, id):
+    if not request.user.is_superuser:
+        return JsonResponse({'error': 'You are not authorized'})
+    if request.method == 'GET':
+        doc = DocStockEnter.objects.get(id=id)
+        serializer = DocStockEnterSerializer(doc)
+        return JsonResponse(serializer.data)
 
 from .models import SKUM, ProductEnterItems
 
