@@ -47,6 +47,8 @@ class MOrderItem(models.Model):
     entries = models.ManyToManyField(to=MOrderItemEntry, blank=True, related_name='product')
     prop_totalEntriesQuantity = property(lambda self: sum([entry.quantity for entry in self.entries.all()]))
     prop_totalPrice = property(lambda self: self.prop_totalEntriesQuantity * self.price)
+    class Meta:
+        ordering = ['product__title']
     def __str__(self):
         return str(self.product) + " | " + str(self.price) + '₪' #str(self.color) + " " + str(self.size) + (" " + self.varient.name) if self.varient != None else ' ' + str(self.quantity) + " " + str(self.price) + '₪'
 # Create your models here.
