@@ -4,12 +4,13 @@ from rest_framework import serializers
 class PPNSerializer(serializers.ModelSerializer):
     product_id = serializers.CharField(source='product.id')
     product_name = serializers.CharField(source='product.title')
+    product_image = serializers.CharField(source='product.cimage')
     provider_id = serializers.CharField(source='provider.id')
     provider_name = serializers.CharField(source='provider.name')
     
     class Meta:
         model = PPN
-        fields = ('id', 'provider_id', 'provider_name', 'product_id', 'product_name', 'providerProductName')
+        fields = ('id', 'provider_id', 'provider_name', 'product_id', 'product_name', 'providerProductName','barcode','buy_price','product_image')
 
 class SKUMSerializer(serializers.ModelSerializer):
     size_name = serializers.CharField(source='size.size')

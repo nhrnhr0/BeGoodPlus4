@@ -83,6 +83,15 @@ def show_inventory_stock(request):
     context['my_data'] = {'products':ProductEnterItemsSerializer(products, many=True).data}
     return render(request, 'show_inventory.html', context=context)
 
+
+@api_view(['POST'])
+def add_doc_stock_enter_ppn(request):
+    print(request)
+    print(request.data)
+    print('============= path ', request.path)
+    return HttpResponseRedirect(request.path)
+    pass
+
 @api_view(['POST'])
 def add_doc_stock_enter_ppn_entry(request):
     if(request.method == 'POST' and request.user.is_superuser):

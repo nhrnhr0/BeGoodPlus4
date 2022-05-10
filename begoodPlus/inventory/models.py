@@ -25,6 +25,7 @@ class PPN(models.Model):
     buy_price = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name=_('Buy Price (no tax)'))
     store_price = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name=_('Store Price (no tax)'))
     providerProductName = models.CharField(max_length=100, verbose_name=_('product provider name'))
+    barcode = models.CharField(max_length=100, verbose_name=_('barcode'), blank=True, null=True)
     #fastProductTitle = models.CharField(max_length=100, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True, verbose_name=_('created at'))
     class Meta:
