@@ -40,19 +40,21 @@ class PPN(models.Model):
 class WarehouseStock(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    sku = models.ForeignKey(to='SKUM', null=True, on_delete=models.SET_NULL)
-    quantity = models.IntegerField()
+    #sku = models.ForeignKey(to='SKUM', null=True, on_delete=models.SET_NULL)
+    #quantity = models.IntegerField()
     avgPrice = models.DecimalField(max_digits=10, decimal_places=3)
-    buyHistory = models.ManyToManyField(to='ProductEnterItems', related_name='buyHistory', blank=True)
+    #buyHistory = models.ManyToManyField(to='ProductEnterItems', related_name='buyHistory', blank=True)
 @receiver(post_save, sender=WarehouseStock, dispatch_uid='update_catalogImage_stock')
 def update_catalogImage_stock(sender, instance, created, **kwargs):
     # get all warchouseStock objects with the same sku__ppn__product_id
     # get the qunatity of all these objects
     # update the catalogImage stock
-    sku = instance.sku
-    qty = WarehouseStock.objects.filter(sku__ppn__product=sku.ppn.product).aggregate(models.Sum('quantity'))['quantity__sum']
-    sku.ppn.product.qyt = qty
-    sku.ppn.product.save()
+    
+    # sku = instance.sku
+    # qty = WarehouseStock.objects.filter(sku__ppn__product=sku.ppn.product).aggregate(models.Sum('quantity'))['quantity__sum']
+    # sku.ppn.product.qyt = qty
+    # sku.ppn.product.save()
+    pass
 class Warehouse(models.Model):
     name = models.CharField(max_length=100)
     stock = models.ManyToManyField(to=WarehouseStock, blank=True, related_name='warehouse')
@@ -133,11 +135,27 @@ class SKUM(models.Model):
 # - amount - int
 # - price - float
 class ProductEnterItems(models.Model):
-    sku = models.ForeignKey(to=SKUM, on_delete=models.SET_DEFAULT, default=1)
-    quantity = models.IntegerField()
-    price = models.DecimalField(max_digits=10, decimal_places=3)
+    #sku = models.ForeignKey(to=SKUM, on_delete=models.SET_DEFAULT, default=1)
+    ppn = models.ForeignKey(to=PPN, on_delete=models.CASCADE)
+    entries = models.ManyToManyField(to='ProductEnterItemsEntries', blank=True) 
+    #total_quantity = models.IntegerField()
+    price = models.DecimalField(max_digits=10, decimal_places=3, default=0)
     created_at = models.DateTimeField(auto_now_add=True)
-    def __str__(self):
-        return str(self.sku.selfDisplay()) + ' | כמות: ' + str(self.quantity) + ' | ' + str(self.price) + '₪'
+    total_quantity = property(lambda self: sum(self.entries.values_list('quantity', flat=True)))
+    def __str__(self) -> str:
+        return str(self.ppn.product.title) + ' | ' + str(self.ppn.provider.name) + ' | ' + str(self.total_quantity)
+    #def __str__(self):
+        #return str(self.sku.selfDisplay()) + ' | כמות: ' + str(self.quantity) + ' | ' + str(self.price) + '₪'
 # Warehouse - 
 # name String
+class ProductEnterItemsEntries(models.Model):
+    size = models.ForeignKey(to=ProductSize, on_delete=models.SET_NULL, null=True, blank=True)
+    color = models.ForeignKey(to=Color, on_delete=models.SET_NULL, null=True, blank=True)
+    verient = models.ForeignKey(to=CatalogImageVarient, on_delete=models.SET_NULL, null=True, blank=True)
+    quantity = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    def __str__(self):
+        size= self.size.size if self.size else ''
+        color = self.color.name if self.color else ''
+        verient = self.verient.name if self.verient else ''
+        return size + ' ' + color + ' ' + verient + ' | ' + str(self.quantity)

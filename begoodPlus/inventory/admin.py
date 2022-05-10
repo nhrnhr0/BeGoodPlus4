@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 # Register your models here.
-from .models import PPN, SKUM, DocStockEnter, ProductEnterItems, Warehouse, WarehouseStock
+from .models import PPN, SKUM, DocStockEnter, ProductEnterItems, ProductEnterItemsEntries, Warehouse, WarehouseStock
 
 class PPNAdmin(admin.ModelAdmin):
     list_display = ('product', 'provider', 'providerProductName', 'created_at')
@@ -12,9 +12,9 @@ admin.site.register(PPN, PPNAdmin)
 
 
 class WarehouseStockAdmin(admin.ModelAdmin):
-    list_display = ('created_at', 'updated_at', 'sku', 'quantity', 'warehouse_display', 'avgPrice')
+    list_display = ('created_at', 'updated_at', 'warehouse_display', 'avgPrice')
     readonly_fields = ('created_at', 'updated_at', 'warehouse_display')
-    list_filter = ('warehouse', 'sku')
+    list_filter = ('warehouse',)
     def warehouse_display(self, obj):
         return obj.warehouse.first().name
 admin.site.register(WarehouseStock, WarehouseStockAdmin)
@@ -44,6 +44,21 @@ admin.site.register(SKUM, SKUMAdmin)
 
 
 class ProductEnterItemsAdmin(admin.ModelAdmin):
-    list_display = ('sku', 'quantity','price', 'created_at',)
+    list_display = ('ppn','total_quantity','price', 'created_at', 'related_doc')
+    readonly_fields = ('created_at','related_doc')
     readonly_fields = ('created_at',)
+    filter_horizontal = ('entries',)
+    def related_doc(adminClass, item):
+        print(adminClass, item)
+        # if item.doc.first() != None:
+        #     return item.doc.first().get_admin_edit_url()
+        # else:
+        return item.doc.first()
 admin.site.register(ProductEnterItems, ProductEnterItemsAdmin)
+
+
+class ProductEnterItemsEntriesAdmin(admin.ModelAdmin):
+    list_display = ('size','color','verient','quantity','created_at',)
+    readonly_fields = ('created_at',)
+    
+admin.site.register(ProductEnterItemsEntries, ProductEnterItemsEntriesAdmin)

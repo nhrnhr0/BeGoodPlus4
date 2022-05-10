@@ -88,8 +88,27 @@ def show_inventory_stock(request):
 def add_doc_stock_enter_ppn(request):
     print(request)
     print(request.data)
+    ppn_id = request.data.get('item_id')
+    cost = request.data.get('item_cost')
+    #barcode = request.data.get('item_barcode')
+    doc_id = request.data.get('doc_id')
+    enter_document = DocStockEnter.objects.get(id=doc_id)
+    ppn = PPN.objects.get(id=ppn_id)
+    old_items = enter_document.items.all()
+    old_item = old_items.filter(ppn=ppn)
+    if old_item.exists():
+        old_item = old_item.first()
+    else:
+        old_item = ProductEnterItems.objects.create(ppn=ppn, price=cost)
+        old_item.doc.set([enter_document])
+    print(old_item)
+    old_item.save()
+    print(old_item)
+    
     print('============= path ', request.path)
-    return HttpResponseRedirect(request.path)
+    #doc = DocStockEnter.objects.get(id=id)
+    serializer = DocStockEnterSerializer(enter_document)
+    return JsonResponse(serializer.data)
     pass
 
 @api_view(['POST'])
