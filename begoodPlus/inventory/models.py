@@ -137,7 +137,7 @@ class SKUM(models.Model):
 class ProductEnterItems(models.Model):
     #sku = models.ForeignKey(to=SKUM, on_delete=models.SET_DEFAULT, default=1)
     ppn = models.ForeignKey(to=PPN, on_delete=models.CASCADE)
-    entries = models.ManyToManyField(to='ProductEnterItemsEntries', blank=True) 
+    entries = models.ManyToManyField(to='ProductEnterItemsEntries', blank=True, related_name='item') 
     #total_quantity = models.IntegerField()
     price = models.DecimalField(max_digits=10, decimal_places=3, default=0)
     created_at = models.DateTimeField(auto_now_add=True)

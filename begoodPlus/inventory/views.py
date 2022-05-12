@@ -69,7 +69,7 @@ def doc_stock_detail_api(request, id):
         serializer = DocStockEnterSerializer(doc)
         return JsonResponse(serializer.data)
 
-from .models import SKUM, ProductEnterItems
+from .models import SKUM, ProductEnterItems, ProductEnterItemsEntries
 
 def show_inventory_stock(request):
     # if the user is not superuser:
@@ -110,6 +110,44 @@ def add_doc_stock_enter_ppn(request):
     serializer = DocStockEnterSerializer(enter_document)
     return JsonResponse(serializer.data)
     pass
+@api_view(['POST'])
+def enter_doc_edit(request):
+    if not request.user.is_superuser:
+        return JsonResponse({'error': 'You are not authorized'})
+    
+    data = request.data
+    id = request.data.get('id')
+    doc_data = request.data.get('doc_data')
+    
+    
+    print(data)
+    id = data.get('id')
+    
+    # TODO: save the headers
+    
+    for item in doc_data.get('items'):
+        
+        item_id = item.get('id')
+        item_obj = ProductEnterItems.objects.get(id=item_id)
+        for entry in item.get('entries'):
+            entry_id = entry.get('id', None)
+            if entry_id:
+                entry_obj = ProductEnterItemsEntries.objects.get(id=entry_id)
+                entry_obj.quantity = entry.get('quantity')
+                entry_obj.save()
+            else:
+                size = int(entry.get('size'))
+                color = int(entry.get('color'))
+                verient = int(entry.get('verient'))
+                quantity=entry.get('quantity')
+                entry_obj = ProductEnterItemsEntries.objects.create(size_id=size, color_id=color, verient_id=verient, quantity=quantity)
+                entry_obj.item.set([item_obj])
+                entry_obj.save()
+        item_obj.save()
+    # return the new doc serializer
+    doc = DocStockEnter.objects.get(id=id)
+    serializer = DocStockEnterSerializer(doc)
+    return JsonResponse(serializer.data)
 
 @api_view(['POST'])
 def add_doc_stock_enter_ppn_entry(request):
