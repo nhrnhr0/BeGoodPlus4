@@ -11,7 +11,7 @@ class PPNSerializer(serializers.ModelSerializer):
     product = ImageClientApi(read_only=True, many=False)
     class Meta:
         model = PPN
-        fields = ('id','product', 'provider_id', 'provider_name', 'product_id', 'product_name', 'providerProductName','barcode','buy_price','product_image')
+        fields = ('id','product', 'provider_id', 'provider_name', 'product_id', 'product_name', 'providerProductName','barcode','buy_price','product_image', 'default_warehouse')
 
 class SKUMSerializer(serializers.ModelSerializer):
     size_name = serializers.CharField(source='size.size')
@@ -58,7 +58,12 @@ class ProductEnterItemsSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductEnterItems
         #fields = ('id', 'sku','quantity','price','created_at',)
-        fields = ('id','ppn', 'total_quantity','price','created_at','entries')
+        fields = ('id','ppn', 'total_quantity','price','created_at','entries','warehouse','barcode',)
+
+class WarehouseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Warehouse
+        fields = ('id','name',)
 
 class DocStockEnterSerializer(serializers.ModelSerializer):
     items = ProductEnterItemsSerializer(many=True)

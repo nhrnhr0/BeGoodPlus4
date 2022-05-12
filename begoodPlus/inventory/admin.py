@@ -6,7 +6,7 @@ from django.conf import settings
 from .models import PPN, SKUM, DocStockEnter, ProductEnterItems, ProductEnterItemsEntries, Warehouse, WarehouseStock
 
 class PPNAdmin(admin.ModelAdmin):
-    list_display = ('product', 'provider', 'providerProductName', 'created_at')
+    list_display = ('id', 'product', 'provider', 'providerProductName', 'created_at')
     search_fields = ('product__title', 'providerProductName', 'provider')
     readonly_fields = ('created_at',)
     list_filter = ('created_at',)
@@ -15,7 +15,7 @@ admin.site.register(PPN, PPNAdmin)
 
 
 class WarehouseStockAdmin(admin.ModelAdmin):
-    list_display = ('created_at', 'updated_at', 'warehouse_display', 'avgPrice')
+    list_display = ('id', 'created_at', 'updated_at', 'warehouse_display', 'avgPrice')
     readonly_fields = ('created_at', 'updated_at', 'warehouse_display')
     list_filter = ('warehouse',)
     def warehouse_display(self, obj):
@@ -28,7 +28,7 @@ admin.site.register(Warehouse, WarehouseAdmin)
 
 
 class DocStockEnterAdmin(admin.ModelAdmin):
-    list_display = ('created_at', 'id', 'docNumber', 'provider', 'warehouse', 'isAplied', 'byUser','get_admin_edit_url')
+    list_display = ('id', 'created_at', 'id', 'docNumber', 'provider', 'warehouse', 'isAplied', 'byUser','get_admin_edit_url')
     readonly_fields = ('created_at','byUser','get_admin_edit_url')
     filter_horizontal = ('items',)
     actions = ['apply_doc']
@@ -47,7 +47,7 @@ admin.site.register(SKUM, SKUMAdmin)
 
 
 class ProductEnterItemsAdmin(admin.ModelAdmin):
-    list_display = ('product_display','ppn','total_quantity','price', 'created_at', 'related_doc', )
+    list_display = ('id', 'product_display','ppn','total_quantity','price', 'created_at', 'related_doc', )
     readonly_fields = ('product_display','created_at','related_doc', )
     readonly_fields = ('created_at',)
     filter_horizontal = ('entries',)
@@ -64,7 +64,7 @@ admin.site.register(ProductEnterItems, ProductEnterItemsAdmin)
 
 
 class ProductEnterItemsEntriesAdmin(admin.ModelAdmin):
-    list_display = ('size','color','verient','quantity','created_at',)
+    list_display = ('id', 'size','color','verient','quantity','created_at',)
     readonly_fields = ('created_at',)
     
 admin.site.register(ProductEnterItemsEntries, ProductEnterItemsEntriesAdmin)

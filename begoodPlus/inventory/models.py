@@ -1,4 +1,5 @@
 from audioop import reverse
+from signal import default_int_handler
 from django.conf import settings
 from django.db import models
 from provider.models import Provider
@@ -9,7 +10,9 @@ from productSize.models import ProductSize
 from django.utils.translation import gettext_lazy  as _
 from color.models import Color
 from django.db.models.signals import post_save
-
+from django.db.models.signals import pre_delete
+from django.db.models.signals import m2m_changed
+from django.db.models import Count
 from django.utils.html import mark_safe
 # Create your models here.
 
@@ -24,10 +27,11 @@ class PPN(models.Model):
     provider = models.ForeignKey(to=Provider, on_delete=models.SET_DEFAULT, default=7, verbose_name=_('provider'))
     buy_price = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name=_('Buy Price (no tax)'))
     store_price = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name=_('Store Price (no tax)'))
-    providerProductName = models.CharField(max_length=100, verbose_name=_('product provider name'))
+    providerProductName = models.CharField(max_length=100, verbose_name=_('provider makat'))
     barcode = models.CharField(max_length=100, verbose_name=_('barcode'), blank=True, null=True)
     #fastProductTitle = models.CharField(max_length=100, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True, verbose_name=_('created at'))
+    default_warehouse = models.ForeignKey(to='Warehouse', on_delete=models.SET_DEFAULT,null=True, blank=True, default=1, verbose_name=_('default warehouse'))
     class Meta:
         unique_together = ('provider', 'providerProductName')
     def __str__(self):
@@ -137,15 +141,40 @@ class SKUM(models.Model):
 class ProductEnterItems(models.Model):
     #sku = models.ForeignKey(to=SKUM, on_delete=models.SET_DEFAULT, default=1)
     ppn = models.ForeignKey(to=PPN, on_delete=models.CASCADE)
-    entries = models.ManyToManyField(to='ProductEnterItemsEntries', blank=True, related_name='item') 
+    entries = models.ManyToManyField(to='ProductEnterItemsEntries', blank=True, related_name='item')
     #total_quantity = models.IntegerField()
     price = models.DecimalField(max_digits=10, decimal_places=3, default=0)
+    barcode = models.CharField(max_length=100, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     total_quantity = property(lambda self: sum(self.entries.values_list('quantity', flat=True)))
+    warehouse = models.ForeignKey(to=Warehouse, on_delete=models.SET_DEFAULT, default=1)
     def __str__(self) -> str:
         return str(self.ppn.product.title) + ' | ' + str(self.ppn.provider.name) + ' | ' + str(self.total_quantity)
     #def __str__(self):
         #return str(self.sku.selfDisplay()) + ' | כמות: ' + str(self.quantity) + ' | ' + str(self.price) + '₪'
+def remove_entries_if_orphan(tags_pk_set):
+    """Removes tags in tags_pk_set if they're associated with only 1 File."""
+
+    annotated_tags = ProductEnterItemsEntries.objects.annotate(n_files=Count('item'))
+    unreferenced = annotated_tags.filter(pk__in=tags_pk_set).filter(n_files=1)
+    unreferenced.delete()
+# This will clean unassociated Tags when deleting/bulk-deleting File objects
+@receiver(pre_delete, sender=ProductEnterItems)
+def handle_file_deletion(sender, **kwargs):
+    associated_tags = kwargs['instance'].entries.values_list('pk')
+    remove_entries_if_orphan(associated_tags)
+
+# This will clean unassociated Tags when clearing or removing Tags from a File
+@receiver(m2m_changed, sender=ProductEnterItems.entries.through)
+def handle_tags(sender, **kwargs):
+    action = kwargs['action']
+    if action == "pre_clear":
+        tags_pk_set = kwargs['instance'].entries.values_list('pk')
+    elif action == "pre_remove":
+        tags_pk_set = kwargs.get('pk_set')
+    else:
+        return
+    remove_entries_if_orphan(tags_pk_set)
 # Warehouse - 
 # name String
 class ProductEnterItemsEntries(models.Model):

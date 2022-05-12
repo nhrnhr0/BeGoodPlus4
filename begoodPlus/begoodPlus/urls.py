@@ -15,7 +15,7 @@ Including another URLconf
 """
 
 from clientApi.views import get_all_varients_api
-from inventory.views import add_doc_stock_enter_ppn, add_doc_stock_enter_ppn_entry, enter_doc_edit,delete_doc_stock_enter_ppn_entry, doc_stock_detail_api, doc_stock_list_api, get_doc_stock_enter_ppn_entries, search_ppn, show_inventory_stock,get_product_inventory,doc_stock_list
+from inventory.views import add_doc_stock_enter_ppn, add_doc_stock_enter_ppn_entry, enter_doc_edit,delete_doc_stock_enter_ppn_entry, doc_stock_detail_api, doc_stock_list_api, get_all_warehouses_api,enter_doc_insert_inventory, enter_doc_remove_product, get_doc_stock_enter_ppn_entries, search_ppn, show_inventory_stock,get_product_inventory,doc_stock_list
 from clientApi.views import get_all_colors_api, get_all_sizes_api, main_page_api
 from campains.views import admin_get_all_campains, admin_get_campain_products, get_user_campains
 from inventory.views import DocStockEnterViewSet, doc_stock_enter
@@ -107,6 +107,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     
     # inventory:
+    
     path('inv/doc-stock-list', doc_stock_list, name='admin_doc_stock_list'),
     path('inv/doc-stock-list-api', doc_stock_list_api, name='doc_stock_list_api'),
     path('inv/doc-stock-detail-api/<int:id>', doc_stock_detail_api, name='doc_stock_detail_api'),
@@ -119,6 +120,9 @@ urlpatterns = [
     path('inv/show-stock', show_inventory_stock),
     path('inv/get-product-inventory/', get_product_inventory, name='admin_get_product_inventory'),
     path('enter-doc-edit/', enter_doc_edit, name='admin_enter_doc_edit'),
+    path('enter-doc-remove-product/', enter_doc_remove_product, name='admin_enter_doc_remove_product'),
+    path('enter-doc-insert-inventory/', enter_doc_insert_inventory, name='admin_enter_doc_insert_inventory'),
+    path('get-all-warehouses-api/', get_all_warehouses_api, name='admin_get_all_warehouses_api'),
     # orders
     path('morders/edit-order/<int:id>', edit_morder, name='admin_edit_order'),
     path('morders/api-get-order-data/<int:id>', api_get_order_data, name='admin_api_get_order_data'),

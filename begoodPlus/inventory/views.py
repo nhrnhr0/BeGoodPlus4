@@ -12,6 +12,7 @@ from inventory.models import DocStockEnter
 from inventory.serializers import DocStockEnterSerializer
 from django.contrib.auth.decorators import permission_required
 from django.contrib.auth.decorators import login_required
+from django.db.models import Q
 
 @api_view(['GET'])
 def get_product_inventory(request):
@@ -69,7 +70,7 @@ def doc_stock_detail_api(request, id):
         serializer = DocStockEnterSerializer(doc)
         return JsonResponse(serializer.data)
 
-from .models import SKUM, ProductEnterItems, ProductEnterItemsEntries
+from .models import SKUM, ProductEnterItems, ProductEnterItemsEntries, Warehouse
 
 def show_inventory_stock(request):
     # if the user is not superuser:
@@ -90,6 +91,8 @@ def add_doc_stock_enter_ppn(request):
     print(request.data)
     ppn_id = request.data.get('item_id')
     cost = request.data.get('item_cost')
+    barcode = request.data.get('item_barcode')
+    warehouse = request.data.get('item_warehouse')
     #barcode = request.data.get('item_barcode')
     doc_id = request.data.get('doc_id')
     enter_document = DocStockEnter.objects.get(id=doc_id)
@@ -98,8 +101,11 @@ def add_doc_stock_enter_ppn(request):
     old_item = old_items.filter(ppn=ppn)
     if old_item.exists():
         old_item = old_item.first()
+        old_item.barcode = barcode
+        old_item.price = cost
+        old_item.warehouse_id = warehouse
     else:
-        old_item = ProductEnterItems.objects.create(ppn=ppn, price=cost)
+        old_item = ProductEnterItems.objects.create(ppn=ppn, price=cost,barcode=barcode, warehouse_id=warehouse)
         old_item.doc.set([enter_document])
     print(old_item)
     old_item.save()
@@ -110,6 +116,44 @@ def add_doc_stock_enter_ppn(request):
     serializer = DocStockEnterSerializer(enter_document)
     return JsonResponse(serializer.data)
     pass
+
+@api_view(['GET'])
+def get_all_warehouses_api(request):
+    if not request.user.is_superuser:
+        return JsonResponse({'error': 'You are not authorized'})
+    if request.method == 'GET':
+        warehouses = Warehouse.objects.all()
+        serializer = WarehouseSerializer(warehouses, many=True)
+        return JsonResponse(serializer.data, safe=False)
+@api_view(['POST'])
+def enter_doc_insert_inventory(request):
+    # if the user is not superuser:
+    #   redirect to login page
+    if not request.user.is_superuser:
+        return JsonResponse({'error': 'You are not authorized'})
+    if request.method == 'POST':
+        doc_id = request.data.get('doc_id')
+        doc = DocStockEnter.objects.get(id=doc_id)
+        # insert all items to inventory
+        
+        doc.isAplied = True
+        doc.save() 
+
+@api_view(['DELETE'])
+def enter_doc_remove_product(request):
+    # if the user is not superuser:
+    #   redirect to login page
+    if not request.user.is_superuser:
+        return JsonResponse({'error': 'You are not authorized'})
+    if request.method == 'DELETE':
+        item_id = request.data.get('item_id')
+        item = ProductEnterItems.objects.get(id=item_id)
+        item.delete()
+    id = request.data.get('doc_id')
+    doc = DocStockEnter.objects.get(id=id)
+    serializer = DocStockEnterSerializer(doc)
+    return JsonResponse(serializer.data)
+
 @api_view(['POST'])
 def enter_doc_edit(request):
     if not request.user.is_superuser:
@@ -120,7 +164,6 @@ def enter_doc_edit(request):
     doc_data = request.data.get('doc_data')
     
     
-    print(data)
     id = data.get('id')
     
     # TODO: save the headers
@@ -129,20 +172,30 @@ def enter_doc_edit(request):
         
         item_id = item.get('id')
         item_obj = ProductEnterItems.objects.get(id=item_id)
+        item_obj.price = item.get('price')
+        item_obj.warehouse_id = item.get('warehouse')
+        item_obj.barcode = item.get('barcode')
         for entry in item.get('entries'):
             entry_id = entry.get('id', None)
             if entry_id:
                 entry_obj = ProductEnterItemsEntries.objects.get(id=entry_id)
-                entry_obj.quantity = entry.get('quantity')
-                entry_obj.save()
             else:
                 size = int(entry.get('size'))
                 color = int(entry.get('color'))
-                verient = int(entry.get('verient'))
-                quantity=entry.get('quantity')
-                entry_obj = ProductEnterItemsEntries.objects.create(size_id=size, color_id=color, verient_id=verient, quantity=quantity)
-                entry_obj.item.set([item_obj])
-                entry_obj.save()
+                verient_str = entry.get('verient', None)
+                if verient_str:
+                    verient = int(verient_str)
+                else:
+                    verient = None
+                entry_objs = ProductEnterItemsEntries.objects.filter(item=item_obj, size=size, color=color, verient=verient)
+                if entry_objs.exists():
+                    entry_obj = entry_objs.first()
+                else:
+                    entry_obj = ProductEnterItemsEntries.objects.create(size_id=size, color_id=color, verient_id=verient)
+                    entry_obj.item.set([item_obj])
+                
+            entry_obj.quantity = entry.get('quantity')
+            entry_obj.save()
         item_obj.save()
     # return the new doc serializer
     doc = DocStockEnter.objects.get(id=id)
@@ -244,7 +297,7 @@ class DocStockEnterViewSet(RetrieveUpdateDestroyAPIView):
     lookup_field = "id"
     
     
-from .serializers import DocStockEnterSerializerList, PPNSerializer, ProductEnterItemsSerializer
+from .serializers import DocStockEnterSerializerList, PPNSerializer, ProductEnterItemsSerializer, WarehouseSerializer
 import json
 def search_ppn(request):
     # if the user is not superuser:
@@ -255,7 +308,7 @@ def search_ppn(request):
         search_term = request.GET.get('q')
         provider = request.GET.get('provider')
         if search_term:
-            ppns= PPN.objects.filter(providerProductName__icontains=search_term,provider__name=provider)#.values('id', 'product', 'provider' 'providerProductName')
+            ppns= PPN.objects.filter(Q(provider__name=provider) & (Q(providerProductName__icontains=search_term) | Q(product__title__icontains=search_term) | Q(barcode__icontains=search_term)) )#.values('id', 'product', 'provider' 'providerProductName')
             serializer = PPNSerializer(ppns, many=True)
             return HttpResponse(json.dumps(serializer.data), content_type='application/json')
         else:
