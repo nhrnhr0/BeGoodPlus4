@@ -71,7 +71,7 @@ class DocStockEnterSerializer(serializers.ModelSerializer):
     warehouse_name = serializers.CharField(source='warehouse.name')
     class Meta:
         model = DocStockEnter
-        fields = ('id','docNumber', 'description','created_at','provider', 'provider_name', 'warehouse','warehouse_name','items','isAplied','byUser',)
+        fields = ('id','docNumber', 'description','created_at','provider', 'provider_name', 'warehouse','warehouse_name','items','isAplied','byUser','new_products')
         
 class DocStockEnterSerializerList(serializers.ModelSerializer):
     provider_name = serializers.CharField(source='provider.name')

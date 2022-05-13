@@ -82,6 +82,7 @@ class DocStockEnter(models.Model):
     items = models.ManyToManyField(to='ProductEnterItems', related_name='doc', blank=True)
     isAplied = models.BooleanField(default=False)
     byUser = models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
+    new_products = models.JSONField(default=list)
     def apply_doc(self):
         for item in self.items.all():
             sku = item.sku

@@ -123,6 +123,7 @@ urlpatterns = [
     path('enter-doc-remove-product/', enter_doc_remove_product, name='admin_enter_doc_remove_product'),
     path('enter-doc-insert-inventory/', enter_doc_insert_inventory, name='admin_enter_doc_insert_inventory'),
     path('get-all-warehouses-api/', get_all_warehouses_api, name='admin_get_all_warehouses_api'),
+    path('enter-doc-insert-inventory/<int:doc_id>', enter_doc_insert_inventory, name='admin_enter_doc_insert_inventory'),
     # orders
     path('morders/edit-order/<int:id>', edit_morder, name='admin_edit_order'),
     path('morders/api-get-order-data/<int:id>', api_get_order_data, name='admin_api_get_order_data'),

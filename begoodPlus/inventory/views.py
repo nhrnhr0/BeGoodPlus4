@@ -155,6 +155,19 @@ def enter_doc_remove_product(request):
     return JsonResponse(serializer.data)
 
 @api_view(['POST'])
+def enter_doc_insert_inventory(request, doc_id):
+    print('enter_doc_insert_inventory', doc_id)
+    if(not request.user.is_superuser):
+        return JsonResponse({'error': 'You are not authorized'})
+    if request.method == 'POST':
+        doc = DocStockEnter.objects.get(id=doc_id)
+        # insert all items to inventory
+        for item in doc.items.all():
+            pass
+    
+    return JsonResponse({'error': 'You are not authorized'})
+
+@api_view(['POST'])
 def enter_doc_edit(request):
     if not request.user.is_superuser:
         return JsonResponse({'error': 'You are not authorized'})
@@ -167,6 +180,9 @@ def enter_doc_edit(request):
     id = data.get('id')
     
     # TODO: save the headers
+    newProducts = doc_data.get('new_products')
+    
+    
     
     for item in doc_data.get('items'):
         
@@ -199,6 +215,8 @@ def enter_doc_edit(request):
         item_obj.save()
     # return the new doc serializer
     doc = DocStockEnter.objects.get(id=id)
+    doc.new_products = newProducts
+    doc.save()
     serializer = DocStockEnterSerializer(doc)
     return JsonResponse(serializer.data)
 
