@@ -15,11 +15,11 @@ admin.site.register(PPN, PPNAdmin)
 
 
 class WarehouseStockAdmin(admin.ModelAdmin):
-    list_display = ('id', 'created_at', 'updated_at', 'warehouse_display', 'avgPrice')
-    readonly_fields = ('created_at', 'updated_at', 'warehouse_display')
-    list_filter = ('warehouse',)
-    def warehouse_display(self, obj):
-        return obj.warehouse.first().name
+    list_display = ('id', 'created_at', 'updated_at','warehouse','ppn', 'get_ppn_product','size','color','verient','quantity','avgPrice',) 
+    readonly_fields = ('created_at', 'updated_at', 'get_ppn_product')
+    #list_filter = ('warehouse',)
+    def get_ppn_product(self, obj):
+        return obj.ppn.product.title
 admin.site.register(WarehouseStock, WarehouseStockAdmin)
 
 class WarehouseAdmin(admin.ModelAdmin):

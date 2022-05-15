@@ -1,7 +1,23 @@
 
 from clientApi.serializers import ImageClientApi
-from .models import PPN, DocStockEnter, ProductEnterItems, SKUM, ProductEnterItemsEntries, Warehouse
+from .models import PPN, DocStockEnter, ProductEnterItems, SKUM, ProductEnterItemsEntries, Warehouse, WarehouseStock
 from rest_framework import serializers
+
+
+class WarehouseStockSerializer(serializers.ModelSerializer):
+    product_name= serializers.CharField(source='ppn.product.title')
+    product_id=  serializers.CharField(source='ppn.product.id')
+    size_name=  serializers.CharField(source='size.size')
+    color_name=  serializers.CharField(source='color.name')
+    verient_name=  serializers.CharField(source='verient.name', default='')
+    warehouse_name= serializers.CharField(source='warehouse.name') 
+    provider_name = serializers.CharField(source='ppn.provider.name')
+    provider_id = serializers.CharField(source='ppn.provider.id')
+    barcode = serializers.CharField(source='ppn.barcode')
+    class Meta:
+        model = WarehouseStock
+        fields = ('id', 'created_at','updated_at','warehouse','warehouse_name', 'ppn','size','color','verient','quantity','created_at','updated_at','avgPrice','product_name','product_id','size_name','color_name','verient_name','provider_id', 'provider_name','barcode')
+
 class PPNSerializer(serializers.ModelSerializer):
     product_id = serializers.CharField(source='product.id')
     product_name = serializers.CharField(source='product.title')
@@ -11,7 +27,7 @@ class PPNSerializer(serializers.ModelSerializer):
     product = ImageClientApi(read_only=True, many=False)
     class Meta:
         model = PPN
-        fields = ('id','product', 'provider_id', 'provider_name', 'product_id', 'product_name', 'providerProductName','barcode','buy_price','product_image', 'default_warehouse')
+        fields = ('id','product', 'provider_id', 'provider_name', 'product_id', 'product_name', 'providerProductName','barcode','buy_price','product_image', )
 
 class SKUMSerializer(serializers.ModelSerializer):
     size_name = serializers.CharField(source='size.size')
@@ -58,7 +74,7 @@ class ProductEnterItemsSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductEnterItems
         #fields = ('id', 'sku','quantity','price','created_at',)
-        fields = ('id','ppn', 'total_quantity','price','created_at','entries','warehouse','barcode',)
+        fields = ('id','ppn', 'total_quantity','price','created_at','entries','barcode',)
 
 class WarehouseSerializer(serializers.ModelSerializer):
     class Meta:

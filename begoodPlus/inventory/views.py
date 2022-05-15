@@ -70,7 +70,7 @@ def doc_stock_detail_api(request, id):
         serializer = DocStockEnterSerializer(doc)
         return JsonResponse(serializer.data)
 
-from .models import SKUM, ProductEnterItems, ProductEnterItemsEntries, Warehouse
+from .models import SKUM, ProductEnterItems, ProductEnterItemsEntries, Warehouse, WarehouseStock
 
 def show_inventory_stock(request):
     # if the user is not superuser:
@@ -155,6 +155,33 @@ def enter_doc_remove_product(request):
     return JsonResponse(serializer.data)
 
 @api_view(['POST'])
+def inventory_edit_entry(request, entry_id):
+    if not request.user.is_superuser:
+        return JsonResponse({'error': 'You are not authorized'})
+    if request.method == 'POST':
+        originalEntry = WarehouseStock.objects.get(id=entry_id)
+        warehouse_idToMove = request.data.get('warehouse_id')
+        newStock, is_created = WarehouseStock.objects.get_or_create(
+                    warehouse_id = warehouse_idToMove,
+                    ppn = originalEntry.ppn,
+                    size = originalEntry.size,
+                    color = originalEntry.color,
+                    verient = originalEntry.verient,)
+        
+        stock_id = request.data.get('stock_id')
+        
+        quantityToMove = request.data.get('quantity')
+        
+        
+    pass
+@api_view(['GET'])
+def get_all_inventory_api(request):
+    qs = WarehouseStock.objects.all()
+    serializer = WarehouseStockSerializer(qs, many=True)
+    return JsonResponse(serializer.data, safe=False)
+    
+    pass
+@api_view(['POST'])
 def enter_doc_insert_inventory(request, doc_id):
     print('enter_doc_insert_inventory', doc_id)
     if(not request.user.is_superuser):
@@ -162,10 +189,28 @@ def enter_doc_insert_inventory(request, doc_id):
     if request.method == 'POST':
         doc = DocStockEnter.objects.get(id=doc_id)
         # insert all items to inventory
+        warehouse = doc.warehouse
+        
         for item in doc.items.all():
-            pass
+            ppn = item.ppn
+            entries = item.entries.all()
+            price = item.price
+            barcode = item.barcode
+            ppn2,is_created = PPN.objects.get_or_create(product=ppn.product,provider=ppn.provider, providerProductName=ppn.providerProductName,barcode=barcode)
+            if is_created:
+                ppn2.buy_price = ppn.buy_price
+                ppn2.save()
+                
+            for entry in entries:
+                warehouse_stock, is_created = WarehouseStock.objects.get_or_create(warehouse=warehouse, ppn=ppn2, size=entry.size, color=entry.color, verient=entry.verient)
+                old_quantity = warehouse_stock.quantity
+                warehouse_stock.quantity = old_quantity + entry.quantity
+                warehouse_stock.avgPrice = (old_quantity * warehouse_stock.avgPrice + entry.quantity * price) / (old_quantity + entry.quantity)
+                warehouse_stock.save()
+
+        doc.isAplied = True
     
-    return JsonResponse({'error': 'You are not authorized'})
+    return JsonResponse({'status': 'ok'})
 
 @api_view(['POST'])
 def enter_doc_edit(request):
@@ -189,7 +234,7 @@ def enter_doc_edit(request):
         item_id = item.get('id')
         item_obj = ProductEnterItems.objects.get(id=item_id)
         item_obj.price = item.get('price')
-        item_obj.warehouse_id = item.get('warehouse')
+        #item_obj.warehouse_id = item.get('warehouse')
         item_obj.barcode = item.get('barcode')
         for entry in item.get('entries'):
             entry_id = entry.get('id', None)
@@ -315,7 +360,7 @@ class DocStockEnterViewSet(RetrieveUpdateDestroyAPIView):
     lookup_field = "id"
     
     
-from .serializers import DocStockEnterSerializerList, PPNSerializer, ProductEnterItemsSerializer, WarehouseSerializer
+from .serializers import DocStockEnterSerializerList, PPNSerializer, ProductEnterItemsSerializer, WarehouseSerializer, WarehouseStockSerializer
 import json
 def search_ppn(request):
     # if the user is not superuser:

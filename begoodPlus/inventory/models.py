@@ -31,9 +31,9 @@ class PPN(models.Model):
     barcode = models.CharField(max_length=100, verbose_name=_('barcode'), blank=True, null=True)
     #fastProductTitle = models.CharField(max_length=100, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True, verbose_name=_('created at'))
-    default_warehouse = models.ForeignKey(to='Warehouse', on_delete=models.SET_DEFAULT,null=True, blank=True, default=1, verbose_name=_('default warehouse'))
+    #default_warehouse = models.ForeignKey(to='Warehouse', on_delete=models.SET_DEFAULT,null=True, blank=True, default=1, verbose_name=_('default warehouse'))
     class Meta:
-        unique_together = ('provider', 'providerProductName')
+        unique_together = ('provider', 'providerProductName','barcode')
     def __str__(self):
         return self.providerProductName
 #@receiver(pre_save, sender=PPN)
@@ -44,9 +44,18 @@ class PPN(models.Model):
 class WarehouseStock(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    #sku = models.ForeignKey(to='SKUM', null=True, on_delete=models.SET_NULL)
-    #quantity = models.IntegerField()
-    avgPrice = models.DecimalField(max_digits=10, decimal_places=3)
+    warehouse = models.ForeignKey(to='Warehouse', on_delete=models.CASCADE)
+    ppn = models.ForeignKey(to=PPN, on_delete=models.CASCADE)
+    size = models.ForeignKey(to=ProductSize, on_delete=models.SET_NULL, null=True, blank=True)
+    color = models.ForeignKey(to=Color, on_delete=models.SET_NULL, null=True, blank=True)
+    verient = models.ForeignKey(to=CatalogImageVarient, on_delete=models.SET_NULL, null=True, blank=True)
+    quantity = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    avgPrice = models.DecimalField(max_digits=10, decimal_places=3, default=0)
+    
+    class Meta():
+        unique_together = ('warehouse','ppn', 'size', 'color', 'verient')
     #buyHistory = models.ManyToManyField(to='ProductEnterItems', related_name='buyHistory', blank=True)
 @receiver(post_save, sender=WarehouseStock, dispatch_uid='update_catalogImage_stock')
 def update_catalogImage_stock(sender, instance, created, **kwargs):
@@ -61,7 +70,7 @@ def update_catalogImage_stock(sender, instance, created, **kwargs):
     pass
 class Warehouse(models.Model):
     name = models.CharField(max_length=100)
-    stock = models.ManyToManyField(to=WarehouseStock, blank=True, related_name='warehouse')
+    #stock = models.ManyToManyField(to=WarehouseStock, blank=True, related_name='warehouse')
     def __str__(self):
         return self.name
 
@@ -82,8 +91,8 @@ class DocStockEnter(models.Model):
     items = models.ManyToManyField(to='ProductEnterItems', related_name='doc', blank=True)
     isAplied = models.BooleanField(default=False)
     byUser = models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
-    new_products = models.JSONField(default=list)
-    def apply_doc(self):
+    new_products = models.JSONField(null=True, blank=True)
+    '''def apply_doc(self):
         for item in self.items.all():
             sku = item.sku
             qyt = item.quantity
@@ -103,7 +112,7 @@ class DocStockEnter(models.Model):
             warehouse.save()
         self.isAplied = True
         self.save()
-        
+    '''
     def get_admin_edit_url(self):
         url = ''
         if self.id:
@@ -148,7 +157,7 @@ class ProductEnterItems(models.Model):
     barcode = models.CharField(max_length=100, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     total_quantity = property(lambda self: sum(self.entries.values_list('quantity', flat=True)))
-    warehouse = models.ForeignKey(to=Warehouse, on_delete=models.SET_DEFAULT, default=1)
+    #warehouse = models.ForeignKey(to=Warehouse, on_delete=models.SET_DEFAULT, default=1)
     def __str__(self) -> str:
         return str(self.ppn.product.title) + ' | ' + str(self.ppn.provider.name) + ' | ' + str(self.total_quantity)
     #def __str__(self):
