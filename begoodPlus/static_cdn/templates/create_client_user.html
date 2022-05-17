@@ -24,8 +24,6 @@
                 {% for store_type in store_types %}
                     <option value="{{ store_type.id }}">{{ store_type.name }} ({{store_type.tariff}})</option>
                 {% endfor %}
-                <option value="מוסדי">מוסדי</option>
-                <option value="חנות">חנות</option>
             </select>
             <label for="price">מחירון:</label>
             <input type="text" name="price" id="price">
@@ -39,6 +37,13 @@
                 {% endfor %}
             {% endif %}
         </div>
+
+        {% if newUsername and newPass%}
+        <img width="250px" src="https://res.cloudinary.com/ms-global/image/upload/v1652800789/msAssets/WhatsApp_Image_2022-05-17_at_6.10.18_PM_hk8eft.jpg" alt="login instractions">
+            <div class="message-content">
+                {{message_content_html | safe}}
+            </div>
+        {% endif %}
     </main>
 </body>
 <style>
