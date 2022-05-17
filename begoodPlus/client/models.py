@@ -454,7 +454,7 @@ class UserSessionLogger(models.Model):
 
 class ClientType(models.Model):
     name = models.CharField(verbose_name=_('name'), max_length=120)
-    
+    tariff = models.FloatField(verbose_name=_('tariff (%)'), default=0)
     def __str__(self):
         return self.name
 
