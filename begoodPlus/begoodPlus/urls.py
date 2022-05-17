@@ -20,7 +20,7 @@ from clientApi.views import get_all_colors_api, get_all_sizes_api, main_page_api
 from campains.views import admin_get_all_campains, admin_get_campain_products, get_user_campains
 from inventory.views import DocStockEnterViewSet, doc_stock_enter
 #from mcrm.views import , admin_upload_bulk_crm_exel, upload_crm_execl, upload_crm_execl2
-from msCrm.views import mcrm_lead_register,get_all_business_types, get_all_interests,import_mscrm_from_exel
+from msCrm.views import get_all_business_types_groups, mcrm_lead_register,get_all_business_types, get_all_interests,import_mscrm_from_exel
 from core.views import client_product_question,send_product_photo, test_celery_view,verify_unique_field_by_field_excel
 from catalogImages.views import admin_api_get_product_cost_price, all_images_ids, catalogimage_upload_warehouse_excel, get_product_sizes_colors_martix, admin_remove_product_from_cart,admin_add_to_existing_cart
 from clientApi.views import ColorsClientViewSet, ImageClientViewSet, SizesClientViewSet,LogoClientViewSet, get_album_images
@@ -44,7 +44,7 @@ from django.contrib.auth.models import User
 
 from catalogImages.views import CatalogImageViewSet
 from catalogAlbum.views import CatalogAlbumViewSet
-from client.views import get_all_users_by_admin, whoAmI, userLogEntryView
+from client.views import create_client_user, get_all_users_by_admin, whoAmI, userLogEntryView
 from color.views import ColorsViewSet
 from productSize.views import SizesViewSet
 router = routers.DefaultRouter()
@@ -83,7 +83,7 @@ from customerCart.views import cart_del, cart_add,cart_view,cart_info
 from clientApi.views import CustomAuthToken
 #from rest_framework_simplejwt.views import (TokenObtainPairView,TokenRefreshView,)
 urlpatterns = [
-    
+    path('create-client-user/', create_client_user, name='create-client-user'),
     path('verify-unique-field-by-field-excel', verify_unique_field_by_field_excel),
     path('product-question', client_product_question, name='client_product_question'),
     path('product-photo', send_product_photo, name='send_product_photo'),
@@ -134,6 +134,7 @@ urlpatterns = [
     path('client-api/lead-distribution/', mcrm_lead_register),
     path('crm-api/get-all-interests/', get_all_interests, name='crm_get_all_interests'),
     path('crm-api/get-all-business-types/', get_all_business_types, name='crm_get_all_business_types'),
+    path('crm-api/get-all-business-types-groups/',get_all_business_types_groups, name='crm_get_all_business_types_groups'),
     #path('admin/crm/crmuser/upload_execl/', upload_crm_execl, name='crm_upload_execl'),
     #path('admin_upload_bulk_crm_exel', admin_upload_bulk_crm_exel, name='admin_upload_bulk_crm_exel'),
     path('admin/crm/crmuser/upload_execl2/', import_mscrm_from_exel, name='crm_upload_execl2'),

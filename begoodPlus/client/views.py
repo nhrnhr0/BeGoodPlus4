@@ -6,10 +6,67 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
 from campains.views import get_user_campains_serializer_data
 from client.models import UserSessionLogger
-
+from django.http import HttpResponse, HttpResponseRedirect
 from client.models import UserLogEntry
 from client.serializers import AdminClientSerializer
-from .models import Client
+from .models import Client, ClientType
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.models import User
+
+@csrf_exempt
+def create_client_user(request):
+    messages = []
+    if not request.user.is_superuser:
+        return HttpResponseRedirect('/admin/login/?next=' + request.path)
+    if request.method == 'POST':
+        messages = []
+        data = request.POST
+        buisness_name = data.get('buisness_name', None)
+        name = data.get('name', None)
+        phone = data.get('phone', None)
+        price = data.get('price', None)
+        store_type_id = data.get('store_type', None)
+        store_type_obj = ClientType.objects.get(id=store_type_id)
+        if not price:
+            price = store_type_obj.tariff
+        else:
+            price = int(price)
+        user, is_user_created = User.objects.get_or_create(username=buisness_name)
+        newPass = buisness_name + '123'
+        if is_user_created:
+            user.set_password(newPass)
+            user.first_name = name
+            user.last_name = buisness_name
+            user.save()
+            messages.append('משתמש נוצר')
+            messages.append('שם משתמש: {}'.format(user.username))
+            messages.append('סיסמא: {}'.format(newPass))
+            messages.append('<a href="{}" target="_blank">לחץ כאן לעריכה</a>'.format('/admin/auth/user/{}/change/'.format(user.id)))
+        else:
+            messages.append('משתמש כבר קיים')
+            messages.append('שם משתמש: {}'.format(user.username))
+            messages.append('<a href="{}" target="_blank">לחץ כאן לעריכה</a>'.format('/admin/auth/user/{}/change/'.format(user.id)))
+        client, is_client_created = Client.objects.get_or_create(user=user)
+        if is_client_created:
+            client.name = name
+            client.phone = phone
+            client.businessName = buisness_name
+            client.clientType = store_type_obj
+            client.tariff = price
+            client.show_prices = True
+            client.save()
+            messages.append('נוצר חשבון לקוח חדש')
+            messages.append('<a href="{}" target="_blank">לחץ כאן לעריכה</a>'.format('/admin/client/client/{}/change/'.format(client.user.id)))
+        else:
+            messages.append('חשבון לקוח קיים')
+            messages.append('<a href="{}" target="_blank">לחץ כאן לעריכה</a>'.format('/admin/client/client/{}/change/'.format(client.user.id)))
+        
+    return render(request, 'create_client_user.html', context={
+        'messages': messages,
+        'store_types': ClientType.objects.all(),
+    })
+
+
 @api_view(['GET'])
 def get_all_users_by_admin(request):
     if request.user.is_superuser:
