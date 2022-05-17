@@ -2,11 +2,20 @@ from django.conf import settings
 from django.contrib import admin
 
 from catalogAlbum.models import CatalogAlbum
-from .models import MsCrmBusinessTypeSelect, MsCrmIntrest, MsCrmUser
+from .models import MsCrmBusinessTypeSelect, MsCrmIntrest, MsCrmIntrestsGroups, MsCrmUser
 from advanced_filters.admin import AdminAdvancedFiltersMixin
 from django.http import HttpResponse
 import io
 import xlsxwriter
+class MsCrmIntrestsGroupsAdmin(AdminAdvancedFiltersMixin, admin.ModelAdmin):
+    list_display = ('name','intrests_list')
+    readonly_fields = ('intrests_list',)
+    filter_horizontal = ('intrests',)
+    search_fields = ('name',)
+    list_filter = ('name',)
+    
+    pass
+admin.site.register(MsCrmIntrestsGroups, MsCrmIntrestsGroupsAdmin)
 
 # Register your models here.
 class MsCrmUserAdmin(AdminAdvancedFiltersMixin, admin.ModelAdmin):
