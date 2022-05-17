@@ -22,7 +22,7 @@
             <label for="price">סוג מחירון: </label>
             <select name="store_type">
                 {% for store_type in store_types %}
-                    <option value="{{ store_type.id }}">{{ store_type.name }}</option>
+                    <option value="{{ store_type.id }}">{{ store_type.name }} ({{store_type.tariff}})</option>
                 {% endfor %}
                 <option value="מוסדי">מוסדי</option>
                 <option value="חנות">חנות</option>

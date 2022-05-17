@@ -19,7 +19,6 @@ def create_client_user(request):
     if not request.user.is_superuser:
         return HttpResponseRedirect('/admin/login/?next=' + request.path)
     if request.method == 'POST':
-        messages = []
         data = request.POST
         buisness_name = data.get('buisness_name', None)
         name = data.get('name', None)
@@ -51,7 +50,7 @@ def create_client_user(request):
             client.name = name
             client.phone = phone
             client.businessName = buisness_name
-            client.clientType = store_type_obj
+            client.storeType = store_type_obj
             client.tariff = price
             client.show_prices = True
             client.save()
@@ -60,7 +59,6 @@ def create_client_user(request):
         else:
             messages.append('חשבון לקוח קיים')
             messages.append('<a href="{}" target="_blank">לחץ כאן לעריכה</a>'.format('/admin/client/client/{}/change/'.format(client.user.id)))
-        
     return render(request, 'create_client_user.html', context={
         'messages': messages,
         'store_types': ClientType.objects.all(),
