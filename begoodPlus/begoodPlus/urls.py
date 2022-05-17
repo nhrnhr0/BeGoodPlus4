@@ -44,7 +44,7 @@ from django.contrib.auth.models import User
 
 from catalogImages.views import CatalogImageViewSet
 from catalogAlbum.views import CatalogAlbumViewSet
-from client.views import get_all_users_by_admin, whoAmI, userLogEntryView
+from client.views import create_client_user, get_all_users_by_admin, whoAmI, userLogEntryView
 from color.views import ColorsViewSet
 from productSize.views import SizesViewSet
 router = routers.DefaultRouter()
@@ -83,7 +83,7 @@ from customerCart.views import cart_del, cart_add,cart_view,cart_info
 from clientApi.views import CustomAuthToken
 #from rest_framework_simplejwt.views import (TokenObtainPairView,TokenRefreshView,)
 urlpatterns = [
-    
+    path('create-client-user/', create_client_user, name='create-client-user'),
     path('verify-unique-field-by-field-excel', verify_unique_field_by_field_excel),
     path('product-question', client_product_question, name='client_product_question'),
     path('product-photo', send_product_photo, name='send_product_photo'),
