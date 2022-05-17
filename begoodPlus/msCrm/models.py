@@ -2,7 +2,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy  as _
 
 from catalogAlbum.models import CatalogAlbum
-
+from django.utils.html import mark_safe
 
 class MsCrmBusinessTypeSelect(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -22,7 +22,15 @@ class MsCrmIntrest(models.Model):
 
     def __str__(self):
         return self.name
-
+class MsCrmIntrestsGroups(models.Model):
+    name = models.CharField(max_length=100, unique=True, verbose_name=_('name'))
+    intrests = models.ManyToManyField(CatalogAlbum, blank=True,verbose_name=_('intrested'))
+    class Meta():
+        ordering = ['id',]
+    def intrests_list(self):
+        return mark_safe('<ul>{}</ul>'.format(''.join(['<li>{}</li>'.format(intrest.title) for intrest in self.intrests.all()])))
+    def __str__(self):
+        return self.name
 # Create your models here.
 class MsCrmUser(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)

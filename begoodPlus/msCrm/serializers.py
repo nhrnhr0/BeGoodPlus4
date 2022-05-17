@@ -1,6 +1,8 @@
 
 from rest_framework import serializers
-from .models import  MsCrmBusinessTypeSelect, MsCrmIntrest
+
+from catalogAlbum.models import CatalogAlbum
+from .models import  MsCrmBusinessTypeSelect, MsCrmIntrest, MsCrmIntrestsGroups
 
 
 class MsCrmIntrestSerializer(serializers.ModelSerializer):
@@ -12,3 +14,12 @@ class MsCrmBusinessTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = MsCrmBusinessTypeSelect
         fields = ('name',)
+class CatalogAlbumOnlyNameSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CatalogAlbum
+        fields = ('title',)
+class MsCrmIntrestsGroupsSerializer(serializers.ModelSerializer):
+    intrests = CatalogAlbumOnlyNameSerializer(many=True)
+    class Meta:
+        model = MsCrmIntrestsGroups
+        fields = ('name', 'intrests')
