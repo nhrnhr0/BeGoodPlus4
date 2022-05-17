@@ -26,8 +26,8 @@ def create_client_user(request):
         phone = data.get('phone', None)
         price = data.get('price', None)
         store_type_id = data.get('store_type', None)
+        store_type_obj = ClientType.objects.get(id=store_type_id)
         if not price:
-            store_type_obj = ClientType.objects.get(id=store_type_id)
             price = store_type_obj.tariff
         else:
             price = int(price)
