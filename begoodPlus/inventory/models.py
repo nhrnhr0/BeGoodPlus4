@@ -1,4 +1,4 @@
-from audioop import reverse
+from django.urls import reverse
 from signal import default_int_handler
 from django.conf import settings
 from django.db import models
@@ -14,6 +14,9 @@ from django.db.models.signals import pre_delete
 from django.db.models.signals import m2m_changed
 from django.db.models import Count
 from django.utils.html import mark_safe
+
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
 # Create your models here.
 
 # PPN - ProviderProductName
@@ -26,7 +29,7 @@ class PPN(models.Model):
     product = models.ForeignKey(to=CatalogImage, on_delete=models.DO_NOTHING, verbose_name=_('product'))
     provider = models.ForeignKey(to=Provider, on_delete=models.SET_DEFAULT, default=7, verbose_name=_('provider'))
     buy_price = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name=_('Buy Price (no tax)'))
-    store_price = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name=_('Store Price (no tax)'))
+    store_price = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name=_('Store Price (no tax)'), null=True, blank=True)
     providerProductName = models.CharField(max_length=100, verbose_name=_('provider makat'))
     barcode = models.CharField(max_length=100, verbose_name=_('barcode'), blank=True, null=True)
     #fastProductTitle = models.CharField(max_length=100, null=True, blank=True)
@@ -40,6 +43,27 @@ class PPN(models.Model):
 #def set_PPN_product_title(sender, instance, *args, **kwargs):
 #    instance.fastProductTitle = instance.product.title
 
+class WarehouseStockHistory(models.Model):
+    from_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, related_name='warehouse_stock_history_from')
+    from_object_id = models.PositiveIntegerField()
+    from_content_object = GenericForeignKey('from_content_type', 'from_object_id')
+    
+    to_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, related_name='warehouse_stock_history_to')
+    to_object_id = models.PositiveIntegerField()
+    to_content_object = GenericForeignKey('to_content_type', 'to_object_id')
+    
+    from_new_quantity = models.IntegerField(default=0, verbose_name=_('from quantity'))
+    to_new_quantity = models.IntegerField(default=0, verbose_name=_('to quantity'))
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_('created at'))
+    class Meta:
+        verbose_name = _('warehouse stock history')
+        verbose_name_plural = _('warehouse stock history')
+    def __str__(self):
+        return str(self.from_content_object) + ' -> ' + str(self.to_content_object)
+
+    def get_admin_url(self):
+        return reverse('admin:%s_%s_change' % (self._meta.app_label, self._meta.model_name),
+                    args=[self.id])
 
 class WarehouseStock(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
@@ -53,9 +77,17 @@ class WarehouseStock(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     avgPrice = models.DecimalField(max_digits=10, decimal_places=3, default=0)
-    
+    history = models.ManyToManyField(to='WarehouseStockHistory', blank=True)
     class Meta():
         unique_together = ('warehouse','ppn', 'size', 'color', 'verient')
+    def __str__(self):
+        verient = (' - ' + str(self.verient)) if (self.verient)  else ''
+        size = (' - ' + str(self.size)) if (self.size and self.size.size != 'ONE SIZE')  else ''
+        color = (' - ' + str(self.color)) if (self.color and self.color.name != 'no color')  else ''
+        return str(self.warehouse) + ' | ' + str(self.ppn.product.title) + '(' + str(self.ppn) + ') ' + size + color + verient + ' => ' + str(self.quantity)
+    def get_admin_url(self):
+        return reverse('admin:%s_%s_change' % (self._meta.app_label, self._meta.model_name),
+                args=[self.id])
     #buyHistory = models.ManyToManyField(to='ProductEnterItems', related_name='buyHistory', blank=True)
 @receiver(post_save, sender=WarehouseStock, dispatch_uid='update_catalogImage_stock')
 def update_catalogImage_stock(sender, instance, created, **kwargs):

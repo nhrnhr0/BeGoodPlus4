@@ -15,7 +15,7 @@ Including another URLconf
 """
 
 from clientApi.views import get_all_varients_api
-from inventory.views import add_doc_stock_enter_ppn, add_doc_stock_enter_ppn_entry, enter_doc_edit,delete_doc_stock_enter_ppn_entry, doc_stock_detail_api, doc_stock_list_api, get_all_inventory_api, get_all_warehouses_api,enter_doc_insert_inventory, enter_doc_remove_product, get_doc_stock_enter_ppn_entries, inventory_edit_entry, search_ppn, show_inventory_stock,get_product_inventory,doc_stock_list
+from inventory.views import add_doc_stock_enter_ppn, add_doc_stock_enter_ppn_entry, create_enter_doc, enter_doc_edit,delete_doc_stock_enter_ppn_entry, doc_stock_detail_api, doc_stock_list_api, get_all_inventory_api, get_all_warehouses_api,enter_doc_insert_inventory, enter_doc_remove_product, get_doc_stock_enter_ppn_entries, inventory_edit_entry, search_ppn, search_warehouses, show_inventory_stock,get_product_inventory,doc_stock_list
 from clientApi.views import get_all_colors_api, get_all_sizes_api, main_page_api
 from campains.views import admin_get_all_campains, admin_get_campain_products, get_user_campains
 from inventory.views import DocStockEnterViewSet, doc_stock_enter
@@ -119,6 +119,7 @@ urlpatterns = [
     path('inv/enter-doc/add-doc-stock-enter-ppn',add_doc_stock_enter_ppn, name='admin_add_doc_stock_enter_ppn'),
     path('inv/show-stock', show_inventory_stock),
     path('inv/get-product-inventory/', get_product_inventory, name='admin_get_product_inventory'),
+    path('inv/create-enter-doc/', create_enter_doc, name='admin_create_enter_doc'),
     path('enter-doc-edit/', enter_doc_edit, name='admin_enter_doc_edit'),
     path('enter-doc-remove-product/', enter_doc_remove_product, name='admin_enter_doc_remove_product'),
     #path('enter-doc-insert-inventory/', enter_doc_insert_inventory, name='admin_enter_doc_insert_inventory'),
@@ -165,7 +166,7 @@ urlpatterns = [
     #path('', catalogView, name="catalogView"),
     
     path('catalog_api', catalogView_api, name="catalog-view-api"),
-    
+    path('search-warehouses/', search_warehouses, name='search_warehouses'),
     path('search-providers/', search_providers, name="search-providers"),
     path('search',autocompleteModel),
     path('search-click', autocompleteClick),

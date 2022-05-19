@@ -3,7 +3,7 @@ from django.utils.html import mark_safe
 
 from django.conf import settings
 # Register your models here.
-from .models import PPN, SKUM, DocStockEnter, ProductEnterItems, ProductEnterItemsEntries, Warehouse, WarehouseStock
+from .models import PPN, SKUM, DocStockEnter, ProductEnterItems, ProductEnterItemsEntries, Warehouse, WarehouseStock, WarehouseStockHistory
 
 class PPNAdmin(admin.ModelAdmin):
     list_display = ('id', 'product', 'provider', 'providerProductName', 'created_at')
@@ -13,7 +13,12 @@ class PPNAdmin(admin.ModelAdmin):
     autocomplete_fields = ['product', 'provider'] 
 admin.site.register(PPN, PPNAdmin)
 
-
+class WarehouseStockHistoryAdmin(admin.ModelAdmin):
+    list_display = ('id', 'get_admin_url','from_content_object','to_content_object', 'from_new_quantity', 'to_new_quantity', 'created_at')
+    readonly_fields = ('created_at','get_admin_url',)
+    list_filter = ('created_at',)
+    
+admin.site.register(WarehouseStockHistory, WarehouseStockHistoryAdmin)
 class WarehouseStockAdmin(admin.ModelAdmin):
     list_display = ('id', 'created_at', 'updated_at','warehouse','ppn', 'get_ppn_product','size','color','verient','quantity','avgPrice',) 
     readonly_fields = ('created_at', 'updated_at', 'get_ppn_product')

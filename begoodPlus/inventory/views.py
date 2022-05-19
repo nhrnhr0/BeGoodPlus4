@@ -13,6 +13,24 @@ from inventory.serializers import DocStockEnterSerializer
 from django.contrib.auth.decorators import permission_required
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
+from django.contrib.contenttypes.models import ContentType
+
+
+@api_view(['GET'])
+def search_warehouses(request, *args, **kwargs):
+    if request.user and request.user.is_superuser:
+        if request.method == 'GET':
+            search_term = request.GET.get('q')
+            if search_term:
+                warehouses = Warehouse.objects.filter(name__icontains=search_term).values('id', 'name')
+                return HttpResponse(json.dumps(list(warehouses)), content_type='application/json')
+            else:
+                return HttpResponse(json.dumps([]), content_type='application/json')
+        else:
+            return HttpResponse(json.dumps([]), content_type='application/json')
+    else:
+        return HttpResponse(json.dumps([]), content_type='application/json')
+    
 
 @api_view(['GET'])
 def get_product_inventory(request):
@@ -53,6 +71,48 @@ def doc_stock_list_api(request):
         serializer = DocStockEnterSerializer(doc_stock_list, many=True)
         return JsonResponse(serializer.data, safe=False)
 #@permission_required('inventory.view_docstockenter')
+
+@api_view(['POST'])
+def create_enter_doc(request):
+    if not request.user.is_superuser:
+        return JsonResponse({'error': 'You are not authorized'})
+    if request.method == 'POST':
+        data = request.data
+# invoice_number
+# description
+# provider
+# warehouse
+
+# description
+# docNumber
+# created_at
+# provider
+# warehouse
+# items
+# isAplied
+# byUser
+# new_products
+        provider = data.get('provider', None)
+        warehouse = data.get('warehouse', None)
+        
+        
+        if provider:
+            provider_id = provider['id']
+        
+        if warehouse:
+            warehouse_id = warehouse['id']
+        user = request.user
+        
+        doc = DocStockEnter.objects.create(
+            description= data.get('description',''),
+            docNumber= data.get('invoice_number', ''),
+            provider_id= provider_id,
+            warehouse_id= warehouse_id,
+            byUser= user,)
+        doc.save()
+        return JsonResponse({'status': 'ok',
+                            'id': doc.id})
+
 def doc_stock_enter(request, id):
     # if the user is not superuser:
     #   redirect to login page
@@ -70,7 +130,7 @@ def doc_stock_detail_api(request, id):
         serializer = DocStockEnterSerializer(doc)
         return JsonResponse(serializer.data)
 
-from .models import SKUM, ProductEnterItems, ProductEnterItemsEntries, Warehouse, WarehouseStock
+from .models import SKUM, ProductEnterItems, ProductEnterItemsEntries, Warehouse, WarehouseStock, WarehouseStockHistory
 
 def show_inventory_stock(request):
     # if the user is not superuser:
@@ -92,7 +152,7 @@ def add_doc_stock_enter_ppn(request):
     ppn_id = request.data.get('item_id')
     cost = request.data.get('item_cost')
     barcode = request.data.get('item_barcode')
-    warehouse = request.data.get('item_warehouse')
+    #warehouse = request.data.get('item_warehouse')
     #barcode = request.data.get('item_barcode')
     doc_id = request.data.get('doc_id')
     enter_document = DocStockEnter.objects.get(id=doc_id)
@@ -103,9 +163,9 @@ def add_doc_stock_enter_ppn(request):
         old_item = old_item.first()
         old_item.barcode = barcode
         old_item.price = cost
-        old_item.warehouse_id = warehouse
+        #old_item.warehouse_id = warehouse
     else:
-        old_item = ProductEnterItems.objects.create(ppn=ppn, price=cost,barcode=barcode, warehouse_id=warehouse)
+        old_item = ProductEnterItems.objects.create(ppn=ppn, price=cost,barcode=barcode)
         old_item.doc.set([enter_document])
     print(old_item)
     old_item.save()
@@ -168,11 +228,21 @@ def inventory_edit_entry(request, entry_id):
                     color = originalEntry.color,
                     verient = originalEntry.verient,)
         
-        stock_id = request.data.get('stock_id')
+        #stock_id = request.data.get('stock_id')
         
         quantityToMove = request.data.get('quantity')
         
+        if originalEntry.quantity < quantityToMove:
+            return JsonResponse({'error': 'Not enough stock'})
+        originalEntry.quantity -= quantityToMove
+        originalEntry.save()
+        newStock.avgPrice = (newStock.avgPrice * newStock.quantity + originalEntry.avgPrice * quantityToMove) / (newStock.quantity + quantityToMove)
+        newStock.quantity += quantityToMove
         
+        newStock.save()
+        objs = [newStock, originalEntry]
+        data = WarehouseStockSerializer(objs, many=True).data
+        return JsonResponse(data)
     pass
 @api_view(['GET'])
 def get_all_inventory_api(request):
@@ -202,14 +272,20 @@ def enter_doc_insert_inventory(request, doc_id):
                 ppn2.save()
                 
             for entry in entries:
-                warehouse_stock, is_created = WarehouseStock.objects.get_or_create(warehouse=warehouse, ppn=ppn2, size=entry.size, color=entry.color, verient=entry.verient)
-                old_quantity = warehouse_stock.quantity
-                warehouse_stock.quantity = old_quantity + entry.quantity
-                warehouse_stock.avgPrice = (old_quantity * warehouse_stock.avgPrice + entry.quantity * price) / (old_quantity + entry.quantity)
-                warehouse_stock.save()
+                if entry.quantity > 0:
+                    warehouse_stock, is_created = WarehouseStock.objects.get_or_create(warehouse=warehouse, ppn=ppn2, size=entry.size, color=entry.color, verient=entry.verient)
+                    old_quantity = warehouse_stock.quantity
+                    warehouse_stock.quantity = old_quantity + entry.quantity
+                    warehouse_stock.avgPrice = (old_quantity * warehouse_stock.avgPrice + entry.quantity * price) / (old_quantity + entry.quantity)
+                    
 
+                    history = WarehouseStockHistory.objects.create(from_content_type= ContentType.objects.get_for_model(DocStockEnter),from_object_id= doc_id,to_content_type=ContentType.objects.get_for_model(WarehouseStock), to_object_id=warehouse_stock.id,from_new_quantity= entry.quantity,to_new_quantity= warehouse_stock.quantity)
+                    history.save()
+                    warehouse_stock.history.add(history)
+                    warehouse_stock.save()
+                
         doc.isAplied = True
-    
+        doc.save()
     return JsonResponse({'status': 'ok'})
 
 @api_view(['POST'])
