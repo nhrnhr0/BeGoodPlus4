@@ -44,17 +44,22 @@ class PPN(models.Model):
 #    instance.fastProductTitle = instance.product.title
 
 class WarehouseStockHistory(models.Model):
-    from_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, related_name='warehouse_stock_history_from')
-    from_object_id = models.PositiveIntegerField()
-    from_content_object = GenericForeignKey('from_content_type', 'from_object_id')
+    # from_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, related_name='warehouse_stock_history_from')
+    # from_object_id = models.PositiveIntegerField()
+    # from_content_object = GenericForeignKey('from_content_type', 'from_object_id')
     
-    to_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, related_name='warehouse_stock_history_to')
-    to_object_id = models.PositiveIntegerField()
-    to_content_object = GenericForeignKey('to_content_type', 'to_object_id')
+    # to_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, related_name='warehouse_stock_history_to')
+    # to_object_id = models.PositiveIntegerField()
+    # to_content_object = GenericForeignKey('to_content_type', 'to_object_id')
     
-    from_new_quantity = models.IntegerField(default=0, verbose_name=_('from quantity'))
-    to_new_quantity = models.IntegerField(default=0, verbose_name=_('to quantity'))
+    # from_new_quantity = models.IntegerField(default=0, verbose_name=_('from quantity'))
+    # to_new_quantity = models.IntegerField(default=0, verbose_name=_('to quantity'))
+    # created_at = models.DateTimeField(auto_now_add=True, verbose_name=_('created at'))
+    old_quantity = models.IntegerField(default=0, verbose_name=_('old quantity'))
+    new_quantity = models.IntegerField(default=0, verbose_name=_('new quantity'))
     created_at = models.DateTimeField(auto_now_add=True, verbose_name=_('created at'))
+    note = models.TextField(verbose_name=_('note'), blank=True, null=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name=_('user'))
     class Meta:
         verbose_name = _('warehouse stock history')
         verbose_name_plural = _('warehouse stock history')
@@ -80,6 +85,7 @@ class WarehouseStock(models.Model):
     history = models.ManyToManyField(to='WarehouseStockHistory', blank=True)
     class Meta():
         unique_together = ('warehouse','ppn', 'size', 'color', 'verient')
+        ordering = ['-created_at']
     def __str__(self):
         verient = (' - ' + str(self.verient)) if (self.verient)  else ''
         size = (' - ' + str(self.size)) if (self.size and self.size.size != 'ONE SIZE')  else ''

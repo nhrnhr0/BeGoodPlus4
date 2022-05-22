@@ -14,6 +14,7 @@ from django.contrib.auth.decorators import permission_required
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.contrib.contenttypes.models import ContentType
+from django.utils.translation import gettext_lazy  as _
 
 
 @api_view(['GET'])
@@ -214,6 +215,48 @@ def enter_doc_remove_product(request):
     serializer = DocStockEnterSerializer(doc)
     return JsonResponse(serializer.data)
 
+
+@api_view(['POST'])
+def inventory_manual_update_entry(request, entry_id):
+    # if the user is not superuser:
+    #   redirect to login page
+    if not request.user.is_superuser:
+        return JsonResponse({'error': _('You are not authorized')})
+    if request.method == 'POST':
+        qyt = request.data.get('quantity')
+        reson = request.data.get('reson')
+        user = request.user
+        entry = WarehouseStock.objects.get(id=entry_id)
+        
+        old_quantity = entry.quantity
+        new_quantity = qyt
+        note= reson
+        user = request.user
+        
+        
+        entry.quantity = qyt
+        entry.history.create(
+            old_quantity=old_quantity,
+            new_quantity=new_quantity,
+            note=note,
+            user=user
+        )
+        entry.save()
+        
+        data = WarehouseStockSerializer(entry).data
+        return JsonResponse(data)
+    return JsonResponse({'error': _('Expected POST')})
+
+
+@api_view(['GET'])
+def inventory_get_entry_history(request, entry_id):
+    if not request.user.is_superuser:
+        return JsonResponse({'error': 'You are not authorized'})
+    if request.method == 'GET':
+        entry = WarehouseStock.objects.get(id=entry_id)
+        serializer = WarehouseStockHistorySerializer(entry.history.all(), many=True)
+        return JsonResponse(serializer.data, safe=False)
+
 @api_view(['POST'])
 def inventory_edit_entry(request, entry_id):
     if not request.user.is_superuser:
@@ -221,28 +264,52 @@ def inventory_edit_entry(request, entry_id):
     if request.method == 'POST':
         originalEntry = WarehouseStock.objects.get(id=entry_id)
         warehouse_idToMove = request.data.get('warehouse_id')
-        newStock, is_created = WarehouseStock.objects.get_or_create(
-                    warehouse_id = warehouse_idToMove,
-                    ppn = originalEntry.ppn,
-                    size = originalEntry.size,
-                    color = originalEntry.color,
-                    verient = originalEntry.verient,)
+        if warehouse_idToMove == None:
+            return JsonResponse({'error': _('You must select a warehouse')})
         
+        originalEntryJson = WarehouseStockSerializer(originalEntry).data
         #stock_id = request.data.get('stock_id')
         
         quantityToMove = request.data.get('quantity')
         
         if originalEntry.quantity < quantityToMove:
-            return JsonResponse({'error': 'Not enough stock'})
+            return JsonResponse({'error': _('Not enough stock')})
         originalEntry.quantity -= quantityToMove
+
+        
+        newStock, is_created = WarehouseStock.objects.get_or_create(
+            warehouse_id = warehouse_idToMove,
+            ppn = originalEntry.ppn,
+            size = originalEntry.size,
+            color = originalEntry.color,
+            verient = originalEntry.verient,)
+        
+        note = 'העברת <b>(%s)</b> פריטים מ <b>%s</b> ל<b>%s</b>' % (quantityToMove, originalEntry.warehouse.name, newStock.warehouse.name)
+        originalEntry.history.create(
+            old_quantity=originalEntry.quantity + quantityToMove,
+            new_quantity=originalEntry.quantity,
+            note= note,
+            user=request.user
+        )
         originalEntry.save()
+        newStockJson = WarehouseStockSerializer(newStock).data
         newStock.avgPrice = (newStock.avgPrice * newStock.quantity + originalEntry.avgPrice * quantityToMove) / (newStock.quantity + quantityToMove)
         newStock.quantity += quantityToMove
-        
+        newStock.history.create(
+            old_quantity=newStock.quantity - quantityToMove,
+            new_quantity=newStock.quantity,
+            #note= 'סחורה זזה ממחסן ' + originalEntryJson['warehouse']['name'] + ' למחסן ' + newStockJson['warehouse']['name'],
+            note= note,
+            user = request.user
+        )
         newStock.save()
         objs = [newStock, originalEntry]
         data = WarehouseStockSerializer(objs, many=True).data
-        return JsonResponse(data)
+        data = {
+            'old': [originalEntryJson, newStockJson],
+            'new': data
+        }
+        return JsonResponse(data, safe=False)
     pass
 @api_view(['GET'])
 def get_all_inventory_api(request):
@@ -278,15 +345,21 @@ def enter_doc_insert_inventory(request, doc_id):
                     warehouse_stock.quantity = old_quantity + entry.quantity
                     warehouse_stock.avgPrice = (old_quantity * warehouse_stock.avgPrice + entry.quantity * price) / (old_quantity + entry.quantity)
                     
-
-                    history = WarehouseStockHistory.objects.create(from_content_type= ContentType.objects.get_for_model(DocStockEnter),from_object_id= doc_id,to_content_type=ContentType.objects.get_for_model(WarehouseStock), to_object_id=warehouse_stock.id,from_new_quantity= entry.quantity,to_new_quantity= warehouse_stock.quantity)
+                    user = request.user
+                    history = WarehouseStockHistory.objects.create(
+                        old_quantity=old_quantity,
+                        new_quantity=warehouse_stock.quantity,
+                        note= 'הכנסה מספר הזהות %s' % doc.docNumber,
+                        user= user
+                    )
                     history.save()
                     warehouse_stock.history.add(history)
                     warehouse_stock.save()
                 
         doc.isAplied = True
         doc.save()
-    return JsonResponse({'status': 'ok'})
+    data = DocStockEnterSerializer(doc).data
+    return JsonResponse(data)
 
 @api_view(['POST'])
 def enter_doc_edit(request):
@@ -436,7 +509,7 @@ class DocStockEnterViewSet(RetrieveUpdateDestroyAPIView):
     lookup_field = "id"
     
     
-from .serializers import DocStockEnterSerializerList, PPNSerializer, ProductEnterItemsSerializer, WarehouseSerializer, WarehouseStockSerializer
+from .serializers import DocStockEnterSerializerList, PPNSerializer, ProductEnterItemsSerializer, WarehouseSerializer, WarehouseStockHistorySerializer, WarehouseStockSerializer
 import json
 def search_ppn(request):
     # if the user is not superuser:

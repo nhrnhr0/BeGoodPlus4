@@ -1,6 +1,6 @@
 
 from clientApi.serializers import ImageClientApi
-from .models import PPN, DocStockEnter, ProductEnterItems, SKUM, ProductEnterItemsEntries, Warehouse, WarehouseStock
+from .models import PPN, DocStockEnter, ProductEnterItems, SKUM, ProductEnterItemsEntries, Warehouse, WarehouseStock, WarehouseStockHistory
 from rest_framework import serializers
 
 
@@ -96,3 +96,9 @@ class DocStockEnterSerializerList(serializers.ModelSerializer):
     class Meta:
         model = DocStockEnter
         fields = ('id','docNumber', 'description','created_at','provider_name', 'warehouse_name','isAplied','byUser')
+        
+class WarehouseStockHistorySerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = WarehouseStockHistory
+        fields = ('id','created_at','note','user','old_quantity','new_quantity','created_at','note','user',)

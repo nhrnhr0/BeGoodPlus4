@@ -14,8 +14,8 @@ class PPNAdmin(admin.ModelAdmin):
 admin.site.register(PPN, PPNAdmin)
 
 class WarehouseStockHistoryAdmin(admin.ModelAdmin):
-    list_display = ('id', 'get_admin_url','from_content_object','to_content_object', 'from_new_quantity', 'to_new_quantity', 'created_at')
-    readonly_fields = ('created_at','get_admin_url',)
+    list_display = ('id', 'created_at','old_quantity','new_quantity','created_at','note','user',)
+    readonly_fields = ('created_at',)
     list_filter = ('created_at',)
     
 admin.site.register(WarehouseStockHistory, WarehouseStockHistoryAdmin)
