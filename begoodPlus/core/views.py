@@ -283,7 +283,8 @@ def svelte_cart_form(request):
         db_cart.productEntries.set(data)
         db_cart.save()
         if (settings.DEBUG):
-            send_cart_notification(db_cart.id)
+            # send_cart_notification(db_cart.id)
+            pass
         else:
             send_cart_notification.delay(db_cart.id)
         return JsonResponse({
