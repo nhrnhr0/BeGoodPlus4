@@ -32,11 +32,12 @@ class PPN(models.Model):
     store_price = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name=_('Store Price (no tax)'), null=True, blank=True)
     providerProductName = models.CharField(max_length=100, verbose_name=_('provider makat'))
     barcode = models.CharField(max_length=100, verbose_name=_('barcode'), blank=True, null=True)
+    has_phisical_barcode = models.BooleanField(default=False, verbose_name=_('has phisical barcode'))
     #fastProductTitle = models.CharField(max_length=100, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True, verbose_name=_('created at'))
     #default_warehouse = models.ForeignKey(to='Warehouse', on_delete=models.SET_DEFAULT,null=True, blank=True, default=1, verbose_name=_('default warehouse'))
     class Meta:
-        unique_together = ('provider', 'providerProductName','barcode')
+        unique_together = ('provider', 'providerProductName','barcode','has_phisical_barcode')
     def __str__(self):
         return self.providerProductName
 #@receiver(pre_save, sender=PPN)
@@ -192,7 +193,7 @@ class ProductEnterItems(models.Model):
     entries = models.ManyToManyField(to='ProductEnterItemsEntries', blank=True, related_name='item')
     #total_quantity = models.IntegerField()
     price = models.DecimalField(max_digits=10, decimal_places=3, default=0)
-    barcode = models.CharField(max_length=100, null=True, blank=True)
+    #barcode = models.CharField(max_length=100, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     total_quantity = property(lambda self: sum(self.entries.values_list('quantity', flat=True)))
     #warehouse = models.ForeignKey(to=Warehouse, on_delete=models.SET_DEFAULT, default=1)
@@ -200,6 +201,8 @@ class ProductEnterItems(models.Model):
         return str(self.ppn.product.title) + ' | ' + str(self.ppn.provider.name) + ' | ' + str(self.total_quantity)
     #def __str__(self):
         #return str(self.sku.selfDisplay()) + ' | כמות: ' + str(self.quantity) + ' | ' + str(self.price) + '₪'
+    class Meta:
+        ordering = ('ppn__product__title',)
 def remove_entries_if_orphan(tags_pk_set):
     """Removes tags in tags_pk_set if they're associated with only 1 File."""
 

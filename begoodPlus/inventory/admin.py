@@ -6,7 +6,7 @@ from django.conf import settings
 from .models import PPN, SKUM, DocStockEnter, ProductEnterItems, ProductEnterItemsEntries, Warehouse, WarehouseStock, WarehouseStockHistory
 
 class PPNAdmin(admin.ModelAdmin):
-    list_display = ('id', 'product', 'provider', 'providerProductName', 'created_at')
+    list_display = ('id', 'product', 'barcode','provider', 'providerProductName', 'created_at', 'has_phisical_barcode',)
     search_fields = ('product__title', 'providerProductName', 'provider')
     readonly_fields = ('created_at',)
     list_filter = ('created_at',)

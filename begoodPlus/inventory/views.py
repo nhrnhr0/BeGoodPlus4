@@ -68,8 +68,8 @@ def doc_stock_list_api(request):
         return JsonResponse({'error': 'You are not authorized'})
     
     if request.method == 'GET':
-        doc_stock_list = DocStockEnter.objects.all()
-        serializer = DocStockEnterSerializer(doc_stock_list, many=True)
+        doc_stock_list = DocStockEnter.objects.all().select_related('provider','warehouse','byUser')
+        serializer = DocStockEnterListSerializer(doc_stock_list, many=True)
         return JsonResponse(serializer.data, safe=False)
 #@permission_required('inventory.view_docstockenter')
 
@@ -313,10 +313,11 @@ def inventory_edit_entry(request, entry_id):
     pass
 @api_view(['GET'])
 def get_all_inventory_api(request):
-    qs = WarehouseStock.objects.all()
-    serializer = WarehouseStockSerializer(qs, many=True)
-    return JsonResponse(serializer.data, safe=False)
-    
+    if request.user.is_superuser:
+        qs = WarehouseStock.objects.all().select_related('ppn', 'size', 'color', 'verient', 'warehouse', 'ppn__product')
+        serializer = WarehouseStockSerializer(qs, many=True)
+        return JsonResponse(serializer.data, safe=False)
+    return JsonResponse({'error': 'You are not authorized'})
     pass
 @api_view(['POST'])
 def enter_doc_insert_inventory(request, doc_id):
@@ -332,8 +333,9 @@ def enter_doc_insert_inventory(request, doc_id):
             ppn = item.ppn
             entries = item.entries.all()
             price = item.price
-            barcode = item.barcode
-            ppn2,is_created = PPN.objects.get_or_create(product=ppn.product,provider=ppn.provider, providerProductName=ppn.providerProductName,barcode=barcode)
+            barcode = item.ppn.barcode
+            has_phisical_barcode = item.ppn.has_phisical_barcode
+            ppn2,is_created = PPN.objects.get_or_create(product=ppn.product,provider=ppn.provider, providerProductName=ppn.providerProductName,barcode=barcode,has_phisical_barcode=has_phisical_barcode)
             if is_created:
                 ppn2.buy_price = ppn.buy_price
                 ppn2.save()
@@ -349,7 +351,7 @@ def enter_doc_insert_inventory(request, doc_id):
                     history = WarehouseStockHistory.objects.create(
                         old_quantity=old_quantity,
                         new_quantity=warehouse_stock.quantity,
-                        note= 'הכנסה מספר הזהות %s' % doc.docNumber,
+                        note= 'טופס הכנסה %s' % doc.docNumber,
                         user= user
                     )
                     history.save()
@@ -384,7 +386,22 @@ def enter_doc_edit(request):
         item_obj = ProductEnterItems.objects.get(id=item_id)
         item_obj.price = item.get('price')
         #item_obj.warehouse_id = item.get('warehouse')
-        item_obj.barcode = item.get('barcode')
+        if item_obj.ppn.barcode != item.get('ppn').get('barcode') or  item_obj.ppn.has_phisical_barcode != item.get('ppn').get('has_phisical_barcode'):
+            #item_obj.barcode = item.get('barcode')
+            has_phisical_barcode = item.get('ppn').get('has_phisical_barcode')
+            barcode = item.get('ppn').get('barcode')
+            newPPN, is_created = PPN.objects.get_or_create(
+                product=item_obj.ppn.product,
+                provider=item_obj.ppn.provider,
+                buy_price=item_obj.ppn.buy_price,
+                store_price=item_obj.ppn.store_price,
+                providerProductName=item_obj.ppn.providerProductName,
+                has_phisical_barcode=has_phisical_barcode,
+                barcode=barcode
+                )
+            item_obj.ppn = newPPN
+        #item_obj.barcode = item.get('barcode')
+        #item_obj.has_phisical_barcode = item.get('has_phisical_barcode')
         for entry in item.get('entries'):
             entry_id = entry.get('id', None)
             if entry_id:
@@ -509,7 +526,7 @@ class DocStockEnterViewSet(RetrieveUpdateDestroyAPIView):
     lookup_field = "id"
     
     
-from .serializers import DocStockEnterSerializerList, PPNSerializer, ProductEnterItemsSerializer, WarehouseSerializer, WarehouseStockHistorySerializer, WarehouseStockSerializer
+from .serializers import DocStockEnterListSerializer, DocStockEnterSerializerList, PPNSerializer, ProductEnterItemsSerializer, WarehouseSerializer, WarehouseStockHistorySerializer, WarehouseStockSerializer
 import json
 def search_ppn(request):
     # if the user is not superuser:

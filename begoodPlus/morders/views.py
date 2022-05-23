@@ -3,7 +3,7 @@ from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 
 from catalogImages.models import CatalogImage
-from .serializers import AdminMOrderItemSerializer, AdminMOrderSerializer
+from .serializers import AdminMOrderItemSerializer, AdminMOrderListSerializer, AdminMOrderSerializer
 from morders.models import MOrder, MOrderItem, MOrderItemEntry
 from rest_framework import status
 import json
@@ -13,6 +13,23 @@ from io import BytesIO
 from django.http import HttpResponse
 
 from django.template.loader import get_template
+
+@api_view(['GET'])
+def get_all_orders(request):
+    if not request.user.is_superuser:
+        return JsonResponse({'error': 'You are not authorized to perform this action'}, status=status.HTTP_401_UNAUTHORIZED)
+    else:
+        if request.method != "GET":
+            return JsonResponse({'error': 'You are not authorized to perform this action'}, status=status.HTTP_401_UNAUTHORIZED)
+        else:
+            data = MOrder.objects.all().prefetch_related('products','products__entries').select_related('client','agent')
+            serializer = AdminMOrderListSerializer(data, many=True)
+            return JsonResponse(serializer.data, status=status.HTTP_200_OK, safe=False)
+
+
+
+
+
 
 def view_morder_stock_document(request, id):
     if not request.user.is_superuser:

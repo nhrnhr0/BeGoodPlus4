@@ -26,7 +26,7 @@ from catalogImages.views import admin_api_get_product_cost_price, all_images_ids
 from clientApi.views import ColorsClientViewSet, ImageClientViewSet, SizesClientViewSet,LogoClientViewSet, get_album_images
 from clientApi.views import AlbumClientViewSet
 from catalogImageDetail.views import SvelteCatalogImageDetailViewSet
-from morders.views import api_edit_order_add_product, api_get_order_data, edit_morder, morder_edit_order_add_product_entries,api_delete_order_data_item,view_morder_pdf, view_morder_stock_document
+from morders.views import api_edit_order_add_product, api_get_order_data, edit_morder, get_all_orders, morder_edit_order_add_product_entries,api_delete_order_data_item,view_morder_pdf, view_morder_stock_document
 from packingType.views import SvelteApiPackingTypeViewSet
 from color.views import SvelteColorsViewSet
 from catalogImages.views import SvelteCatalogImageViewSet, create_mini_table, catalogimage_upload_slim_excel
@@ -137,6 +137,8 @@ urlpatterns = [
     path('morders/edit-order-add-product-entries', morder_edit_order_add_product_entries,name="morder_edit_order_add_product_entries"),
     path('morders/view-order-pdf/<int:id>', view_morder_pdf, name='view_morder_pdf'),
     path('morders/view_morder_stock_document/<int:id>', view_morder_stock_document, name='view_morder_stock_document'),
+    
+    path('api/get-all-orders', get_all_orders, name='admin_get_all_orders'),
     path('search-ppn/', search_ppn, name='search_ppn'),
     #path('api/', include(router.urls)),
 
