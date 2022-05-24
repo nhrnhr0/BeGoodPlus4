@@ -20,6 +20,7 @@ class AdminMOrderItemEntrySerializer(serializers.ModelSerializer):
 
 class AdminMOrderItemSerializer(serializers.ModelSerializer):
     product_name = serializers.CharField(source='product.title')
+    product_cimage = serializers.CharField(source='product.cimage')
     entries = AdminMOrderItemEntrySerializer(many=True, read_only=True)
     providers = serializers.SerializerMethodField('get_providers')
     pbarcode = serializers.CharField(source='product.barcode')
@@ -28,7 +29,7 @@ class AdminMOrderItemSerializer(serializers.ModelSerializer):
         return list(ids)
     class Meta:
         model = MOrderItem
-        fields = ('id', 'product',  'price','providers', 'ergent', 'prining', 'embroidery', 'comment','product_name', 'entries','pbarcode',)
+        fields = ('id', 'product',  'price','providers', 'ergent', 'prining', 'embroidery', 'comment','product_name', 'entries','pbarcode','product_cimage')
     
 
 class AdminMOrderListSerializer(serializers.ModelSerializer):
@@ -44,6 +45,7 @@ class AdminMOrderListSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = MOrder
+        #order_by = ('created','id')
         fields = ('id', 'agent', 'agent_name', 'client', 'status', 'created', 'updated', 'message', 'name', 'phone', 'email', 'client_businessName','total_price','products_count',)
 
 class AdminMOrderSerializer(serializers.ModelSerializer):

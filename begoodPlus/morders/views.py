@@ -147,7 +147,7 @@ def api_edit_order_add_product(request):
                 return JsonResponse({'error': 'You are not authorized to perform this action'}, status=status.HTTP_401_UNAUTHORIZED)
                 # TODO: continue from here
 
-
+@api_view(['GET'])
 def api_get_order_data(request, id):
     if not request.user.is_superuser:
         return JsonResponse({'status':'error'}, status=status.HTTP_403_FORBIDDEN)

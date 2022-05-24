@@ -67,6 +67,9 @@ class MOrder(models.Model):
     prop_totalPrice = property(lambda self: sum([item.prop_totalPrice for item in self.products.all()]))
     prop_totalPricePlusTax = property(lambda self: self.prop_totalPrice * Decimal('1.17'))
     
+    class Meta:
+        ordering = ['-created']
+    
     def get_exel_data(self):
         # שם	כמות	מחיר מכירה ללא מע"מ	ספקים
         products = []
