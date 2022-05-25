@@ -101,7 +101,7 @@ def create_enter_doc(request):
             provider_id = provider['id']
         
         if warehouse:
-            warehouse_id = warehouse['id']
+            warehouse_id = warehouse
         user = request.user
         
         doc = DocStockEnter.objects.create(
@@ -153,21 +153,26 @@ def add_doc_stock_enter_ppn(request):
     ppn_id = request.data.get('item_id')
     cost = request.data.get('item_cost')
     barcode = request.data.get('item_barcode')
+    has_phisical_barcode = request.data.get('has_phisical_barcode')
     #warehouse = request.data.get('item_warehouse')
     #barcode = request.data.get('item_barcode')
     doc_id = request.data.get('doc_id')
     enter_document = DocStockEnter.objects.get(id=doc_id)
     ppn = PPN.objects.get(id=ppn_id)
+    if ppn.barcode != barcode or ppn.has_phisical_barcode != has_phisical_barcode:
+        ppn, is_created = PPN.objects.get_or_create(has_phisical_barcode=has_phisical_barcode,product=ppn.product,provider=ppn.provider,buy_price=ppn.buy_price,store_price=ppn.store_price,providerProductName=ppn.providerProductName,barcode=barcode)
+        
     old_items = enter_document.items.all()
     old_item = old_items.filter(ppn=ppn)
     if old_item.exists():
         old_item = old_item.first()
-        old_item.barcode = barcode
+        # old_item.barcode = barcode
         old_item.price = cost
         #old_item.warehouse_id = warehouse
     else:
-        old_item = ProductEnterItems.objects.create(ppn=ppn, price=cost,barcode=barcode)
+        old_item = ProductEnterItems.objects.create(ppn=ppn, price=cost)
         old_item.doc.set([enter_document])
+
     print(old_item)
     old_item.save()
     print(old_item)

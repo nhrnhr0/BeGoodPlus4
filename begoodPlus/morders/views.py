@@ -50,6 +50,42 @@ def view_morder_pdf(request, id):
     html = render(request, 'morder_pdf.html', {'order': obj,'products': products})
     return HttpResponse(html)
 
+
+
+@api_view(["POST"])
+def morder_edit_order_add_product_entries_2(request):
+    if not request.user.is_superuser:
+        return JsonResponse({'error': 'You are not authorized to perform this action'}, status=status.HTTP_401_UNAUTHORIZED)
+    else:
+        entry_id = request.data.get('entry_id')
+        color_id = int(request.data.get('color'))
+        size_id = int(request.data.get('size'))
+        varient_id = request.data.get('varient', None)
+        if varient_id:
+            varient_id = int(varient_id)
+        else: # handle if varient_id is '': make it None
+            varient_id = None
+        orderObj = MOrderItem.objects.get(id=int(entry_id))
+        entry = MOrderItemEntry.objects.filter(
+                    product=orderObj,
+                    color_id=color_id,
+                    size_id=size_id,
+                    varient_id=varient_id,
+                )
+        if entry.exists():
+            return JsonResponse({'error': 'This entry already exists'}, status=status.HTTP_401_UNAUTHORIZED)
+        else:
+            entry = MOrderItemEntry.objects.create(
+                color_id=color_id,
+                size_id=size_id,
+                varient_id=varient_id,
+                quantity=0
+            )
+            entry.product.set([orderObj])
+            entry.save()
+            new_entries = AdminMOrderItemSerializer(orderObj).data
+            return JsonResponse({'success': 'success', 'data': new_entries}, status=status.HTTP_200_OK)
+
 @api_view(["POST"])
 def morder_edit_order_add_product_entries(request):
     print(request)
