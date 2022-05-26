@@ -52,8 +52,8 @@ class AdminMOrderItemSerializer(serializers.ModelSerializer):
         kwargs['context'] = self.get_serializer_context()
         return serializer_class(*args, **kwargs)
     def get_available_inventory(self, obj):
-        stock = WarehouseStock.objects.values('size', 'color', 'verient','ppn__barcode', 'ppn__has_phisical_barcode',) \
-            .order_by('size', 'color', 'verient','ppn__barcode', 'ppn__has_phisical_barcode',) \
+        stock = WarehouseStock.objects.values('size', 'color', 'verient','ppn__barcode', 'ppn__has_phisical_barcode','ppn__provider__name',) \
+            .order_by('size', 'color', 'verient', 'ppn__barcode', 'ppn__has_phisical_barcode','ppn__provider__name',) \
             .filter(ppn__product=obj.product) \
                 .annotate(total=Sum('quantity'))
         #data = WarehouseStockSerializer(stock, many=True).data
