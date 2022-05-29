@@ -8,9 +8,11 @@ from inventory.models import WarehouseStock
 from inventory.serializers import WarehouseStockSerializer
 from catalogImages.serializers import CatalogImageSerializer
 from django.db.models import Sum
-
+from django.db.models import OuterRef, Subquery
 from provider.serializers import SvelteProviderSerializer
 from .models import MOrder, MOrderItem, MOrderItemEntry
+from django.db import models
+
 from django.core import serializers as django_serializers
 
 class AdminMOrderItemEntrySerializer(serializers.ModelSerializer):
@@ -55,7 +57,11 @@ class AdminMOrderItemSerializer(serializers.ModelSerializer):
         stock = WarehouseStock.objects.values('size', 'color', 'verient','ppn__barcode', 'ppn__has_phisical_barcode','ppn__provider__name',) \
             .order_by('size', 'color', 'verient', 'ppn__barcode', 'ppn__has_phisical_barcode','ppn__provider__name',) \
             .filter(ppn__product=obj.product) \
-                .annotate(total=Sum('quantity'))
+                .annotate(total=Sum('quantity'),)
+                
+        for s in stock:
+            s['taken'] = obj.taken.filter(barcode=s['ppn__barcode'],has_physical_barcode=s['ppn__has_phisical_barcode'], size=s['size'], color=s['color']).aggregate(Sum('quantity'))['quantity__sum'] or 0
+                    #taken=Subquery(obj.taken.filter(size=OuterRef('size'), color=OuterRef('color'), varient=OuterRef('verient'), barcode=OuterRef('ppn__barcode'), has_physical_barcode=OuterRef('ppn__has_phisical_barcode'), provider__name=OuterRef('ppn__provider__name'),output_field='quantity')))
         #data = WarehouseStockSerializer(stock, many=True).data
         #data = django_serializers.serialize('json', stock, fields=('size', 'color', 'verient','ppn__barcode', 'ppn__has_phisical_barcode', 'total'))
         return list(stock)
@@ -77,7 +83,7 @@ class AdminMOrderItemSerializer(serializers.ModelSerializer):
         return list(ids)
     class Meta:
         model = MOrderItem
-        fields = ('id', 'product',  'price','providers', 'ergent', 'prining', 'embroidery', 'comment','product_name', 'entries','pbarcode','product_cimage','available_inventory','product',)
+        fields = ('id', 'product',  'price','providers', 'ergent', 'prining', 'embroidery', 'comment','product_name', 'entries','pbarcode','product_cimage','available_inventory','product','priningComment','embroideryComment',)
     
 
 class AdminMOrderListSerializer(serializers.ModelSerializer):

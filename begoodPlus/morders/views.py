@@ -3,14 +3,16 @@ from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 
 from catalogImages.models import CatalogImage
+from provider.models import Provider
 from .serializers import AdminMOrderItemSerializer, AdminMOrderListSerializer, AdminMOrderSerializer
-from morders.models import MOrder, MOrderItem, MOrderItemEntry
+from morders.models import MOrder, MOrderItem, MOrderItemEntry, TakenInventory
 from rest_framework import status
 import json
 from rest_framework.decorators import api_view
 from django.shortcuts import render
 from io import BytesIO
 from django.http import HttpResponse
+from django.db import connection, reset_queries
 
 from django.template.loader import get_template
 
@@ -182,7 +184,79 @@ def api_edit_order_add_product(request):
             else:
                 return JsonResponse({'error': 'You are not authorized to perform this action'}, status=status.HTTP_401_UNAUTHORIZED)
                 # TODO: continue from here
+@api_view(['GET', 'POST'])
+def api_get_order_data2(request, id):
+    
+    #data = AdminMOrderSerializer(order).data
+    #print('querys: => ', connection.queries)
+    if request.method == 'POST':
+        newData = request.data
+        for product in newData['products']:
+            if product['id'] != None:
+                item = MOrderItem.objects.get(id=product['id'])
+                #obj.quantity = product['quantity']
+                item.price = product['price']
+                item.prining =product['prining']
+                if(item.prining):
+                    item.priningComment = product.get('priningComment','')
+                else:
+                    item.priningComment = ''
+                item.embroidery =product['embroidery']
+                if(item.embroidery):
+                    item.embroideryComment = product.get('embroideryComment', '')
+                else:
+                    item.embroideryComment = ''
+                item.comment =product['comment']
+                item.save()
+            else:
+                item = MOrderItem.objects.create(
+                    product_id=product['product_id'],
+                    price=product['price'],
+                    prining=product['prining'],
+                    embroidery=product['embroidery'],
+                    comment=product['comment'],
+                )
+                item.morder.set([MOrder.objects.get(id=id)])
+                item.save()
+            for entry in product['entries']:
+                if entry['id'] != None:
+                    dbEntry = MOrderItemEntry.objects.get(id=entry['id'])
+                    dbEntry.quantity = entry['quantity']
+                    dbEntry.save()
+                else:
+                    dbEntry = MOrderItemEntry.objects.create(
+                        quantity=entry['quantity'],
+                        size=entry['size'],
+                        color=entry['color'],
+                        varient=entry['varient'],
+                    )
+                    dbEntry.product.set([entry])
+                    dbEntry.save()
 
+            for inventory_takes in product['available_inventory']:
+                # 'size':117
+                # 'color':77
+                # 'verient':None
+                # 'ppn__barcode':''
+                # 'ppn__has_phisical_barcode':False
+                # 'ppn__provider__name':'המלביש'
+                # 'total':10
+                # 'taken':4
+                objs = item.taken.filter(
+                    color_id=inventory_takes['color'],
+                    size_id=inventory_takes['size'],
+                    varient_id=inventory_takes['verient'],
+                    barcode=inventory_takes['ppn__barcode'],
+                    has_physical_barcode=inventory_takes['ppn__has_phisical_barcode'],
+                    provider=Provider.objects.get(name=inventory_takes['ppn__provider__name']))
+                obj = objs.first()
+                item.taken.add(obj)
+                print('setup', obj.id, ' => ',inventory_takes['taken'])
+                obj.quantity = inventory_takes['taken']
+                obj.save()
+    order = MOrder.objects.select_related('client','agent').prefetch_related('products','products__product__albums','products__taken', 'products__entries','products__entries__color','products__entries__size','products__entries__varient',).get(id=id)# 'products__taken__quantity','products__taken__color','products__taken__size','products__taken__varient','products__taken__barcode','products__taken__has_physical_barcode','products__taken__provider')
+    data = AdminMOrderSerializer(order).data
+    return JsonResponse(data, status=status.HTTP_200_OK)
 @api_view(['GET'])
 def api_get_order_data(request, id):
     if not request.user.is_superuser:

@@ -14,6 +14,15 @@ from catalogImages.models import CatalogImageVarient
 from provider.models import Provider
 from django.utils.html import mark_safe
 
+class TakenInventory(models.Model):
+    quantity = models.IntegerField(default=0)
+    color = models.ForeignKey(to=Color, on_delete=models.SET_DEFAULT,default=76, null=True, blank=True)
+    size = models.ForeignKey(to=ProductSize, on_delete=models.SET_DEFAULT, default=108, null=True, blank=True)
+    varient = models.ForeignKey(to=CatalogImageVarient, on_delete=models.CASCADE, null=True, blank=True)
+    barcode = models.CharField(max_length=100, null=True, blank=True)
+    has_physical_barcode = models.BooleanField(default=False)
+    provider = models.ForeignKey(to=Provider, on_delete=models.CASCADE, null=True, blank=True)
+
 
 class MOrderItemEntry(models.Model):
     quantity = models.IntegerField(default=1)
@@ -42,9 +51,12 @@ class MOrderItem(models.Model):
     #clientBuyPrice = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     ergent = models.BooleanField(default=False)
     prining = models.BooleanField(default=False)
+    priningComment = models.CharField(max_length=255, null=True, blank=True)
     embroidery = models.BooleanField(default=False)
+    embroideryComment = models.CharField(max_length=255, null=True, blank=True)
     comment = models.TextField(null=True, blank=True)
     entries = models.ManyToManyField(to=MOrderItemEntry, blank=True, related_name='product')
+    taken = models.ManyToManyField(to=TakenInventory, blank=True, related_name='product')
     prop_totalEntriesQuantity = property(lambda self: sum([entry.quantity for entry in self.entries.all()]))
     prop_totalPrice = property(lambda self: self.prop_totalEntriesQuantity * self.price)
     class Meta:
