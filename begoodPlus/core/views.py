@@ -304,7 +304,7 @@ def svelte_cart_history(request):
             'detail': 'User is not authenticated',
         })
     previous_carts = list(
-        SvelteCartModal.objects.all().filter(user_id=request.user).values())
+        SvelteCartModal.objects.all().filter(user_id=request.user).order_by('-created_date').values('user','user__username', 'name','businessName','productsRaw','message','created_date','agent','agent__client__businessName'))
     return JsonResponse(previous_carts, safe=False)
 
 
