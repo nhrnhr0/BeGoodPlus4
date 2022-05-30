@@ -4,7 +4,7 @@ from openpyxl import Workbook
 from productColor.models import ProductColor
 
 from productSize.models import ProductSize
-from .models import MOrderItem, MOrder, MOrderItemEntry
+from .models import MOrderItem, MOrder, MOrderItemEntry, TakenInventory
 import io
 from django.contrib import admin
 from django.http.response import HttpResponse
@@ -18,7 +18,13 @@ import copy
 from openpyxl.styles.borders import Border, Side
 from openpyxl import Workbook
 
-
+class TakenInventoryAdmin(admin.ModelAdmin):
+    list_display = ('quantity', 'color', 'size', 'varient', 'barcode', 'has_physical_barcode', 'provider')
+    list_filter = ('color', 'size', 'varient', 'provider')
+    search_fields = ('color', 'size', 'varient', 'barcode', 'has_physical_barcode', 'provider')
+    ordering = ('color', 'size', 'varient', 'provider')
+    pass
+admin.site.register(TakenInventory, TakenInventoryAdmin)
 
 class MOrderItemEntryAdmin(admin.ModelAdmin):
     list_display = ('id', 'product', 'color', 'size', 'varient', 'quantity')
@@ -30,7 +36,7 @@ admin.site.register(MOrderItemEntry, MOrderItemEntryAdmin)
 class MOrderItemAdmin(admin.ModelAdmin):
     model = MOrderItem
     list_display = ('id', 'product','price','ergent','prining','embroidery','comment',)
-    filter_horizontal = ('providers','entries','morder')
+    filter_horizontal = ('providers','entries','morder', 'taken')
 admin.site.register(MOrderItem, MOrderItemAdmin)
 
 

@@ -7,11 +7,12 @@ from catalogImages.models import CatalogImage
 from inventory.models import WarehouseStock
 from inventory.serializers import WarehouseStockSerializer
 from catalogImages.serializers import CatalogImageSerializer
-from django.db.models import Sum
+from django.db.models import Sum, Avg
 from django.db.models import OuterRef, Subquery
 from provider.serializers import SvelteProviderSerializer
-from .models import MOrder, MOrderItem, MOrderItemEntry
+from .models import MOrder, MOrderItem, MOrderItemEntry, TakenInventory
 from django.db import models
+from django.db.models import Q
 
 from django.core import serializers as django_serializers
 
@@ -54,17 +55,29 @@ class AdminMOrderItemSerializer(serializers.ModelSerializer):
         kwargs['context'] = self.get_serializer_context()
         return serializer_class(*args, **kwargs)
     def get_available_inventory(self, obj):
-        stock = WarehouseStock.objects.values('size', 'color', 'verient','ppn__barcode', 'ppn__has_phisical_barcode','ppn__provider__name',) \
+        stock = WarehouseStock.objects.select_related('size','color', 'verient', 'ppn','product').values('size', 'color', 'verient','ppn__barcode', 'ppn__has_phisical_barcode','ppn__provider__name',) \
             .order_by('size', 'color', 'verient', 'ppn__barcode', 'ppn__has_phisical_barcode','ppn__provider__name',) \
             .filter(ppn__product=obj.product) \
-                .annotate(total=Sum('quantity'),)
-                
+                .annotate(total=Sum('quantity'))
+        taken = TakenInventory.objects.select_related('product', 'size', 'color', 'varient', 'provider').filter(~Q(product=obj),Q(product__product__id=obj.product.id), Q(product__morder__freezeTakenInventory=True), Q(product__morder__archive=False)).annotate(total=Sum('quantity')).values('size', 'color', 'varient','barcode', 'has_physical_barcode','provider__name',) \
+            .order_by('size', 'color', 'varient', 'barcode', 'has_physical_barcode','provider__name',) \
+                    .annotate(total=Sum('quantity'))
+        # frozzenOrders = MOrder.objects.filter(freezeTakenInventory=True)
+        # for order in frozzenOrders:
+        #     taken = order.taken.filter(product=obj.product)
+            
         for s in stock:
-            s['taken'] = obj.taken.filter(barcode=s['ppn__barcode'],has_physical_barcode=s['ppn__has_phisical_barcode'], size=s['size'], color=s['color']).aggregate(Sum('quantity'))['quantity__sum'] or 0
+            s['taken'] = obj.taken.filter(barcode=s['ppn__barcode'],has_physical_barcode=s['ppn__has_phisical_barcode'], size=s['size'], color=s['color'], varient=s['verient']).aggregate(Sum('quantity'))['quantity__sum'] or 0
+            s['total_with_freeze'] = s['total']
+            frozen_inventory = taken.filter(barcode=s['ppn__barcode'],has_physical_barcode=s['ppn__has_phisical_barcode'], size=s['size'], color=s['color'], varient=s['verient']).aggregate(Sum('quantity'))['quantity__sum'] or 0
+            s['frozen'] = frozen_inventory
+            s['total'] = s['total'] - frozen_inventory
+            
                     #taken=Subquery(obj.taken.filter(size=OuterRef('size'), color=OuterRef('color'), varient=OuterRef('verient'), barcode=OuterRef('ppn__barcode'), has_physical_barcode=OuterRef('ppn__has_phisical_barcode'), provider__name=OuterRef('ppn__provider__name'),output_field='quantity')))
         #data = WarehouseStockSerializer(stock, many=True).data
         #data = django_serializers.serialize('json', stock, fields=('size', 'color', 'verient','ppn__barcode', 'ppn__has_phisical_barcode', 'total'))
-        return list(stock)
+        ret = list(stock)
+        return ret
     
     def get_sizes(self, obj):
         ids = obj.product.sizes.values_list('id', flat=True)
@@ -109,7 +122,7 @@ class AdminMOrderSerializer(serializers.ModelSerializer):
     #client_id = serializers.IntegerField(source='client.user.id', read_only=False)
     class Meta:
         model = MOrder
-        fields = ('id','agent','agent_name', 'client', 'status', 'created', 'updated','message','name', 'phone', 'email', 'client_businessName', 'products')
+        fields = ('id','agent','agent_name', 'client', 'status', 'created', 'updated','message','name', 'phone', 'email', 'client_businessName', 'products','freezeTakenInventory','isOrder')
     
 
 '''

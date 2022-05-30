@@ -76,6 +76,10 @@ class MOrder(models.Model):
     status = models.CharField(max_length=100, choices=[('new', 'חדש'), ('in_progress', 'בתהליך'), ('done', 'גמור')])
     products = models.ManyToManyField(to=MOrderItem, blank=True, related_name='morder')
     message = models.TextField(null=True, blank=True)
+    freezeTakenInventory = models.BooleanField(default=False)
+    archive = models.BooleanField(default=False)
+    isOrder = models.BooleanField(default=False)
+    
     prop_totalPrice = property(lambda self: sum([item.prop_totalPrice for item in self.products.all()]))
     prop_totalPricePlusTax = property(lambda self: self.prop_totalPrice * Decimal('1.17'))
     

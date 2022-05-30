@@ -59,6 +59,7 @@ def morder_edit_order_add_product_entries_2(request):
     if not request.user.is_superuser:
         return JsonResponse({'error': 'You are not authorized to perform this action'}, status=status.HTTP_401_UNAUTHORIZED)
     else:
+        
         entry_id = request.data.get('entry_id')
         color_id = int(request.data.get('color'))
         size_id = int(request.data.get('size'))
@@ -186,11 +187,16 @@ def api_edit_order_add_product(request):
                 # TODO: continue from here
 @api_view(['GET', 'POST'])
 def api_get_order_data2(request, id):
-    
+    if request.user.is_superuser == False:
+        return JsonResponse({'error': 'You are not authorized to perform this action'}, status=status.HTTP_401_UNAUTHORIZED)
     #data = AdminMOrderSerializer(order).data
     #print('querys: => ', connection.queries)
+    
     if request.method == 'POST':
+        order = MOrder.objects.select_related('client','agent').prefetch_related('products','products__product__albums','products__taken', 'products__entries','products__entries__color','products__entries__size','products__entries__varient',).get(id=id)# 'products__taken__quantity','products__taken__color','products__taken__size','products__taken__varient','products__taken__barcode','products__taken__has_physical_barcode','products__taken__provider')
         newData = request.data
+        order.freezeTakenInventory = newData['freezeTakenInventory']
+        order.isOrder = newData['isOrder']
         for product in newData['products']:
             if product['id'] != None:
                 item = MOrderItem.objects.get(id=product['id'])
@@ -207,6 +213,7 @@ def api_get_order_data2(request, id):
                 else:
                     item.embroideryComment = ''
                 item.comment =product['comment']
+                item.ergent =product['ergent']
                 item.save()
             else:
                 item = MOrderItem.objects.create(
@@ -219,19 +226,22 @@ def api_get_order_data2(request, id):
                 item.morder.set([MOrder.objects.get(id=id)])
                 item.save()
             for entry in product['entries']:
-                if entry['id'] != None:
+                if entry.get('id', None) != None:
                     dbEntry = MOrderItemEntry.objects.get(id=entry['id'])
-                    dbEntry.quantity = entry['quantity']
+                    dbEntry.quantity = entry.get('quantity',0)
                     dbEntry.save()
                 else:
+                    print(entry)
                     dbEntry = MOrderItemEntry.objects.create(
                         quantity=entry['quantity'],
-                        size=entry['size'],
-                        color=entry['color'],
-                        varient=entry['varient'],
+                        size_id=entry['size'],
+                        color_id=entry['color'],
+                        varient_id=entry.get('verient', None),
                     )
-                    dbEntry.product.set([entry])
+                    dbEntry.product.set([item])
                     dbEntry.save()
+                if dbEntry and dbEntry.quantity <= 0:
+                    dbEntry.delete()
 
             for inventory_takes in product['available_inventory']:
                 # 'size':117
@@ -250,10 +260,24 @@ def api_get_order_data2(request, id):
                     has_physical_barcode=inventory_takes['ppn__has_phisical_barcode'],
                     provider=Provider.objects.get(name=inventory_takes['ppn__provider__name']))
                 obj = objs.first()
+                if obj == None:
+                    obj = TakenInventory.objects.create(
+                        color_id=inventory_takes['color'],
+                        size_id=inventory_takes['size'],
+                        varient_id=inventory_takes['verient'],
+                        barcode=inventory_takes['ppn__barcode'],
+                        has_physical_barcode=inventory_takes['ppn__has_phisical_barcode'],
+                        provider=Provider.objects.get(name=inventory_takes['ppn__provider__name']),
+                        quantity=inventory_takes['taken']
+                    )
+                
                 item.taken.add(obj)
-                print('setup', obj.id, ' => ',inventory_takes['taken'])
+                #print('setup', obj.id, ' => ',inventory_takes['taken'])
                 obj.quantity = inventory_takes['taken']
+                if inventory_takes['taken'] == 0:
+                    obj.delete()
                 obj.save()
+        order.save()
     order = MOrder.objects.select_related('client','agent').prefetch_related('products','products__product__albums','products__taken', 'products__entries','products__entries__color','products__entries__size','products__entries__varient',).get(id=id)# 'products__taken__quantity','products__taken__color','products__taken__size','products__taken__varient','products__taken__barcode','products__taken__has_physical_barcode','products__taken__provider')
     data = AdminMOrderSerializer(order).data
     return JsonResponse(data, status=status.HTTP_200_OK)
