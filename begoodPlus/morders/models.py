@@ -23,7 +23,7 @@ class TakenInventory(models.Model):
     barcode = models.CharField(max_length=100, null=True, blank=True)
     has_physical_barcode = models.BooleanField(default=False)
     provider = models.ForeignKey(to=Provider, on_delete=models.CASCADE, null=True, blank=True)
-
+    #toOrder = models.IntegerField(default=0)
 
 class MOrderItemEntry(models.Model):
     quantity = models.IntegerField(default=1)

@@ -250,6 +250,7 @@ def api_get_order_data2(request, id):
                     dbEntry.delete()
 
             for inventory_takes in product['available_inventory']:
+                print(inventory_takes)
                 # 'size':117
                 # 'color':77
                 # 'verient':None
@@ -274,13 +275,15 @@ def api_get_order_data2(request, id):
                         barcode=inventory_takes['ppn__barcode'],
                         has_physical_barcode=inventory_takes['ppn__has_phisical_barcode'],
                         provider=Provider.objects.get(name=inventory_takes['ppn__provider__name']),
-                        quantity=inventory_takes['taken']
+                        quantity=inventory_takes.get('taken',0),
+                        #toOrder=inventory_takes.get('toOrder',0)
                     )
                 
                 item.taken.add(obj)
                 #print('setup', obj.id, ' => ',inventory_takes['taken'])
-                obj.quantity = inventory_takes['taken']
-                if inventory_takes['taken'] == 0:
+                obj.quantity = inventory_takes.get('taken',0)
+                #obj.toOrder = inventory_takes.get('toOrder',0)
+                if obj.quantity <= 0:# and obj.toOrder <= 0:
                     obj.delete()
                 obj.save()
         order.save()

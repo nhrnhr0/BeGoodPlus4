@@ -70,8 +70,10 @@ class AdminMOrderItemSerializer(serializers.ModelSerializer):
             s['taken'] = obj.taken.filter(barcode=s['ppn__barcode'],has_physical_barcode=s['ppn__has_phisical_barcode'], size=s['size'], color=s['color'], varient=s['verient']).aggregate(Sum('quantity'))['quantity__sum'] or 0
             s['total_with_freeze'] = s['total']
             frozen_inventory = taken.filter(barcode=s['ppn__barcode'],has_physical_barcode=s['ppn__has_phisical_barcode'], size=s['size'], color=s['color'], varient=s['verient']).aggregate(Sum('quantity'))['quantity__sum'] or 0
+            #toOrder          = taken.filter(barcode=s['ppn__barcode'],has_physical_barcode=s['ppn__has_phisical_barcode'], size=s['size'], color=s['color'], varient=s['verient']).aggregate(Sum('toOrder'))
             s['frozen'] = frozen_inventory
             s['total'] = s['total'] - frozen_inventory
+            #s['toOrder'] = TakenInventory.objects.select_related('product', 'size', 'color', 'varient', 'provider').filter(product=obj,color=s['color'],size=s['size'],varient=s['verient'],barcode=s['ppn__barcode'],has_physical_barcode=s['ppn__has_phisical_barcode'],provider__name=s['ppn__provider__name']).aggregate(Sum('toOrder'))['toOrder__sum'] or 0
             
                     #taken=Subquery(obj.taken.filter(size=OuterRef('size'), color=OuterRef('color'), varient=OuterRef('verient'), barcode=OuterRef('ppn__barcode'), has_physical_barcode=OuterRef('ppn__has_phisical_barcode'), provider__name=OuterRef('ppn__provider__name'),output_field='quantity')))
         #data = WarehouseStockSerializer(stock, many=True).data
