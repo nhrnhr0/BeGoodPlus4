@@ -1,6 +1,8 @@
 from begoodPlus.secrects import SECRECT_BASE_MY_DOMAIN
 from .base import *
+#from begoodPlus.urls import urlpatterns
 
+from django.urls import path, include, re_path
 
 DEBUG=True
 COMPRESS_ENABLED = False
@@ -14,6 +16,7 @@ CORS_ALLOWED_ORIGINS = [
 
 MIDDLEWARE += [
     'debug_toolbar.middleware.DebugToolbarMiddleware',
+    'silk.middleware.SilkyMiddleware',
     #'livereload.middleware.LiveReloadScript',
 ]
 
@@ -24,3 +27,8 @@ print('===========> development settings')
 INTERNAL_IPS = [
     '*',
 ]
+
+INSTALLED_APPS += [
+    'silk',
+]
+

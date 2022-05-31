@@ -195,8 +195,11 @@ def api_get_order_data2(request, id):
     if request.method == 'POST':
         order = MOrder.objects.select_related('client','agent').prefetch_related('products','products__product__albums','products__taken', 'products__entries','products__entries__color','products__entries__size','products__entries__varient',).get(id=id)# 'products__taken__quantity','products__taken__color','products__taken__size','products__taken__varient','products__taken__barcode','products__taken__has_physical_barcode','products__taken__provider')
         newData = request.data
-        order.freezeTakenInventory = newData['freezeTakenInventory']
-        order.isOrder = newData['isOrder']
+        order.freezeTakenInventory = newData.get('freezeTakenInventory', False)
+        order.isOrder = newData.get('isOrder', False)
+        order.sendProviders = newData.get('sendProviders', False)
+        order.startCollecting = newData.get('startCollecting', False)
+        order.isOrder = newData.get('isOrder', False)
         for product in newData['products']:
             if product['id'] != None:
                 item = MOrderItem.objects.get(id=product['id'])

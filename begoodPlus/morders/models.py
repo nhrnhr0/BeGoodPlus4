@@ -82,7 +82,8 @@ class MOrder(models.Model):
     freezeTakenInventory = models.BooleanField(default=False)
     archive = models.BooleanField(default=False)
     isOrder = models.BooleanField(default=False)
-    
+    sendProviders = models.BooleanField(default=False)
+    startCollecting = models.BooleanField(default=False)
     prop_totalPrice = property(lambda self: sum([item.prop_totalPrice for item in self.products.all()]))
     prop_totalPricePlusTax = property(lambda self: self.prop_totalPrice * Decimal('1.17'))
     
