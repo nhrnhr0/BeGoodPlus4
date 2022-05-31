@@ -228,8 +228,14 @@ def api_get_order_data2(request, id):
             for entry in product['entries']:
                 if entry.get('id', None) != None:
                     dbEntry = MOrderItemEntry.objects.get(id=entry['id'])
-                    dbEntry.quantity = entry.get('quantity',0)
-                    dbEntry.save()
+                    dbEntry.quantity = entry.get('quantity',0) or 0
+                    try:
+                        dbEntry.validate_unique()
+                        dbEntry.save()
+                    except:
+                        dbEntry.delete()
+                    
+                    
                 else:
                     print(entry)
                     dbEntry = MOrderItemEntry.objects.create(

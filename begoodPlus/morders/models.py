@@ -1,4 +1,5 @@
 from decimal import Decimal
+from django.forms import ValidationError
 from django.urls import reverse
 
 from multiprocessing.connection import Client
@@ -32,8 +33,10 @@ class MOrderItemEntry(models.Model):
     def __str__(self):
         return str(self.quantity) + ' ' + str(self.color) + ' ' + str(self.size) + ' ' + str(self.varient)
     pass
-
-    
+    def validate_unique(self, *args, **kwargs):
+        super().validate_unique(*args, **kwargs)
+        if MOrderItemEntry.objects.filter(product=self.product.all().first(), color=self.color, size=self.size, varient=self.varient).count() > 1:
+            raise ValidationError("This product has already been added")
 
 class MOrderItem(models.Model):
     """
