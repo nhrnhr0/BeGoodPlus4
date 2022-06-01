@@ -193,7 +193,30 @@ def get_order_detail_to_collect(request):
     #print(request)
     morders_ids = request.GET.getlist('orders')
     print(morders_ids)
-    return JsonResponse({'success': 'success'}, status=status.HTTP_200_OK)
+    morders = MOrder.objects.filter(id__in=morders_ids)
+    
+'''
+created
+client
+products: {
+    product
+    ergent
+    prining
+    priningComment
+    embroidery
+    embroideryComment
+    comment
+    entries: {
+        quantity
+        color
+        size
+        varient
+    }
+}
+message
+freezeTakenInventory
+startCollecting
+'''
 
 
 @api_view(['GET'])
