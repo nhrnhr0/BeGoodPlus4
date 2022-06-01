@@ -140,9 +140,14 @@ class AdminMOrderSerializer(serializers.ModelSerializer):
     #client_id = serializers.IntegerField(source='client.user.id', read_only=False)
     class Meta:
         model = MOrder
-        fields = ('id','agent','agent_name', 'client', 'status', 'created', 'updated','message','name', 'phone', 'email', 'client_businessName', 'products','freezeTakenInventory','isOrder')
+        fields = ('id','agent','agent_name', 'client', 'status', 'created', 'updated','message','name', 'phone', 'email', 'client_businessName', 'products','freezeTakenInventory','isOrder','sendProviders','startCollecting')
     
-
+class MOrderCollectionSerializer(serializers.ModelSerializer):
+    client_businessName = serializers.CharField(source='client.businessName', read_only=False, default='')
+    class Meta:
+        model = MOrder
+        fields = ('id', 'name', 'created', 'updated', 'client','message','client_businessName',)
+        
 '''
 product
 quantity

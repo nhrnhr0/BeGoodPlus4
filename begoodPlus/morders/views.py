@@ -4,7 +4,7 @@ from django.shortcuts import render
 
 from catalogImages.models import CatalogImage
 from provider.models import Provider
-from .serializers import AdminMOrderItemSerializer, AdminMOrderListSerializer, AdminMOrderSerializer
+from .serializers import AdminMOrderItemSerializer, AdminMOrderListSerializer, AdminMOrderSerializer, MOrderCollectionSerializer
 from morders.models import MOrder, MOrderItem, MOrderItemEntry, TakenInventory
 from rest_framework import status
 import json
@@ -185,6 +185,28 @@ def api_edit_order_add_product(request):
             else:
                 return JsonResponse({'error': 'You are not authorized to perform this action'}, status=status.HTTP_401_UNAUTHORIZED)
                 # TODO: continue from here
+                
+
+
+@api_view(['GET'])
+def get_order_detail_to_collect(request):
+    #print(request)
+    morders_ids = request.GET.getlist('orders')
+    print(morders_ids)
+    return JsonResponse({'success': 'success'}, status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+def list_orders_to_collect(request): 
+    if request.user.is_superuser == False:
+        return JsonResponse({'error': 'You are not authorized to perform this action'}, status=status.HTTP_401_UNAUTHORIZED)
+    else:
+        if request.method == "GET":
+            orders = MOrder.objects.filter(startCollecting=True)
+            serializer = MOrderCollectionSerializer(orders, many=True)
+            return JsonResponse(serializer.data,safe=False, status=status.HTTP_200_OK)
+
+
 @api_view(['GET', 'POST'])
 def api_get_order_data2(request, id):
     if request.user.is_superuser == False:
@@ -196,7 +218,6 @@ def api_get_order_data2(request, id):
         order = MOrder.objects.select_related('client','agent').prefetch_related('products','products__product__albums','products__taken', 'products__entries','products__entries__color','products__entries__size','products__entries__varient',).get(id=id)# 'products__taken__quantity','products__taken__color','products__taken__size','products__taken__varient','products__taken__barcode','products__taken__has_physical_barcode','products__taken__provider')
         newData = request.data
         order.freezeTakenInventory = newData.get('freezeTakenInventory', False)
-        order.isOrder = newData.get('isOrder', False)
         order.sendProviders = newData.get('sendProviders', False)
         order.startCollecting = newData.get('startCollecting', False)
         order.isOrder = newData.get('isOrder', False)
