@@ -3,6 +3,7 @@ from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 
 from catalogImages.models import CatalogImage
+from inventory.models import WarehouseStock
 from provider.models import Provider
 from .serializers import AdminMOrderItemSerializer, AdminMOrderListSerializer, AdminMOrderSerializer, MOrderCollectionSerializer
 from morders.models import MOrder, MOrderItem, MOrderItemEntry, TakenInventory
@@ -187,14 +188,55 @@ def api_edit_order_add_product(request):
                 # TODO: continue from here
                 
 
+from django.db.models import Count, F, Value
+from django.db.models import OuterRef, Subquery
 
 @api_view(['GET'])
 def get_order_detail_to_collect(request):
     #print(request)
-    morders_ids = request.GET.getlist('orders')
+    morders_ids = request.GET.get('orders')
     print(morders_ids)
+    morders_ids = json.loads(morders_ids)
     morders = MOrder.objects.filter(id__in=morders_ids)
+    print(morders)
+    ret = []
     
+    all_taken = TakenInventory.objects.filter(product__morder__id__in=morders_ids).values(
+        'product__product_id',
+        'product__taken__color_id',
+        'product__taken__size_id',
+        'product__taken__varient_id',
+        'product__taken__quantity',
+        'product__taken__barcode',
+        'product__taken__has_physical_barcode',
+        'product__taken__provider',)
+    taken_products_ids = all_taken.values_list('product__product_id', flat=True)
+    stock= WarehouseStock.objects.filter(ppn__product_id__in=taken_products_ids).annotate(
+        stock=F('quantity'),
+        varient_id=F('verient_id'),
+    ).values(
+        'ppn__product_id',
+        'color_id',
+        'size_id',
+        'varient_id',
+        'stock',
+        'ppn__barcode',
+        'ppn__has_phisical_barcode',
+        'ppn__provider',
+    )
+    data = all_taken.union(stock)
+    # print(stock)
+    # for morder in morders:
+    #     print(morder)
+    #     morder_items = MOrderItem.objects.filter(morder=morder)
+    #     print(morder_items)
+    #     for morder_item in morder_items:
+    #         print(morder_item)
+    #         product = morder_item.product
+    #         print(product)
+    # print(all_taken)
+    
+    return JsonResponse({'success': 'success', 'data': list(data),}, status=status.HTTP_200_OK)
 '''
 created
 client
