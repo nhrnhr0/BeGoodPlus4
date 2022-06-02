@@ -31,7 +31,7 @@ class PPN(models.Model):
     buy_price = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name=_('Buy Price (no tax)'))
     store_price = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name=_('Store Price (no tax)'), null=True, blank=True)
     providerProductName = models.CharField(max_length=100, verbose_name=_('provide\'s product name'),)
-    providerMakat = models.CharField(max_length=100, verbose_name=_('provider\'s makat'), default='', blank=True)
+    providerMakat = models.CharField(max_length=100, verbose_name=_('provider\'s makat'), default='', blank=True, null=True)
     barcode = models.CharField(max_length=100, verbose_name=_('barcode'), blank=True, default='')
     has_phisical_barcode = models.BooleanField(default=False, verbose_name=_('has phisical barcode'))
     #fastProductTitle = models.CharField(max_length=100, null=True, blank=True)
