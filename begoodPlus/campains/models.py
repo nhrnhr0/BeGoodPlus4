@@ -137,7 +137,7 @@ class MonthCampain(models.Model):
 # catalogImage,catalogAlbum,image_order
 
 
-class CartCampains(models.Model):
+class CartCampain(models.Model):
     title = models.CharField(verbose_name=_('title'), max_length=100)
     end_showing_date = models.DateTimeField(verbose_name=_(
         'End showing date'), default=datetime.now, blank=False)

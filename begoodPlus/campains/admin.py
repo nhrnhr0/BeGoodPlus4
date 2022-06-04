@@ -1,7 +1,7 @@
 from django.contrib import admin
 from adminsortable.admin import SortableAdmin, SortableTabularInline
 # Register your models here.
-from .models import CartCampains, MonthCampain, CampainProduct, PriceTable, PaymantType
+from .models import CartCampain, MonthCampain, CampainProduct, PriceTable, PaymantType
 
 
 class ProductInline(admin.TabularInline):
@@ -57,8 +57,8 @@ class PriceTableAdmin(admin.ModelAdmin):
 admin.site.register(PriceTable, PriceTableAdmin)
 
 
-class CartCampainsAdmin(admin.ModelAdmin):
+class CartCampainAdmin(admin.ModelAdmin):
     pass
 
 
-admin.site.register(CartCampains, CartCampainsAdmin)
+admin.site.register(CartCampain, CartCampainAdmin)
