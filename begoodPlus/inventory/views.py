@@ -316,6 +316,15 @@ def inventory_edit_entry(request, entry_id):
         }
         return JsonResponse(data, safe=False)
     pass
+
+def get_stock_by_id_api(request,id):
+    if not request.user.is_superuser:
+        return JsonResponse({'error': 'You are not authorized'})
+    if request.method == 'GET':
+        stock = WarehouseStock.objects.get(id=id)
+        serializer = WarehouseStockSerializer(stock)
+        return JsonResponse(serializer.data)
+
 @api_view(['GET'])
 def get_all_inventory_api(request):
     if request.user.is_superuser:

@@ -201,26 +201,26 @@ def get_order_detail_to_collect(request):
     print(morders)
     ret = []
     
-    taken_products = TakenInventory.objects.filter(product__morder__in=morders)\
-        .values('product__morder', 'product__id', 'product__product__id','product__product__title', 'quantity','color','size','varient','barcode','has_physical_barcode','provider',)
-    taken_product_ids = taken_products.values_list('product__product__id', flat=True).distinct()
+    taken_products = TakenInventory.objects.filter(orderItem__morder__in=morders)\
+        .values('orderItem__morder', 'orderItem__id', 'orderItem__product__id','orderItem__product__cimage','orderItem__product__title', 'quantity','color', 'color__name','color__color','size','size__size','varient','varient__name','barcode','has_physical_barcode','provider','provider__name')
+    taken_product_ids = taken_products.values_list('orderItem__product__id', flat=True).distinct()
     stocks = WarehouseStock.objects.filter(ppn__product__id__in=taken_product_ids)\
-        .values('ppn__product__id', 'ppn__product__title', 'quantity','color','size','verient','ppn__barcode','ppn__has_phisical_barcode','ppn__provider', 'warehouse')
+        .values('id', 'ppn__product__id', 'ppn__product__title','ppn__provider','ppn__provider__name','ppn__product__cimage', 'quantity','color', 'color__color','color__name','size', 'size__size','verient','verient__name','ppn__barcode','ppn__has_phisical_barcode','ppn__provider', 'warehouse', 'warehouse__name',)
     print(taken_product_ids)
     taken_product_ids_objs = {}
     # create a dict with product_id as key and the list of taken_inventory as value
     # taken_product_ids_objs = {product_id: {order: [taken_inventory, taken_inventory, ...], stocks: [stock, stock, ...]}}
-    for taken_product in taken_products:
-        if taken_product['product__product__id'] not in taken_product_ids_objs:
-            taken_product_ids_objs[taken_product['product__product__id']] = {'order': [], 'stocks': []}
-        taken_product_ids_objs[taken_product['product__product__id']]['order'].append(taken_product)
-    for stock in stocks:
-        if stock['ppn__product__id'] not in taken_product_ids_objs:
-            taken_product_ids_objs[stock['ppn__product__id']] = {'order': [], 'stocks': []}
-        taken_product_ids_objs[stock['ppn__product__id']]['stocks'].append(stock)
+    # for taken_product in taken_products:
+    #     if taken_product['product__product__id'] not in taken_product_ids_objs:
+    #         taken_product_ids_objs[taken_product['product__product__id']] = {'order': [], 'stocks': []}
+    #     taken_product_ids_objs[taken_product['product__product__id']]['order'].append(taken_product)
+    # for stock in stocks:
+    #     if stock['ppn__product__id'] not in taken_product_ids_objs:
+    #         taken_product_ids_objs[stock['ppn__product__id']] = {'order': [], 'stocks': []}
+    #     taken_product_ids_objs[stock['ppn__product__id']]['stocks'].append(stock)
     
     pass
-    return JsonResponse({'success': 'success', 'taken': list(taken_product_ids_objs)}, status=status.HTTP_200_OK)
+    return JsonResponse({'success': 'success', 'taken': list(taken_products), 'stocks': list(stocks)}, status=status.HTTP_200_OK)
 '''
 created
 client

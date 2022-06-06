@@ -27,9 +27,9 @@ class TakenInventoryAdmin(admin.ModelAdmin):
 admin.site.register(TakenInventory, TakenInventoryAdmin)
 
 class MOrderItemEntryAdmin(admin.ModelAdmin):
-    list_display = ('id', 'product', 'color', 'size', 'varient', 'quantity')
-    list_filter = ('product', 'color', 'size', 'varient')
-    search_fields = ('product', 'color', 'size', 'varient')
+    list_display = ('id', 'orderItem', 'color', 'size', 'varient', 'quantity')
+    list_filter = ('orderItem', 'color', 'size', 'varient')
+    search_fields = ('orderItem', 'color', 'size', 'varient')
 admin.site.register(MOrderItemEntry, MOrderItemEntryAdmin)
 
 # Register your models here.

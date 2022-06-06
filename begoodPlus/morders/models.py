@@ -58,8 +58,8 @@ class MOrderItem(models.Model):
     embroidery = models.BooleanField(default=False)
     embroideryComment = models.CharField(max_length=255, null=True, blank=True)
     comment = models.TextField(null=True, blank=True)
-    entries = models.ManyToManyField(to=MOrderItemEntry, blank=True, related_name='product')
-    taken = models.ManyToManyField(to=TakenInventory, blank=True, related_name='product')
+    entries = models.ManyToManyField(to=MOrderItemEntry, blank=True, related_name='orderItem')
+    taken = models.ManyToManyField(to=TakenInventory, blank=True, related_name='orderItem')
     prop_totalEntriesQuantity = property(lambda self: sum([entry.quantity for entry in self.entries.all()]))
     prop_totalPrice = property(lambda self: self.prop_totalEntriesQuantity * self.price)
     class Meta:
