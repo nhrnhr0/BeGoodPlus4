@@ -190,6 +190,16 @@ def api_edit_order_add_product(request):
 
 from django.db.models import Count, F, Value
 from django.db.models import OuterRef, Subquery
+from django.db.models import Q
+
+@api_view(['POST'])
+def dashboard_orders_collection_collect_save(request):
+    print(request)
+    data = json.loads(request.body)
+    #print(data)
+    for d in data:
+        print(d.get('collected', None))
+    pass
 
 @api_view(['GET'])
 def get_order_detail_to_collect(request):
@@ -197,15 +207,15 @@ def get_order_detail_to_collect(request):
     morders_ids = request.GET.get('orders')
     print(morders_ids)
     morders_ids = json.loads(morders_ids)
-    morders = MOrder.objects.all()#.filter(id__in=morders_ids)
+    morders = MOrder.objects.filter(id__in=morders_ids) #.objects.all()#
     print(morders)
     ret = []
     
-    taken_products = TakenInventory.objects.filter(orderItem__morder__in=morders)\
-        .values('orderItem__morder', 'orderItem__id', 'orderItem__product__id','orderItem__product__cimage','orderItem__product__title', 'quantity','color', 'color__name','color__color','size','size__size','varient','varient__name','barcode','has_physical_barcode','provider','provider__name')
+    taken_products = TakenInventory.objects.filter(Q(orderItem__morder__in=morders) & Q(quantity__gt=0))\
+        .values('id', 'orderItem__morder', 'orderItem__id', 'orderItem__product__id','orderItem__product__cimage','orderItem__product__title', 'quantity','color__id', 'color__name','color__color','size__id','size__size','size__code','varient__id','varient__name','barcode','has_physical_barcode','provider','provider__name', 'collected')
     taken_product_ids = taken_products.values_list('orderItem__product__id', flat=True).distinct()
     stocks = WarehouseStock.objects.filter(ppn__product__id__in=taken_product_ids)\
-        .values('id', 'ppn__product__id', 'ppn__product__title','ppn__provider','ppn__provider__name','ppn__product__cimage', 'quantity','color', 'color__color','color__name','size', 'size__size','verient','verient__name','ppn__barcode','ppn__has_phisical_barcode','ppn__provider', 'warehouse', 'warehouse__name',)
+        .values('id', 'ppn__product__id', 'ppn__product__title','ppn__provider','ppn__provider__name','ppn__product__cimage', 'quantity','color__id', 'color__color','color__name','size__id', 'size__size','verient__id','verient__name','ppn__barcode','ppn__has_phisical_barcode','ppn__provider', 'warehouse', 'warehouse__name','collectedInventory__id',)
     print(taken_product_ids)
     taken_product_ids_objs = {}
     # create a dict with product_id as key and the list of taken_inventory as value
@@ -317,9 +327,9 @@ def api_get_order_data2(request, id):
                         color_id=entry['color'],
                         varient_id=entry.get('verient', None),
                     )
-                    dbEntry.product.set([item])
+                    dbEntry.orderItem.set([item])
                     dbEntry.save()
-                if dbEntry and dbEntry.quantity <= 0:
+                if dbEntry and dbEntry.id and dbEntry.quantity <= -1:
                     dbEntry.delete()
 
             for inventory_takes in product['available_inventory']:

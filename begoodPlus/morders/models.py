@@ -10,10 +10,15 @@ from catalogImages.models import CatalogImage
 from client.models import Client
 from color.models import Color
 from core.models import SvelteCartModal
+from inventory.models import WarehouseStock
 from productSize.models import ProductSize
 from catalogImages.models import CatalogImageVarient
 from provider.models import Provider
 from django.utils.html import mark_safe
+
+class CollectedInventory(models.Model):
+    warehouseStock = models.ForeignKey(WarehouseStock, on_delete=models.CASCADE, related_name='collectedInventory')
+    quantity = models.IntegerField(default=0)
 
 class TakenInventory(models.Model):
     quantity = models.IntegerField(default=0)
@@ -23,6 +28,7 @@ class TakenInventory(models.Model):
     barcode = models.CharField(max_length=100, null=True, blank=True)
     has_physical_barcode = models.BooleanField(default=False)
     provider = models.ForeignKey(to=Provider, on_delete=models.CASCADE,)
+    collected = models.ManyToManyField(to=CollectedInventory, related_name='taken_inventory')
     #toOrder = models.IntegerField(default=0)
 
 class MOrderItemEntry(models.Model):

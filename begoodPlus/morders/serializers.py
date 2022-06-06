@@ -68,7 +68,7 @@ class AdminMOrderItemSerializer(serializers.ModelSerializer):
             .filter(ppn__product=obj.product) \
                 .annotate(total=Sum('quantity'))
         # get all the orders for this product frozen
-        taken_in_other_orders = TakenInventory.objects.select_related('product', 'size', 'color', 'varient', 'provider').filter(~Q(product=obj),Q(product__product__id=obj.product.id), Q(product__morder__freezeTakenInventory=True), Q(product__morder__archive=False)).annotate(total=Sum('quantity')).values('size', 'color', 'varient','barcode', 'has_physical_barcode','provider__name',) \
+        taken_in_other_orders = TakenInventory.objects.select_related('orderItem', 'size', 'color', 'varient', 'provider').filter(~Q(orderItem=obj),Q(orderItem__product__id=obj.product.id), Q(orderItem__morder__freezeTakenInventory=True), Q(orderItem__morder__archive=False)).annotate(total=Sum('quantity')).values('size', 'color', 'varient','barcode', 'has_physical_barcode','provider__name',) \
             .order_by('size', 'color', 'varient', 'barcode', 'has_physical_barcode','provider__name',) \
                     .annotate(total=Sum('quantity'))
         # frozzenOrders = MOrder.objects.filter(freezeTakenInventory=True)
