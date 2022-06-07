@@ -32,7 +32,7 @@ import AutoComplete from "simple-svelte-autocomplete";
     let selectedProduct;
 
     async function searchProducts(keyword) {
-            let json = await apiSearchProducts(keyword);
+            let json = await apiSearchProducts(keyword, true);
             let data = json;
             return data.all
         }
