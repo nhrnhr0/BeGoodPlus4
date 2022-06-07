@@ -191,6 +191,7 @@ def api_edit_order_add_product(request):
 from django.db.models import Count, F, Value
 from django.db.models import OuterRef, Subquery
 from django.db.models import Q
+from django.contrib.postgres.aggregates import ArrayAgg
 
 @api_view(['POST'])
 def dashboard_orders_collection_collect_save(request):
@@ -233,12 +234,38 @@ def get_order_detail_to_collect(request):
     print(morders)
     ret = []
     
-    taken_products = TakenInventory.objects.filter(Q(orderItem__morder__in=morders) & Q(quantity__gt=0))\
-        .values('id', 'orderItem__morder', 'orderItem__id', 'orderItem__product__id','orderItem__product__cimage','orderItem__product__title', 'quantity','color__id', 'color__name','color__color','size__id','size__size','size__code','varient__id','varient__name','has_physical_barcode','provider','provider__name', 'collected')\
-        .order_by('orderItem__product__id',)
+    taken_products = TakenInventory.objects.filter(Q(orderItem__morder__in=morders) & Q(quantity__gt=0)).prefetch_related('collected')
+    taken_products_vals = []
+    for taken_product in taken_products:
+        d = {
+                'id': taken_product.id,
+                'orderItem__morder': taken_product.orderItem.first().morder.first().id,
+                'orderItem__id': taken_product.orderItem.first().id,
+                'orderItem__product__id': taken_product.orderItem.first().product.id, 
+                'orderItem__product__cimage': taken_product.orderItem.first().product.cimage, 
+                'orderItem__product__title':taken_product.orderItem.first().product.title,
+                'quantity': taken_product.quantity,
+                'color__id': taken_product.color.id,
+                'color__name': taken_product.color.name,
+                'color__color': taken_product.color.color,
+                'size__id': taken_product.size.id,
+                'size__size':taken_product.size.size,
+                'size__code': taken_product.size.code,
+                'varient__id': taken_product.varient.id if taken_product.varient != None else None,
+                'varient__name': taken_product.varient.name if taken_product.varient != None else None,
+                'has_physical_barcode': taken_product.has_physical_barcode,
+                'provider': taken_product.provider.id,
+                'provider__name': taken_product.provider.name,
+                'collected': [{'id': c.id, 'quantity': c.quantity, 'warehouseStock__id': c.warehouseStock.id} for c in taken_product.collected.all()],
+            }
+        taken_products_vals.append(d)
+        #[{'id': taken_product.id,'orderItem__morder': taken_product.orderItem.first().morder.id,'orderItem__id': taken_product.orderItem.first().id, 'orderItem__product__id': taken_product.orderItem.first().product.id, 'orderItem__product__cimage': taken_product.orderItem.first().product.cimage, 'orderItem__product__title':taken_product.orderItem.first().product.title,'quantity': taken_product.quantity} for taken_product in taken_products]#, 'collected':[{'quantity': '1'} for colect in taken_product.collected.all()]} for taken_product in taken_products]
+        # .values('id', 'orderItem__morder', 'orderItem__id', 'orderItem__product__id','orderItem__product__cimage','orderItem__product__title', 'quantity','color__id', 'color__name','color__color','size__id','size__size','size__code','varient__id','varient__name','has_physical_barcode','provider','provider__name', )\
+        #         .order_by('orderItem__product__id',)
+                
     taken_product_ids = taken_products.values_list('orderItem__product__id', flat=True).distinct()
     stocks = WarehouseStock.objects.filter(ppn__product__id__in=taken_product_ids)\
-        .values('id', 'ppn__product__id', 'ppn__product__title','ppn__provider','ppn__provider__name','ppn__product__cimage', 'quantity','color__id', 'color__color','color__name','size__id', 'size__size','verient__id','verient__name','ppn__barcode','ppn__has_phisical_barcode','ppn__provider', 'warehouse', 'warehouse__name','collectedInventory__id',)
+        .values('id', 'ppn__product__id', 'ppn__product__title','ppn__provider','ppn__provider__name','ppn__product__cimage', 'quantity','color__id', 'color__color','color__name','size__id', 'size__size','verient__id','verient__name','ppn__barcode','ppn__has_phisical_barcode','ppn__provider', 'warehouse', 'warehouse__name',)
     print(taken_product_ids)
     taken_product_ids_objs = {}
     # create a dict with product_id as key and the list of taken_inventory as value
@@ -253,7 +280,7 @@ def get_order_detail_to_collect(request):
     #     taken_product_ids_objs[stock['ppn__product__id']]['stocks'].append(stock)
     
     pass
-    return JsonResponse({'success': 'success', 'taken': list(taken_products), 'stocks': list(stocks)}, status=status.HTTP_200_OK)
+    return JsonResponse({'success': 'success', 'taken': list(taken_products_vals), 'stocks': list(stocks)}, status=status.HTTP_200_OK)
 '''
 created
 client
