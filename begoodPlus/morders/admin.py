@@ -19,9 +19,9 @@ from openpyxl.styles.borders import Border, Side
 from openpyxl import Workbook
 
 class TakenInventoryAdmin(admin.ModelAdmin):
-    list_display = ('quantity', 'color', 'size', 'varient', 'barcode', 'has_physical_barcode', 'provider')
+    list_display = ('quantity', 'color', 'size', 'varient', 'has_physical_barcode', 'provider')
     list_filter = ('color', 'size', 'varient', 'provider')
-    search_fields = ('color', 'size', 'varient', 'barcode', 'has_physical_barcode', 'provider')
+    search_fields = ('color', 'size', 'varient', 'has_physical_barcode', 'provider')
     ordering = ('color', 'size', 'varient', 'provider')
     pass
 admin.site.register(TakenInventory, TakenInventoryAdmin)

@@ -6,7 +6,7 @@ from catalogImages.models import CatalogImage
 from inventory.models import WarehouseStock
 from provider.models import Provider
 from .serializers import AdminMOrderItemSerializer, AdminMOrderListSerializer, AdminMOrderSerializer, MOrderCollectionSerializer
-from morders.models import MOrder, MOrderItem, MOrderItemEntry, TakenInventory
+from morders.models import CollectedInventory, MOrder, MOrderItem, MOrderItemEntry, TakenInventory
 from rest_framework import status
 import json
 from rest_framework.decorators import api_view
@@ -199,6 +199,28 @@ def dashboard_orders_collection_collect_save(request):
     #print(data)
     for d in data:
         print(d.get('collected', None))
+        collected = d.get('collected', None)
+        if (collected):
+            for [orderItem_id, collected_amount] in collected.items():
+                takenInventory = TakenInventory.objects.get(id=orderItem_id)
+                warehouseStock_id = d.get('id')
+                collectedObj = CollectedInventory.objects.filter(
+                    taken_inventory__in=[takenInventory],
+                    warehouseStock__id=warehouseStock_id,
+                )
+                
+                if collectedObj.count() == 0:
+                    collectedObj = CollectedInventory.objects.create(
+                        warehouseStock=WarehouseStock.objects.get(id=warehouseStock_id),
+                        quantity=collected_amount,
+                    )
+                    takenInventory.collected.add(collectedObj)
+                else:
+                    collectedObj = collectedObj.first()
+                collectedObj.quantity = collected_amount
+                collectedObj.save()
+                # obj.collected_amount = collected_amount
+                # obj.save()
     pass
 
 @api_view(['GET'])
@@ -212,7 +234,8 @@ def get_order_detail_to_collect(request):
     ret = []
     
     taken_products = TakenInventory.objects.filter(Q(orderItem__morder__in=morders) & Q(quantity__gt=0))\
-        .values('id', 'orderItem__morder', 'orderItem__id', 'orderItem__product__id','orderItem__product__cimage','orderItem__product__title', 'quantity','color__id', 'color__name','color__color','size__id','size__size','size__code','varient__id','varient__name','barcode','has_physical_barcode','provider','provider__name', 'collected')
+        .values('id', 'orderItem__morder', 'orderItem__id', 'orderItem__product__id','orderItem__product__cimage','orderItem__product__title', 'quantity','color__id', 'color__name','color__color','size__id','size__size','size__code','varient__id','varient__name','has_physical_barcode','provider','provider__name', 'collected')\
+        .order_by('orderItem__product__id',)
     taken_product_ids = taken_products.values_list('orderItem__product__id', flat=True).distinct()
     stocks = WarehouseStock.objects.filter(ppn__product__id__in=taken_product_ids)\
         .values('id', 'ppn__product__id', 'ppn__product__title','ppn__provider','ppn__provider__name','ppn__product__cimage', 'quantity','color__id', 'color__color','color__name','size__id', 'size__size','verient__id','verient__name','ppn__barcode','ppn__has_phisical_barcode','ppn__provider', 'warehouse', 'warehouse__name','collectedInventory__id',)
@@ -310,6 +333,7 @@ def api_get_order_data2(request, id):
                 item.save()
             for entry in product['entries']:
                 if entry.get('id', None) != None:
+                    
                     dbEntry = MOrderItemEntry.objects.get(id=entry['id'])
                     dbEntry.quantity = entry.get('quantity',0) or 0
                     try:
@@ -329,8 +353,8 @@ def api_get_order_data2(request, id):
                     )
                     dbEntry.orderItem.set([item])
                     dbEntry.save()
-                if dbEntry and dbEntry.id and dbEntry.quantity <= -1:
-                    dbEntry.delete()
+                # if dbEntry and dbEntry.id and dbEntry.quantity <= -1:
+                #     dbEntry.delete()
 
             for inventory_takes in product['available_inventory']:
                 print(inventory_takes)
@@ -346,7 +370,7 @@ def api_get_order_data2(request, id):
                     color_id=inventory_takes['color'],
                     size_id=inventory_takes['size'],
                     varient_id=inventory_takes['verient'],
-                    barcode=inventory_takes['ppn__barcode'],
+                    
                     has_physical_barcode=inventory_takes['ppn__has_phisical_barcode'],
                     provider=Provider.objects.get(name=inventory_takes['ppn__provider__name']))
                 obj = objs.first()
@@ -355,7 +379,6 @@ def api_get_order_data2(request, id):
                         color_id=inventory_takes['color'],
                         size_id=inventory_takes['size'],
                         varient_id=inventory_takes['verient'],
-                        barcode=inventory_takes['ppn__barcode'],
                         has_physical_barcode=inventory_takes['ppn__has_phisical_barcode'],
                         provider=Provider.objects.get(name=inventory_takes['ppn__provider__name']),
                         quantity=inventory_takes.get('taken',0),
@@ -366,8 +389,8 @@ def api_get_order_data2(request, id):
                 #print('setup', obj.id, ' => ',inventory_takes['taken'])
                 obj.quantity = inventory_takes.get('taken',0)
                 #obj.toOrder = inventory_takes.get('toOrder',0)
-                if obj.quantity <= 0:# and obj.toOrder <= 0:
-                    obj.delete()
+                # if obj.quantity < 0:# and obj.toOrder <= 0:
+                #     obj.delete()
                 obj.save()
         order.save()
     order = MOrder.objects.select_related('client','agent').prefetch_related('products','products__product__albums','products__taken', 'products__entries','products__entries__color','products__entries__size','products__entries__varient',).get(id=id)# 'products__taken__quantity','products__taken__color','products__taken__size','products__taken__varient','products__taken__barcode','products__taken__has_physical_barcode','products__taken__provider')

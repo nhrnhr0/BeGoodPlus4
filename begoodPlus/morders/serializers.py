@@ -63,13 +63,13 @@ class AdminMOrderItemSerializer(serializers.ModelSerializer):
         return serializer_class(*args, **kwargs)
     def get_available_inventory(self, obj):
         # all the available stock in all the warhoused and sum the quantity for every product, size,color,varient, ppn__has_phisical_barcode,ppn__provider__name,ppn__barcode
-        stock = WarehouseStock.objects.select_related('size','color', 'verient', 'ppn','product').values('size', 'color', 'verient','ppn__barcode', 'ppn__has_phisical_barcode','ppn__provider__name',) \
-            .order_by('size', 'color', 'verient', 'ppn__barcode', 'ppn__has_phisical_barcode','ppn__provider__name',) \
+        stock = WarehouseStock.objects.select_related('size','color', 'verient', 'ppn','product').values('size', 'color', 'verient', 'ppn__has_phisical_barcode','ppn__provider__name',) \
+            .order_by('size', 'color', 'verient', 'ppn__has_phisical_barcode','ppn__provider__name',) \
             .filter(ppn__product=obj.product) \
                 .annotate(total=Sum('quantity'))
         # get all the orders for this product frozen
-        taken_in_other_orders = TakenInventory.objects.select_related('orderItem', 'size', 'color', 'varient', 'provider').filter(~Q(orderItem=obj),Q(orderItem__product__id=obj.product.id), Q(orderItem__morder__freezeTakenInventory=True), Q(orderItem__morder__archive=False)).annotate(total=Sum('quantity')).values('size', 'color', 'varient','barcode', 'has_physical_barcode','provider__name',) \
-            .order_by('size', 'color', 'varient', 'barcode', 'has_physical_barcode','provider__name',) \
+        taken_in_other_orders = TakenInventory.objects.select_related('orderItem', 'size', 'color', 'varient', 'provider').filter(~Q(orderItem=obj),Q(orderItem__product__id=obj.product.id), Q(orderItem__morder__freezeTakenInventory=True), Q(orderItem__morder__archive=False)).annotate(total=Sum('quantity')).values('size', 'color', 'varient', 'has_physical_barcode','provider__name',) \
+            .order_by('size', 'color', 'varient', 'has_physical_barcode','provider__name',) \
                     .annotate(total=Sum('quantity'))
         # frozzenOrders = MOrder.objects.filter(freezeTakenInventory=True)
         # for order in frozzenOrders:
@@ -83,9 +83,9 @@ class AdminMOrderItemSerializer(serializers.ModelSerializer):
         # {'size': 117, 'color': 77, 'varient': None, 'barcode': '', 'has_physical_barcode': False, 'provider__name': 'המלביש', 'total': 1}, 
         # {'size': 118, 'color': 77, 'varient': None, 'barcode': '', 'has_physical_barcode': False, 'provider__name': 'המלביש', 'total': 3},
         for s in stock:
-            s['taken'] = obj.taken.filter(barcode=s['ppn__barcode'],has_physical_barcode=s['ppn__has_phisical_barcode'], size=s['size'], color=s['color'], varient=s['verient']).aggregate(Sum('quantity'))['quantity__sum'] or 0
+            s['taken'] = obj.taken.filter(has_physical_barcode=s['ppn__has_phisical_barcode'], size=s['size'], color=s['color'], varient=s['verient']).aggregate(Sum('quantity'))['quantity__sum'] or 0
             s['total_with_freeze'] = s['total']
-            frozen_inventory = taken_in_other_orders.filter(barcode=s['ppn__barcode'],has_physical_barcode=s['ppn__has_phisical_barcode'], size=s['size'], color=s['color'], varient=s['verient']).aggregate(Sum('quantity'))['quantity__sum'] or 0
+            frozen_inventory = taken_in_other_orders.filter(has_physical_barcode=s['ppn__has_phisical_barcode'], size=s['size'], color=s['color'], varient=s['verient']).aggregate(Sum('quantity'))['quantity__sum'] or 0
             #toOrder          = taken.filter(barcode=s['ppn__barcode'],has_physical_barcode=s['ppn__has_phisical_barcode'], size=s['size'], color=s['color'], varient=s['verient']).aggregate(Sum('toOrder'))
             s['frozen'] = frozen_inventory
             s['total'] = s['total'] - frozen_inventory

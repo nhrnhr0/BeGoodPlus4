@@ -25,7 +25,6 @@ class TakenInventory(models.Model):
     color = models.ForeignKey(to=Color, on_delete=models.SET_DEFAULT,default=76,)
     size = models.ForeignKey(to=ProductSize, on_delete=models.SET_DEFAULT, default=108,)
     varient = models.ForeignKey(to=CatalogImageVarient, on_delete=models.CASCADE, null=True, blank=True)
-    barcode = models.CharField(max_length=100, null=True, blank=True)
     has_physical_barcode = models.BooleanField(default=False)
     provider = models.ForeignKey(to=Provider, on_delete=models.CASCADE,)
     collected = models.ManyToManyField(to=CollectedInventory, related_name='taken_inventory')
@@ -41,7 +40,7 @@ class MOrderItemEntry(models.Model):
     pass
     def validate_unique(self, *args, **kwargs):
         super().validate_unique(*args, **kwargs)
-        if MOrderItemEntry.objects.filter(product=self.product.all().first(), color=self.color, size=self.size, varient=self.varient).count() > 1:
+        if MOrderItemEntry.objects.filter(orderItem=self.orderItem.all().first(), color=self.color, size=self.size, varient=self.varient).count() > 1:
             raise ValidationError("This product has already been added")
 
 class MOrderItem(models.Model):
