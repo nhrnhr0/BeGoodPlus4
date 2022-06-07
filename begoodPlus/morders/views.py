@@ -234,7 +234,7 @@ def get_order_detail_to_collect(request):
     print(morders)
     ret = []
     
-    taken_products = TakenInventory.objects.filter(Q(orderItem__morder__in=morders) & Q(quantity__gt=0)).prefetch_related('collected')
+    taken_products = TakenInventory.objects.filter(Q(orderItem__morder__in=morders) & Q(quantity__gt=0)).prefetch_related('collected', 'orderItem','orderItem__morder','orderItem__product').select_related('color', 'size', 'varient',)
     taken_products_vals = []
     for taken_product in taken_products:
         d = {
@@ -280,7 +280,7 @@ def get_order_detail_to_collect(request):
     #     taken_product_ids_objs[stock['ppn__product__id']]['stocks'].append(stock)
     
     pass
-    return JsonResponse({'success': 'success', 'taken': list(taken_products_vals), 'stocks': list(stocks)}, status=status.HTTP_200_OK)
+    return JsonResponse({'success': 'success', 'taken': taken_products_vals, 'stocks': list(stocks)}, status=status.HTTP_200_OK)
 '''
 created
 client
