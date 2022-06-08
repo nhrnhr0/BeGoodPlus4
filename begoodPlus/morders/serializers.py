@@ -10,7 +10,7 @@ from catalogImages.serializers import CatalogImageSerializer
 from django.db.models import Sum, Avg
 from django.db.models import OuterRef, Subquery
 from provider.serializers import SvelteProviderSerializer
-from .models import MOrder, MOrderItem, MOrderItemEntry, TakenInventory
+from .models import CollectedInventory, MOrder, MOrderItem, MOrderItemEntry, TakenInventory
 from django.db import models
 from django.db.models import Q
 
@@ -144,9 +144,22 @@ class AdminMOrderSerializer(serializers.ModelSerializer):
     
 class MOrderCollectionSerializer(serializers.ModelSerializer):
     client_businessName = serializers.CharField(source='client.businessName', read_only=False, default='')
+    taken_count = serializers.SerializerMethodField('get_taken_count')
+    collected_sum = serializers.SerializerMethodField('get_collected_sum')
+    def get_taken_count(self, obj):
+        return obj.products.all().prefetch_related('taken').aggregate(Sum('taken__quantity'))['taken__quantity__sum'] or 0
+    
+    def get_collected_sum(self, obj):
+        qyt = 0
+        qs = obj.products.all().prefetch_related('taken', 'taken__collected')
+        for p in qs:
+            for t in p.taken.all():
+                for c in t.collected.all():
+                    qyt += c.quantity
+        return qyt
     class Meta:
         model = MOrder
-        fields = ('id', 'name', 'created', 'updated', 'client','message','client_businessName',)
+        fields = ('id', 'name', 'created', 'updated', 'client','message','client_businessName', 'taken_count','collected_sum')
         
 '''
 product

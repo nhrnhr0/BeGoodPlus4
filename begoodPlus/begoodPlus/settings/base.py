@@ -100,6 +100,7 @@ INSTALLED_APPS = [
     'catalogImageAttrs',
     'morders',
     'inventory',
+    'smartbee',
     
     #### old unused modals ####
     'clientLikedImages',

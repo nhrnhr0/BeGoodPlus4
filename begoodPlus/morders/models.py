@@ -1,4 +1,5 @@
 from decimal import Decimal
+import secrets
 from django.forms import ValidationError
 from django.urls import reverse
 
@@ -15,7 +16,18 @@ from productSize.models import ProductSize
 from catalogImages.models import CatalogImageVarient
 from provider.models import Provider
 from django.utils.html import mark_safe
-
+import datetime
+from django.db.models import Count, F, Value
+from django.db.models import OuterRef, Subquery
+from django.db.models import Q
+from django.contrib.postgres.aggregates import ArrayAgg
+from django.db.models import Sum, Avg, When, Case
+from django.db.models.functions import Substr
+from django.db.models.functions import Concat
+from django.db.models.functions import Length
+from begoodPlus.secrects import SMARTBEE_DOMAIN, SMARTBEE_providerUserToken
+from smartbee.models import SmartbeeTokens
+import requests
 class CollectedInventory(models.Model):
     warehouseStock = models.ForeignKey(WarehouseStock, on_delete=models.CASCADE, related_name='collectedInventory')
     quantity = models.IntegerField(default=0)
@@ -94,7 +106,68 @@ class MOrder(models.Model):
     
     class Meta:
         ordering = ['-created']
-    
+        
+    def morder_to_smartbe_json(self):
+        collected_items = CollectedInventory.objects.filter(taken_inventory__orderItem__morder=self)
+        vals = collected_items.values('warehouseStock__ppn__product__id', 'warehouseStock__ppn__product__title','warehouseStock__ppn__barcode', 'taken_inventory__orderItem__price')\
+            .order_by('warehouseStock__ppn__product__title', 'warehouseStock__ppn__barcode')\
+                    .annotate(quantity=Sum('quantity'), providerItemId=F('warehouseStock__ppn__product__id'),barcodeLen=Length(F('warehouseStock__ppn__barcode')),
+                            catNumber=F('warehouseStock__ppn__product__id'),pricePerUnit=F('taken_inventory__orderItem__price'),
+                            vatOption=Value("NotInclude", output_field=models.CharField()),description=Case(
+                                When(barcodeLen__gte=1, then=Concat(F('warehouseStock__ppn__barcode',), Value(' | '), F('warehouseStock__ppn__product__title'))),
+                                default=F('warehouseStock__ppn__product__title'),
+                            ))\
+                                .values('quantity', 'providerItemId', 'catNumber', 'pricePerUnit', 'vatOption', 'description')
+
+        info = {
+            "providerUserToken": SMARTBEE_providerUserToken,
+            "providerMsgId": datetime.datetime.now().strftime("%Y%m%d%H%M%S"),
+            "providerMsgReferenceId": "something 123456",
+            "customer":{
+                'providerCustomerId': self.client.user.id if self.client else None,
+                'name': self.name,
+                #'email': self.email,
+                #'mainPhone': self.phone,
+                'dealerNumber': self.client.privateCompany if self.client else None,
+                'netEOM': 30,
+            },
+            "docType": "Invoice",
+            "createDraftOnFailure": True,
+            "dueDate": self.updated.strftime("%Y-%m-%d"),
+            "title": 'הזמנה מספר ' + str(self.id),
+            "extraCommentsForEmail": "",
+            "currency": {
+                "currencyType": "ILS",
+                "rate": 0
+            },
+            "documentItems": {
+                "paymentItems": list(vals),
+                "discount": {
+                    "discountValueType": "Percentage",
+                    "value": 0
+                },
+                "roundTotalSum": True
+            },
+            "isSendOrigEng": False,
+            "docDate": datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S+03:00"),
+        }
+        return info
+        
+    def create_smartbe_order(self):
+        info = self.morder_to_smartbe_json()
+        print('providerMsgId: ', info['providerMsgId'])
+        smartbee_auth = SmartbeeTokens.get_or_create_token()
+        headers = {"Authorization": "Bearer " + smartbee_auth.token}
+        smartbee_response = requests.post(SMARTBEE_DOMAIN + '/api/v1/documents/create' , json=info,headers=headers)
+        if smartbee_response.status_code == 200:
+            # self.isOrder = True
+            # self.save()
+            data = smartbee_response.json()
+            print(data)
+            return data
+        else:
+            print(smartbee_response)
+            print(smartbee_response.json())
     def get_exel_data(self):
         # שם	כמות	מחיר מכירה ללא מע"מ	ספקים
         products = []

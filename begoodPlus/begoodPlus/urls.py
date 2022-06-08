@@ -27,7 +27,7 @@ from catalogImages.views import admin_api_get_product_cost_price, all_images_ids
 from clientApi.views import ColorsClientViewSet, ImageClientViewSet, SizesClientViewSet,LogoClientViewSet, get_album_images
 from clientApi.views import AlbumClientViewSet
 from catalogImageDetail.views import SvelteCatalogImageDetailViewSet
-from morders.views import api_edit_order_add_product, api_get_order_data, api_get_order_data2, edit_morder, get_all_orders,dashboard_orders_collection_collect_save, get_order_detail_to_collect, list_orders_to_collect, morder_edit_order_add_product_entries,api_delete_order_data_item, morder_edit_order_add_product_entries_2,view_morder_pdf, view_morder_stock_document
+from morders.views import api_edit_order_add_product, api_get_order_data, api_get_order_data2, dashboard_orders_collection_smartbee, edit_morder, get_all_orders,dashboard_orders_collection_collect_save, get_order_detail_to_collect, list_orders_to_collect, morder_edit_order_add_product_entries,api_delete_order_data_item, morder_edit_order_add_product_entries_2,view_morder_pdf, view_morder_stock_document
 from packingType.views import SvelteApiPackingTypeViewSet
 from color.views import SvelteColorsViewSet
 from catalogImages.views import SvelteCatalogImageViewSet, create_mini_table, catalogimage_upload_slim_excel
@@ -146,6 +146,7 @@ urlpatterns = [
     path('morders/list-orders-to-collect', list_orders_to_collect, name='admin_list_orders_to_collect'),
     path('morders/get-order-detail-to-collect', get_order_detail_to_collect, name='admin_get_order_detail_to_collect'),
     path('dashboard/orders-collection/collect/save', dashboard_orders_collection_collect_save, name='admin_dashboard_orders_collection_collect_save'),
+    path('dashboard/orders-collection/smartbee/<int:id>', dashboard_orders_collection_smartbee, name='admin_dashboard_orders_collection_smartbee'),
     path('api/get-all-orders', get_all_orders, name='admin_get_all_orders'),
     path('search-ppn/', search_ppn, name='search_ppn'),
     #path('api/', include(router.urls)),

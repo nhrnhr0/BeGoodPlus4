@@ -1,3 +1,5 @@
+from ast import Return
+import datetime
 from gettext import Catalog
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
@@ -5,6 +7,7 @@ from django.shortcuts import render
 from catalogImages.models import CatalogImage
 from inventory.models import WarehouseStock
 from provider.models import Provider
+from smartbee.models import SmartbeeTokens
 from .serializers import AdminMOrderItemSerializer, AdminMOrderListSerializer, AdminMOrderSerializer, MOrderCollectionSerializer
 from morders.models import CollectedInventory, MOrder, MOrderItem, MOrderItemEntry, TakenInventory
 from rest_framework import status
@@ -187,15 +190,37 @@ def api_edit_order_add_product(request):
                 return JsonResponse({'error': 'You are not authorized to perform this action'}, status=status.HTTP_401_UNAUTHORIZED)
                 # TODO: continue from here
                 
+from django.db import models
 
 from django.db.models import Count, F, Value
 from django.db.models import OuterRef, Subquery
 from django.db.models import Q
 from django.contrib.postgres.aggregates import ArrayAgg
+from django.db.models import Sum, Avg, When, Case
+from django.db.models.functions import Substr
+from django.db.models.functions import Concat
+from django.db.models.functions import Length
+
+
+
+
+@api_view(['POST', 'GET'])
+def dashboard_orders_collection_smartbee(request,id):
+    if not request.user.is_superuser:
+        return JsonResponse({'error': 'You are not authorized to perform this action'}, status=status.HTTP_401_UNAUTHORIZED)
+    
+    print(id)
+    morder = MOrder.objects.get(id=id)
+    #info = morder_to_smartbe_json(morder)
+    info = morder.create_smartbe_order()
+    
+    return JsonResponse({'success': 'success', 'data': info}, status=status.HTTP_200_OK)
 
 @api_view(['POST'])
 def dashboard_orders_collection_collect_save(request):
     print(request)
+    if not request.user.is_superuser:
+        return JsonResponse({'error': 'You are not authorized to perform this action'}, status=status.HTTP_401_UNAUTHORIZED)
     data = json.loads(request.body)
     #print(data)
     for d in data:
@@ -222,7 +247,8 @@ def dashboard_orders_collection_collect_save(request):
                 collectedObj.save()
                 # obj.collected_amount = collected_amount
                 # obj.save()
-    pass
+    return JsonResponse({'success': 'success'}, status=status.HTTP_200_OK)
+    
 
 @api_view(['GET'])
 def get_order_detail_to_collect(request):
@@ -234,7 +260,7 @@ def get_order_detail_to_collect(request):
     print(morders)
     ret = []
     
-    taken_products = TakenInventory.objects.filter(Q(orderItem__morder__in=morders) & Q(quantity__gt=0)).prefetch_related('collected', 'orderItem','orderItem__morder','orderItem__product').select_related('color', 'size', 'varient',)
+    taken_products = TakenInventory.objects.filter(Q(orderItem__morder__in=morders) & (Q(quantity__gt=0) | ~Q(collected=None))).prefetch_related('collected', 'orderItem','orderItem__morder','orderItem__product').select_related('color', 'size', 'varient',)
     taken_products_vals = []
     for taken_product in taken_products:
         d = {
