@@ -6,6 +6,7 @@ from rest_framework import serializers
 
 class WarehouseStockSerializer(serializers.ModelSerializer):
     product_name= serializers.CharField(source='ppn.product.title')
+    product_image = serializers.CharField(source='ppn.product.cimage')
     product_id=  serializers.CharField(source='ppn.product.id')
     size_name=  serializers.CharField(source='size.size')
     color_name=  serializers.CharField(source='color.name')
@@ -17,7 +18,7 @@ class WarehouseStockSerializer(serializers.ModelSerializer):
     has_phisical_barcode = serializers.BooleanField(source='ppn.has_phisical_barcode')
     class Meta:
         model = WarehouseStock
-        fields = ('id', 'created_at','updated_at','warehouse','warehouse_name', 'ppn','size','color','verient','quantity','created_at','updated_at','avgPrice','product_name','product_id','size_name','color_name','verient_name','provider_id', 'provider_name','barcode', 'has_phisical_barcode',)
+        fields = ('id', 'created_at','updated_at','warehouse','warehouse_name', 'ppn','size','color','verient','quantity','created_at','updated_at','avgPrice','product_name','product_image','product_id','size_name','color_name','verient_name','provider_id', 'provider_name','barcode', 'has_phisical_barcode',)
 
 class PPNSerializer(serializers.ModelSerializer):
     product_id = serializers.CharField(source='product.id')

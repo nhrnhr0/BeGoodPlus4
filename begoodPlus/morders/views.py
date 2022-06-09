@@ -8,8 +8,8 @@ from catalogImages.models import CatalogImage
 from inventory.models import WarehouseStock
 from provider.models import Provider
 from smartbee.models import SmartbeeTokens
-from .serializers import AdminMOrderItemSerializer, AdminMOrderListSerializer, AdminMOrderSerializer, MOrderCollectionSerializer
-from morders.models import CollectedInventory, MOrder, MOrderItem, MOrderItemEntry, TakenInventory
+from .serializers import AdminMOrderItemSerializer, AdminMOrderListSerializer, AdminMOrderSerializer, AdminProviderRequestrSerializer, MOrderCollectionSerializer
+from morders.models import CollectedInventory, MOrder, MOrderItem, MOrderItemEntry, ProviderRequest, TakenInventory
 from rest_framework import status
 import json
 from rest_framework.decorators import api_view
@@ -58,6 +58,38 @@ def view_morder_pdf(request, id):
 
 
 
+
+@api_view(['POST'])
+def morder_edit_order_add_provider_entries(request,entry_id):
+    if not request.user.is_superuser:
+        return JsonResponse({'error': 'You are not authorized to perform this action'}, status=status.HTTP_401_UNAUTHORIZED)
+    orderItem = MOrderItem.objects.get(id=entry_id)
+    data_provider = request.data.get('provider')
+    data_size = request.data.get('size')
+    data_varient = request.data.get('varient')
+    data_color = request.data.get('color')
+    data_need_phisical_barcode = request.data.get('need_phisical_barcode')
+    data_quantity = request.data.get('quantity')
+    
+    
+    print(data_provider)
+    print(data_size)
+    print(data_varient)
+    print(data_color)
+    print(data_need_phisical_barcode)
+    print(data_quantity)
+    existing = orderItem.toProviders.filter(provider_id=data_provider, size_id=data_size, varient_id=data_varient, color_id=data_color, force_physical_barcode=data_need_phisical_barcode)
+    if existing.exists():
+        entry = existing.first()
+        entry.update(quantity=data_quantity)
+    else:
+        entry = ProviderRequest(provider_id=data_provider, size_id=data_size, varient_id=data_varient, color_id=data_color, force_physical_barcode=data_need_phisical_barcode, quantity=data_quantity)
+        entry.save()
+        orderItem.toProviders.add(entry)
+    data = AdminProviderRequestrSerializer(entry).data
+    return JsonResponse({'success': 'success','data': data}, status=status.HTTP_200_OK)
+    
+    pass
 @api_view(["POST"])
 def morder_edit_order_add_product_entries_2(request):
     if not request.user.is_superuser:
@@ -156,7 +188,23 @@ def api_delete_order_data_item(request, row_id):
             except:
                 return JsonResponse({'error': 'You are not authorized to perform this action'}, status=status.HTTP_401_UNAUTHORIZED)
 
+@api_view(["DELETE"])
+def api_edit_order_delete_product(request):
+    if not request.user.is_superuser:
+        return JsonResponse({'error': 'You are not authorized to perform this action'}, status=status.HTTP_401_UNAUTHORIZED)
+    else:
+        if request.method != "DELETE":
+            return JsonResponse({'error': 'You are not authorized to perform this action'}, status=status.HTTP_401_UNAUTHORIZED)
+        else:
+            try:
+                entry_id = request.data.get('entry_id')
+                entry = MOrderItem.objects.get(id=int(entry_id))
+                entry.delete()
+                return JsonResponse({'success': 'success'}, status=status.HTTP_200_OK)
+            except:
+                return JsonResponse({'error': 'You are not authorized to perform this action'}, status=status.HTTP_401_UNAUTHORIZED)
 
+@api_view(["POST"])
 def api_edit_order_add_product(request):
     if not request.user.is_superuser:
         return JsonResponse({'error': 'You are not authorized to perform this action'}, status=status.HTTP_401_UNAUTHORIZED)
@@ -446,7 +494,7 @@ def api_get_order_data2(request, id):
                 #     obj.delete()
                 obj.save()
         order.save()
-    order = MOrder.objects.select_related('client','agent').prefetch_related('products','products__product__albums','products__taken', 'products__entries','products__entries__color','products__entries__size','products__entries__varient',).get(id=id)# 'products__taken__quantity','products__taken__color','products__taken__size','products__taken__varient','products__taken__barcode','products__taken__has_physical_barcode','products__taken__provider')
+    order = MOrder.objects.select_related('client','agent').prefetch_related('products__toProviders', 'products','products__product__albums','products__taken', 'products__entries','products__entries__color','products__entries__size','products__entries__varient',).get(id=id)# 'products__taken__quantity','products__taken__color','products__taken__size','products__taken__varient','products__taken__barcode','products__taken__has_physical_barcode','products__taken__provider')
     data = AdminMOrderSerializer(order).data
     return JsonResponse(data, status=status.HTTP_200_OK)
 @api_view(['GET'])

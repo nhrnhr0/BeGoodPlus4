@@ -55,6 +55,16 @@ class MOrderItemEntry(models.Model):
         if MOrderItemEntry.objects.filter(orderItem=self.orderItem.all().first(), color=self.color, size=self.size, varient=self.varient).count() > 1:
             raise ValidationError("This product has already been added")
 
+
+class ProviderRequest(models.Model):
+    provider = models.ForeignKey(to=Provider, on_delete=models.CASCADE, related_name='provider_request')
+    size= models.ForeignKey(to=ProductSize, on_delete=models.SET_DEFAULT, default=108, null=True, blank=True)
+    varient = models.ForeignKey(to=CatalogImageVarient, on_delete=models.CASCADE, null=True, blank=True)
+    color = models.ForeignKey(to=Color, on_delete=models.SET_DEFAULT,default=76, null=True, blank=True)
+    force_physical_barcode = models.BooleanField(default=False)
+    quantity = models.IntegerField(default=0)
+    
+
 class MOrderItem(models.Model):
     """
     This is the model for the items in the order.
@@ -77,6 +87,7 @@ class MOrderItem(models.Model):
     comment = models.TextField(null=True, blank=True)
     entries = models.ManyToManyField(to=MOrderItemEntry, blank=True, related_name='orderItem')
     taken = models.ManyToManyField(to=TakenInventory, blank=True, related_name='orderItem')
+    toProviders = models.ManyToManyField(to=ProviderRequest, blank=True, related_name='orderItem')
     prop_totalEntriesQuantity = property(lambda self: sum([entry.quantity for entry in self.entries.all()]))
     prop_totalPrice = property(lambda self: self.prop_totalEntriesQuantity * self.price)
     class Meta:

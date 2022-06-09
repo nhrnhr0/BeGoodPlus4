@@ -10,7 +10,7 @@ from catalogImages.serializers import CatalogImageSerializer
 from django.db.models import Sum, Avg
 from django.db.models import OuterRef, Subquery
 from provider.serializers import SvelteProviderSerializer
-from .models import CollectedInventory, MOrder, MOrderItem, MOrderItemEntry, TakenInventory
+from .models import CollectedInventory, MOrder, MOrderItem, MOrderItemEntry, ProviderRequest, TakenInventory
 from django.db import models
 from django.db.models import Q
 
@@ -27,6 +27,12 @@ class AdminMOrderItemEntrySerializer(serializers.ModelSerializer):
 
 
 
+class AdminProviderRequestrSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProviderRequest
+        fields = '__all__'
+        pass
+
 
 class AdminMOrderItemSerializer(serializers.ModelSerializer):
     product_name = serializers.CharField(source='product.title')
@@ -39,6 +45,7 @@ class AdminMOrderItemSerializer(serializers.ModelSerializer):
     # verients = serializers.SerializerMethodField('get_verients')
     available_inventory = serializers.SerializerMethodField('get_available_inventory')
     product = serializers.SerializerMethodField('get_product_serializer')
+    toProviders = AdminProviderRequestrSerializer(many=True, read_only=True)
     
     def get_product_serializer(self, obj):
         # serializer_context = {'request': self.context.get('request') }
@@ -114,7 +121,7 @@ class AdminMOrderItemSerializer(serializers.ModelSerializer):
         return list(ids)
     class Meta:
         model = MOrderItem
-        fields = ('id', 'product',  'price','providers', 'ergent', 'prining', 'embroidery', 'comment','product_name', 'entries','pbarcode','product_cimage','available_inventory','product','priningComment','embroideryComment',)
+        fields = ('id', 'product',  'price','providers', 'ergent', 'prining', 'embroidery', 'comment','product_name', 'entries','pbarcode','product_cimage','available_inventory','product','priningComment','embroideryComment','toProviders',)
     
 
 class AdminMOrderListSerializer(serializers.ModelSerializer):
@@ -131,8 +138,7 @@ class AdminMOrderListSerializer(serializers.ModelSerializer):
     class Meta:
         model = MOrder
         #order_by = ('created','id')
-        fields = ('id', 'agent', 'agent_name', 'client', 'status', 'created', 'updated', 'message', 'name', 'phone', 'email', 'client_businessName','total_price','products_count',)
-
+        fields = ('id', 'agent', 'agent_name', 'client', 'status', 'created', 'updated', 'message', 'name', 'phone', 'email', 'client_businessName','total_price','products_count','freezeTakenInventory','isOrder','sendProviders','startCollecting','archive',)
 class AdminMOrderSerializer(serializers.ModelSerializer):
     products = AdminMOrderItemSerializer(many=True, read_only=True)
     client_businessName = serializers.CharField(source='client.businessName', read_only=False, default='')

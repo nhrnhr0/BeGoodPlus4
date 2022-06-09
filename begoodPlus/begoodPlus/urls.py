@@ -27,7 +27,7 @@ from catalogImages.views import admin_api_get_product_cost_price, all_images_ids
 from clientApi.views import ColorsClientViewSet, ImageClientViewSet, SizesClientViewSet,LogoClientViewSet, get_album_images
 from clientApi.views import AlbumClientViewSet
 from catalogImageDetail.views import SvelteCatalogImageDetailViewSet
-from morders.views import api_edit_order_add_product, api_get_order_data, api_get_order_data2, dashboard_orders_collection_smartbee, edit_morder, get_all_orders,dashboard_orders_collection_collect_save, get_order_detail_to_collect, list_orders_to_collect, morder_edit_order_add_product_entries,api_delete_order_data_item, morder_edit_order_add_product_entries_2,view_morder_pdf, view_morder_stock_document
+from morders.views import api_edit_order_add_product, api_edit_order_delete_product,api_get_order_data, api_get_order_data2, dashboard_orders_collection_smartbee, edit_morder, get_all_orders,dashboard_orders_collection_collect_save, get_order_detail_to_collect, list_orders_to_collect, morder_edit_order_add_product_entries,api_delete_order_data_item, morder_edit_order_add_product_entries_2, morder_edit_order_add_provider_entries,view_morder_pdf, view_morder_stock_document
 from packingType.views import SvelteApiPackingTypeViewSet
 from color.views import SvelteColorsViewSet
 from catalogImages.views import SvelteCatalogImageViewSet, create_mini_table, catalogimage_upload_slim_excel
@@ -137,9 +137,11 @@ urlpatterns = [
     path('morders/api-get-order-data2/<int:id>', api_get_order_data2, name='admin_api_get_order_data2'),
     
     path('morders/api-edit-order/add-new-product', api_edit_order_add_product, name="admin_api_edit_order_add_product"),
+    path('morders/api-edit-order/delete-product-from-morder', api_edit_order_delete_product, name="admin_api_edit_order_delete_product"),
     path('morders/delete-product/<int:row_id>', api_delete_order_data_item, name='admin_api_delete_order_data_item'),
     path('morders/edit-order-add-product-entries', morder_edit_order_add_product_entries,name="morder_edit_order_add_product_entries"),
     path('morders/edit-order-add-product-entries/v2', morder_edit_order_add_product_entries_2,name="morder_edit_order_add_product_entries"),
+    path('morders/edit-order-add-provider-entries/<int:entry_id>', morder_edit_order_add_provider_entries,name="morder_edit_order_add_provider_entries"),
     path('morders/view-order-pdf/<int:id>', view_morder_pdf, name='view_morder_pdf'),
     path('morders/view_morder_stock_document/<int:id>', view_morder_stock_document, name='view_morder_stock_document'),
     
