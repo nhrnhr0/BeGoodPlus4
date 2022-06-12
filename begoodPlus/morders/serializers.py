@@ -33,11 +33,11 @@ class AdminProviderRequestrSerializer(serializers.ModelSerializer):
     size__code = serializers.CharField(source='size.code',default='',)
     varient__str = serializers.CharField(source='varient.name',default='',)
     color__str = serializers.CharField(source='color.name',default='',)
-    
+    color__color = serializers.CharField(source='color.color',default='',)
     
     class Meta:
         model = ProviderRequest
-        fields = ('id', 'provider', 'size', 'varient', 'color', 'provider__str', 'size__str','size__code', 'varient__str', 'color__str','quantity')
+        fields = ('id', 'provider','force_physical_barcode', 'size', 'varient', 'color', 'provider__str', 'size__str','size__code', 'varient__str', 'color__str', 'color__color','quantity')
         pass
 
 
