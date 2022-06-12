@@ -28,9 +28,16 @@ class AdminMOrderItemEntrySerializer(serializers.ModelSerializer):
 
 
 class AdminProviderRequestrSerializer(serializers.ModelSerializer):
+    provider__str = serializers.CharField(source='provider.name',default='',)
+    size__str = serializers.CharField(source='size.size',default='',)
+    size__code = serializers.CharField(source='size.code',default='',)
+    varient__str = serializers.CharField(source='varient.name',default='',)
+    color__str = serializers.CharField(source='color.name',default='',)
+    
+    
     class Meta:
         model = ProviderRequest
-        fields = '__all__'
+        fields = ('id', 'provider', 'size', 'varient', 'color', 'provider__str', 'size__str','size__code', 'varient__str', 'color__str','quantity')
         pass
 
 

@@ -63,7 +63,8 @@ class ProviderRequest(models.Model):
     color = models.ForeignKey(to=Color, on_delete=models.SET_DEFAULT,default=76, null=True, blank=True)
     force_physical_barcode = models.BooleanField(default=False)
     quantity = models.IntegerField(default=0)
-    
+    class Meta:
+        ordering = ['provider', 'color', 'varient','force_physical_barcode', 'size']
 
 class MOrderItem(models.Model):
     """

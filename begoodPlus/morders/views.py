@@ -81,7 +81,7 @@ def morder_edit_order_add_provider_entries(request,entry_id):
     existing = orderItem.toProviders.filter(provider_id=data_provider, size_id=data_size, varient_id=data_varient, color_id=data_color, force_physical_barcode=data_need_phisical_barcode)
     if existing.exists():
         entry = existing.first()
-        entry.update(quantity=data_quantity)
+        entry.quantity=data_quantity
     else:
         entry = ProviderRequest(provider_id=data_provider, size_id=data_size, varient_id=data_varient, color_id=data_color, force_physical_barcode=data_need_phisical_barcode, quantity=data_quantity)
         entry.save()
