@@ -26,7 +26,39 @@ class AdminMOrderItemEntrySerializer(serializers.ModelSerializer):
     pass
 
 
+class AdminProviderResuestSerializerWithMOrder(serializers.ModelSerializer):
+    '''
+        id
+        provider
+        size
+        varient
+        color
+        force_physical_barcode
+        quantity
+        orderItem__product
+        orderItem__morder
+    '''
+    morder = serializers.SerializerMethodField()
+    product = serializers.SerializerMethodField()
+    
+    def get_morder(self, originalObj):
+        obj = originalObj.orderItem.first()
+        print('get_morder', obj)
+        if obj:
+            return list(obj.morder.all().values_list('id', flat=True))
+        return ''
+    
+    def get_product(self, originalObj):
+        obj = originalObj.orderItem.first()
+        print('get_product', obj)
+        if obj:
+            return obj.product.id
+        return ''
 
+    class Meta:
+        model = ProviderRequest
+        fields = ('id', 'provider', 'size', 'varient', 'color', 'force_physical_barcode', 'quantity', 'morder', 'product')
+        
 class AdminProviderRequestrSerializer(serializers.ModelSerializer):
     provider__str = serializers.CharField(source='provider.name',default='',)
     size__str = serializers.CharField(source='size.size',default='',)

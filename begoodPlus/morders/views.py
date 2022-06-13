@@ -8,7 +8,7 @@ from catalogImages.models import CatalogImage
 from inventory.models import WarehouseStock
 from provider.models import Provider
 from smartbee.models import SmartbeeTokens
-from .serializers import AdminMOrderItemSerializer, AdminMOrderListSerializer, AdminMOrderSerializer, AdminProviderRequestrSerializer, MOrderCollectionSerializer
+from .serializers import AdminMOrderItemSerializer, AdminMOrderListSerializer, AdminMOrderSerializer, AdminProviderRequestrSerializer, AdminProviderResuestSerializerWithMOrder, MOrderCollectionSerializer
 from morders.models import CollectedInventory, MOrder, MOrderItem, MOrderItemEntry, ProviderRequest, TakenInventory
 from rest_framework import status
 import json
@@ -33,7 +33,12 @@ def get_all_orders(request):
             return JsonResponse(serializer.data, status=status.HTTP_200_OK, safe=False)
 
 
-
+def load_all_provider_request_admin(request):
+    if not request.user.is_superuser:
+        return HttpResponseRedirect('/admin/login/?next=' + request.path)
+    data = ProviderRequest.objects.all().prefetch_related('provider').select_related('provider')
+    serializer = AdminProviderResuestSerializerWithMOrder(data, many=True)
+    return JsonResponse(serializer.data, status=status.HTTP_200_OK, safe=False)
 
 
 
@@ -85,8 +90,8 @@ def morder_edit_order_add_provider_entries(request,entry_id):
     else:
         entry = ProviderRequest(provider_id=data_provider, size_id=data_size, varient_id=data_varient, color_id=data_color, force_physical_barcode=data_need_phisical_barcode, quantity=data_quantity)
         entry.save()
-        orderItem.toProviders.add(entry)
-    data = AdminProviderRequestrSerializer(entry).data
+    orderItem.toProviders.add(entry)
+    data = AdminProviderRequestrSerializer(orderItem.toProviders, many=True).data
     return JsonResponse({'success': 'success','data': data}, status=status.HTTP_200_OK)
     
     pass
@@ -106,7 +111,7 @@ def morder_edit_order_add_product_entries_2(request):
             varient_id = None
         orderObj = MOrderItem.objects.get(id=int(entry_id))
         entry = MOrderItemEntry.objects.filter(
-                    product=orderObj,
+                    orderItem=orderObj,
                     color_id=color_id,
                     size_id=size_id,
                     varient_id=varient_id,
@@ -120,7 +125,7 @@ def morder_edit_order_add_product_entries_2(request):
                 varient_id=varient_id,
                 quantity=0
             )
-            entry.product.set([orderObj])
+            entry.orderItem.set([orderObj])
             entry.save()
             new_entries = AdminMOrderItemSerializer(orderObj).data
             return JsonResponse({'success': 'success', 'data': new_entries}, status=status.HTTP_200_OK)
@@ -432,6 +437,40 @@ def api_get_order_data2(request, id):
                 )
                 item.morder.set([MOrder.objects.get(id=id)])
                 item.save()
+            
+            
+            for provider_entry in product['toProviders']:
+                print('toProviders', provider_entry)
+                if provider_entry.get('id', None) != None:
+                    try:
+                        obj = ProviderRequest.objects.get(id=provider_entry['id'])
+                        obj.quantity = provider_entry['quantity']
+                        obj.orderItem.set([item])
+                        obj.save()
+                    except ProviderRequest.DoesNotExist:
+                        # create new
+                        obj = ProviderRequest.objects.create(
+                            provider_id=provider_entry['provider'],
+                            size_id=provider_entry['size'],
+                            varient_id=provider_entry.get('verient', None),
+                            color_id=provider_entry['color'],
+                            force_physical_barcode=provider_entry['force_physical_barcode'],
+                            quantity=provider_entry['quantity'],)
+                        obj.orderItem.set([item])
+                        obj.save()
+                else:
+                    # create new
+                    obj = ProviderRequest.objects.create(
+                        provider_id=provider_entry['provider'],
+                        size_id=provider_entry['size'],
+                        varient_id=provider_entry.get('verient', None),
+                        color_id=provider_entry['color'],
+                        force_physical_barcode=provider_entry['force_physical_barcode'],
+                        quantity=provider_entry['quantity'],)
+                    obj.orderItem.set([item])
+                    obj.save()
+                if obj.quantity < 0:
+                    obj.delete()
             for entry in product['entries']:
                 if entry.get('id', None) != None:
                     
@@ -454,6 +493,8 @@ def api_get_order_data2(request, id):
                     )
                     dbEntry.orderItem.set([item])
                     dbEntry.save()
+                if dbEntry.quantity < 0:
+                    dbEntry.delete()
                 # if dbEntry and dbEntry.id and dbEntry.quantity <= -1:
                 #     dbEntry.delete()
 
@@ -493,6 +534,9 @@ def api_get_order_data2(request, id):
                 # if obj.quantity < 0:# and obj.toOrder <= 0:
                 #     obj.delete()
                 obj.save()
+        
+        
+                
         order.save()
     order = MOrder.objects.select_related('client','agent').prefetch_related('products__toProviders', 'products','products__product__albums','products__taken', 'products__entries','products__entries__color','products__entries__size','products__entries__varient',).get(id=id)# 'products__taken__quantity','products__taken__color','products__taken__size','products__taken__varient','products__taken__barcode','products__taken__has_physical_barcode','products__taken__provider')
     data = AdminMOrderSerializer(order).data
