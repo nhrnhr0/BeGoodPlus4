@@ -19,7 +19,6 @@ def create_client_user(request):
     if not request.user.is_superuser:
         return HttpResponseRedirect('/admin/login/?next=' + request.path)
     if request.method == 'POST':
-        messages = []
         data = request.POST
         buisness_name = data.get('buisness_name', None)
         name = data.get('name', None)
@@ -51,7 +50,7 @@ def create_client_user(request):
             client.name = name
             client.phone = phone
             client.businessName = buisness_name
-            client.clientType = store_type_obj
+            client.storeType = store_type_obj
             client.tariff = price
             client.show_prices = True
             client.save()
@@ -60,12 +59,29 @@ def create_client_user(request):
         else:
             messages.append('חשבון לקוח קיים')
             messages.append('<a href="{}" target="_blank">לחץ כאן לעריכה</a>'.format('/admin/client/client/{}/change/'.format(client.user.id)))
+        message_content_html = '''
+לקוח יקר, תודה על הצטרפותך לממשק הדיגיטלי שלנו! <br>
+קישור לאתר - https://www.ms-global.co.il/ <br>
+לוחצים על המנעול בחלק העליון של האתר ומזינים פרטים <br>
+שם משתמש: {{ newUsername }} <br>
+סיסמא: {{ newPass }}
+        '''
+        message_content_html = message_content_html.replace('{{ newUsername }}', user.username)
+        message_content_html = message_content_html.replace('{{ newPass }}', newPass)
+        message_content = message_content_html.replace('<br>', "‏‎\n\r")
         
+        return render(request, 'create_client_user.html', context={
+            'messages': messages,
+            'store_types': ClientType.objects.all(),
+            'newUsername': user.username,
+            'newPass': newPass,
+            'message_content': message_content,
+            'message_content_html': message_content_html,
+        })
     return render(request, 'create_client_user.html', context={
         'messages': messages,
         'store_types': ClientType.objects.all(),
     })
-
 
 @api_view(['GET'])
 def get_all_users_by_admin(request):
