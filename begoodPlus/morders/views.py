@@ -36,7 +36,8 @@ def get_all_orders(request):
 def load_all_provider_request_admin(request):
     if not request.user.is_superuser:
         return HttpResponseRedirect('/admin/login/?next=' + request.path)
-    data = ProviderRequest.objects.all().prefetch_related('provider').select_related('provider')
+    # filter only ProviderRequest.orderItem(m2m).morder(m2m).sendProviders = True
+    data = ProviderRequest.objects.filter(orderItem__morder__sendProviders=True).order_by('orderItem__morder','orderItem__product',).prefetch_related('provider').select_related('provider')
     serializer = AdminProviderResuestSerializerWithMOrder(data, many=True)
     return JsonResponse(serializer.data, status=status.HTTP_200_OK, safe=False)
 
