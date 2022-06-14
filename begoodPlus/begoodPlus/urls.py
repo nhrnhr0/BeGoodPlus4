@@ -27,7 +27,7 @@ from catalogImages.views import admin_api_get_product_cost_price, all_images_ids
 from clientApi.views import ColorsClientViewSet, ImageClientViewSet, SizesClientViewSet,LogoClientViewSet, get_album_images
 from clientApi.views import AlbumClientViewSet
 from catalogImageDetail.views import SvelteCatalogImageDetailViewSet
-from morders.views import api_edit_order_add_product, api_edit_order_delete_product,api_get_order_data, api_get_order_data2, dashboard_orders_collection_smartbee, edit_morder, get_all_orders,dashboard_orders_collection_collect_save, get_order_detail_to_collect, list_orders_to_collect, load_all_provider_request_admin, morder_edit_order_add_product_entries,api_delete_order_data_item, morder_edit_order_add_product_entries_2, morder_edit_order_add_provider_entries,view_morder_pdf, view_morder_stock_document
+from morders.views import api_edit_order_add_product, api_edit_order_delete_product,api_get_order_data, api_get_order_data2, dashboard_orders_collection_smartbee, edit_morder, get_all_orders,dashboard_orders_collection_collect_save, get_order_detail_to_collect, list_orders_to_collect, load_all_provider_request_admin, morder_edit_order_add_product_entries,api_delete_order_data_item, morder_edit_order_add_product_entries_2, morder_edit_order_add_provider_entries, provider_request_update_entry_admin,view_morder_pdf, view_morder_stock_document
 from packingType.views import SvelteApiPackingTypeViewSet
 from color.views import SvelteColorsViewSet
 from catalogImages.views import SvelteCatalogImageViewSet, create_mini_table, catalogimage_upload_slim_excel
@@ -85,6 +85,7 @@ from clientApi.views import CustomAuthToken
 #from rest_framework_simplejwt.views import (TokenObtainPairView,TokenRefreshView,)
 urlpatterns = [
     path('load-all-provider-request', load_all_provider_request_admin, name='load_all_provider_request_admin'),
+    path('update-provider-request-entry', provider_request_update_entry_admin, name='provider_request_update_entry_admin'),
     path('verify-unique-field-by-field-excel', verify_unique_field_by_field_excel),
     path('product-question', client_product_question, name='client_product_question'),
     path('product-photo', send_product_photo, name='send_product_photo'),

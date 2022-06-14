@@ -43,16 +43,16 @@ class AdminProviderResuestSerializerWithMOrder(serializers.ModelSerializer):
     
     def get_morder(self, originalObj):
         obj = originalObj.orderItem.first()
-        print('get_morder', obj)
+        #print('get_morder', obj)
         if obj:
             return obj.morder.first().id
         return ''
     
     def get_product(self, originalObj):
         obj = originalObj.orderItem.first()
-        print('get_product', obj)
+        #print('get_product', obj)
         if obj:
-            return {'id': obj.product.id, 'title': obj.product.title}
+            return {'id': obj.product.id, 'title': obj.product.title, 'cimage': obj.product.cimage}
         return ''
 
     class Meta:

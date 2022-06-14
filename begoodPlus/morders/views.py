@@ -33,11 +33,35 @@ def get_all_orders(request):
             return JsonResponse(serializer.data, status=status.HTTP_200_OK, safe=False)
 
 
+def provider_request_update_entry_admin(request):
+    if not request.user.is_superuser:
+        return HttpResponseRedirect('/admin/login/?next=' + request.path)
+    data = json.loads(request.body)
+    print(data)
+    if data.get('id', None):
+        obj = ProviderRequest.objects.get(id=data['id'])
+        obj.quantity = data['quantity']
+    else:
+        obj = ProviderRequest.objects.create(
+            provider_id=data['provider'],
+            size_id=data['size'],
+            varient_id=data['varient'],
+            color_id=data['color'],
+            force_physical_barcode=data['force_physical_barcode'],
+            quantity=data['quantity'],
+        )
+        #morder = MOrder.objects.get(id=data['morder'])
+        morderItem = MOrderItem.objects.get(product_id=data['product']['id'], morder=data['morder'])
+        obj.orderItem.add(morderItem)
+    print(obj)
+    obj.save()
+    return JsonResponse({'success': 'success',}, status=status.HTTP_200_OK)
+
 def load_all_provider_request_admin(request):
     if not request.user.is_superuser:
         return HttpResponseRedirect('/admin/login/?next=' + request.path)
     # filter only ProviderRequest.orderItem(m2m).morder(m2m).sendProviders = True
-    data = ProviderRequest.objects.filter(orderItem__morder__sendProviders=True).order_by('orderItem__morder','orderItem__product',).prefetch_related('provider').select_related('provider')
+    data = ProviderRequest.objects.filter(orderItem__morder__sendProviders=True).order_by('orderItem__morder','orderItem__product',).prefetch_related('provider','orderItem__product','orderItem__morder').select_related('provider','size','varient','color')
     serializer = AdminProviderResuestSerializerWithMOrder(data, many=True)
     return JsonResponse(serializer.data, status=status.HTTP_200_OK, safe=False)
 
