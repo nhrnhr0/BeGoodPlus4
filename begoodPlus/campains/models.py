@@ -1,5 +1,3 @@
-from enum import unique
-from turtle import title
 from django.db import models
 from core.models import SvelteCartModal
 from catalogAlbum.models import ThroughImage
