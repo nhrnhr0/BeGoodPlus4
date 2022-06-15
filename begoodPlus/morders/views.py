@@ -19,6 +19,7 @@ from django.http import HttpResponse
 from django.db import connection, reset_queries
 
 from django.template.loader import get_template
+from docxtpl import DocxTemplate
 
 @api_view(['GET'])
 def get_all_orders(request):
@@ -54,8 +55,41 @@ def provider_request_update_entry_admin(request):
         morderItem = MOrderItem.objects.get(product_id=data['product']['id'], morder=data['morder'])
         obj.orderItem.add(morderItem)
     print(obj)
+    data = AdminProviderResuestSerializerWithMOrder(obj).data
     obj.save()
-    return JsonResponse({'success': 'success',}, status=status.HTTP_200_OK)
+    return JsonResponse({'success': 'success', 'data': data}, status=status.HTTP_200_OK)
+def create_provider_docs(request):
+    if not request.user.is_superuser:
+        return JsonResponse({'error': 'You are not authorized to perform this action'}, status=status.HTTP_401_UNAUTHORIZED)
+    else:
+        provider_requests_ids = json.loads(request.GET.get('ids'))
+        objs = ProviderRequest.objects.filter(id__in=provider_requests_ids)
+        print(objs)
+        import os
+        from django.conf import settings
+
+        today = datetime.datetime.now()
+        date_time = today.strftime("%d/%m/%Y")
+        #C:/Users/ronio/Desktop/projects/BeGoodPlus4/begoodPlus
+        file_location = os.path.join(settings.BASE_DIR, 'static_cdn\\templates\\provider_template.docx')
+        doc = DocxTemplate(file_location)
+        data_table = '''<table border="1" cellspacing="0" cellpadding="0">
+            <tr>
+                <td>Product</td>
+                <td>Size</td>
+                <td>Varient</td>
+                <td>Color</td>
+            </tr>'''
+        context = { 'data_for' : "World company",
+                    'data_date' : date_time,
+                    'data_table' : data_table,}
+        doc.render(context)
+        #doc.save("generated_doc.docx")
+        #return HttpResponse(doc, content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+        response['Content-Disposition'] = 'attachment; filename=download.docx'
+        doc.save(response)
+        return response
 
 def load_all_provider_request_admin(request):
     if not request.user.is_superuser:
