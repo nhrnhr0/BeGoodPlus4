@@ -38,7 +38,7 @@ class MOrderAdmin(admin.ModelAdmin):
     model = MOrder
     fields = ('cart', 'client', 'name', 'phone', 'email', 'status', 'message', 'products_display',) # what is this for?
     readonly_fields = ('created', 'updated', 'products_display','get_edit_url','view_morder_pdf_link','view_morder_stock_document_link',)
-    list_display = ('id', 'client', 'status', 'created', 'updated','get_edit_url', 'view_morder_pdf_link','view_morder_stock_document_link',)
+    list_display = ('id', 'client', 'name','status', 'created', 'updated','get_edit_url', 'view_morder_pdf_link','view_morder_stock_document_link',)
     #filter_horizontal = ('products',)
     actions = ('export_to_excel',)
     def export_to_excel(self, request, queryset):
