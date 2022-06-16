@@ -20,6 +20,8 @@ from django.db import connection, reset_queries
 
 from django.template.loader import get_template
 from docxtpl import DocxTemplate
+from productSize.models import ProductSize
+from docx.enum.table import WD_TABLE_DIRECTION
 
 @api_view(['GET'])
 def get_all_orders(request):
@@ -62,34 +64,226 @@ def create_provider_docs(request):
     if not request.user.is_superuser:
         return JsonResponse({'error': 'You are not authorized to perform this action'}, status=status.HTTP_401_UNAUTHORIZED)
     else:
+        ALL_SIZES = ProductSize.objects.all().values('id','size', 'code')
+        # ALL_SIZES = [{'id': 1, 'size': 'S', 'code': '1'}, {'id': 2, 'size': 'M', 'code': '2'}, {'id': 3, 'size': 'L', 'code': 'L'}, {'id': 4, 'size': 'XL', 'code': '3'}, {'id': 5, 'size': 'XXL', 'code': '4'}]
+        # code is the order
+        # create a dictonary with key=size_size and value=code
+        sizes = {}
+        for size in ALL_SIZES:
+            sizes[size['size']] = size['code']
+        print(sizes)
         provider_requests_ids = json.loads(request.GET.get('ids'))
         objs = ProviderRequest.objects.filter(id__in=provider_requests_ids)
         print(objs)
-        import os
-        from django.conf import settings
+        vals = objs.values('provider__name','orderItem__product__title','size__size','varient__name','color__name',).annotate(total_quantity=Sum('quantity')).order_by('provider__name','orderItem__product__title','size__size','varient__name','color__name')
+        
+        
+        
+        
+        print(vals)
+        providers_split = {}
+        for val in vals:
+            if val['provider__name'] not in providers_split:
+                providers_split[val['provider__name']] = {'products':[]}
+            providers_split[val['provider__name']]['products'].append(val)
+        print(providers_split)
+        for provider_name, data in providers_split.items():
+            sizes_set = set()
+            for product in data['products']:
+                sizes_set.add(product['size__size'])
+            sizes_list = list(sizes_set)
+            sizes_list.sort(key=lambda x: sizes[x])
+            data['sizes_list'] = sizes_list
+        
+        for provider_name, data in providers_split.items():
+            document = create_providers_docx(data)
 
-        today = datetime.datetime.now()
-        date_time = today.strftime("%d/%m/%Y")
-        #C:/Users/ronio/Desktop/projects/BeGoodPlus4/begoodPlus
-        file_location = os.path.join(settings.BASE_DIR, 'static_cdn\\templates\\provider_template.docx')
-        doc = DocxTemplate(file_location)
-        data_table = '''<table border="1" cellspacing="0" cellpadding="0">
-            <tr>
-                <td>Product</td>
-                <td>Size</td>
-                <td>Varient</td>
-                <td>Color</td>
-            </tr>'''
-        context = { 'data_for' : "World company",
-                    'data_date' : date_time,
-                    'data_table' : data_table,}
-        doc.render(context)
-        #doc.save("generated_doc.docx")
-        #return HttpResponse(doc, content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
         response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
         response['Content-Disposition'] = 'attachment; filename=download.docx'
-        doc.save(response)
+        document.save(response)
         return response
+
+
+class PivotReshape():
+    def __init__(self, data = list([]), index = list([]), columns= list([]), value = ''):
+        self.data = data
+        self.columns = columns
+        self.rows = index
+        self.value = value
+        
+    def pivot(self):
+        col_keys_set = set()
+        pivot_data = {}
+        for idx, row_data in enumerate(self.data):
+                indexies = list(map(lambda row_key: row_data.get(row_key,None), self.rows))
+                indexes_hash = tuple(indexies)
+                if pivot_data.get(indexes_hash, None) is None:
+                    pivot_data[indexes_hash] = {
+                        'cols': {},
+                        'rows': {},
+                        'data': {}
+                    }
+                    
+
+                
+                for column_key in self.columns:
+                    pivot_data[indexes_hash]['cols'][row_data[column_key]] = row_data[self.value]
+                    col_keys_set.add(row_data[column_key])
+                for row_key in self.rows:
+                    pivot_data[indexes_hash]['rows'][row_key] = row_data[row_key]
+                # pivot_data[indexes_hash]['data'] = mergeing pivot_data[indexes_hash]['rows'] and pivot_data[indexes_hash]['cols']:
+                pivot_data[indexes_hash]['data'] = {**pivot_data[indexes_hash]['rows'], **pivot_data[indexes_hash]['cols']}
+                if pivot_data[indexes_hash].get('original_indexes', None) is None:
+                    pivot_data[indexes_hash]['original_indexes'] = []
+                pivot_data[indexes_hash]['original_indexes'].append({idx: row_data})
+        self.pivot_data = pivot_data
+        self.col_keys_list = list(col_keys_set)
+        self.row_keys_list = self.rows
+        return pivot_data
+    
+
+def create_providers_docx(doc_data):
+        
+        import os
+        from django.conf import settings
+        from docx import Document
+        from docx.shared import Inches
+        from docx.enum.style import WD_STYLE_TYPE
+        from docx.enum.text import WD_ALIGN_PARAGRAPH
+        import pandas as pd
+        
+        ALL_SIZES = ProductSize.objects.all().values('id','size', 'code')
+        # ALL_SIZES = [{'id': 1, 'size': 'S', 'code': '1'}, {'id': 2, 'size': 'M', 'code': '2'}, {'id': 3, 'size': 'L', 'code': 'L'}, {'id': 4, 'size': 'XL', 'code': '3'}, {'id': 5, 'size': 'XXL', 'code': '4'}]
+        # code is the order
+        # create a dictonary with key=size_size and value=code
+        sizes = {}
+        for size in ALL_SIZES:
+            sizes[size['size']] = size['code']
+
+        # df = pd.DataFrame(doc_data['products']) 
+        # df = df.pivot(index=['orderItem__product__title','varient__name', 'color__name'], columns=['size__size'], values='total_quantity')
+        
+        
+        
+        data = doc_data['products'] # [{'provider__name': 'defult provider', 'orderItem__product__title': 'חולצת דרייפיט שרוול ארוך', 'size__size': 'ONE SIZE', 'varient__name': None, 'color__name': 'שחור', 'total_quantity': 4}, {'provider__name': 'אוניברסל פרטס', 'orderItem__product__title': "בידורית 12 אינץ' power", 'size__size': '38', 'varient__name': None, 'color__name': 'no color', 'total_quantity': 10},...
+        indexs = ['orderItem__product__title','varient__name', 'color__name']
+        column = 'size__size'
+        value = 'total_quantity'
+        pivot_table = PivotReshape(data=data, index=indexs, columns=[column], value=value)
+        data = pivot_table.pivot()
+        key_cols = pivot_table.col_keys_list
+        key_cols.sort(key=lambda x: sizes[x])
+        headers_keys = pivot_table.row_keys_list + key_cols
+
+
+        document = Document()
+        
+        
+        today = datetime.datetime.now()
+        date_time = today.strftime("%d/%m/%Y")
+        
+        file_location = os.path.join(settings.BASE_DIR, 'static_cdn\\assets\\images\\provider_docx_header.png')
+        document.add_picture(file_location, width=Inches(6))
+        
+        #document = Document()
+        
+        rtlstyle = document.styles.add_style('rtl', WD_STYLE_TYPE.PARAGRAPH)
+        rtlstyle.font.rtl = True
+        p = document.add_heading(date_time, level=1)
+        p = document.add_heading('לכבוד: ' + 'השם שלי', level=1)
+        p.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+        
+        
+        t = document.add_table( 1,len(headers_keys))
+        headers_keys = reversed(headers_keys)
+        t.direction = WD_TABLE_DIRECTION.RTL
+        header = t.rows[0].cells
+        header_len = len(headers_keys)
+        for idx, head in enumerate(headers_keys):
+            header[header_len - idx] = str(head)
+        
+        # header[0].text = 'שם מוצר'
+        # header[1].text = 'מודל'
+        # header[2].text = 'צבע'
+        # for i in range(len(key_cols)):
+        #     header[i+3].text = key_cols[i]
+        
+        for _, row_data in data.items():
+            print(row_data)
+            row = t.add_row()
+
+            for header_key in headers_keys:
+                print(row_data['data'].get(header_key, None), ' - ', header_key)
+                row.cells[headers_keys.index(header_key)].text = str(row_data['data'].get(header_key, None))
+        
+        # t = document.add_table( 1,df.shape[1])
+        # header = t.add_row().cells
+        # header[df.shape[1]-1-0].text = 'שם מוצר'
+        # header[df.shape[1]-1-1].text = 'צבע'
+        
+        # for i in range(df.shape[1]-2):
+        #     header[df.shape[1]-1-i-2].text = df.columns[i]
+            
+        
+        
+        # for index, row in df.iterrows():
+        #     row_cells = t.add_row().cells
+        #     # row_cells[0].text = row['orderItem__product__title']
+        #     # row_cells[1].text = row['color__name']
+        #     # row_cells[2].text = row['size__size']
+        #     for i in range(df.shape[1]):
+        #         row_cells[i].text = str(row[df.shape[1]-i-1])
+        #p = document.add_heading(df.to_html(), level=1)
+        #p.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+        
+
+        
+        # add a table to the end and create a reference variable
+        # extra row is so we can add the header row
+        # t = document.add_table(df.shape[0]+1, df.shape[1])
+
+        # # add the header rows.
+        # for j in range(df.shape[-1]):
+        #     t.cell(0,j).text = df.columns[j]
+
+        # # add the rest of the data frame
+        # for i in range(df.shape[0]):
+        #     for j in range(df.shape[-1]):
+        #         t.cell(i+1,j).text = str(df.values[i,j])
+        # table = document.add_table(rows=1, cols=2 + len(doc_data['sizes_list']), style='Table Grid')
+        # hdr_cells = table.rows[0].cells
+        # hdr_cells[0].text = 'שם המוצר'
+        # hdr_cells[1].text = 'צבע'
+        # for i, size in enumerate(doc_data['sizes_list']):
+        #     hdr_cells[2+i].text = size
+        
+        # for product in doc_data['products']:
+        #     row_cells = table.add_row().cells
+        #     row_cells[0].text = product['orderItem__product__title'] + if product['varient__name']: ' - ' + product['varient__name'] else ''
+        #     row_cells[1].text = product['color__name']
+            
+            # row_cells[0].text = str(qty)
+            # row_cells[1].text = id
+            # row_cells[2].text = desc 
+
+        #document.add_page_break()
+        
+        #C:/Users/ronio/Desktop/projects/BeGoodPlus4/begoodPlus
+        # file_location = os.path.join(settings.BASE_DIR, 'static_cdn\\templates\\provider_template.docx')
+        # doc = DocxTemplate(file_location)
+        # data_table = '''<table border="1" cellspacing="0" cellpadding="0">
+        #     <tr>
+        #         <td>Product</td>
+        #         <td>Size</td>
+        #         <td>Varient</td>
+        #         <td>Color</td>
+        #     </tr>'''
+        # context = { 'data_for' : "World company",
+        #             'data_date' : date_time,
+        #             'data_table' : data_table,}
+        # doc.render(context)
+
+        return document#response
 
 def load_all_provider_request_admin(request):
     if not request.user.is_superuser:
