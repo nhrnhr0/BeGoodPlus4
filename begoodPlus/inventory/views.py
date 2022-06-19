@@ -30,14 +30,14 @@ def upload_inventory_csv(request):
         # group df by provider_name and create DocStockEnter to every group
         df = df.groupby(['provider_name',])
         for provider_name, group in df:
-            print(provider_name)
-            print(group)
+            #print(provider_name)
+            #print(group)
             provider_name = provider_name.strip()
             description = 'הכנסה למלאי ' + provider_name + datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             provider, _ = Provider.objects.get_or_create(name=provider_name,)
             doc = DocStockEnter.objects.create(byUser=request.user, warehouse=Warehouse.objects.get(name='מחסן ספירה'), description=description,provider=provider)
             for idx, row in group.iterrows():
-                print(row) # ppn entries price
+                #print(row) # ppn entries price
                 productObj = CatalogImage.objects.get(id=row['admin_product_id'])
                 ppnObj, is_created = PPN.objects.get_or_create(product= productObj, \
                         provider= provider, \
@@ -63,12 +63,17 @@ def upload_inventory_csv(request):
                 
                 
                 #size color verient quantity
+                size_name = str(row['size_name'])
+                if size_name == '' or size_name == None or size_name == 'nan' or size_name == 'ONE SIZE':
+                    size_name = 'one size'
                 sizeObj,_ = ProductSize.objects.get_or_create(size=row['size_name'], 
                                                             defaults={
                                                                 'code': '00',
                                                             })
-                
-                colorObj,_ = Color.objects.get_or_create(name=row['color'])
+                color_name = str(row['color'])
+                if color_name == '' or color_name == None or color_name == 'nan':
+                    color_name = 'no color'
+                colorObj,_ = Color.objects.get_or_create(name=color_name)
                 varientObj = CatalogImageVarient.objects.filter(name = row['varient'])
                 if varientObj.exists():
                     varientObj = varientObj.first()
@@ -81,7 +86,7 @@ def upload_inventory_csv(request):
                     quantity=row['quantity'],
                 )
                 
-
+        return HttpResponseRedirect('/admin/inventory/docstockenter/')
 
 
 def unpivot_inventory_exel(request): 

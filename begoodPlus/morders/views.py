@@ -19,7 +19,7 @@ from django.http import HttpResponse
 from django.db import connection, reset_queries
 
 from django.template.loader import get_template
-from docxtpl import DocxTemplate
+#from docxtpl import DocxTemplate
 from productSize.models import ProductSize
 from docx.enum.table import WD_TABLE_DIRECTION
 
