@@ -51,6 +51,19 @@ from django.views.decorators.cache import cache_page
 import functools
 from django.db import connection
 
+
+@api_view(['GET'])
+@renderer_classes((JSONRenderer,))
+def get_products_info(request):
+    ids = request.GET.get('product_ids').split(',')
+    print(ids)
+    images = CatalogImage.objects.filter(id__in=ids)
+    images = images.prefetch_related('colors','sizes','albums','varients').select_related('packingTypeClient')
+    ser = ImageClientApi(images, many=True,context={
+        'request': request
+    })
+    return Response(ser.data)
+
 @api_view(('GET',))
 @renderer_classes((JSONRenderer,))
 def get_album_images(request, pk):
