@@ -1,12 +1,13 @@
 from audioop import reverse
+from datetime import datetime
 from html import entities
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
-from catalogImages.models import CatalogImageVarient
+from catalogImages.models import CatalogImage, CatalogImageVarient
 from color.models import Color
 from productSize.models import ProductSize
 from provider.models import Provider
-from inventory.models import PPN
+from inventory.models import PPN, Warehouse
 from rest_framework.decorators import api_view
 from inventory.models import DocStockEnter
 from inventory.serializers import DocStockEnterSerializer
@@ -15,6 +16,124 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import gettext_lazy  as _
+import pandas as pd
+import math
+
+def upload_inventory_csv(request):
+    if not request.user.is_superuser:
+        return HttpResponseRedirect('/admin/login/?next=' + request.path)
+    if request.method == 'GET':
+        return render(request, 'upload_inventory_csv.html')
+    elif request.method == 'POST':
+        file = request.FILES['csv_file']
+        df = pd.read_csv(file)
+        # group df by provider_name and create DocStockEnter to every group
+        df = df.groupby(['provider_name',])
+        for provider_name, group in df:
+            print(provider_name)
+            print(group)
+            provider_name = provider_name.strip()
+            description = 'הכנסה למלאי ' + provider_name + datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            provider, _ = Provider.objects.get_or_create(name=provider_name,)
+            doc = DocStockEnter.objects.create(byUser=request.user, warehouse=Warehouse.objects.get(name='מחסן ספירה'), description=description,provider=provider)
+            for idx, row in group.iterrows():
+                print(row) # ppn entries price
+                productObj = CatalogImage.objects.get(id=row['admin_product_id'])
+                ppnObj, is_created = PPN.objects.get_or_create(product= productObj, \
+                        provider= provider, \
+                        providerProductName= row['provider_product_name'], \
+                        barcode= row['provider_barcode'] if isinstance(row['provider_barcode'], str) else '', \
+                        has_phisical_barcode=row['has_phisical_barcode'], \
+                        providerMakat=row['provider_makat'] if isinstance(row['provider_makat'], str) else '', \
+                        defaults={ \
+                            'buy_price': row['cost_price'], \
+                        } \
+                    )
+                #ppn entries price
+                rowObjFilter = ProductEnterItems.objects.filter(doc=doc, ppn=ppnObj, price=row['cost_price'])
+                if rowObjFilter.exists():
+                    rowObj = rowObjFilter.first()
+                else:
+                    rowObj = ProductEnterItems.objects.create(
+                        ppn=ppnObj,
+                        price=row['cost_price'],
+                    )
+                    doc.items.add(rowObj)
+                    doc.save()
+                
+                
+                #size color verient quantity
+                sizeObj,_ = ProductSize.objects.get_or_create(size=row['size_name'], 
+                                                            defaults={
+                                                                'code': '00',
+                                                            })
+                
+                colorObj,_ = Color.objects.get_or_create(name=row['color'])
+                varientObj = CatalogImageVarient.objects.filter(name = row['varient'])
+                if varientObj.exists():
+                    varientObj = varientObj.first()
+                else:
+                    varientObj = None
+                rowObj.entries.create(
+                    size=sizeObj,
+                    color=colorObj,
+                    verient=varientObj,
+                    quantity=row['quantity'],
+                )
+                
+
+
+
+def unpivot_inventory_exel(request): 
+    if not request.user.is_superuser:
+        return HttpResponseRedirect('/admin/login/?next=' + request.path)
+    if request.method == 'GET':
+        return render(request, 'unpivot_inventory_exel.html')
+    elif request.method == 'POST':
+        file = request.FILES['exel_file']
+        w = pd.read_excel(file)
+        # get only the columes with מוצר באדמין is not empty
+        w = w[w['מוצר באדמין'].notnull()]
+        w = w.reset_index(drop=True)
+        print(w)
+        calc_data = []
+        for idx, row in w.iterrows():
+            admin_product_id = row['מוצר באדמין']
+            provider_name = row['ספק']
+            cost_price = row['לפני מע"מ יח\'']
+            provider_product_name = row['מוצר']
+            provider_barcode = row['ברקוד']
+            provider_makat = row['ברקוד משני']
+            try:
+                print(admin_product_id)
+                item = CatalogImage.objects.get(id=admin_product_id)
+                makatObj = item.detailTabel.filter(provider__name=provider_name).first()
+                if makatObj:
+                    provider_product_name = makatObj.providerMakat
+                # if not provider_makat or provider_makat == '':
+                #     makatObj = item.detailTabel.filter(provider__name=provider_name).first()
+                #     if makatObj:
+                #         provider_makat = makatObj.providerMakat
+
+                has_phisical_barcode = item.has_physical_barcode
+                color = row['צבע']
+                varient = row['מודל']
+                size_list = ['ONE SIZE','5XL','4XL','3XL','2XL','XL','L','M','S','XS','47','46','45','44','43','42','41','40','39','38','37','36',]
+                for size in size_list:
+                    if row.get(size) != None and not math.isnan(row.get(size)):
+                        size_name = size
+                        quantity = row[size]
+                        calc_data.append({'admin_product_id':admin_product_id, 'has_phisical_barcode':has_phisical_barcode,'provider_name':provider_name, 'cost_price':cost_price, 'provider_product_name':provider_product_name, 'provider_barcode':provider_barcode, 'provider_makat':provider_makat, 'color':color, 'varient':varient, 'size_name':size_name, 'quantity':quantity})
+            except Exception as e:
+                pass
+        newDf = pd.DataFrame(calc_data)
+        
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename=export.csv'  # alter as needed
+        newDf.to_csv(response, index=False, encoding='utf-8')
+        return response
+    
+    #return render(request, 'unpivot_inventory_exel.html', context={})
 
 
 @api_view(['GET'])

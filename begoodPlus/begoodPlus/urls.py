@@ -14,7 +14,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
-from inventory.views import get_stock_by_id_api
+from inventory.views import get_stock_by_id_api, unpivot_inventory_exel, upload_inventory_csv
 from clientApi.views import get_all_varients_api
 from inventory.views import add_doc_stock_enter_ppn, add_doc_stock_enter_ppn_entry, create_enter_doc, enter_doc_edit,delete_doc_stock_enter_ppn_entry, doc_stock_detail_api, doc_stock_list_api, get_all_inventory_api, get_all_warehouses_api,enter_doc_insert_inventory, enter_doc_remove_product, get_doc_stock_enter_ppn_entries, inventory_edit_entry, inventory_get_entry_history, inventory_manual_update_entry, search_ppn, search_warehouses, show_inventory_stock,get_product_inventory,doc_stock_list
 from clientApi.views import get_all_colors_api, get_all_sizes_api, main_page_api
@@ -84,6 +84,8 @@ from customerCart.views import cart_del, cart_add,cart_view,cart_info
 from clientApi.views import CustomAuthToken
 #from rest_framework_simplejwt.views import (TokenObtainPairView,TokenRefreshView,)
 urlpatterns = [
+    path('upload-inventory-csv/', upload_inventory_csv, name='upload-inventory-csv'),
+    path('unpivot-inventory-exel/', unpivot_inventory_exel, name='unpivot-inventory-exel'),
     path('create-provider-docs', create_provider_docs, name='create-provider-docs'),
     path('load-all-provider-request', load_all_provider_request_admin, name='load_all_provider_request_admin'),
     path('update-provider-request-entry', provider_request_update_entry_admin, name='provider_request_update_entry_admin'),

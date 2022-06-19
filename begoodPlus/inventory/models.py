@@ -38,7 +38,7 @@ class PPN(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name=_('created at'))
     #default_warehouse = models.ForeignKey(to='Warehouse', on_delete=models.SET_DEFAULT,null=True, blank=True, default=1, verbose_name=_('default warehouse'))
     class Meta:
-        unique_together = ('provider', 'providerProductName','barcode','has_phisical_barcode')
+        unique_together = ('provider', 'providerProductName','barcode','has_phisical_barcode','providerMakat')
     def __str__(self):
         return self.providerProductName
 #@receiver(pre_save, sender=PPN)
