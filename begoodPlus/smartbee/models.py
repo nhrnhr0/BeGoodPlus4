@@ -5,6 +5,12 @@ from django.utils import timezone
 import pytz
 from begoodPlus.secrects import SMARTBEE_DOMAIN, SMARTBEE_clientId, SMARTBEE_password
 # Create your models here.
+class SmartbeeResults(models.Model):
+    morder = models.ForeignKey('morders.MOrder', on_delete=models.CASCADE)
+    resultCodeId = models.IntegerField(default=0)
+    result = models.TextField(default='')
+    validationErrors = models.JSONField(default=dict, blank=True, null=True)
+
 class SmartbeeTokens(models.Model):
     token = models.CharField(max_length=1024, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)

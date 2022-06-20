@@ -5,6 +5,7 @@ from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from catalogImages.models import CatalogImage, CatalogImageVarient
 from color.models import Color
+from productColor.models import ProductColor
 from productSize.models import ProductSize
 from provider.models import Provider
 from inventory.models import PPN, Warehouse
@@ -19,6 +20,7 @@ from django.utils.translation import gettext_lazy  as _
 import pandas as pd
 import math
 
+
 def upload_inventory_csv(request):
     if not request.user.is_superuser:
         return HttpResponseRedirect('/admin/login/?next=' + request.path)
@@ -26,7 +28,8 @@ def upload_inventory_csv(request):
         return render(request, 'upload_inventory_csv.html')
     elif request.method == 'POST':
         file = request.FILES['csv_file']
-        df = pd.read_csv(file)
+        dtypes = {'varient': 'str'}
+        df = pd.read_json(file, dtype=dtypes)
         # group df by provider_name and create DocStockEnter to every group
         df = df.groupby(['provider_name',])
         for provider_name, group in df:
@@ -38,17 +41,49 @@ def upload_inventory_csv(request):
             doc = DocStockEnter.objects.create(byUser=request.user, warehouse=Warehouse.objects.get(name='מחסן ספירה'), description=description,provider=provider)
             for idx, row in group.iterrows():
                 #print(row) # ppn entries price
-                productObj = CatalogImage.objects.get(id=row['admin_product_id'])
-                ppnObj, is_created = PPN.objects.get_or_create(product= productObj, \
-                        provider= provider, \
-                        providerProductName= row['provider_product_name'], \
-                        barcode= row['provider_barcode'] if isinstance(row['provider_barcode'], str) else '', \
-                        has_phisical_barcode=row['has_phisical_barcode'], \
-                        providerMakat=row['provider_makat'] if isinstance(row['provider_makat'], str) else '', \
-                        defaults={ \
-                            'buy_price': row['cost_price'], \
-                        } \
-                    )
+                productObj = CatalogImage.objects.get(id=int(float(row['admin_product_id'])))
+                # try:
+                print('==========================================================')
+                print(idx, row)
+                print('==========================================================')
+                #print(productObj, provider, row['cost_price'], row['provider_product_name'], row['provider_barcode'],row['has_phisical_barcode'], row['provider_makat'])
+                ppnObjs = PPN.objects.filter(product=productObj, \
+                                            provider=provider, \
+                                            providerProductName= row['provider_product_name'] if row['provider_product_name'] != None else '', \
+                                            barcode= str(row['provider_barcode'] if isinstance(row['provider_barcode'], str) else '').strip(), \
+                                            has_phisical_barcode=row['has_phisical_barcode'], \
+                                            providerMakat=str(row['provider_makat'] if isinstance(row['provider_makat'], str) else '').strip(), \
+                        )
+                if ppnObjs.count() == 0:
+                    ppnObj = PPN.objects.create(product=productObj, \
+                                            provider=provider, \
+                                            providerProductName= row['provider_product_name'] if row['provider_product_name'] != None else '', \
+                                            barcode= str(row['provider_barcode'] if isinstance(row['provider_barcode'], str) else '').strip(), \
+                                            has_phisical_barcode=row['has_phisical_barcode'], \
+                                            providerMakat=str(row['provider_makat'] if isinstance(row['provider_makat'], str) else '').strip(), \
+                                            buy_price= row['cost_price'],
+                        )
+                else:
+                    ppnObj = ppnObjs.first()
+                # ppnObj, is_created = PPN.objects.get_or_create(product= productObj, \
+                #         provider= provider, \
+                #         providerProductName= row['provider_product_name'] if row['provider_product_name'] != None else '', \
+                #         barcode= str(row['provider_barcode'] if isinstance(row['provider_barcode'], str) else '').strip(), \
+                #         has_phisical_barcode=row['has_phisical_barcode'], \
+                #         providerMakat=str(row['provider_makat'] if isinstance(row['provider_makat'], str) else '').strip(), \
+                #         defaults={ \
+                #             'buy_price': row['cost_price'], \
+                #         } \
+                #     )
+                # except Exception as e:
+                #     ppnObjs = PPN.objects.filter(product= productObj, \
+                #         provider= provider, \
+                #         providerProductName= row['provider_product_name'], \
+                #         barcode= str(row['provider_barcode'] if isinstance(row['provider_barcode'], str) else '').strip(), \
+                #         has_phisical_barcode=row['has_phisical_barcode'], \
+                #         providerMakat=str(row['provider_makat'] if isinstance(row['provider_makat'], str) else '').strip(), \
+                #     )
+                #     ppnObj = ppnObjs.first()
                 #ppn entries price
                 rowObjFilter = ProductEnterItems.objects.filter(doc=doc, ppn=ppnObj, price=row['cost_price'])
                 if rowObjFilter.exists():
@@ -71,9 +106,14 @@ def upload_inventory_csv(request):
                                                                 'code': '00',
                                                             })
                 color_name = str(row['color'])
-                if color_name == '' or color_name == None or color_name == 'nan':
+                if color_name == '' or color_name == None or color_name == 'nan' or color_name == 'None':
                     color_name = 'no color'
-                colorObj,_ = Color.objects.get_or_create(name=color_name)
+                #colorObj,_ = ProductColor.objects.get_or_create(name=color_name, defaults={'code': '00' })
+                colorObjs = ProductColor.objects.filter(name=color_name)
+                if colorObjs.exists():
+                    colorObj = colorObjs.first()
+                else:
+                    colorObj = ProductColor.objects.create(name=color_name, code='00')
                 varientObj = CatalogImageVarient.objects.filter(name = row['varient'])
                 if varientObj.exists():
                     varientObj = varientObj.first()
@@ -83,7 +123,7 @@ def upload_inventory_csv(request):
                     size=sizeObj,
                     color=colorObj,
                     verient=varientObj,
-                    quantity=row['quantity'],
+                    quantity=int(float(row['quantity'])),
                 )
                 
         return HttpResponseRedirect('/admin/inventory/docstockenter/')
@@ -97,9 +137,11 @@ def unpivot_inventory_exel(request):
     elif request.method == 'POST':
         file = request.FILES['exel_file']
         w = pd.read_excel(file)
+        
         # get only the columes with מוצר באדמין is not empty
         w = w[w['מוצר באדמין'].notnull()]
         w = w.reset_index(drop=True)
+        w.columns = w.columns.astype("str")
         print(w)
         calc_data = []
         for idx, row in w.iterrows():
@@ -113,7 +155,7 @@ def unpivot_inventory_exel(request):
                 print(admin_product_id)
                 item = CatalogImage.objects.get(id=admin_product_id)
                 makatObj = item.detailTabel.filter(provider__name=provider_name).first()
-                if makatObj:
+                if makatObj and makatObj.providerMakat != '' and makatObj.providerMakat != None and makatObj.providerMakat != 'nan':
                     provider_product_name = makatObj.providerMakat
                 # if not provider_makat or provider_makat == '':
                 #     makatObj = item.detailTabel.filter(provider__name=provider_name).first()
@@ -131,11 +173,11 @@ def unpivot_inventory_exel(request):
                         calc_data.append({'admin_product_id':admin_product_id, 'has_phisical_barcode':has_phisical_barcode,'provider_name':provider_name, 'cost_price':cost_price, 'provider_product_name':provider_product_name, 'provider_barcode':provider_barcode, 'provider_makat':provider_makat, 'color':color, 'varient':varient, 'size_name':size_name, 'quantity':quantity})
             except Exception as e:
                 pass
-        newDf = pd.DataFrame(calc_data)
-        
-        response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename=export.csv'  # alter as needed
-        newDf.to_csv(response, index=False, encoding='utf-8')
+        newDf = pd.DataFrame(calc_data, dtype=str)
+        #newDf = newDf.astype(str)
+        response = HttpResponse(content_type='application/json')
+        response['Content-Disposition'] = 'attachment; filename=export.json'  # alter as needed
+        newDf.to_json(response)
         return response
     
     #return render(request, 'unpivot_inventory_exel.html', context={})
@@ -251,7 +293,7 @@ def doc_stock_detail_api(request, id):
     if not request.user.is_superuser:
         return JsonResponse({'error': 'You are not authorized'})
     if request.method == 'GET':
-        doc = DocStockEnter.objects.get(id=id)
+        doc = DocStockEnter.objects.select_related('provider','warehouse','byUser').prefetch_related('items', 'items__ppn', 'items__entries','items__ppn__product__colors','items__ppn__product__sizes','items__ppn__product__providers','items__ppn__product__varients').get(id=id)
         serializer = DocStockEnterSerializer(doc)
         return JsonResponse(serializer.data)
 

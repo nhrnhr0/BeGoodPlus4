@@ -35,9 +35,9 @@ admin.site.register(Warehouse, WarehouseAdmin)
 class DocStockEnterAdmin(admin.ModelAdmin):
     list_display = ('id', 'created_at', 'id', 'docNumber', 'provider', 'warehouse', 'isAplied', 'byUser','get_admin_edit_url')
     readonly_fields = ('created_at','byUser','get_admin_edit_url')
-    filter_horizontal = ('items',)
+    #filter_horizontal = ('items',)
     actions = ['apply_doc']
-    list_filter = ('created_at', 'provider', 'warehouse', 'isAplied', 'byUser')
+    #list_filter = ('created_at', 'provider', 'warehouse', 'isAplied', 'byUser')
     
     def apply_doc(self, request, queryset):
         for doc in queryset:

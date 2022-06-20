@@ -519,6 +519,7 @@ def dashboard_orders_collection_smartbee(request,id):
     morder = MOrder.objects.get(id=id)
     #info = morder_to_smartbe_json(morder)
     info = morder.create_smartbe_order()
+    morder.subtract_collected_inventory(request.user)
     
     return JsonResponse({'success': 'success', 'data': info}, status=status.HTTP_200_OK)
 

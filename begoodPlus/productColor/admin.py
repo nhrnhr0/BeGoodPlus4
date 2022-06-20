@@ -5,7 +5,7 @@ from .models import ProductColor
 
 class ProductColorAdmin(admin.ModelAdmin):
     model = ProductColor
-    list_display = ('name', 'color', 'colored_box', 'code',)
+    list_display = ('id', 'name', 'color', 'colored_box', 'code',)
     #ordering = ('code',)
     
 admin.site.register(ProductColor, ProductColorAdmin)

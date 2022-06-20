@@ -26,7 +26,7 @@ from django.db.models.functions import Substr
 from django.db.models.functions import Concat
 from django.db.models.functions import Length
 from begoodPlus.secrects import SMARTBEE_DOMAIN, SMARTBEE_providerUserToken
-from smartbee.models import SmartbeeTokens
+from smartbee.models import SmartbeeResults, SmartbeeTokens
 import requests
 class CollectedInventory(models.Model):
     warehouseStock = models.ForeignKey(WarehouseStock, on_delete=models.CASCADE, related_name='collectedInventory')
@@ -118,7 +118,17 @@ class MOrder(models.Model):
     
     class Meta:
         ordering = ['-created']
-        
+    def subtract_collected_inventory(self, user):
+        collected_items = CollectedInventory.objects.filter(taken_inventory__orderItem__morder=self)
+        for item in collected_items:
+            entry = item.warehouseStock
+            qyt = item.quantity
+            entry.history.create(old_quantity=item.warehouseStock.quantity,
+                                new_quantity=item.warehouseStock.quantity - qyt,
+                                note='הזמנה ' + str(self.id),
+                                user=user)
+            entry.quantity = item.warehouseStock.quantity-qyt
+            entry.save()
     def morder_to_smartbe_json(self):
         collected_items = CollectedInventory.objects.filter(taken_inventory__orderItem__morder=self)
         vals = collected_items.values('warehouseStock__ppn__product__id', 'warehouseStock__ppn__product__title','warehouseStock__ppn__barcode', 'taken_inventory__orderItem__price')\
@@ -175,6 +185,10 @@ class MOrder(models.Model):
             # self.isOrder = True
             # self.save()
             data = smartbee_response.json()
+            SmartbeeResults.objects.create(morder=self, 
+                                    resultCodeId= data['resultCodeId'],
+                                    result= data['result'],
+                                    validationErrors= data['validationErrors'],)
             print(data)
             return data
         else:
