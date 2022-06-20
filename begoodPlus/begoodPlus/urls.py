@@ -19,7 +19,7 @@ from catalogAlbum.views import catalogView_api  # ,catalog_timer
 # admin_subscribe_view, mainView,, form_changed #saveBaseContactFormView
 from core.views import autocompleteModel, autocompleteClick, success_view
 from core.views import handler404, api_logout, shareable_category_view, shareable_product_view, svelte_contact_form, set_csrf_token, svelte_cart_form, track_cart
-from clientApi.views import CustomAuthToken
+from clientApi.views import CustomAuthToken, get_products_info
 from productColor.views import api_product_colors
 from productSize.views import api_product_sizes
 from packingType.views import api_packing_types
@@ -85,6 +85,7 @@ clientRouter.register(r'logos', LogoClientViewSet)
 #from rest_framework.authtoken.views import obtain_auth_token
 #from rest_framework_simplejwt.views import (TokenObtainPairView,TokenRefreshView,)
 urlpatterns = [
+    path('get-products-info', get_products_info, name='get-products-info'),
     path('create-client-user/', create_client_user, name='create-client-user'),
     path('verify-unique-field-by-field-excel',
          verify_unique_field_by_field_excel),
