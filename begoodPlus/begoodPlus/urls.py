@@ -48,6 +48,7 @@ from catalogAlbum.views import CatalogAlbumViewSet
 from client.views import get_all_users_by_admin, whoAmI, userLogEntryView
 from color.views import ColorsViewSet
 from productSize.views import SizesViewSet
+from smartbee.views import get_smartbee_doc
 router = routers.DefaultRouter()
 router.register(r'CatalogAlbums', CatalogAlbumViewSet)
 router.register(r'CatalogImages', CatalogImageViewSet)
@@ -153,6 +154,7 @@ urlpatterns = [
     path('morders/get-order-detail-to-collect', get_order_detail_to_collect, name='admin_get_order_detail_to_collect'),
     path('dashboard/orders-collection/collect/save', dashboard_orders_collection_collect_save, name='admin_dashboard_orders_collection_collect_save'),
     path('dashboard/orders-collection/smartbee/<int:id>', dashboard_orders_collection_smartbee, name='admin_dashboard_orders_collection_smartbee'),
+    path('get-smartbee-doc/<str:doc_id>',get_smartbee_doc, name='admin_get_smartbee_doc'),
     path('api/get-all-orders', get_all_orders, name='admin_get_all_orders'),
     path('search-ppn/', search_ppn, name='search_ppn'),
     #path('api/', include(router.urls)),

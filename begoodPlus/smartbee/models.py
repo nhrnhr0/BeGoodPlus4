@@ -10,6 +10,17 @@ class SmartbeeResults(models.Model):
     resultCodeId = models.IntegerField(default=0)
     result = models.TextField(default='')
     validationErrors = models.JSONField(default=dict, blank=True, null=True)
+    
+    def request_smartbee_doc(doc_id):
+        from .models import SmartbeeTokens
+        url = SMARTBEE_DOMAIN + 'api/v1/documents/' + str(doc_id)
+        smartbee_auth = SmartbeeTokens.get_or_create_token()
+        headers = {"Authorization": "Bearer " + smartbee_auth.token}
+        smartbee_response = requests.get(url ,headers=headers)
+        if smartbee_response.status_code == 200:
+            return smartbee_response.json()
+        else:
+            return None
 
 class SmartbeeTokens(models.Model):
     token = models.CharField(max_length=1024, unique=True)
