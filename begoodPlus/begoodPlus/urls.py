@@ -225,7 +225,7 @@ print('settings: ', settings)
 if settings.DEBUG:
     urlpatterns= urlpatterns + static(settings.MEDIA_URL, document_root= settings.MEDIA_ROOT)
     urlpatterns= urlpatterns + static(settings.STATIC_URL, document_root= settings.STATIC_ROOT)
-    urlpatterns =urlpatterns +  [path('silk/', include('silk.urls', namespace='silk'))]
+    #urlpatterns =urlpatterns +  [path('silk/', include('silk.urls', namespace='silk'))]
 
 if settings.DEBUG:
     urlpatterns = [
