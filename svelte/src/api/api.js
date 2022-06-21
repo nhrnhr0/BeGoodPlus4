@@ -90,8 +90,11 @@ export function apiLoadEnterDocData(docId) {
     return fetch_wraper(`${INV_API_GET_ENTER_DOC_DATA_URL}${docId}`);
 }
 
-export function apiSearchProducts(keyword) {
-    const url = SEARCH_API_URL + '?q=' + encodeURIComponent(keyword);
+export function apiSearchProducts(keyword, show_hidden=false) {
+    let url = SEARCH_API_URL + '?q=' + encodeURIComponent(keyword);
+    if(show_hidden){
+        url += '&show_hidden=true';
+    }
     return fetch_wraper(url);
 }
 export function apiSearchProviders(keyword) {
