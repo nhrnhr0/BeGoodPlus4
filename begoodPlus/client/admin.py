@@ -58,11 +58,14 @@ admin.site.register(Client, ClientAdmin)
 class OnlyNameAdmin(admin.ModelAdmin):
     list_display = ('name',)
 
-admin.site.register(ClientType, OnlyNameAdmin)
+##admin.site.register(ClientType, OnlyNameAdmin)
 admin.site.register(PaymantWay, OnlyNameAdmin)
 admin.site.register(PaymentTime, OnlyNameAdmin)
 admin.site.register(ClientOrganizations, OnlyNameAdmin)
-
+class ClientTypeAdmin(admin.ModelAdmin):
+    list_display = ('name','tariff')
+    #list_editable = ('tariff','name',)
+admin.site.register(ClientType, ClientTypeAdmin)
 from .models import UserSessionLogger
 '''class UserLogEntryInline(admin.TabularInline):
     model = UserSessionLogger.logs.through

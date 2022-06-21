@@ -4,9 +4,9 @@ from django.http import JsonResponse
 from rest_framework.permissions import AllowAny
 
 from catalogAlbum.models import CatalogAlbum
-from .models import MsCrmBusinessTypeSelect, MsCrmIntrest, MsCrmUser
+from .models import MsCrmBusinessTypeSelect, MsCrmIntrest, MsCrmIntrestsGroups, MsCrmUser
 from .tasks import new_user_subscribed_task
-from .serializers import MsCrmIntrestSerializer, MsCrmBusinessTypeSerializer
+from .serializers import MsCrmIntrestSerializer, MsCrmBusinessTypeSerializer, MsCrmIntrestsGroupsSerializer
 import pandas as pd
 from django.shortcuts import render,redirect
 from django.contrib import messages
@@ -108,6 +108,18 @@ def get_all_business_types(request):
     businessTypes = MsCrmBusinessTypeSelect.objects.all()
     data = MsCrmBusinessTypeSerializer(businessTypes, many=True).data
     return JsonResponse(data, safe=False)
+
+
+def get_all_business_types_groups(request):
+    if request.user and request.user.is_superuser:
+        businessTypesGroups = MsCrmIntrestsGroups.objects.all()
+        data = MsCrmIntrestsGroupsSerializer(businessTypesGroups, many=True).data
+        return JsonResponse(data, safe=False)
+    else:
+        return JsonResponse({"error":"not authorized"}, safe=False)
+    # businessTypesGroups = MsCrmIntrestsGroups.objects.all()
+    # data = MsCrmIntrestsGroupsSerializer(businessTypesGroups, many=True).data
+    # return JsonResponse(data, safe=False)
 
 # Create your views here.
 @api_view(['POST'])

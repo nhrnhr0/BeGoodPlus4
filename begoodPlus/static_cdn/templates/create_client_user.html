@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>יצירת משתמש באתר</title>
+</head>
+<body>
+    <main class="main-wraper">
+        
+        <form class="new-user-form" method="post">
+            {% csrf_token %}
+            <h3>יצירת משתמש חדש לאתר</h3>
+            <label for="username">שם העסק:</label>
+            <input type="text" name="buisness_name" id="buisness_name" required>
+            <label for="name">שם:</label>
+            <input type="text" name="name" id="name" required>
+            <label for="טלפון">טלפון:</label>
+            <input type="text" name="phone" id="phone" required>
+
+            <label for="price">סוג מחירון: </label>
+            <select name="store_type">
+                {% for store_type in store_types %}
+                    <option value="{{ store_type.id }}">{{ store_type.name }} ({{store_type.tariff}})</option>
+                {% endfor %}
+            </select>
+            <label for="price">מחירון:</label>
+            <input type="text" name="price" id="price">
+            <button class="sub-btn" type="submit">שלח</button>
+        </form>
+
+        <div class="messages">
+            {% if messages %}
+                {% for message in messages %}
+                    <p>{{ message |safe  }}</p>
+                {% endfor %}
+            {% endif %}
+        </div>
+
+        {% if newUsername and newPass%}
+        <img width="250px" src="https://res.cloudinary.com/ms-global/image/upload/v1652800789/msAssets/WhatsApp_Image_2022-05-17_at_6.10.18_PM_hk8eft.jpg" alt="login instractions">
+            <div class="message-content">
+                {{message_content_html | safe}}
+            </div>
+        {% endif %}
+    </main>
+</body>
+<style>
+    .sub-btn {
+        margin-top: 25px;
+        padding:15px;
+        font-size: larger;
+    }
+    select {
+        margin-bottom: 10px;;
+    }
+    .main-wraper{
+        padding-top: 75px;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        direction: rtl;
+        flex-direction: column;
+    }
+    .new-user-form {
+        width: 100%;
+        max-width: 500px;
+        margin: 0 auto;
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        box-shadow: 0 0 10px #ccc;
+        display: flex;
+        flex-direction: column;
+    }
+</style>
+</html>
