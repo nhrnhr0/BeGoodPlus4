@@ -7,5 +7,5 @@ class SvelteProviderSerializer(serializers.ModelSerializer):
     label = serializers.CharField(source='name')
     class Meta:
         model = Provider
-        fields = ('value', 'label')
+        fields = ('id', 'value', 'label')
         

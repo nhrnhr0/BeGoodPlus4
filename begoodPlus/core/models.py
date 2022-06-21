@@ -448,8 +448,9 @@ class SvelteCartModal(models.Model):
             if(len(entries_list) > 0):
                 currentProduct['entries'] = entries_list
             else:
-                currentProduct['entries'] = [
-                    {'size_id': None, 'color_id': None, 'varient_id': None, 'quantity': i.amount}]
+                ONE_SIZE_ID = 108
+                NO_COLOR_ID = 76
+                currentProduct['entries'] = [{'size_id': ONE_SIZE_ID, 'color_id': NO_COLOR_ID, 'varient_id': None, 'quantity': i.amount}]
             products_list.append(currentProduct)
         #order_product = [MOrderItem(product=i['product'], price=i['price']) for i in products_list]
         # MOrderItem.objects.bulk_create(order_product)

@@ -27,6 +27,8 @@ from django.dispatch import receiver
 
 class CatalogImageVarient(models.Model):
     name = models.CharField(max_length=255, verbose_name=_('Name'), unique=True)
+    class Meta:
+        ordering = ('id',)
     def __str__(self):
         return self.name
 
