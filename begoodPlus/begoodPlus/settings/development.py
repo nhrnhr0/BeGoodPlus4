@@ -28,7 +28,7 @@ INTERNAL_IPS = [
     '*',
 ]
 
-INSTALLED_APPS += [
-    'silk',
-]
+# INSTALLED_APPS += [
+#     'silk',
+# ]
 
