@@ -1,6 +1,28 @@
+from .models import UserSearchData
+from django.db.models import Value, CharField
+from itertools import chain
+from .serializers import SearchCatalogImageSerializer, SearchCatalogAlbumSerializer
+import json
+from .models import Customer, BeseContactInformation
+from django.contrib.contenttypes.models import ContentType
+import time
+from .tasks import product_photo_send_notification, send_cantacts_notificatios, send_cart_notification, send_question_notification, test
+import xlsxwriter
+import io
+import pandas as pd
+from rest_framework.decorators import api_view, permission_classes
+from django.contrib.auth.models import User
+from django.conf import settings
+import uuid
+from django.views.decorators.csrf import ensure_csrf_cookie
+from catalogAlbum.serializers import CatalogImageSerializer
+from catalogAlbum.models import CatalogAlbum, CatalogImage
+import json
+from django.db.models import Q
+from django.contrib.auth import logout
 from decimal import Decimal
 import celery
-from django.shortcuts import render,redirect, HttpResponse
+from django.shortcuts import render, redirect, HttpResponse
 from django.http import JsonResponse
 from django.db.models.functions import Greatest
 from django.contrib.postgres.search import TrigramSimilarity
@@ -46,20 +68,8 @@ def saveBaseContactFormView(request,next, *args, **kwargs):
 
     return redirect(next)
 '''
-from django.contrib.auth import logout
 
-from django.db.models import Q
-import json
-from catalogAlbum.models import CatalogAlbum, CatalogImage
-from .serializers import SearchCatalogImageSerializer,SearchCatalogAlbumSerializer
-from itertools import chain 
-from django.db.models import Value,CharField
-from catalogAlbum.serializers import CatalogImageSerializer
-from django.views.decorators.csrf import ensure_csrf_cookie
-import uuid
-from django.conf import settings
-from django.contrib.auth.models import User
-from rest_framework.decorators import api_view, permission_classes
+
 @api_view(['POST', 'GET'])
 @ensure_csrf_cookie
 def set_csrf_token(request, factory_id=None):
@@ -74,41 +84,45 @@ def set_csrf_token(request, factory_id=None):
         uid = str(uuid.uuid4().hex)
     return JsonResponse({"details": "CSRF cookie set",
                          'uid': uid,
-                         'whoAmI': get_user_info(request.user),},safe=False)
-                         #'campains': get_user_campains_serializer_data(request.user),}, safe=False)
+                         'whoAmI': get_user_info(request.user), }, safe=False)
+    # 'campains': get_user_campains_serializer_data(request.user),}, safe=False)
+
+
 @api_view(['POST'])
 @permission_classes((AllowAny,))
 def svelte_contact_form(request):
     if request.method == "POST":
         try:
             print(request.user)
-            body_unicode = request.data#.decode('utf-8')
+            body_unicode = request.data  # .decode('utf-8')
             device = request.COOKIES.get('device')
-            body = body_unicode #json.loads(body_unicode)
-            name = body['name']  or ''
-            email = body['email']  or ''
-            phone = body['phone']  or ''
-            message = body['message']  or ''
+            body = body_unicode  # json.loads(body_unicode)
+            name = body['name'] or ''
+            email = body['email'] or ''
+            phone = body['phone'] or ''
+            message = body['message'] or ''
             uuid = body['uuid'] or ''
             if(request.user.is_anonymous):
                 user = None
             else:
                 user = request.user
-            data = SvelteContactFormModal.objects.create(user=user, device=device,uid=uuid, name=name, phone=phone, email=email,message=message)
+            data = SvelteContactFormModal.objects.create(
+                user=user, device=device, uid=uuid, name=name, phone=phone, email=email, message=message)
             data.save()
             if(settings.DEBUG):
                 send_cantacts_notificatios(data.id)
             else:
                 send_cantacts_notificatios.delay(data.id)
             return JsonResponse({
-                'status':'success',
-                'detail':'form sent successfuly'
-                })
+                'status': 'success',
+                'detail': 'form sent successfuly'
+            })
         except Exception as e:
             return JsonResponse({
                 'status': 'warning',
                 'detail': str(e),
             })
+
 
 @api_view(['POST'])
 @permission_classes((AllowAny,))
@@ -118,43 +132,50 @@ def track_cart(request):
     active_cart_id = body_unicode.get('active_cart_id')
     if active_cart_id == None:
         active_cart_id = str(uuid.uuid4().hex)
-    obj, is_created = ActiveCartTracker.objects.get_or_create(active_cart_id=active_cart_id)
+    obj, is_created = ActiveCartTracker.objects.get_or_create(
+        active_cart_id=active_cart_id)
     print('track_cart', obj, is_created)
     obj.last_ip = device
     obj.data = body_unicode
     obj.save()
-    response = HttpResponse(json.dumps({'status':'ok','active_cart_id':active_cart_id}), content_type='application/json')
+    response = HttpResponse(json.dumps(
+        {'status': 'ok', 'active_cart_id': active_cart_id}), content_type='application/json')
     #response.set_cookie('active_cart', active_cart_id, max_age=60*60*24*365*10, httponly=True)
     return response
+
+
 @api_view(['POST'])
 @permission_classes((AllowAny,))
 def send_product_photo(request):
     data = request.data
     print(data)
     buy_price = data.get('buy_price', '')
-    want_price = data.get('want_price','')
-    description = data.get('description','')
+    want_price = data.get('want_price', '')
+    description = data.get('description', '')
     dzero = Decimal(0)
     if buy_price == '':
         buy_price = dzero
     if want_price == '':
         want_price = dzero
-    file = data.get('file',None)
+    file = data.get('file', None)
     if request.user.is_anonymous:
         user = None
     else:
         user = request.user
-    obj = UserProductPhoto.objects.create(user=user, photo=file, buy_price=buy_price, description=description,want_price=want_price)
+    obj = UserProductPhoto.objects.create(
+        user=user, photo=file, buy_price=buy_price, description=description, want_price=want_price)
     print(obj)
     if(settings.DEBUG):
         product_photo_send_notification(obj.id)
     else:
         product_photo_send_notification.delay(obj.id)
-    #product_photo_send_notification(obj.id)
+    # product_photo_send_notification(obj.id)
     return JsonResponse({
-        'status':'success',
-        'detail':'form sent successfuly'
-        })
+        'status': 'success',
+        'detail': 'form sent successfuly'
+    })
+
+
 @api_view(['POST'])
 @permission_classes((AllowAny,))
 def client_product_question(request):
@@ -170,7 +191,7 @@ def client_product_question(request):
         phone = body.get('phone', None)
         email = body.get('email', None)
         name = body.get('name', None)
-        
+
     else:
         user = request.user
         if user.client:
@@ -184,36 +205,37 @@ def client_product_question(request):
             email = None
             name = None
     data = UserQuestion.objects.create(
-        product = CatalogImage.objects.get(id=product_id),question = question,
-        user = user,ip=device,is_answered=False, buissnes_name=buissnes_name,phone=phone,email=email,name=name)
+        product=CatalogImage.objects.get(id=product_id), question=question,
+        user=user, ip=device, is_answered=False, buissnes_name=buissnes_name, phone=phone, email=email, name=name)
     data.save()
     if (settings.DEBUG):
         send_question_notification(data.id)
     else:
         send_question_notification.delay(data.id)
     return JsonResponse({
-        'status':'success',
-        'id':data.id,
-        'detail':'form sent successfuly'
-        })
+        'status': 'success',
+        'id': data.id,
+        'detail': 'form sent successfuly'
+    })
+
 
 @api_view(['POST'])
 @permission_classes((AllowAny,))
 def svelte_cart_form(request):
     if request.method == "POST":
-        body_unicode = request.data #body.decode('utf-8')
+        body_unicode = request.data  # body.decode('utf-8')
         device = request.COOKIES.get('device')
-        body = body_unicode #json.loads(body_unicode)
-        name = body['name']  or ''
-        email = body['email']  or ''
-        phone = body['phone']  or ''
-        business_name = body['business_name']  or ''
+        body = body_unicode  # json.loads(body_unicode)
+        name = body['name'] or ''
+        email = body['email'] or ''
+        phone = body['phone'] or ''
+        business_name = body['business_name'] or ''
         uuid = body['uuid'] or ''
-        message = body['message']  or ''
-        order_type = body['order_type']  or ''
+        message = body['message'] or ''
+        order_type = body['order_type'] or ''
         products = body['products'] or ''
         raw_cart = body['raw_cart'] or ''
-        agent=None
+        agent = None
         if(request.user.is_anonymous):
             user_id = None
         else:
@@ -222,7 +244,7 @@ def svelte_cart_form(request):
                     user_id = int(body['asUser']['id'])
                     try:
                         user_id = User.objects.get(id=user_id)
-                    except  User.DoesNotExist:
+                    except User.DoesNotExist:
                         user_id = None
                 else:
                     user_id = request.user
@@ -230,13 +252,14 @@ def svelte_cart_form(request):
                 agent = request.user
             else:
                 user_id = request.user
-        db_cart = SvelteCartModal.objects.create(user=user_id, device=device,uid=uuid,businessName=business_name, name=name, phone=phone, email=email, message=message, agent=agent, order_type=order_type)
-        #data.products.set(products)
+        db_cart = SvelteCartModal.objects.create(user=user_id, device=device, uid=uuid, businessName=business_name,
+                                                 name=name, phone=phone, email=email, message=message, agent=agent, order_type=order_type)
+        # data.products.set(products)
         db_cart.productsRaw = raw_cart
         # products = [{'id': 5, 'amount': 145, 'mentries': {...}}, {'id': 18, 'amount': 0, 'mentries': {...}}, {'id': 138, 'amount': 0}]
         data = []
         for p in products:
-            
+
             pid = p.get('id')
             pamount = p.get('amount')
             pentries = p.get('mentries', None) or {}
@@ -250,7 +273,8 @@ def svelte_cart_form(request):
             print_desition = p.get('print', False)
             embro = p.get('embro', False)
             try:
-                obj = SvelteCartProductEntery.objects.create(product_id=pid, amount=pamount, details=pentries,unitPrice=unitPrice, print=print_desition, embro=embro)
+                obj = SvelteCartProductEntery.objects.create(
+                    product_id=pid, amount=pamount, details=pentries, unitPrice=unitPrice, print=print_desition, embro=embro)
                 data.append(obj)
             except:
                 pass
@@ -259,16 +283,29 @@ def svelte_cart_form(request):
         db_cart.productEntries.set(data)
         db_cart.save()
         if (settings.DEBUG):
-            send_cart_notification(db_cart.id)
+            # send_cart_notification(db_cart.id)
+            pass
         else:
             send_cart_notification.delay(db_cart.id)
         return JsonResponse({
-            'status':'success',
-            'detail':'form sent successfuly',
+            'status': 'success',
+            'detail': 'form sent successfuly',
             'cart_id': db_cart.id,
             'product_ids': [p.product_id for p in data]
-            })
+        })
 
+
+@api_view(['GET'])
+@permission_classes((IsAuthenticated,))
+def svelte_cart_history(request):
+    if request.user.is_anonymous:
+        return JsonResponse({
+            'status': 'warning',
+            'detail': 'User is not authenticated',
+        })
+    previous_carts = list(
+        SvelteCartModal.objects.all().filter(user_id=request.user).order_by('-created_date').values('user','user__username', 'name','businessName','productsRaw','message','created_date','agent','agent__client__businessName'))
+    return JsonResponse(previous_carts, safe=False)
 
 
 @api_view(['GET'])
@@ -281,20 +318,14 @@ def api_logout(request):
         })
     logout(request)
     response = JsonResponse({
-        'status':'success',
-        'detail':'logout successfuly'
-        })
+        'status': 'success',
+        'detail': 'logout successfuly'
+    })
     response.delete_cookie('auth_token')
 
     request.session.flush()
     return response
 
-
-
-
-import pandas as pd
-import io
-import xlsxwriter
 
 def verify_unique_field_by_field_excel(request):
     #     <input type="file" name="main_excel_file" id="main_excel_file" accept=".xlsx, .xls" required>
@@ -304,7 +335,8 @@ def verify_unique_field_by_field_excel(request):
     if request.method == "POST":
         print(request.POST)
         main_excel_file = request.FILES.get('main_excel_file', None)
-        subtract_excel_file = request.FILES.getlist('subtract_excel_file', None)
+        subtract_excel_file = request.FILES.getlist(
+            'subtract_excel_file', None)
         unique_field = request.POST.get('unique_field', None)
         main_df = pd.read_excel(main_excel_file, dtype=str)
         subtracts_dfs = []
@@ -317,46 +349,50 @@ def verify_unique_field_by_field_excel(request):
 
         df_data = main_df.values.tolist()
         print('len data before: ', len(df_data))
-        df_data = list(filter(lambda x: (x[0] not in to_remove_numbers),df_data))
-        #for i,val  in enumerate(df_data):
-            #if val[0] in to_remove_numbers:
-                #del df_data[i]
+        df_data = list(
+            filter(lambda x: (x[0] not in to_remove_numbers), df_data))
+        # for i,val  in enumerate(df_data):
+        # if val[0] in to_remove_numbers:
+        #del df_data[i]
         # convert to excel to send
         print('len data after: ', len(df_data))
         output = io.BytesIO()
         workbook = xlsxwriter.Workbook(output)
         worksheet = workbook.add_worksheet()
-        
-        df_data.insert(0,['WhatsApp Number(with country code)', 'First Name', 'Last Name', 'Other'])
+
+        df_data.insert(0, ['WhatsApp Number(with country code)',
+                       'First Name', 'Last Name', 'Other'])
         for i, row in enumerate(df_data):
             for j, col in enumerate(row):
                 worksheet.write(i, j, col)
         workbook.close()
         output.seek(0)
-        response = HttpResponse(output.read(), content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        response = HttpResponse(output.read(
+        ), content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
         response['Content-Disposition'] = "attachment; filename=output.xlsx"
         return response
     return render(request, 'verify_unique_field_by_field_excel.html')
 
 
-from .tasks import product_photo_send_notification, send_cantacts_notificatios, send_cart_notification, send_question_notification, test
-
 def test_celery_view(request):
     print('test_celery_view start')
-    ret = test.delay(1,2)
+    ret = test.delay(1, 2)
     print('celery done')
-    return JsonResponse({'status':'ok'})
+    return JsonResponse({'status': 'ok'})
+
 
 def get_session_key(request):
     if not request.session.session_key:
         request.session.save()
     return request.session.session_key
 
+
 #from .tasks import save_user_search
-import time
+
+
 def autocompleteModel(request):
     start = time.time()
-    #if request.is_ajax():
+    # if request.is_ajax():
     q = request.GET.get('q', '')
     show_hidden = request.GET.get('show_hidden', False)
     products_qs = CatalogImage.objects.filter(Q(title__icontains=q) | Q(albums__title__icontains=q) | Q(albums__keywords__icontains=q) | Q(barcode__icontains=q)).distinct()
@@ -364,33 +400,32 @@ def autocompleteModel(request):
         products_qs = products_qs.filter(Q(is_active=True) & ~Q(albums=None) & Q(albums__is_public=True))
     #  & (~Q(albums=None) & Q(is_active = True)
 #
-    #is_hidden=False
-    ser_context={'request': request}
+    # is_hidden=False
+    ser_context = {'request': request}
     products_qs_short = products_qs[0:20]
-    products_qs_short = products_qs_short.prefetch_related('colors','sizes', 'albums')
-    products = ImageClientApi(products_qs_short, many=True,context={
+    products_qs_short = products_qs_short.prefetch_related(
+        'colors', 'sizes', 'albums')
+    products = ImageClientApi(products_qs_short, many=True, context={
         'request': request
     })
     #products = SearchCatalogImageSerializer(products_qs,context=ser_context, many=True)
     session = get_session_key(request)
-    
-    search_history = UserSearchData.objects.create(session=session, term=q, resultCount=products_qs.count())#+ len(mylogos.data)
+
+    search_history = UserSearchData.objects.create(
+        session=session, term=q, resultCount=products_qs.count())  # + len(mylogos.data)
     search_history.save()
-    all = products.data# + mylogos.data
+    all = products.data  # + mylogos.data
     #all = all[0:20]
-    context = {'all':all,
-                'q':q,
-                'id': search_history.id}
+    context = {'all': all,
+               'q': q,
+               'id': search_history.id}
     print('autocompleteModel', time.time() - start)
     print('autocompleteModel', len(all))
-    
-    
-    end=time.time() - start
+
+    end = time.time() - start
     print('autocompleteModel: ', start-end)
     return JsonResponse(context)
 
-from .models import UserSearchData
-from django.contrib.contenttypes.models import ContentType
 
 def autocompleteClick(request):
     print('autocompleteClick')
@@ -404,45 +439,42 @@ def autocompleteClick(request):
         elif my_type == 'album':
             content_type = ContentType.objects.get_for_model(CatalogAlbum)
             obj = CatalogAlbum.objects.get(pk=content_id)
-        #TODO: add my catalog to saved on click
+        # TODO: add my catalog to saved on click
 
-        
-        
         search_data = UserSearchData.objects.get(pk=id)
         search_data.content_object = obj
         search_data.save()
         context = {'status': 'ok',
-                    'id':id}
+                   'id': id}
         return JsonResponse(context)
-        
 
-from .models import Customer, BeseContactInformation
-from .forms import FormBeseContactInformation
-import  json
+
 def form_changed(request):
     if request.is_ajax() and request.method == 'POST':
-        customer,customer_created  = Customer.objects.get_or_create(device=request.COOKIES['device'])
+        customer, customer_created = Customer.objects.get_or_create(
+            device=request.COOKIES['device'])
         data = request.POST['content']
         data = json.loads(data)
         form_data_dict = {}
         for field in data:
             form_data_dict[field["name"]] = field["value"]
-        
+
         name = form_data_dict['name']
         email = form_data_dict['email']
         phone = form_data_dict['phone']
         message = form_data_dict['message']
         formUUID = form_data_dict['formUUID']
-        url =  form_data_dict['url']
+        url = form_data_dict['url']
         sumbited = False if form_data_dict['sumbited'] == '' else True
-        obj, created = BeseContactInformation.objects.get_or_create(formUUID=formUUID)
+        obj, created = BeseContactInformation.objects.get_or_create(
+            formUUID=formUUID)
         #print('BeseContactInformation ', created, obj)
-        obj.name=name
-        obj.email=email
-        obj.phone=phone
-        obj.message=message
-        obj.url=url
-        obj.sumbited=sumbited
+        obj.name = name
+        obj.email = email
+        obj.phone = phone
+        obj.message = message
+        obj.url = url
+        obj.sumbited = sumbited
         obj.save()
         customer.contact.add(obj)
         customer.save()
@@ -460,9 +492,9 @@ def form_changed(request):
     else:
         print('why not post')
 
+
 def success_view(request):
     return HttpResponse(render(request, 'success.html', context={}))
-
 
 
 def handler404(request, *args, **argv):
@@ -474,9 +506,9 @@ def handler404(request, *args, **argv):
 
 def shareable_product_view(request, prod_id):
     obj = CatalogImage.objects.get(pk=prod_id)
-    return render(request, 'share_product.html', context={'obj':obj})
-    
+    return render(request, 'share_product.html', context={'obj': obj})
+
 
 def shareable_category_view(request, category_id):
     obj = CatalogAlbum.objects.get(pk=category_id)
-    return render(request, 'share_category.html', context={'obj':obj})
+    return render(request, 'share_category.html', context={'obj': obj})

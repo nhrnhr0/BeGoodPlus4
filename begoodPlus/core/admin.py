@@ -92,6 +92,9 @@ def cart_to_dict(obj: SvelteCartModal):
 
 from core.tasks import send_cart_notification
 from core.models import UserProductPhoto
+import json
+from django.utils.http import urlencode
+from django.utils.html import mark_safe
 class UserProductPhotoAdmin(admin.ModelAdmin):
     list_display = ('user', 'photo_display', 'created_date', 'buy_price', 'want_price','description',)
     readonly_fields = ('photo_display',)
@@ -101,13 +104,26 @@ class SvelteCartProductEnteryAdmin(admin.ModelAdmin):
 admin.site.register(SvelteCartProductEntery, SvelteCartProductEnteryAdmin)
 
 class SvelteCartModalAdmin(admin.ModelAdmin):
-    list_display = ('id', 'doneOrder', 'user','buiss_display', 'cart_count', 'uniqe_color','name','phone','email','created_date', 'agent')
+    list_display = ('id', 'doneOrder', 'user','buiss_display', 'cart_count', 'uniqe_color','name','phone','email','created_date', 'agent','copy_cart')
     
     #filter_horizontal = ('products',)
-    readonly_fields = ('buiss_display','productsRaw','cart_count')
-    readonly_fields = ('productsRaw',)
+    readonly_fields = ('buiss_display','productsRaw','cart_count', 'copy_cart')
+    readonly_fields = ('productsRaw','copy_cart')
     exclude = ('products','productEntries')
-    
+    def copy_cart(self, obj):
+        url_res = {}
+        raw = json.loads(obj.productsRaw or '{}')
+        for key in raw: 
+            url_res[key] = {'mentries': raw[key]['mentries'], 'amount': raw[key]['amount']}
+        url = urlencode({'cart_json': json.dumps(url_res)})
+        ms_domain = 'https://www.ms-global.co.il/?'
+        boost_domain = 'https://boost-pop.com/?'
+        local_domain = 'http://127.0.0.1:3000/?'
+        return mark_safe('<ul><li><a href="{}{}">{}</a></li><li><a href="{}{}">{}</a></li><li><a href="{}{}">{}</a></li></ul>'
+                        .format(ms_domain, url, 'ms-global',
+                                boost_domain, url, 'boost-pop',
+                                local_domain, url, 'local'))
+        
     def change_view(self, request, object_id, form_url='', extra_context=None):
         extra_context = extra_context or {}
         extra_context['my_data'] = {'object_id':object_id}
