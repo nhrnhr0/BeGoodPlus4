@@ -108,9 +108,10 @@ class CatalogImageAdmin(AdminAdvancedFiltersMixin, admin.ModelAdmin):
     list_per_page = 50
     exclude = ('detailTabel',)
     advanced_filter_fields = (
-        'title', 'description','sizes__size', 'colors__name','provides__name',
+        'title', 'description','sizes__size', 'colors__name','provides__name', 'varients__name',
         'barcode', 'cost_price', 'client_price', 'recomended_price', 'albums__title', 'show_sizes_popup',
-        ('packingTypeProvider__name', 'שיטת אריזה מהספק'), ('packingTypeClient__name', 'שיטת אריזה ללקוח'),'date_modified', 'can_tag',)
+        ('packingTypeProvider__name', 'שיטת אריזה מהספק'), ('packingTypeClient__name', 'שיטת אריזה ללקוח'),'date_created','date_modified', 'can_tag','out_of_stock', 'is_active','has_physical_barcode','cimage',)
+
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
