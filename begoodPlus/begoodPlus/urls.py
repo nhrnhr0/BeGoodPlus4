@@ -14,29 +14,22 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
-from customerCart.views import cart_del, cart_add, cart_view, cart_info
-from catalogAlbum.views import catalogView_api  # ,catalog_timer
-# admin_subscribe_view, mainView,, form_changed #saveBaseContactFormView
-from core.views import autocompleteModel, autocompleteClick, success_view
-from core.views import handler404, api_logout, shareable_category_view, shareable_product_view, svelte_contact_form, set_csrf_token, svelte_cart_form, track_cart
-from clientApi.views import CustomAuthToken, get_products_info
-from productColor.views import api_product_colors
-from productSize.views import api_product_sizes
-from packingType.views import api_packing_types
-from provider.views import api_providers
-from clientApi.views import get_all_varients_api
-from inventory.views import add_doc_stock_enter_ppn_entry, delete_doc_stock_enter_ppn_entry, get_doc_stock_enter_ppn_entries, search_ppn, show_inventory_stock, get_product_inventory, doc_stock_list
+from inventory.views import get_stock_by_id_api, unpivot_inventory_exel, upload_inventory_csv
+from clientApi.views import CustomAuthToken, get_all_varients_api
+from inventory.views import add_doc_stock_enter_ppn, add_doc_stock_enter_ppn_entry, create_enter_doc, enter_doc_edit,delete_doc_stock_enter_ppn_entry, doc_stock_detail_api, doc_stock_list_api, get_all_inventory_api, get_all_warehouses_api,enter_doc_insert_inventory, enter_doc_remove_product, get_doc_stock_enter_ppn_entries, inventory_edit_entry, inventory_get_entry_history, inventory_manual_update_entry, search_ppn, search_warehouses, show_inventory_stock,get_product_inventory,doc_stock_list
+
 from clientApi.views import get_all_colors_api, get_all_sizes_api, main_page_api
 from campains.views import admin_get_all_campains, admin_get_campain_products, get_user_campains
 from inventory.views import DocStockEnterViewSet, doc_stock_enter
 # from mcrm.views import , admin_upload_bulk_crm_exel, upload_crm_execl, upload_crm_execl2
 from msCrm.views import get_all_business_types_groups, mcrm_lead_register, get_all_business_types, get_all_interests, import_mscrm_from_exel
-from core.views import client_product_question, send_product_photo, svelte_cart_history, test_celery_view, verify_unique_field_by_field_excel
+from core.views import api_logout, autocompleteClick, autocompleteModel, client_product_question, handler404, send_product_photo, set_csrf_token, success_view, svelte_cart_form, svelte_cart_history, svelte_contact_form, test_celery_view, track_cart, verify_unique_field_by_field_excel
 from catalogImages.views import admin_api_get_product_cost_price, all_images_ids, catalogimage_upload_warehouse_excel, get_product_sizes_colors_martix, admin_remove_product_from_cart, admin_add_to_existing_cart
 from clientApi.views import ColorsClientViewSet, ImageClientViewSet, SizesClientViewSet, LogoClientViewSet, get_album_images
 from clientApi.views import AlbumClientViewSet
 from catalogImageDetail.views import SvelteCatalogImageDetailViewSet
-from morders.views import api_edit_order_add_product, api_get_order_data, edit_morder, morder_edit_order_add_product_entries, api_delete_order_data_item, view_morder_pdf, view_morder_stock_document
+from morders.views import api_edit_order_add_product, api_edit_order_delete_product,api_get_order_data, api_get_order_data2, create_provider_docs, dashboard_orders_collection_smartbee, edit_morder, get_all_orders,dashboard_orders_collection_collect_save, get_order_detail_to_collect, list_orders_to_collect, load_all_provider_request_admin, morder_edit_order_add_product_entries,api_delete_order_data_item, morder_edit_order_add_product_entries_2, morder_edit_order_add_provider_entries, provider_request_update_entry_admin,view_morder_pdf, view_morder_stock_document
+
 from packingType.views import SvelteApiPackingTypeViewSet
 from color.views import SvelteColorsViewSet
 from catalogImages.views import SvelteCatalogImageViewSet, create_mini_table, catalogimage_upload_slim_excel
@@ -53,10 +46,11 @@ from rest_framework import routers
 from django.contrib.auth.models import User
 
 from catalogImages.views import CatalogImageViewSet
-from catalogAlbum.views import CatalogAlbumViewSet
+from catalogAlbum.views import CatalogAlbumViewSet, catalogView_api
 from client.views import create_client_user, get_all_users_by_admin, whoAmI, userLogEntryView
 from color.views import ColorsViewSet
 from productSize.views import SizesViewSet
+from smartbee.views import get_smartbee_doc
 router = routers.DefaultRouter()
 router.register(r'CatalogAlbums', CatalogAlbumViewSet)
 router.register(r'CatalogImages', CatalogImageViewSet)
@@ -85,22 +79,21 @@ clientRouter.register(r'logos', LogoClientViewSet)
 #from rest_framework.authtoken.views import obtain_auth_token
 #from rest_framework_simplejwt.views import (TokenObtainPairView,TokenRefreshView,)
 urlpatterns = [
-    path('get-products-info', get_products_info, name='get-products-info'),
-    path('create-client-user/', create_client_user, name='create-client-user'),
-    path('verify-unique-field-by-field-excel',
-         verify_unique_field_by_field_excel),
-    path('product-question', client_product_question,
-         name='client_product_question'),
+    path('upload-inventory-csv/', upload_inventory_csv, name='upload-inventory-csv'),
+    path('unpivot-inventory-exel/', unpivot_inventory_exel, name='unpivot-inventory-exel'),
+    path('create-provider-docs', create_provider_docs, name='create-provider-docs'),
+    path('load-all-provider-request', load_all_provider_request_admin, name='load_all_provider_request_admin'),
+    path('update-provider-request-entry', provider_request_update_entry_admin, name='provider_request_update_entry_admin'),
+    path('verify-unique-field-by-field-excel', verify_unique_field_by_field_excel),
+    path('product-question', client_product_question, name='client_product_question'),
     path('product-photo', send_product_photo, name='send_product_photo'),
     path('main_page_api/', main_page_api, name='main_page_api'),
-
     path('admin-api/remove-product-from-cart/',
          admin_remove_product_from_cart, name='admin_remove_product_from_cart'),
     path('admin-api/get-product-sizes-colors-martix/<int:id>',
          get_product_sizes_colors_martix, name=''),
     path('admin-api/add-to-existing-cart/', admin_add_to_existing_cart,
          name='admin_add_to_existing_cart'),
-
     path('admin-api/get-all-campaigns/', admin_get_all_campains),
     path('admin-api/get-campaign-products/<int:campain_id>',
          admin_get_campain_products),
@@ -109,7 +102,6 @@ urlpatterns = [
     path('test', test_celery_view),
     path('create_mini_table/<int:id>/',
          create_mini_table, name='create_mini_table'),
-
     #path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     #path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/get-token/', CustomAuthToken.as_view(), name='get_token'),
@@ -119,34 +111,49 @@ urlpatterns = [
     path('admin/', admin.site.urls),
 
     # inventory:
+    
     path('inv/doc-stock-list', doc_stock_list, name='admin_doc_stock_list'),
-    path('inv/doc-stock-enter/<int:id>', doc_stock_enter,
-         name='admin_edit_doc_stock_enter'),
-    path('inv/enter-doc/<int:id>',
-         DocStockEnterViewSet.as_view(), name='admin_enter_doc'),
-    path('inv/enter-doc/get-doc-stock-enter-ppn-entries/',
-         get_doc_stock_enter_ppn_entries, name='admin_get_doc_stock_enter_ppn_entries'),
-    path('inv/enter-doc/delete-doc-stock-enter-ppn-entry',
-         delete_doc_stock_enter_ppn_entry, name='admin_delete_doc_stock_enter_ppn_entry'),
-    path('inv/enter-doc/add-doc-stock-enter-ppn-entry',
-         add_doc_stock_enter_ppn_entry, name='admin_add_doc_stock_enter_ppn_entry'),
+    path('inv/doc-stock-list-api', doc_stock_list_api, name='doc_stock_list_api'),
+    path('inv/doc-stock-detail-api/<int:id>', doc_stock_detail_api, name='doc_stock_detail_api'),
+    path('inv/doc-stock-enter/<int:id>', doc_stock_enter, name='admin_edit_doc_stock_enter'),
+    path('inv/enter-doc/<int:id>', DocStockEnterViewSet.as_view(), name='admin_enter_doc'),
+    path('inv/enter-doc/get-doc-stock-enter-ppn-entries/', get_doc_stock_enter_ppn_entries, name='admin_get_doc_stock_enter_ppn_entries'),
+    path('inv/enter-doc/delete-doc-stock-enter-ppn-entry', delete_doc_stock_enter_ppn_entry, name='admin_delete_doc_stock_enter_ppn_entry'),
+    path('inv/enter-doc/add-doc-stock-enter-ppn-entry', add_doc_stock_enter_ppn_entry, name='admin_add_doc_stock_enter_ppn_entry'),
+    path('inv/enter-doc/add-doc-stock-enter-ppn',add_doc_stock_enter_ppn, name='admin_add_doc_stock_enter_ppn'),
     path('inv/show-stock', show_inventory_stock),
-    path('inv/get-product-inventory/', get_product_inventory,
-         name='admin_get_product_inventory'),
+    path('inv/get-product-inventory/', get_product_inventory, name='admin_get_product_inventory'),
+    path('inv/create-enter-doc/', create_enter_doc, name='admin_create_enter_doc'),
+    path('enter-doc-edit/', enter_doc_edit, name='admin_enter_doc_edit'),
+    path('enter-doc-remove-product/', enter_doc_remove_product, name='admin_enter_doc_remove_product'),
+    #path('enter-doc-insert-inventory/', enter_doc_insert_inventory, name='admin_enter_doc_insert_inventory'),
+    path('get-all-warehouses-api/', get_all_warehouses_api, name='admin_get_all_warehouses_api'),
+    path('enter-doc-insert-inventory/<int:doc_id>', enter_doc_insert_inventory, name='admin_enter_doc_insert_inventory'),
+    path('get-all-inventory-api/', get_all_inventory_api, name='admin_get_all_inventory_api'),
+    path('get-stock-by-id-api/<int:id>', get_stock_by_id_api, name='admin_get_stock_by_id_api'),
+    path('inventory-edit-entry/<int:entry_id>', inventory_edit_entry, name='admin_inventory_edit_entry'),
+    path('inventory-edit-entry/<int:entry_id>/history/', inventory_get_entry_history, name='admin_inventory_edit_entry_history'),
+    path('inventory-manual-update-entry/<int:entry_id>', inventory_manual_update_entry, name='admin_inventory_manual_update_entry'),
     # orders
     path('morders/edit-order/<int:id>', edit_morder, name='admin_edit_order'),
-    path('morders/api-get-order-data/<int:id>',
-         api_get_order_data, name='admin_api_get_order_data'),
-    path('morders/api-edit-order/add-new-product',
-         api_edit_order_add_product, name="admin_api_edit_order_add_product"),
-    path('morders/delete-product/<int:row_id>', api_delete_order_data_item,
-         name='admin_api_delete_order_data_item'),
-    path('morders/edit-order-add-product-entries', morder_edit_order_add_product_entries,
-         name="morder_edit_order_add_product_entries"),
-    path('morders/view-order-pdf/<int:id>',
-         view_morder_pdf, name='view_morder_pdf'),
-    path('morders/view_morder_stock_document/<int:id>',
-         view_morder_stock_document, name='view_morder_stock_document'),
+    path('morders/api-get-order-data/<int:id>', api_get_order_data, name='admin_api_get_order_data'),
+    path('morders/api-get-order-data2/<int:id>', api_get_order_data2, name='admin_api_get_order_data2'),
+    
+    path('morders/api-edit-order/add-new-product', api_edit_order_add_product, name="admin_api_edit_order_add_product"),
+    path('morders/api-edit-order/delete-product-from-morder', api_edit_order_delete_product, name="admin_api_edit_order_delete_product"),
+    path('morders/delete-product/<int:row_id>', api_delete_order_data_item, name='admin_api_delete_order_data_item'),
+    path('morders/edit-order-add-product-entries', morder_edit_order_add_product_entries,name="morder_edit_order_add_product_entries"),
+    path('morders/edit-order-add-product-entries/v2', morder_edit_order_add_product_entries_2,name="morder_edit_order_add_product_entries"),
+    path('morders/edit-order-add-provider-entries/<int:entry_id>', morder_edit_order_add_provider_entries,name="morder_edit_order_add_provider_entries"),
+    path('morders/view-order-pdf/<int:id>', view_morder_pdf, name='view_morder_pdf'),
+    path('morders/view_morder_stock_document/<int:id>', view_morder_stock_document, name='view_morder_stock_document'),
+    
+    path('morders/list-orders-to-collect', list_orders_to_collect, name='admin_list_orders_to_collect'),
+    path('morders/get-order-detail-to-collect', get_order_detail_to_collect, name='admin_get_order_detail_to_collect'),
+    path('dashboard/orders-collection/collect/save', dashboard_orders_collection_collect_save, name='admin_dashboard_orders_collection_collect_save'),
+    path('dashboard/orders-collection/smartbee/<int:id>', dashboard_orders_collection_smartbee, name='admin_dashboard_orders_collection_smartbee'),
+    path('get-smartbee-doc/<str:doc_id>',get_smartbee_doc, name='admin_get_smartbee_doc'),
+    path('api/get-all-orders', get_all_orders, name='admin_get_all_orders'),
     path('search-ppn/', search_ppn, name='search_ppn'),
     #path('api/', include(router.urls)),
 
@@ -185,7 +192,7 @@ urlpatterns = [
     #path('', catalogView, name="catalogView"),
 
     path('catalog_api', catalogView_api, name="catalog-view-api"),
-
+    path('search-warehouses/', search_warehouses, name='search_warehouses'),
     path('search-providers/', search_providers, name="search-providers"),
     path('search', autocompleteModel),
     path('search-click', autocompleteClick),
@@ -198,28 +205,27 @@ urlpatterns = [
     path('api/set_csrf_token/', set_csrf_token, name='set_csrf_token'),
     #path('form-change', form_changed, name='form-change'),
 
-    path('cart/add', cart_add, name='cart-add'),
-    path('cart/del', cart_del, name='cart-del'),
-    path('cart/view', cart_view, name='cart-view'),
-    path('cart/info', cart_info, name='cart-info'),
+    # path('cart/add', cart_add, name='cart-add'),
+    # path('cart/del', cart_del, name='cart-del'),
+    # path('cart/view', cart_view, name='cart-view'),
+    # path('cart/info', cart_info, name='cart-info'),
 
 
     #path('user-tasks', user_tasks, name='user-tasks'),
     path('success/', success_view, name='success'),
     re_path(r'^advanced_filters/', include('advanced_filters.urls')),
-    re_path(r'share-me/product/(?P<prod_id>\d+)/$',
-            shareable_product_view, name='shareable_product_view'),
-    re_path(r'share-me/category/(?P<category_id>\d+)/$',
-            shareable_category_view, name='shareable_category_view'),
+    # re_path(r'share-me/product/(?P<prod_id>\d+)/$',
+    #         shareable_product_view, name='shareable_product_view'),
+    # re_path(r'share-me/category/(?P<category_id>\d+)/$',
+    #         shareable_category_view, name='shareable_category_view'),
 
     path('404', handler404)
 ]
 print('settings: ', settings)
 if settings.DEBUG:
-    urlpatterns = urlpatterns + \
-        static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-    urlpatterns = urlpatterns + \
-        static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    urlpatterns= urlpatterns + static(settings.MEDIA_URL, document_root= settings.MEDIA_ROOT)
+    urlpatterns= urlpatterns + static(settings.STATIC_URL, document_root= settings.STATIC_ROOT)
+    #urlpatterns =urlpatterns +  [path('silk/', include('silk.urls', namespace='silk'))]
 
 if settings.DEBUG:
     urlpatterns = [

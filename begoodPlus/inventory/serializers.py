@@ -1,15 +1,36 @@
 
-from .models import PPN, DocStockEnter, ProductEnterItems, SKUM, Warehouse
+from clientApi.serializers import ImageClientApi
+from .models import PPN, DocStockEnter, ProductEnterItems, SKUM, ProductEnterItemsEntries, Warehouse, WarehouseStock, WarehouseStockHistory
 from rest_framework import serializers
+
+
+class WarehouseStockSerializer(serializers.ModelSerializer):
+    product_name= serializers.CharField(source='ppn.product.title')
+    product_image = serializers.CharField(source='ppn.product.cimage')
+    product_id=  serializers.CharField(source='ppn.product.id')
+    size_name=  serializers.CharField(source='size.size')
+    color_name=  serializers.CharField(source='color.name')
+    verient_name=  serializers.CharField(source='verient.name', default='')
+    warehouse_name= serializers.CharField(source='warehouse.name') 
+    provider_name = serializers.CharField(source='ppn.provider.name')
+    provider_id = serializers.CharField(source='ppn.provider.id')
+    barcode = serializers.CharField(source='ppn.barcode')
+    has_phisical_barcode = serializers.BooleanField(source='ppn.has_phisical_barcode')
+    class Meta:
+        model = WarehouseStock
+        fields = ('id', 'created_at','updated_at','warehouse','warehouse_name', 'ppn','size','color','verient','quantity','created_at','updated_at','avgPrice','product_name','product_image','product_id','size_name','color_name','verient_name','provider_id', 'provider_name','barcode', 'has_phisical_barcode',)
+
 class PPNSerializer(serializers.ModelSerializer):
     product_id = serializers.CharField(source='product.id')
     product_name = serializers.CharField(source='product.title')
+    product_image = serializers.CharField(source='product.cimage')
     provider_id = serializers.CharField(source='provider.id')
     provider_name = serializers.CharField(source='provider.name')
+    product = ImageClientApi(read_only=True, many=False)
     
     class Meta:
         model = PPN
-        fields = ('id', 'provider_id', 'provider_name', 'product_id', 'product_name', 'providerProductName')
+        fields = ('id','product', 'provider_id', 'provider_name', 'product_id', 'product_name', 'providerProductName','barcode','buy_price','product_image', 'has_phisical_barcode',)
 
 class SKUMSerializer(serializers.ModelSerializer):
     size_name = serializers.CharField(source='size.size')
@@ -22,25 +43,55 @@ class SKUMSerializer(serializers.ModelSerializer):
         model = SKUM
         fields = ('id', 'ppn', 'ppn_name','size', 'size_name','color', 'color_name','verient', 'verient_name', 'created_at','product_name', 'product_id')
 
+class ProductEnterItemsEntriesSerializer(serializers.ModelSerializer):
+    size_name = serializers.CharField(source='size.size')
+    color_name = serializers.CharField(source='color.name')
+    verient_name = serializers.CharField(source='verient.name', default='')
+    class Meta:
+        model = ProductEnterItemsEntries
+        fields = ('id', 'size', 'size_name','color', 'color_name','verient', 'verient_name','quantity','created_at')
+        
 class ProductEnterItemsSerializer(serializers.ModelSerializer):
-    #sku = SKUMSerializer(many=False)
-    sku_id = serializers.CharField(source='sku.id')
-    sku_size_id = serializers.CharField(source='sku.size.id')
-    sku_size_name = serializers.CharField(source='sku.size.size')
-    sku_color_id = serializers.CharField(source='sku.color.id')
-    sku_color_name = serializers.CharField(source='sku.color.name')
-    sku_verient_id = serializers.CharField(source='sku.verient.id', default='')
-    sku_verient_name = serializers.CharField(source='sku.verient.name', default='')
-    sku_ppn_id = serializers.CharField(source='sku.ppn.id')
-    sku_ppn_name = serializers.CharField(source='sku.ppn.providerProductName')
-    sku_ppn_provider_id = serializers.CharField(source='sku.ppn.provider.id')
-    sku_ppn_provider_name = serializers.CharField(source='sku.ppn.provider.name')
-    sku_product_id = serializers.CharField(source='sku.ppn.product.id')
-    sku_product_name = serializers.CharField(source='sku.ppn.product.title')
+    ##sku = SKUMSerializer(many=False)
+    #sku_id = serializers.CharField(source='sku.id')
+    #sku_size_id = serializers.CharField(source='sku.size.id')
+    #sku_size_name = serializers.CharField(source='sku.size.size')
+    #sku_color_id = serializers.CharField(source='sku.color.id')
+    #sku_color_name = serializers.CharField(source='sku.color.name')
+    #sku_verient_id = serializers.CharField(source='sku.verient.id', default='')
+    #sku_verient_name = serializers.CharField(source='sku.verient.name', default='')
+    #sku_ppn_id = serializers.CharField(source='sku.ppn.id')
+    #sku_ppn_name = serializers.CharField(source='sku.ppn.providerProductName')
+    #sku_ppn_provider_id = serializers.CharField(source='sku.ppn.provider.id')
+    #sku_ppn_provider_name = serializers.CharField(source='sku.ppn.provider.name')
+    #sku_product_id = serializers.CharField(source='sku.ppn.product.id')
+    #sku_product_name = serializers.CharField(source='sku.ppn.product.title')
+    #sku_product_image = serializers.CharField(source='sku.ppn.product.cimage')
+    # ppn_product_cimage = serializers.CharField(source='ppn.product.cimage')
+    # ppn_product_title = serializers.CharField(source='ppn.product.title')
+    # ppn_provider_id = serializers.CharField(source='ppn.provider.id')
+    # ppn_provider_name = serializers.CharField(source='ppn.provider.name')
+    # ppn_providerProductName = serializers.CharField(source='ppn.providerProductName')
+    ppn = PPNSerializer(many=False)
+    entries = ProductEnterItemsEntriesSerializer(many=True)
     class Meta:
         model = ProductEnterItems
         #fields = ('id', 'sku','quantity','price','created_at',)
-        fields = ('id', 'quantity','price','created_at', 'sku_id', 'sku_size_id', 'sku_size_name', 'sku_color_id', 'sku_color_name', 'sku_verient_id', 'sku_verient_name', 'sku_ppn_id', 'sku_ppn_name', 'sku_product_id', 'sku_product_name','sku_ppn_provider_id','sku_ppn_provider_name')
+        fields = ('id','ppn', 'total_quantity','price','created_at','entries',)
+
+class WarehouseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Warehouse
+        fields = ('id','name',)
+
+
+class DocStockEnterListSerializer(serializers.ModelSerializer):
+    provider_name = serializers.CharField(source='provider.name')
+    warehouse_name = serializers.CharField(source='warehouse.name')
+    username = serializers.CharField(source='byUser.username', default='')
+    class Meta:
+        model = DocStockEnter
+        fields = ('id','docNumber', 'description','created_at','provider', 'provider_name', 'warehouse','warehouse_name','isAplied','byUser','username')
 
 class DocStockEnterSerializer(serializers.ModelSerializer):
     items = ProductEnterItemsSerializer(many=True)
@@ -48,11 +99,18 @@ class DocStockEnterSerializer(serializers.ModelSerializer):
     warehouse_name = serializers.CharField(source='warehouse.name')
     class Meta:
         model = DocStockEnter
-        fields = ('id','docNumber', 'description','created_at','provider', 'provider_name', 'warehouse','warehouse_name','items','isAplied','byUser',)
+        fields = ('id','docNumber', 'description','created_at','provider', 'provider_name', 'warehouse','warehouse_name','items','isAplied','byUser','new_products')
         
 class DocStockEnterSerializerList(serializers.ModelSerializer):
     provider_name = serializers.CharField(source='provider.name')
     warehouse_name = serializers.CharField(source='warehouse.name')
+    username = serializers.CharField(source='byUser.username', default='None')
     class Meta:
         model = DocStockEnter
-        fields = ('id','docNumber', 'description','created_at','provider_name', 'warehouse_name','isAplied',)
+        fields = ('id','docNumber', 'description','created_at','provider_name', 'warehouse_name','isAplied','byUser')
+        
+class WarehouseStockHistorySerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = WarehouseStockHistory
+        fields = ('id','created_at','note','user','old_quantity','new_quantity','created_at','note','user',)

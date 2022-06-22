@@ -8,8 +8,7 @@ class Provider(models.Model):
         verbose_name = _('Provider')
         verbose_name_plural = _('Providers')
         default_related_name = 'providers'
-
-    name = models.CharField(max_length=150, verbose_name=_('name'))
+    name = models.CharField(max_length=150, verbose_name=_('name'), unique=True)
     providerId = models.CharField(max_length=150, verbose_name=_('private compeny'), blank=True)
     code = models.CharField(verbose_name=_('code'), max_length=3, default='A')
     #color = models.ForeignKey(Color, on_delete=models.CASCADE)
