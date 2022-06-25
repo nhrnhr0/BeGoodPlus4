@@ -143,6 +143,45 @@ import AutoComplete from "simple-svelte-autocomplete";
         alert('saved');        
     }
     
+    function statusFormatter(cell, formatterParams) {
+        let value = cell.getValue();
+        const options = ['חדש','סחורה הוזמנה','מוכן לליקוט','ארוז מוכן למשלוח','בהדפסה','סופק',]
+        let selectElement = document.createElement("select");
+        selectElement.classList.add("editor-list");
+        options.forEach(option => {
+            let item = document.createElement("option");
+            item.classList.add("editor-item");
+            item.innerHTML = option;
+            item.setAttribute('value', option);
+            if (value == option) {
+                item.setAttribute('selected', 'selected');
+            }
+            selectElement.appendChild(item);
+        });
+        selectElement.addEventListener("change", function() {
+            console.log('change: ', this);
+            let value = this.value;
+            
+            // remove the selected from the old option
+            let oldOption = document.querySelector(`option[value="${cell.getValue()}"]`);
+            try {
+                oldOption.removeAttribute('selected');
+            }
+            catch(e) {
+                console.log('error: ', e);
+            }
+
+            // set the new value
+            headerData[0].status = value;
+            cell.setValue(value);
+            // add the selected to the new option
+            let newOption = document.querySelector(`option[value="${value}"]`);
+            newOption.setAttribute('selected', 'selected');
+        }
+        );
+        return selectElement;
+    }
+
     function multiSelectProviderFormatter(cell, formatterParams, onRendered) {
         let value = cell.getValue();
         let values
@@ -222,15 +261,18 @@ import AutoComplete from "simple-svelte-autocomplete";
             //autoColumns:true,
             layout:"fitDataStretch",
             textDirection:"rtl", 
+            height:"auto",
+            minHeight:300,
+            rowHeight:300,
             columns: [
                 {title:'תאריך יצירה', field:'created'},
                 {title:'תאריך שינוי', field:'updated'},
                 {title:'id', field:'id'},
                 {title:'שם', field:'name'},
                 {title:'אימייל', field:'email'},
-                {title:'הודעה', field:'message',editor:true},
+                {title:'הודעה', field:'message',editor:true, formatter: "textarea"},
                 {title: 'טפלון', field: 'phone'},
-                {title: 'סטטוס', field: 'status', editor:"select", editorParams:{values:['new', 'done'],multiselect:false}},
+                {title: 'סטטוס', field: 'status', formatter:statusFormatter},
                 {title: 'שם לקוח', field: 'client_name'},
                 {title: 'סוכן', field:'agent'},
             ]
@@ -410,8 +452,6 @@ import AutoComplete from "simple-svelte-autocomplete";
         }).catch(err=>{
             console.log(err);
         });
-        
-        //productAmountEditModel.hide();
     }
 </script>
 

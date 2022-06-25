@@ -38233,7 +38233,7 @@ var morderedit = (function () {
     const { console: console_1 } = globals;
     const file = "src\\MorderEdit.svelte";
 
-    // (423:4) {:else}
+    // (463:4) {:else}
     function create_else_block(ctx) {
     	let div0;
     	let t0;
@@ -38278,8 +38278,8 @@ var morderedit = (function () {
     				$$slots: {
     					item: [
     						create_item_slot,
-    						({ label, item }) => ({ 25: label, 26: item }),
-    						({ label, item }) => (label ? 33554432 : 0) | (item ? 67108864 : 0)
+    						({ label, item }) => ({ 26: label, 27: item }),
+    						({ label, item }) => (label ? 67108864 : 0) | (item ? 134217728 : 0)
     					]
     				},
     				$$scope: { ctx }
@@ -38335,22 +38335,22 @@ var morderedit = (function () {
     			t9 = space();
     			create_component(button.$$.fragment);
     			attr_dev(div0, "id", "headers-table");
-    			add_location(div0, file, 423, 8, 17936);
-    			add_location(hr0, file, 424, 8, 17976);
+    			add_location(div0, file, 463, 8, 19499);
+    			add_location(hr0, file, 464, 8, 19539);
     			attr_dev(div1, "id", "products-table");
-    			add_location(div1, file, 425, 8, 17990);
-    			add_location(hr1, file, 426, 8, 18031);
-    			add_location(h3, file, 429, 12, 18088);
+    			add_location(div1, file, 465, 8, 19553);
+    			add_location(hr1, file, 466, 8, 19594);
+    			add_location(h3, file, 469, 12, 19651);
     			attr_dev(label, "for", "product_name");
-    			add_location(label, file, 432, 20, 18242);
+    			add_location(label, file, 472, 20, 19805);
     			attr_dev(div2, "class", "search-wraper");
-    			add_location(div2, file, 433, 20, 18305);
+    			add_location(div2, file, 473, 20, 19868);
     			attr_dev(div3, "class", "form-group");
-    			add_location(div3, file, 431, 16, 18196);
+    			add_location(div3, file, 471, 16, 19759);
     			attr_dev(form, "method", "post");
-    			add_location(form, file, 430, 12, 18120);
+    			add_location(form, file, 470, 12, 19683);
     			attr_dev(div4, "id", "new-product-form");
-    			add_location(div4, file, 428, 8, 18047);
+    			add_location(div4, file, 468, 8, 19610);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div0, anchor);
@@ -38384,7 +38384,7 @@ var morderedit = (function () {
     		p: function update(ctx, dirty) {
     			const autocomplete_changes = {};
 
-    			if (dirty & /*$$scope, label, item*/ 234881024) {
+    			if (dirty & /*$$scope, label, item*/ 469762048) {
     				autocomplete_changes.$$scope = { dirty, ctx };
     			}
 
@@ -38405,7 +38405,7 @@ var morderedit = (function () {
     			const button_changes = {};
     			if (dirty & /*updateing_to_server*/ 2) button_changes.disabled = /*updateing_to_server*/ ctx[1];
 
-    			if (dirty & /*$$scope, updateing_to_server*/ 134217730) {
+    			if (dirty & /*$$scope, updateing_to_server*/ 268435458) {
     				button_changes.$$scope = { dirty, ctx };
     			}
 
@@ -38445,14 +38445,14 @@ var morderedit = (function () {
     		block,
     		id: create_else_block.name,
     		type: "else",
-    		source: "(423:4) {:else}",
+    		source: "(463:4) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (421:4) {#if updateing}
+    // (461:4) {#if updateing}
     function create_if_block(ctx) {
     	let loading;
     	let current;
@@ -38489,14 +38489,14 @@ var morderedit = (function () {
     		block,
     		id: create_if_block.name,
     		type: "if",
-    		source: "(421:4) {#if updateing}",
+    		source: "(461:4) {#if updateing}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (437:28) 
+    // (477:28) 
     function create_item_slot(ctx) {
     	let div2;
     	let div1;
@@ -38506,7 +38506,7 @@ var morderedit = (function () {
     	let img_src_value;
     	let t;
     	let html_tag;
-    	let raw_value = /*label*/ ctx[25] + "";
+    	let raw_value = /*label*/ ctx[26] + "";
 
     	const block = {
     		c: function create() {
@@ -38516,17 +38516,17 @@ var morderedit = (function () {
     			img = element("img");
     			t = space();
     			html_tag = new HtmlTag();
-    			attr_dev(img, "alt", img_alt_value = /*item*/ ctx[26].title);
+    			attr_dev(img, "alt", img_alt_value = /*item*/ ctx[27].title);
     			set_style(img, "height", "25px");
-    			if (!src_url_equal(img.src, img_src_value = "" + (CLOUDINARY_BASE_URL + "f_auto,w_auto/" + /*item*/ ctx[26].cimage))) attr_dev(img, "src", img_src_value);
-    			add_location(img, file, 439, 40, 18984);
+    			if (!src_url_equal(img.src, img_src_value = "" + (CLOUDINARY_BASE_URL + "f_auto,w_auto/" + /*item*/ ctx[27].cimage))) attr_dev(img, "src", img_src_value);
+    			add_location(img, file, 479, 40, 20547);
     			html_tag.a = null;
     			attr_dev(div0, "class", "inner");
-    			add_location(div0, file, 438, 36, 18923);
+    			add_location(div0, file, 478, 36, 20486);
     			attr_dev(div1, "class", "search-item");
-    			add_location(div1, file, 437, 32, 18860);
+    			add_location(div1, file, 477, 32, 20423);
     			attr_dev(div2, "slot", "item");
-    			add_location(div2, file, 436, 28, 18775);
+    			add_location(div2, file, 476, 28, 20338);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div2, anchor);
@@ -38537,15 +38537,15 @@ var morderedit = (function () {
     			html_tag.m(raw_value, div0);
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*item*/ 67108864 && img_alt_value !== (img_alt_value = /*item*/ ctx[26].title)) {
+    			if (dirty & /*item*/ 134217728 && img_alt_value !== (img_alt_value = /*item*/ ctx[27].title)) {
     				attr_dev(img, "alt", img_alt_value);
     			}
 
-    			if (dirty & /*item*/ 67108864 && !src_url_equal(img.src, img_src_value = "" + (CLOUDINARY_BASE_URL + "f_auto,w_auto/" + /*item*/ ctx[26].cimage))) {
+    			if (dirty & /*item*/ 134217728 && !src_url_equal(img.src, img_src_value = "" + (CLOUDINARY_BASE_URL + "f_auto,w_auto/" + /*item*/ ctx[27].cimage))) {
     				attr_dev(img, "src", img_src_value);
     			}
 
-    			if (dirty & /*label*/ 33554432 && raw_value !== (raw_value = /*label*/ ctx[25] + "")) html_tag.p(raw_value);
+    			if (dirty & /*label*/ 67108864 && raw_value !== (raw_value = /*label*/ ctx[26] + "")) html_tag.p(raw_value);
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(div2);
@@ -38556,14 +38556,14 @@ var morderedit = (function () {
     		block,
     		id: create_item_slot.name,
     		type: "slot",
-    		source: "(437:28) ",
+    		source: "(477:28) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (455:20) {:else}
+    // (495:20) {:else}
     function create_else_block_2(ctx) {
     	let button;
 
@@ -38572,7 +38572,7 @@ var morderedit = (function () {
     			button = element("button");
     			button.textContent = "הוסף";
     			button.disabled = true;
-    			add_location(button, file, 455, 24, 19866);
+    			add_location(button, file, 495, 24, 21429);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, button, anchor);
@@ -38587,14 +38587,14 @@ var morderedit = (function () {
     		block,
     		id: create_else_block_2.name,
     		type: "else",
-    		source: "(455:20) {:else}",
+    		source: "(495:20) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (446:20) {#if selectedProduct}
+    // (486:20) {#if selectedProduct}
     function create_if_block_2(ctx) {
     	let div1;
     	let div0;
@@ -38620,13 +38620,13 @@ var morderedit = (function () {
     			attr_dev(img, "alt", img_alt_value = /*selectedProduct*/ ctx[2]?.title);
     			set_style(img, "height", "25px");
     			if (!src_url_equal(img.src, img_src_value = "" + (CLOUDINARY_BASE_URL + "f_auto,w_auto/" + /*selectedProduct*/ ctx[2]?.cimage))) attr_dev(img, "src", img_src_value);
-    			add_location(img, file, 448, 32, 19484);
+    			add_location(img, file, 488, 32, 21047);
     			html_tag.a = null;
     			attr_dev(div0, "class", "inner");
-    			add_location(div0, file, 447, 28, 19431);
+    			add_location(div0, file, 487, 28, 20994);
     			attr_dev(div1, "class", "selected-product");
-    			add_location(div1, file, 446, 24, 19371);
-    			add_location(button, file, 453, 24, 19790);
+    			add_location(div1, file, 486, 24, 20934);
+    			add_location(button, file, 493, 24, 21353);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div1, anchor);
@@ -38659,14 +38659,14 @@ var morderedit = (function () {
     		block,
     		id: create_if_block_2.name,
     		type: "if",
-    		source: "(446:20) {#if selectedProduct}",
+    		source: "(486:20) {#if selectedProduct}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (466:16) {:else}
+    // (506:16) {:else}
     function create_else_block_1(ctx) {
     	let t;
 
@@ -38688,14 +38688,14 @@ var morderedit = (function () {
     		block,
     		id: create_else_block_1.name,
     		type: "else",
-    		source: "(466:16) {:else}",
+    		source: "(506:16) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (464:16) {#if updateing_to_server}
+    // (504:16) {#if updateing_to_server}
     function create_if_block_1(ctx) {
     	let loading;
     	let current;
@@ -38731,14 +38731,14 @@ var morderedit = (function () {
     		block,
     		id: create_if_block_1.name,
     		type: "if",
-    		source: "(464:16) {#if updateing_to_server}",
+    		source: "(504:16) {#if updateing_to_server}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (463:12) <Button class="update-btn" disabled={updateing_to_server} on:click={()=>{save_data()}}>
+    // (503:12) <Button class="update-btn" disabled={updateing_to_server} on:click={()=>{save_data()}}>
     function create_default_slot(ctx) {
     	let current_block_type_index;
     	let if_block;
@@ -38807,7 +38807,7 @@ var morderedit = (function () {
     		block,
     		id: create_default_slot.name,
     		type: "slot",
-    		source: "(463:12) <Button class=\\\"update-btn\\\" disabled={updateing_to_server} on:click={()=>{save_data()}}>",
+    		source: "(503:12) <Button class=\\\"update-btn\\\" disabled={updateing_to_server} on:click={()=>{save_data()}}>",
     		ctx
     	});
 
@@ -38851,7 +38851,7 @@ var morderedit = (function () {
     			t = space();
     			if_block.c();
     			attr_dev(main, "class", "svelte-1qn055f");
-    			add_location(main, file, 417, 0, 17700);
+    			add_location(main, file, 457, 0, 19263);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -39098,6 +39098,52 @@ var morderedit = (function () {
     		alert('saved');
     	}
 
+    	function statusFormatter(cell, formatterParams) {
+    		let value = cell.getValue();
+    		const options = ['חדש', 'סחורה הוזמנה', 'מוכן לליקוט', 'ארוז מוכן למשלוח', 'בהדפסה', 'סופק'];
+    		let selectElement = document.createElement("select");
+    		selectElement.classList.add("editor-list");
+
+    		options.forEach(option => {
+    			let item = document.createElement("option");
+    			item.classList.add("editor-item");
+    			item.innerHTML = option;
+    			item.setAttribute('value', option);
+
+    			if (value == option) {
+    				item.setAttribute('selected', 'selected');
+    			}
+
+    			selectElement.appendChild(item);
+    		});
+
+    		selectElement.addEventListener("change", function () {
+    			console.log('change: ', this);
+    			let value = this.value;
+
+    			// remove the selected from the old option
+    			let oldOption = document.querySelector(`option[value="${cell.getValue()}"]`);
+
+    			try {
+    				oldOption.removeAttribute('selected');
+    			} catch(e) {
+    				console.log('error: ', e);
+    			}
+
+    			// set the new value
+    			headerData[0].status = value;
+
+    			cell.setValue(value);
+
+    			// add the selected to the new option
+    			let newOption = document.querySelector(`option[value="${value}"]`);
+
+    			newOption.setAttribute('selected', 'selected');
+    		});
+
+    		return selectElement;
+    	}
+
     	function multiSelectProviderFormatter(cell, formatterParams, onRendered) {
     		let value = cell.getValue();
     		let values;
@@ -39191,6 +39237,9 @@ var morderedit = (function () {
     				//autoColumns:true,
     				layout: "fitDataStretch",
     				textDirection: "rtl",
+    				height: "auto",
+    				minHeight: 300,
+    				rowHeight: 300,
     				columns: [
     					{ title: 'תאריך יצירה', field: 'created' },
     					{ title: 'תאריך שינוי', field: 'updated' },
@@ -39200,17 +39249,14 @@ var morderedit = (function () {
     					{
     						title: 'הודעה',
     						field: 'message',
-    						editor: true
+    						editor: true,
+    						formatter: "textarea"
     					},
     					{ title: 'טפלון', field: 'phone' },
     					{
     						title: 'סטטוס',
     						field: 'status',
-    						editor: "select",
-    						editorParams: {
-    							values: ['new', 'done'],
-    							multiselect: false
-    						}
+    						formatter: statusFormatter
     					},
     					{ title: 'שם לקוח', field: 'client_name' },
     					{ title: 'סוכן', field: 'agent' }
@@ -39413,7 +39459,7 @@ var morderedit = (function () {
     		}).catch(err => {
     			console.log(err);
     		});
-    	} //productAmountEditModel.hide();
+    	}
 
     	const writable_props = ['id'];
 
@@ -39473,6 +39519,7 @@ var morderedit = (function () {
     		id,
     		load_order_from_server,
     		save_data,
+    		statusFormatter,
     		multiSelectProviderFormatter,
     		ALL_PROVIDERS,
     		createPivot,
