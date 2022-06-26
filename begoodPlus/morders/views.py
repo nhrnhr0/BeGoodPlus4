@@ -1,6 +1,8 @@
 from ast import Return
 import datetime
 from gettext import Catalog
+import io
+import zipfile
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from matplotlib.pyplot import annotate
@@ -100,10 +102,30 @@ def create_provider_docs(request):
             sizes_list = list(sizes_set)
             sizes_list.sort(key=lambda x: sizes[x])
             data['sizes_list'] = sizes_list
-        
+        docs = []
         for provider_name, data in providers_split.items():
             document = create_providers_docx(data)
+            docs.append({'doc': document, 'name': provider_name})
 
+        
+        zip_buffer = io.BytesIO()
+        with zipfile.ZipFile(zip_buffer, "a", zipfile.ZIP_DEFLATED, False) as zip_file:
+            for doc in docs:
+                file_stream = io.BytesIO()
+                data = doc['doc']
+                data.save(file_stream)
+                file_name = doc['name'] + '.docx'
+                file_stream.seek(0)
+                zip_file.writestr(file_name , file_stream.getvalue())
+        zip_buffer.seek(0)
+        response = HttpResponse(zip_buffer.read(), content_type="application/zip")
+        response['Content-Disposition'] = 'attachment; filename="products.zip"'
+        return response
+        
+        # create a zip file with all the docs with the name
+        # provider_name_date.zip
+
+        
         response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
         response['Content-Disposition'] = 'attachment; filename=download.docx'
         document.save(response)
