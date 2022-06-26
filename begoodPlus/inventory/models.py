@@ -15,6 +15,7 @@ from django.db.models.signals import m2m_changed
 from django.db.models import Count
 from django.utils.html import mark_safe
 
+
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 # Create your models here.
@@ -25,6 +26,18 @@ from django.contrib.contenttypes.models import ContentType
 # - providerProductName
 # - fastProductTitle - text - autofill with product->title
 # provider_id & providerProductName are unique together
+
+class ProviderRequest(models.Model):
+    provider = models.ForeignKey(to=Provider, on_delete=models.CASCADE, related_name='provider_request')
+    size= models.ForeignKey(to=ProductSize, on_delete=models.SET_DEFAULT, default=108, null=True, blank=True)
+    varient = models.ForeignKey(to=CatalogImageVarient, on_delete=models.CASCADE, null=True, blank=True)
+    color = models.ForeignKey(to=Color, on_delete=models.SET_DEFAULT,default=76, null=True, blank=True)
+    force_physical_barcode = models.BooleanField(default=False)
+    quantity = models.IntegerField(default=0)
+    class Meta:
+        ordering = ['provider', 'color', 'varient','force_physical_barcode', 'size']
+
+
 class PPN(models.Model):
     product = models.ForeignKey(to=CatalogImage, on_delete=models.DO_NOTHING, verbose_name=_('product'))
     provider = models.ForeignKey(to=Provider, on_delete=models.SET_DEFAULT, default=7, verbose_name=_('provider'))
@@ -188,6 +201,12 @@ class SKUM(models.Model):
 # - sku  - FK SKUM
 # - amount - int
 # - price - float
+
+class ProviderRequestToEnter(models.Model):
+    providerRequest = models.ForeignKey(to=ProviderRequest, on_delete=models.CASCADE)
+    quantity = models.IntegerField(default=0)
+    pass
+
 class ProductEnterItems(models.Model):
     #sku = models.ForeignKey(to=SKUM, on_delete=models.SET_DEFAULT, default=1)
     ppn = models.ForeignKey(to=PPN, on_delete=models.CASCADE)
@@ -198,6 +217,7 @@ class ProductEnterItems(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     total_quantity = property(lambda self: sum(self.entries.values_list('quantity', flat=True)))
     #warehouse = models.ForeignKey(to=Warehouse, on_delete=models.SET_DEFAULT, default=1)
+    provider = models.ManyToManyField(to=ProviderRequestToEnter, blank=True, related_name='providerItems')
     def __str__(self) -> str:
         return str(self.ppn.product.title) + ' | ' + str(self.ppn.provider.name) + ' | ' + str(self.total_quantity)
     #def __str__(self):
@@ -240,3 +260,9 @@ class ProductEnterItemsEntries(models.Model):
         color = self.color.name if self.color else ''
         verient = self.verient.name if self.verient else ''
         return size + ' ' + color + ' ' + verient + ' | ' + str(self.quantity)
+    
+# class ProviderEnterItems(models.Model):
+#     from inventory.models import ProviderRequest
+#     providerRequest = models.ForeignKey(to='ProviderRequest', on_delete=models.CASCADE)
+#     quantity = models.IntegerField(default=0)
+#     providerEnterItems = models.ForeignKey(to=ProductEnterItems, on_delete=models.CASCADE)

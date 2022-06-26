@@ -8,10 +8,10 @@ from django.shortcuts import render
 from matplotlib.pyplot import annotate
 
 from catalogImages.models import CatalogImage
-from inventory.models import WarehouseStock
+from inventory.models import PPN, WarehouseStock
 from provider.models import Provider
 from smartbee.models import SmartbeeTokens
-from .serializers import AdminMOrderItemSerializer, AdminMOrderListSerializer, AdminMOrderSerializer, AdminProviderRequestrSerializer, AdminProviderResuestSerializerWithMOrder, MOrderCollectionSerializer
+from .serializers import AdminMOrderItemSerializer, AdminMOrderListSerializer, AdminMOrderSerializer, AdminProviderRequestrInfoSerializer, AdminProviderRequestrSerializer, AdminProviderResuestSerializerWithMOrder, MOrderCollectionSerializer
 from morders.models import CollectedInventory, MOrder, MOrderItem, MOrderItemEntry, ProviderRequest, TakenInventory
 from rest_framework import status
 import json
@@ -26,6 +26,18 @@ from django.template.loader import get_template
 #from docxtpl import DocxTemplate
 from productSize.models import ProductSize
 from docx.enum.table import WD_TABLE_DIRECTION
+
+
+def request_provider_info_admin(request, ppn_id):
+    if not request.user.is_superuser:
+        return HttpResponseRedirect('/admin/login/?next=' + request.path)
+    ppn_obj = PPN.objects.get(id=ppn_id)
+    product_id= ppn_obj.product_id
+    provider_id = ppn_obj.provider_id
+    obj = ProviderRequest.objects.filter(orderItem__product=product_id, provider=provider_id)
+    serializer = AdminProviderRequestrInfoSerializer(obj, many=True)
+    return JsonResponse(serializer.data, status=status.HTTP_200_OK, safe=False)
+
 
 @api_view(['GET'])
 def get_all_orders(request):
