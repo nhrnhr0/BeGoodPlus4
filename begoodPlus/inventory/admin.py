@@ -3,8 +3,15 @@ from django.utils.html import mark_safe
 
 from django.conf import settings
 # Register your models here.
-from .models import PPN, SKUM, DocStockEnter, ProductEnterItems, ProductEnterItemsEntries, Warehouse, WarehouseStock, WarehouseStockHistory
+from .models import PPN, SKUM, DocStockEnter, ProductEnterItems, ProductEnterItemsEntries, ProviderRequestToEnter, Warehouse, WarehouseStock, WarehouseStockHistory
 
+class ProviderRequestToEnterAdmin(admin.ModelAdmin):
+    list_display = ('id', 'providerRequest','quantity',)
+    list_filter = ('providerRequest',)
+    search_fields = ('providerRequest',)
+    ordering = ('id',)
+    readonly_fields = ('id',)
+admin.site.register(ProviderRequestToEnter, ProviderRequestToEnterAdmin)
 class PPNAdmin(admin.ModelAdmin):
     list_display = ('id', 'product', 'barcode','provider', 'providerProductName', 'created_at', 'has_phisical_barcode','providerMakat')
     search_fields = ('product__title', 'providerProductName', 'provider')
@@ -34,11 +41,13 @@ admin.site.register(Warehouse, WarehouseAdmin)
 
 class DocStockEnterAdmin(admin.ModelAdmin):
     list_display = ('id', 'created_at', 'id', 'docNumber', 'provider', 'warehouse', 'isAplied', 'byUser','get_admin_edit_url')
-    readonly_fields = ('created_at','byUser','get_admin_edit_url')
+    readonly_fields = ('id', 'created_at','byUser','get_admin_edit_url','admin_products_list')
     #filter_horizontal = ('items',)
     actions = ['apply_doc']
     #list_filter = ('created_at', 'provider', 'warehouse', 'isAplied', 'byUser')
-    
+    fields = ('id', 'created_at', 'docNumber', 'provider', 'warehouse', 'isAplied', 'byUser', 'admin_products_list')
+    def admin_products_list(self, obj):
+        return '<br>'.join([str(item) for item in obj.items.all()])
     def apply_doc(self, request, queryset):
         for doc in queryset:
             doc.apply_doc()
@@ -52,13 +61,16 @@ admin.site.register(SKUM, SKUMAdmin)
 
 
 class ProductEnterItemsAdmin(admin.ModelAdmin):
-    list_display = ('id', 'product_display','ppn','total_quantity','price', 'created_at', 'related_doc', )
-    readonly_fields = ('product_display','created_at','related_doc', )
+    list_display = ('id', 'product_display','ppn','total_quantity','display_price','created_at', 'related_doc', ) # 
+    readonly_fields = ('product_display','created_at','related_doc','display_price' )
     readonly_fields = ('created_at',)
-    filter_horizontal = ('entries',)
+    fields = ('ppn','price','created_at','providerRequests',)
+    filter_horizontal = ('providerRequests',)
+    def display_price(self, obj):
+        return str(obj.price)
     def product_display(self, obj):
         
-        return mark_safe(('<div><img src="{}" width="100" height="100" />{}</div>').format(settings.CLOUDINARY_BASE_URL + obj.ppn.product.cimage,obj.ppn.product.title))#obj.ppn.product.title
+        return mark_safe(('<div><img src="{}" width="100" height="100" />{}</div>').format(settings.CLOUDINARY_BASE_URL + str(obj.ppn.product.cimage),str(obj.ppn.product.title)))#obj.ppn.product.title
     def related_doc(adminClass, item):
         print(adminClass, item)
         # if item.doc.first() != None:

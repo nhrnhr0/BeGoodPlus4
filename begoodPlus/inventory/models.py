@@ -145,6 +145,7 @@ class DocStockEnter(models.Model):
     isAplied = models.BooleanField(default=False)
     byUser = models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
     new_products = models.JSONField(null=True, blank=True)
+    
     '''def apply_doc(self):
         for item in self.items.all():
             sku = item.sku
@@ -217,7 +218,7 @@ class ProductEnterItems(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     total_quantity = property(lambda self: sum(self.entries.values_list('quantity', flat=True)))
     #warehouse = models.ForeignKey(to=Warehouse, on_delete=models.SET_DEFAULT, default=1)
-    provider = models.ManyToManyField(to=ProviderRequestToEnter, blank=True, related_name='providerItems')
+    providerRequests = models.ManyToManyField(to=ProviderRequestToEnter, blank=True, related_name='prodEnterItem')
     def __str__(self) -> str:
         return str(self.ppn.product.title) + ' | ' + str(self.ppn.provider.name) + ' | ' + str(self.total_quantity)
     #def __str__(self):

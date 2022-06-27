@@ -61,7 +61,7 @@ class ProductEnterItemsEntriesSerializer(serializers.ModelSerializer):
 class ProviderRequestToEnterSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProviderRequestToEnter
-        fields = ('id', 'quantity')#, 'providerRequest', 'providerEnterItems')
+        fields = ('id','providerRequest', 'quantity')#, 'providerRequest', 'providerEnterItems')
 class ProductEnterItemsSerializer(serializers.ModelSerializer):
     ##sku = SKUMSerializer(many=False)
     #sku_id = serializers.CharField(source='sku.id')
@@ -85,21 +85,21 @@ class ProductEnterItemsSerializer(serializers.ModelSerializer):
     # ppn_providerProductName = serializers.CharField(source='ppn.providerProductName')
     ppn = PPNSerializer(many=False)
     entries = ProductEnterItemsEntriesSerializer(many=True)
-    provider = ProviderRequestToEnterSerializer(many=False)
-    freeProviders = serializers.SerializerMethodField()
+    providerRequests = ProviderRequestToEnterSerializer(many=True)
+    #freeProviders = serializers.SerializerMethodField()
     
-    def get_freeProviders(self, obj):
-        product_id = obj.ppn.product.id
-        provider_id = obj.ppn.provider.id
-        freeProviders = ProviderRequest.objects.filter(orderItem__product__id=product_id, provider__id=provider_id)
-        # get the values 'id','provider','size','varient','color','force_physical_barcode','quantity', morder.first().id
-        vals = freeProviders.values('id','provider','size','varient','color','force_physical_barcode','quantity', 'orderItem__morder__id')
-        return list(vals)
+    # def get_freeProviders(self, obj):
+    #     product_id = obj.ppn.product.id
+    #     provider_id = obj.ppn.provider.id
+    #     freeProviders = ProviderRequest.objects.filter(orderItem__product__id=product_id, provider__id=provider_id)
+    #     # get the values 'id','provider','size','varient','color','force_physical_barcode','quantity', morder.first().id
+    #     vals = freeProviders.values('id','provider','size','varient','color','force_physical_barcode','quantity', 'orderItem__morder__id')
+    #     return list(vals)
     #providers = ProviderSerializer(many=True)
     class Meta:
         model = ProductEnterItems
         #fields = ('id', 'sku','quantity','price','created_at',)
-        fields = ('id','ppn', 'total_quantity','price','created_at','entries','provider','freeProviders')
+        fields = ('id','ppn', 'total_quantity','price','created_at','entries','providerRequests',)
 
 class WarehouseSerializer(serializers.ModelSerializer):
     class Meta:
@@ -119,9 +119,20 @@ class DocStockEnterSerializer(serializers.ModelSerializer):
     items = ProductEnterItemsSerializer(many=True)
     provider_name = serializers.CharField(source='provider.name')
     warehouse_name = serializers.CharField(source='warehouse.name')
+    freeProviders = serializers.SerializerMethodField()
+    
+    def get_freeProviders(self, obj):
+        products_ids = [item.ppn.product.id for item in obj.items.all()]
+        providers_ids = [item.ppn.provider.id for item in obj.items.all()]
+        # product_id = obj.items.first().ppn.product.id
+        # provider_id = obj.items.first().ppn.provider.id
+        freeProviders = ProviderRequest.objects.filter(orderItem__product__id__in=products_ids, provider__id__in=providers_ids)
+        # get the values 'id','provider','size','varient','color','force_physical_barcode','quantity', morder.first().id
+        vals = freeProviders.values('id','provider','size','varient','color','force_physical_barcode','quantity', 'orderItem__morder__id', 'orderItem__product__id', 'orderItem__product__title')
+        return list(vals)
     class Meta:
         model = DocStockEnter
-        fields = ('id','docNumber', 'description','created_at','provider', 'provider_name', 'warehouse','warehouse_name','items','isAplied','byUser','new_products')
+        fields = ('id','docNumber', 'description','created_at','provider', 'provider_name', 'warehouse','warehouse_name','freeProviders', 'items','isAplied','byUser','new_products')
         
 class DocStockEnterSerializerList(serializers.ModelSerializer):
     provider_name = serializers.CharField(source='provider.name')
