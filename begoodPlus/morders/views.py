@@ -61,21 +61,38 @@ def provider_request_update_entry_admin(request):
         obj = ProviderRequest.objects.get(id=data['id'])
         obj.quantity = data['quantity']
     else:
-        obj = ProviderRequest.objects.create(
+        morderItem = MOrderItem.objects.get(product_id=data['product']['id'], morder=data['morder'])
+        objs = ProviderRequest.objects.filter(
             provider_id=data['provider'],
             size_id=data['size'],
             varient_id=data['varient'],
             color_id=data['color'],
             force_physical_barcode=data['force_physical_barcode'],
-            quantity=data['quantity'],
+            orderItem=morderItem
         )
+        if objs.exists():
+            obj = objs.first()
+            obj.quantity = data['quantity']
+        else:
+            obj = ProviderRequest.objects.create(
+                provider_id=data['provider'],
+                size_id=data['size'],
+                varient_id=data['varient'],
+                color_id=data['color'],
+                force_physical_barcode=data['force_physical_barcode'],
+                quantity=data['quantity'],
+            )
+            obj.orderItem.add(morderItem)
         #morder = MOrder.objects.get(id=data['morder'])
-        morderItem = MOrderItem.objects.get(product_id=data['product']['id'], morder=data['morder'])
-        obj.orderItem.add(morderItem)
+        
     print(obj)
-    data = AdminProviderResuestSerializerWithMOrder(obj).data
     obj.save()
-    return JsonResponse({'success': 'success', 'data': data}, status=status.HTTP_200_OK)
+    if obj.quantity <= 0:
+        obj.delete()
+        return JsonResponse({'status': 'Entry deleted'}, status=status.HTTP_200_OK)
+    else:
+        data = AdminProviderResuestSerializerWithMOrder(obj).data
+        return JsonResponse({'status': 'success', 'data': data}, status=status.HTTP_200_OK)
 def create_provider_docs(request):
     if not request.user.is_superuser:
         return JsonResponse({'error': 'You are not authorized to perform this action'}, status=status.HTTP_401_UNAUTHORIZED)

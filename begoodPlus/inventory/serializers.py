@@ -1,6 +1,6 @@
 
 from clientApi.serializers import ImageClientApi
-from .models import PPN, DocStockEnter, ProductEnterItems, SKUM, ProductEnterItemsEntries, ProviderRequest, ProviderRequestToEnter, Warehouse, WarehouseStock, WarehouseStockHistory
+from .models import PPN, DocStockEnter, ProductEnterItems, SKUM, ProductEnterItemsEntries, ProviderRequest, Warehouse, WarehouseStock, WarehouseStockHistory
 from rest_framework import serializers
 
 
@@ -58,10 +58,7 @@ class ProductEnterItemsEntriesSerializer(serializers.ModelSerializer):
 #         fields = ('id', 'quantity')#, 'providerRequest', 'providerEnterItems') 
 
 
-class ProviderRequestToEnterSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ProviderRequestToEnter
-        fields = ('id','providerRequest', 'quantity')#, 'providerRequest', 'providerEnterItems')
+
 class ProductEnterItemsSerializer(serializers.ModelSerializer):
     ##sku = SKUMSerializer(many=False)
     #sku_id = serializers.CharField(source='sku.id')
@@ -85,7 +82,7 @@ class ProductEnterItemsSerializer(serializers.ModelSerializer):
     # ppn_providerProductName = serializers.CharField(source='ppn.providerProductName')
     ppn = PPNSerializer(many=False)
     entries = ProductEnterItemsEntriesSerializer(many=True)
-    providerRequests = ProviderRequestToEnterSerializer(many=True)
+    
     #freeProviders = serializers.SerializerMethodField()
     
     # def get_freeProviders(self, obj):
@@ -99,7 +96,7 @@ class ProductEnterItemsSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductEnterItems
         #fields = ('id', 'sku','quantity','price','created_at',)
-        fields = ('id','ppn', 'total_quantity','price','created_at','entries','providerRequests',)
+        fields = ('id','ppn', 'total_quantity','price','created_at','entries',)
 
 class WarehouseSerializer(serializers.ModelSerializer):
     class Meta:

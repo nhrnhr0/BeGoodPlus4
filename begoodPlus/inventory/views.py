@@ -396,7 +396,7 @@ def doc_stock_detail_api(request, id):
         serializer = DocStockEnterSerializer(doc)
         return JsonResponse(serializer.data)
 
-from .models import SKUM, ProductEnterItems, ProductEnterItemsEntries, ProviderRequest, ProviderRequestToEnter, Warehouse, WarehouseStock, WarehouseStockHistory
+from .models import SKUM, ProductEnterItems, ProductEnterItemsEntries, ProviderRequest, Warehouse, WarehouseStock, WarehouseStockHistory
 
 def show_inventory_stock(request):
     # if the user is not superuser:
@@ -765,18 +765,6 @@ def enter_doc_edit(request):
             entry_obj.quantity = entry.get('quantity')
             entry_obj.save()
         
-        # for providerRequest in item.get('providerRequests'):
-        #     providerRequestToEnter_id = providerRequest.get('id', None)
-        #     providerRequest_id = providerRequest.get('providerRequest', None)
-        #     quantity = providerRequest.get('quantity')
-            
-        #     if providerRequestToEnter_id:
-        #         providerRequest_obj = ProviderRequestToEnter.objects.get(id=providerRequestToEnter_id)
-        #     else:
-        #         providerRequest_obj = ProviderRequestToEnter.objects.create(providerRequest_id=providerRequest_id, quantity=quantity)
-        #         providerRequest_obj.prodEnterItem.set([item_obj])
-        #     providerRequest_obj.quantity = providerRequest.get('quantity')
-        #     providerRequest_obj.save()
         
         item_obj.save()
     # return the new doc serializer

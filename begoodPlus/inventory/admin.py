@@ -3,15 +3,9 @@ from django.utils.html import mark_safe
 
 from django.conf import settings
 # Register your models here.
-from .models import PPN, SKUM, DocStockEnter, ProductEnterItems, ProductEnterItemsEntries, ProviderRequestToEnter, Warehouse, WarehouseStock, WarehouseStockHistory
+from .models import PPN, SKUM, DocStockEnter, ProductEnterItems, ProductEnterItemsEntries, Warehouse, WarehouseStock, WarehouseStockHistory
 
-class ProviderRequestToEnterAdmin(admin.ModelAdmin):
-    list_display = ('id', 'providerRequest','quantity',)
-    list_filter = ('providerRequest',)
-    search_fields = ('providerRequest',)
-    ordering = ('id',)
-    readonly_fields = ('id',)
-admin.site.register(ProviderRequestToEnter, ProviderRequestToEnterAdmin)
+
 class PPNAdmin(admin.ModelAdmin):
     list_display = ('id', 'product', 'barcode','provider', 'providerProductName', 'created_at', 'has_phisical_barcode','providerMakat')
     search_fields = ('product__title', 'providerProductName', 'provider')
@@ -63,9 +57,8 @@ admin.site.register(SKUM, SKUMAdmin)
 class ProductEnterItemsAdmin(admin.ModelAdmin):
     list_display = ('id', 'product_display','ppn','total_quantity','display_price','created_at', 'related_doc', ) # 
     readonly_fields = ('product_display','created_at','related_doc','display_price' )
-    readonly_fields = ('created_at',)
-    fields = ('ppn','price','created_at','providerRequests',)
-    filter_horizontal = ('providerRequests',)
+    #readonly_fields = ('created_at',)
+    fields = ('ppn','price','created_at',)
     def display_price(self, obj):
         return str(obj.price)
     def product_display(self, obj):
