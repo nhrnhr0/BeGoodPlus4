@@ -14,7 +14,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
-from inventory.views import doc_stock_enter_provider_requests_api, get_stock_by_id_api, unpivot_inventory_exel, upload_inventory_csv
+from inventory.views import doc_stock_enter_provider_requests_api, get_stock_by_id_api, save_doc_stock_enter_provider_requests, unpivot_inventory_exel, upload_inventory_csv
 from clientApi.views import CustomAuthToken, get_all_varients_api
 from inventory.views import add_doc_stock_enter_ppn, add_doc_stock_enter_ppn_entry, create_enter_doc, enter_doc_edit,delete_doc_stock_enter_ppn_entry, doc_stock_detail_api, doc_stock_list_api, get_all_inventory_api, get_all_warehouses_api,enter_doc_insert_inventory, enter_doc_remove_product, get_doc_stock_enter_ppn_entries, inventory_edit_entry, inventory_get_entry_history, inventory_manual_update_entry, search_ppn, search_warehouses, show_inventory_stock,get_product_inventory,doc_stock_list
 
@@ -113,6 +113,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
 
     # inventory:
+    path('inv/enter-doc/save-doc-stock-enter-provider-requests', save_doc_stock_enter_provider_requests, name='save_doc_stock_enter_provider_requests'),
     path('inv/doc-stock-enter-provider-requests-api/<int:doc_stock_enter_id>', doc_stock_enter_provider_requests_api),
     path('inv/doc-stock-list', doc_stock_list, name='admin_doc_stock_list'),
     path('inv/doc-stock-list-api', doc_stock_list_api, name='doc_stock_list_api'),

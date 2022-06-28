@@ -281,15 +281,100 @@ def create_enter_doc(request):
         return JsonResponse({'status': 'ok',
                             'id': doc.id})
 
-
+@api_view(['POST'])
+def save_doc_stock_enter_provider_requests(request):
+    if request.user.is_superuser:
+        if request.method == 'POST':
+            data = request.data
+            doc_id = data.get('doc_id', None)
+            if doc_id:
+                doc = DocStockEnter.objects.get(id=doc_id)
+                all_items = list(data.items())
+                for key, val in all_items:
+                    if key.startswith('cell_entry_'):
+                        split_str = key.split('_')
+                        entry_id = split_str[2]
+                        request_id = split_str[4]
+                        print(entry_id, request_id, val)
+                        entryObj = ProductEnterItemsEntries.objects.get(id=entry_id)
+                        itemObj = entryObj.item.first()
+                        ppn= itemObj.ppn
+                        
+                        warhouse = doc.warehouse
+                        provider = doc.provider
+                        if val:
+                            val = int(val)
+                            
+                           
+                            # find the provider request and add the value
+                            providerRequestObj = ProviderRequest.objects.get(id=request_id)
+                            morderItem = providerRequestObj.orderItem.first()
+                            takens = morderItem.taken.filter(color=entryObj.color, size=entryObj.size, varient=entryObj.verient,provider=provider,has_physical_barcode=ppn.has_phisical_barcode)
+                            if takens.exists():
+                                taken = takens.first()
+                                taken.quantity += val
+                                taken.save()
+                            else:
+                                taken = TakenInventory.objects.create(
+                                    provider=provider,
+                                    quantity=val,
+                                    color=entryObj.color,
+                                    size=entryObj.size,
+                                    varient=entryObj.verient,
+                                    has_physical_barcode=ppn.has_phisical_barcode,
+                                    )
+                                taken.save()
+                                morderItem.taken.add(taken)
+                            morderItem.save()
+                            
+                            
+                            # remove the taken quantity from the provider request
+                            providerRequestObj.quantity -= val
+                            providerRequestObj.save()
+                            if providerRequestObj.quantity <= 0:
+                                providerRequestObj.delete()
+                            
+                            # find the warhouse stock and subtract the value
+                            try:
+                                stock = WarehouseStock.objects.get(ppn=ppn, warehouse=warhouse, size=entryObj.size,color=entryObj.color,verient=entryObj.verient)
+                                if stock and data.get('action', None) == 'collected':
+                                    collectedInventory = taken.collected.filter(warehouseStock=stock)
+                                    if collectedInventory.exists():
+                                        collectedInventory = collectedInventory.first()
+                                        collectedInventory.quantity += val
+                                        collectedInventory.save()
+                                    else:
+                                        collectedInventory = CollectedInventory.objects.create(
+                                            warehouseStock=stock,
+                                            quantity=val,
+                                            )
+                                        collectedInventory.save()
+                                        taken.collected.add(collectedInventory)
+                                # stock.quantity -= val
+                                # stock.save()
+                            except WarehouseStock.DoesNotExist:
+                                pass
+                            
+                            # request.save()
+                            
+                return JsonResponse({'status': 'success'})
+            else:
+                return JsonResponse({'status': 'error', 'message': 'doc_id is required'})
+        else:
+            return JsonResponse({'status': 'error', 'message': 'method is not allowed'})
+    else:
+        return JsonResponse({'status': 'error', 'message': 'You are not authorized'})
+    
+@api_view(['GET'])
 def doc_stock_enter_provider_requests_api(request, doc_stock_enter_id):
+    
     # get the provider from the doc_stock_enter
     doc_stock_enter = DocStockEnter.objects.get(id=doc_stock_enter_id)
     provider = doc_stock_enter.provider
 
     # get all the ProviderRequests of this provider
     provider_requests = ProviderRequest.objects.filter(provider=provider)
-    ret = list(provider_requests.values('size','varient','color','force_physical_barcode','quantity','orderItem', 'orderItem__morder__id', 'orderItem__product__id', 'orderItem__product__title')\
+    ret = list(provider_requests.values('id', 'size','varient','color','force_physical_barcode','quantity','orderItem', 'orderItem__morder__id', 'orderItem__product__id', 'orderItem__product__title')\
         .order_by('orderItem__product__id', 'orderItem__morder__id', 'color', 'varient','size', ))
     
     return JsonResponse(ret, safe=False)
@@ -680,18 +765,18 @@ def enter_doc_edit(request):
             entry_obj.quantity = entry.get('quantity')
             entry_obj.save()
         
-        for providerRequest in item.get('providerRequests'):
-            providerRequestToEnter_id = providerRequest.get('id', None)
-            providerRequest_id = providerRequest.get('providerRequest', None)
-            quantity = providerRequest.get('quantity')
+        # for providerRequest in item.get('providerRequests'):
+        #     providerRequestToEnter_id = providerRequest.get('id', None)
+        #     providerRequest_id = providerRequest.get('providerRequest', None)
+        #     quantity = providerRequest.get('quantity')
             
-            if providerRequestToEnter_id:
-                providerRequest_obj = ProviderRequestToEnter.objects.get(id=providerRequestToEnter_id)
-            else:
-                providerRequest_obj = ProviderRequestToEnter.objects.create(providerRequest_id=providerRequest_id, quantity=quantity)
-                providerRequest_obj.prodEnterItem.set([item_obj])
-            providerRequest_obj.quantity = providerRequest.get('quantity')
-            providerRequest_obj.save()
+        #     if providerRequestToEnter_id:
+        #         providerRequest_obj = ProviderRequestToEnter.objects.get(id=providerRequestToEnter_id)
+        #     else:
+        #         providerRequest_obj = ProviderRequestToEnter.objects.create(providerRequest_id=providerRequest_id, quantity=quantity)
+        #         providerRequest_obj.prodEnterItem.set([item_obj])
+        #     providerRequest_obj.quantity = providerRequest.get('quantity')
+        #     providerRequest_obj.save()
         
         item_obj.save()
     # return the new doc serializer
