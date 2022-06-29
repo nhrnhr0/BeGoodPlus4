@@ -23,7 +23,6 @@ admin.site.register(MsCrmIntrestsGroups, MsCrmIntrestsGroupsAdmin)
 class MsCrmBusinessSelectToIntrestAdmin(admin.ModelAdmin):
     list_display = ('id', 'businessSelect', 'intrests_display')
     readonly_fields = ('intrests_display',)
-    change_form_template = 'admin/MsCrmBusinessSelectToIntrestAdmin_change_form.html'
     def intrests_display(self, obj):
         
         intrests = obj.intrests.all().values_list('title', flat=True)
