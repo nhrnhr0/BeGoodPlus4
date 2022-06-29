@@ -32,6 +32,11 @@ class MsCrmIntrestsGroups(models.Model):
     def __str__(self):
         return self.name
 # Create your models here.
+
+class MsCrmBusinessSelectToIntrests(models.Model):
+    businessSelect = models.OneToOneField(to=MsCrmBusinessTypeSelect, on_delete=models.CASCADE, verbose_name=_('business'))
+    intrests = models.ManyToManyField(CatalogAlbum, blank=True, verbose_name=_('intrested'))
+
 class MsCrmUser(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
