@@ -581,8 +581,11 @@ var admincarteditor = (function () {
         return cookieValue;
     }
 
-    function apiSearchProducts(keyword) {
-        const url = SEARCH_API_URL + '?q=' + encodeURIComponent(keyword);
+    function apiSearchProducts(keyword, show_hidden=false) {
+        let url = SEARCH_API_URL + '?q=' + encodeURIComponent(keyword);
+        if(show_hidden){
+            url += '&show_hidden=true';
+        }
         return fetch_wraper(url);
     }
     function fetch_wraper(url, requestOptions, custom_fetch, isRetry = false) {

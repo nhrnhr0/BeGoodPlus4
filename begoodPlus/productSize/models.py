@@ -7,7 +7,7 @@ class ProductSize(models.Model):
     class Meta():
         verbose_name = _('Product size')
         verbose_name_plural = _('Product sizes')
-        ordering = ('code',)
+        ordering = ('-code',)
         default_related_name = 'productSizes'
         
     size = models.CharField(_('size'), default='X', max_length=30, unique=True)

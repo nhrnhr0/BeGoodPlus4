@@ -15,7 +15,7 @@ Including another URLconf
 """
 
 from inventory.views import doc_stock_enter_provider_requests_api, get_stock_by_id_api, save_doc_stock_enter_provider_requests, unpivot_inventory_exel, upload_inventory_csv
-from clientApi.views import CustomAuthToken, get_all_varients_api
+from clientApi.views import CustomAuthToken, get_all_varients_api,get_products_info
 from inventory.views import add_doc_stock_enter_ppn, add_doc_stock_enter_ppn_entry, create_enter_doc, enter_doc_edit,delete_doc_stock_enter_ppn_entry, doc_stock_detail_api, doc_stock_list_api, get_all_inventory_api, get_all_warehouses_api,enter_doc_insert_inventory, enter_doc_remove_product, get_doc_stock_enter_ppn_entries, inventory_edit_entry, inventory_get_entry_history, inventory_manual_update_entry, search_ppn, search_warehouses, show_inventory_stock,get_product_inventory,doc_stock_list
 
 from clientApi.views import get_all_colors_api, get_all_sizes_api, main_page_api
@@ -24,6 +24,7 @@ from inventory.views import DocStockEnterViewSet, doc_stock_enter
 # from mcrm.views import , admin_upload_bulk_crm_exel, upload_crm_execl, upload_crm_execl2
 from msCrm.views import get_all_business_types_groups, mcrm_lead_register, get_all_business_types, get_all_interests, import_mscrm_from_exel
 from core.views import api_logout, autocompleteClick, autocompleteModel, client_product_question, handler404, send_product_photo, set_csrf_token, svelte_cart_form, svelte_cart_history, svelte_contact_form, test_celery_view, track_cart, verify_unique_field_by_field_excel
+
 from catalogImages.views import admin_api_get_product_cost_price, all_images_ids, catalogimage_upload_warehouse_excel, get_product_sizes_colors_martix, admin_remove_product_from_cart, admin_add_to_existing_cart
 from clientApi.views import ColorsClientViewSet, ImageClientViewSet, SizesClientViewSet, LogoClientViewSet, get_album_images
 from clientApi.views import AlbumClientViewSet
@@ -86,6 +87,7 @@ urlpatterns = [
     path('create-provider-docs', create_provider_docs, name='create-provider-docs'),
     path('load-all-provider-request', load_all_provider_request_admin, name='load_all_provider_request_admin'),
     path('update-provider-request-entry', provider_request_update_entry_admin, name='provider_request_update_entry_admin'),
+    path('get-products-info', get_products_info, name='get-products-info'),
     path('verify-unique-field-by-field-excel', verify_unique_field_by_field_excel),
     path('product-question', client_product_question, name='client_product_question'),
     path('product-photo', send_product_photo, name='send_product_photo'),
@@ -208,19 +210,10 @@ urlpatterns = [
     path('api/set_csrf_token/', set_csrf_token, name='set_csrf_token'),
     #path('form-change', form_changed, name='form-change'),
 
-#     path('cart/add', cart_add, name='cart-add'),
-#     path('cart/del', cart_del, name='cart-del'),
-#     path('cart/view', cart_view, name='cart-view'),
-#     path('cart/info', cart_info, name='cart-info'),
-
 
     #path('user-tasks', user_tasks, name='user-tasks'),
 #     path('success/', success_view, name='success'),
     re_path(r'^advanced_filters/', include('advanced_filters.urls')),
-#     re_path(r'share-me/product/(?P<prod_id>\d+)/$',
-#             shareable_product_view, name='shareable_product_view'),
-#     re_path(r'share-me/category/(?P<category_id>\d+)/$',
-#             shareable_category_view, name='shareable_category_view'),
 
     path('404', handler404)
 ]
@@ -228,7 +221,7 @@ print('settings: ', settings)
 if settings.DEBUG:
     urlpatterns= urlpatterns + static(settings.MEDIA_URL, document_root= settings.MEDIA_ROOT)
     urlpatterns= urlpatterns + static(settings.STATIC_URL, document_root= settings.STATIC_ROOT)
-    urlpatterns =urlpatterns +  [path('silk/', include('silk.urls', namespace='silk'))]
+    #urlpatterns =urlpatterns +  [path('silk/', include('silk.urls', namespace='silk'))]
 
 if settings.DEBUG:
     urlpatterns = [
