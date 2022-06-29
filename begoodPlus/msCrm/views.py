@@ -6,11 +6,19 @@ from rest_framework.permissions import AllowAny
 from catalogAlbum.models import CatalogAlbum
 from .models import MsCrmBusinessSelectToIntrests, MsCrmBusinessTypeSelect, MsCrmIntrest, MsCrmIntrestsGroups, MsCrmUser
 from .tasks import new_user_subscribed_task
-from .serializers import MsCrmIntrestSerializer, MsCrmBusinessTypeSerializer, MsCrmIntrestsGroupsSerializer
+from .serializers import MsCrmIntrestSerializer, MsCrmBusinessTypeSerializer, MsCrmIntrestsGroupsSerializer, MsCrmPhoneContactsSerializer
 import pandas as pd
 from django.shortcuts import render,redirect
 from django.contrib import messages
 
+@api_view(['GET'])
+def get_all_mscrm_phone_contacts(request):
+    if(request.user.is_superuser):
+        phoneContacts = MsCrmUser.objects.filter(phone__isnull=False)
+        data = MsCrmPhoneContactsSerializer(phoneContacts, many=True).data
+        return JsonResponse(data, safe=False)
+    else:
+        return JsonResponse({"error":"not authorized"}, safe=False)
 # Create your views here.
 def upload_mscrm_business_select_to_intrests_exel(request):
     if request.user and request.user.is_superuser:
