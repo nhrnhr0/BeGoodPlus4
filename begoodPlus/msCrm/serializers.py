@@ -42,5 +42,5 @@ class MsCrmPhoneContactsSerializer(serializers.ModelSerializer):
         return phone
     class Meta:
         model = MsCrmUser
-        fields = ('name', 'phone', 'clean_phonenumber')
+        fields = ('id', 'name', 'phone', 'clean_phonenumber')
         
