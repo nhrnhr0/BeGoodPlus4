@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <main>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <label for="sheetName">גיליון</label>
+        <input type="text" name="sheetName" value="upload">
+        <br>
+        <label for="file">קובץ</label>
+        <input type="file" name="file" />
+        <input type="submit" value="Upload" />
+    </form>
+</main>
+</body>
+</html>
+<style>
+    body {
+        direction: rtl;
+    }
+    main{
+        padding-top: 115px;
+        width: 70%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+</style>

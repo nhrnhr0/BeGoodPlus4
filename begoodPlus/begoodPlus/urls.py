@@ -30,8 +30,9 @@ from clientApi.views import get_all_colors_api, get_all_sizes_api, main_page_api
 from campains.views import admin_get_all_campains, admin_get_campain_products, get_user_campains
 from inventory.views import DocStockEnterViewSet, doc_stock_enter
 # from mcrm.views import , admin_upload_bulk_crm_exel, upload_crm_execl, upload_crm_execl2
-from msCrm.views import get_all_business_types_groups, mcrm_lead_register, get_all_business_types, get_all_interests, import_mscrm_from_exel
-from core.views import client_product_question, send_product_photo, svelte_cart_history, test_celery_view, verify_unique_field_by_field_excel
+
+from msCrm.views import get_all_business_types_groups, mcrm_lead_register, get_all_business_types, get_all_interests, import_mscrm_from_exel, upload_mscrm_business_select_to_intrests_exel
+from core.views import api_logout, autocompleteClick, autocompleteModel, client_product_question, handler404, send_product_photo, set_csrf_token, svelte_cart_form, svelte_cart_history, svelte_contact_form, test_celery_view, track_cart, verify_unique_field_by_field_excel
 from catalogImages.views import admin_api_get_product_cost_price, all_images_ids, catalogimage_upload_warehouse_excel, get_product_sizes_colors_martix, admin_remove_product_from_cart, admin_add_to_existing_cart
 from clientApi.views import ColorsClientViewSet, ImageClientViewSet, SizesClientViewSet, LogoClientViewSet, get_album_images
 from clientApi.views import AlbumClientViewSet
@@ -85,12 +86,14 @@ clientRouter.register(r'logos', LogoClientViewSet)
 #from rest_framework.authtoken.views import obtain_auth_token
 #from rest_framework_simplejwt.views import (TokenObtainPairView,TokenRefreshView,)
 urlpatterns = [
+
     path('get-products-info', get_products_info, name='get-products-info'),
     path('create-client-user/', create_client_user, name='create-client-user'),
-    path('verify-unique-field-by-field-excel',
-         verify_unique_field_by_field_excel),
-    path('product-question', client_product_question,
-         name='client_product_question'),
+
+     path('upload-mscrm-business-select-to-intrests-exel', upload_mscrm_business_select_to_intrests_exel, name='upload-mscrm-business-select-to-intrests-exel'),
+    path('verify-unique-field-by-field-excel', verify_unique_field_by_field_excel),
+    path('product-question', client_product_question, name='client_product_question'),
+
     path('product-photo', send_product_photo, name='send_product_photo'),
     path('main_page_api/', main_page_api, name='main_page_api'),
 
