@@ -195,7 +195,7 @@ urlpatterns = [
     path('contact-form', svelte_contact_form, name='contact-form'),
     path('cart-form', svelte_cart_form, name='svelte-cart-form'),
     path('cart-history', svelte_cart_history, name='svelte-cart-history'),
-    path('track-cart', track_cart, name='track-cart'),
+    #path('track-cart', track_cart, name='track-cart'),
     re_path('api/set_csrf_token/(?P<factory_id>.+)/$',
             set_csrf_token, name='set_csrf_token'),
     path('api/set_csrf_token/', set_csrf_token, name='set_csrf_token'),
