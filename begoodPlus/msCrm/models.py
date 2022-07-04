@@ -52,11 +52,18 @@ class MsCrmUser(models.Model):
     want_whatsapp = models.BooleanField(default=True, verbose_name=_('want whatsapp'))
     flashy_contact_id = models.CharField(max_length=256, null=True, blank=True, verbose_name=_('flashy contact id'))
     intrests = models.ManyToManyField(CatalogAlbum, blank=True, verbose_name=_('intrested'))
+    def save(self, *args, **kwargs):
+        if self.phone:
+            # remove the first char of self.get_clean_phonenumber()
+            self.phone = self.get_clean_phonenumber()[1:]
+        super().save(*args, **kwargs)
     
     def get_clean_phonenumber(self):
         # remove \u2066 and ⁩ and '+'
         # then add one + at the begining and return
         phone = self.phone
+        phone = phone.replace(' ' , '')
+        phone = phone.replace('-', '')
         phone = phone.replace('\u200f', '')
         phone = phone.replace('\u202a', '')
         phone = phone.replace('\u202c', '')
