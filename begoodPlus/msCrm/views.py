@@ -235,13 +235,11 @@ def api_save_lead(request):
     phone = phone.replace(' ', '')
     obj = LeadSubmit.objects.create(
         bussiness_name=form_data['bussiness_name'],
-        businessTypeCustom=form_data.get('bussiness_type', ''),
+        businessType=form_data.get('bussiness_type', ''),
         address=form_data.get('bussiness_address', ''),
         name=form_data.get('bussiness_contact_name', ''),
         phone=phone
     )
-    for business_type in form_data['business_type']:
-        obj.businessTypeSelects.add(MsCrmBusinessTypeSelect.objects.get(name=business_type))
     return JsonResponse({
         'status': 200,
         'data': 'ok',

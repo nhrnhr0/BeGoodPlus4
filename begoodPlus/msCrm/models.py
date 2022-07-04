@@ -76,8 +76,8 @@ class MsCrmUser(models.Model):
 # api_save_lead
 class LeadSubmit(models.Model):
     bussiness_name = models.CharField(max_length=100, verbose_name=_('business name'))
-    businessTypeSelects = models.ManyToManyField(to=MsCrmBusinessTypeSelect, verbose_name=_('business type'))
-    businessTypeCustom = models.CharField(max_length=100, null=True, blank=True, verbose_name=_('business type custom'))
+    businessType = models.CharField(max_length=254, verbose_name=_('business type'))
+    #businessTypeCustom = models.CharField(max_length=100, null=True, blank=True, verbose_name=_('business type custom'))
     address = models.CharField(max_length=100, null=True, blank=True, verbose_name=_('address'))
     name = models.CharField(max_length=100, verbose_name=_('name'))
     phone = models.CharField(max_length=100, verbose_name=_('phone'))
