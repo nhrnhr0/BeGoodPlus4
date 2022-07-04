@@ -4,7 +4,7 @@ from openpyxl import Workbook
 from productColor.models import ProductColor
 
 from productSize.models import ProductSize
-from .models import MOrderItem, MOrder, MOrderItemEntry
+from .models import MOrderItem, MOrder, MOrderItemEntry, ProviderRequest, TakenInventory
 import io
 from django.contrib import admin
 from django.http.response import HttpResponse
@@ -18,21 +18,46 @@ import copy
 from openpyxl.styles.borders import Border, Side
 from openpyxl import Workbook
 
-
+class TakenInventoryAdmin(admin.ModelAdmin):
+    list_display = ('quantity', 'color', 'size', 'varient', 'has_physical_barcode', 'provider')
+    list_filter = ('color', 'size', 'varient', 'provider')
+    search_fields = ('color', 'size', 'varient', 'has_physical_barcode', 'provider')
+    ordering = ('color', 'size', 'varient', 'provider')
+    pass
+admin.site.register(TakenInventory, TakenInventoryAdmin)
 
 class MOrderItemEntryAdmin(admin.ModelAdmin):
-    list_display = ('id', 'product', 'color', 'size', 'varient', 'quantity')
-    list_filter = ('product', 'color', 'size', 'varient')
-    search_fields = ('product', 'color', 'size', 'varient')
+    list_display = ('id', 'orderItem', 'color', 'size', 'varient', 'quantity')
+    list_filter = ('orderItem', 'color', 'size', 'varient')
+    search_fields = ('orderItem', 'color', 'size', 'varient')
 admin.site.register(MOrderItemEntry, MOrderItemEntryAdmin)
 
 # Register your models here.
 class MOrderItemAdmin(admin.ModelAdmin):
     model = MOrderItem
     list_display = ('id', 'product','price','ergent','prining','embroidery','comment',)
-    filter_horizontal = ('providers','entries','morder')
+    filter_horizontal = ('providers','entries','morder', 'taken')
 admin.site.register(MOrderItem, MOrderItemAdmin)
 
+
+class ProviderRequestAdmin(admin.ModelAdmin):
+    model = ProviderRequest
+    list_display = ('id', 'provider','size','varient','color','force_physical_barcode','quantity','product_name_display', 'morder_id_display')
+    
+    def product_name_display(self, obj):
+        item = obj.orderItem.first()
+        if item:
+            return item.product.title
+        return None
+    product_name_display.short_description = _('Product Name')
+    
+    def morder_id_display(self, obj):
+        item = obj.orderItem.first()
+        if item:
+            return item.morder.first().id
+        return None
+    morder_id_display.short_description = _('MOrder id')
+admin.site.register(ProviderRequest, ProviderRequestAdmin)
 
 class MOrderAdmin(admin.ModelAdmin):
     model = MOrder

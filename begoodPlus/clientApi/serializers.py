@@ -73,9 +73,9 @@ class ImageClientApi(serializers.ModelSerializer):
 class ColorClientApi(serializers.ModelSerializer):
     class Meta:
         model = ProductColor
-        fields = ('id', 'name', 'color')
+        fields = ('id', 'name', 'color','code',)
 
 class SizeClientApi(serializers.ModelSerializer):
     class Meta:
         model = ProductSize
-        fields = ('id', 'size')
+        fields = ('id', 'size', 'code')

@@ -58,3 +58,16 @@ run the server
 python manage.py runserver
 
 ```
+
+
+
+
+1) open remote container
+   Ctrl + Shift + P => Remote Containers: open folder in container
+2)
+docker cp db.sql begoodplus4_devcontainer_db_1:/tmp/db.sql
+docker exec -it begoodplus4_devcontainer_db_1 /bin/bash
+DROP DATABASE testdb5;
+CREATE DATABASE testdb5;
+\q
+PGPASSWORD=password psql -h localhost -U postgres -d testdb5 < /tmp/db.sql
