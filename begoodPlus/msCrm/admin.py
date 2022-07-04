@@ -1,12 +1,21 @@
 from django.conf import settings
 from django.contrib import admin
+from numpy import integer
 
 from catalogAlbum.models import CatalogAlbum
-from .models import MsCrmBusinessTypeSelect, MsCrmIntrest, MsCrmIntrestsGroups, MsCrmUser
+from .models import LeadSubmit, MsCrmBusinessSelectToIntrests, MsCrmBusinessTypeSelect, MsCrmIntrest, MsCrmIntrestsGroups, MsCrmUser
 from advanced_filters.admin import AdminAdvancedFiltersMixin
 from django.http import HttpResponse
 import io
 import xlsxwriter
+from django.utils.html import mark_safe
+
+class LeadSubmitAdmin(admin.ModelAdmin):
+    list_display = ('id', 'bussiness_name','address','name','phone','created_at','updated_at',)   
+    filter_horizontal= ('businessTypeSelects',)
+admin.site.register(LeadSubmit, LeadSubmitAdmin)
+
+
 class MsCrmIntrestsGroupsAdmin(AdminAdvancedFiltersMixin, admin.ModelAdmin):
     list_display = ('name','intrests_list')
     readonly_fields = ('intrests_list',)
@@ -16,6 +25,22 @@ class MsCrmIntrestsGroupsAdmin(AdminAdvancedFiltersMixin, admin.ModelAdmin):
     
     pass
 admin.site.register(MsCrmIntrestsGroups, MsCrmIntrestsGroupsAdmin)
+
+
+class MsCrmBusinessSelectToIntrestAdmin(admin.ModelAdmin):
+    list_display = ('id', 'businessSelect', 'intrests_display')
+    readonly_fields = ('intrests_display',)
+    def intrests_display(self, obj):
+        
+        intrests = obj.intrests.all().values_list('title', flat=True)
+        ret = '<ul>'
+        for intre in intrests:
+            ret += '<li>' + intre + '</li>'
+        ret += '</ul>'
+        return mark_safe(ret)
+    filter_horizontal = ('intrests',)
+admin.site.register(MsCrmBusinessSelectToIntrests, MsCrmBusinessSelectToIntrestAdmin)
+
 
 # Register your models here.
 class MsCrmUserAdmin(AdminAdvancedFiltersMixin, admin.ModelAdmin):

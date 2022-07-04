@@ -22,7 +22,8 @@ from clientApi.views import get_all_colors_api, get_all_sizes_api, main_page_api
 from campains.views import admin_get_all_campains, admin_get_campain_products, get_user_campains
 from inventory.views import DocStockEnterViewSet, doc_stock_enter
 # from mcrm.views import , admin_upload_bulk_crm_exel, upload_crm_execl, upload_crm_execl2
-from msCrm.views import get_all_business_types_groups, mcrm_lead_register, get_all_business_types, get_all_interests, import_mscrm_from_exel
+
+from msCrm.views import api_save_lead, get_all_business_types_groups, mcrm_lead_register, get_all_business_types, get_all_interests, import_mscrm_from_exel, upload_mscrm_business_select_to_intrests_exel, get_all_mscrm_phone_contacts
 from core.views import api_logout, autocompleteClick, autocompleteModel, client_product_question, handler404, send_product_photo, set_csrf_token, svelte_cart_form, svelte_cart_history, svelte_contact_form, test_celery_view, track_cart, verify_unique_field_by_field_excel
 
 from catalogImages.views import admin_api_get_product_cost_price, all_images_ids, catalogimage_upload_warehouse_excel, get_product_sizes_colors_martix, admin_remove_product_from_cart, admin_add_to_existing_cart
@@ -80,6 +81,15 @@ clientRouter.register(r'logos', LogoClientViewSet)
 #from rest_framework.authtoken.views import obtain_auth_token
 #from rest_framework_simplejwt.views import (TokenObtainPairView,TokenRefreshView,)
 urlpatterns = [
+     path('api-save-lead/', api_save_lead, name='api_save_lead'),
+     path('get_all_mscrm_phone_contacts/', get_all_mscrm_phone_contacts, name='get_all_mscrm_phone_contacts'),
+    path('get-products-info', get_products_info, name='get-products-info'),
+    path('create-client-user/', create_client_user, name='create-client-user'),
+
+     path('upload-mscrm-business-select-to-intrests-exel', upload_mscrm_business_select_to_intrests_exel, name='upload-mscrm-business-select-to-intrests-exel'),
+    path('verify-unique-field-by-field-excel', verify_unique_field_by_field_excel),
+    path('product-question', client_product_question, name='client_product_question'),
+
      
      path('request-provider-info/<int:ppn_id>', request_provider_info_admin, name='request-provider-info'),
     path('upload-inventory-csv/', upload_inventory_csv, name='upload-inventory-csv'),
@@ -87,9 +97,6 @@ urlpatterns = [
     path('create-provider-docs', create_provider_docs, name='create-provider-docs'),
     path('load-all-provider-request', load_all_provider_request_admin, name='load_all_provider_request_admin'),
     path('update-provider-request-entry', provider_request_update_entry_admin, name='provider_request_update_entry_admin'),
-    path('get-products-info', get_products_info, name='get-products-info'),
-    path('verify-unique-field-by-field-excel', verify_unique_field_by_field_excel),
-    path('product-question', client_product_question, name='client_product_question'),
     path('product-photo', send_product_photo, name='send_product_photo'),
     path('main_page_api/', main_page_api, name='main_page_api'),
     path('admin-api/remove-product-from-cart/',
@@ -204,7 +211,7 @@ urlpatterns = [
     path('contact-form', svelte_contact_form, name='contact-form'),
     path('cart-form', svelte_cart_form, name='svelte-cart-form'),
     path('cart-history', svelte_cart_history, name='svelte-cart-history'),
-    path('track-cart', track_cart, name='track-cart'),
+    #path('track-cart', track_cart, name='track-cart'),
     re_path('api/set_csrf_token/(?P<factory_id>.+)/$',
             set_csrf_token, name='set_csrf_token'),
     path('api/set_csrf_token/', set_csrf_token, name='set_csrf_token'),
