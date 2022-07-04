@@ -4,3 +4,6 @@ from .models import Color
 
 
 #admin.site.register(Color)
+class ColorAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name', 'color',)# 'colored_box', 'code',)
+admin.site.register(Color, ColorAdmin)

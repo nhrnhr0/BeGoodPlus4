@@ -4,7 +4,7 @@ from django.http import JsonResponse
 from rest_framework.permissions import AllowAny
 
 from catalogAlbum.models import CatalogAlbum
-from .models import MsCrmBusinessSelectToIntrests, MsCrmBusinessTypeSelect, MsCrmIntrest, MsCrmIntrestsGroups, MsCrmUser
+from .models import LeadSubmit, MsCrmBusinessSelectToIntrests, MsCrmBusinessTypeSelect, MsCrmIntrest, MsCrmIntrestsGroups, MsCrmUser
 from .tasks import new_user_subscribed_task
 from .serializers import MsCrmIntrestSerializer, MsCrmBusinessTypeSerializer, MsCrmIntrestsGroupsSerializer, MsCrmPhoneContactsSerializer
 import pandas as pd
@@ -221,4 +221,29 @@ def mcrm_lead_register(request):
         'data': 'ok',
         'id': crmObj.id,
         'is_created': is_created,
+    })
+    
+    
+@api_view(['POST'])
+def api_save_lead(request):
+    form_data = request.data
+    phone = form_data.get('bussiness_phone', '')
+    if (phone.startswith('05')):
+        phone = phone[1:]
+        phone = '+972' + phone
+    phone = phone.replace('-', '')
+    phone = phone.replace(' ', '')
+    obj = LeadSubmit.objects.create(
+        bussiness_name=form_data['bussiness_name'],
+        businessTypeCustom=form_data.get('bussiness_type', ''),
+        address=form_data.get('bussiness_address', ''),
+        name=form_data.get('bussiness_contact_name', ''),
+        phone=phone
+    )
+    for business_type in form_data['business_type']:
+        obj.businessTypeSelects.add(MsCrmBusinessTypeSelect.objects.get(name=business_type))
+    return JsonResponse({
+        'status': 200,
+        'data': 'ok',
+        'id': obj.id,
     })

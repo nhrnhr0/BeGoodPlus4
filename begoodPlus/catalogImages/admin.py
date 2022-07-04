@@ -112,6 +112,7 @@ class CatalogImageAdmin(AdminAdvancedFiltersMixin, admin.ModelAdmin):
         'barcode', 'cost_price', 'client_price', 'recomended_price', 'albums__title', 'show_sizes_popup',
         ('packingTypeProvider__name', 'שיטת אריזה מהספק'), ('packingTypeClient__name', 'שיטת אריזה ללקוח'),'date_created','date_modified', 'can_tag','out_of_stock', 'is_active','has_physical_barcode','cimage',)
 
+
     def get_queryset(self, request):
         qs = super().get_queryset(request)
         return qs.prefetch_related('albums', 'detailTabel')

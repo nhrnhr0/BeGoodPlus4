@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework.utils import model_meta
 
-from .models import CatalogImage
+from .models import CatalogImage, CatalogImageVarient
 from color.serializers import ColorSerializer
 from productSize.serializers import ProductSizeSerializer
 from productColor.models import ProductColor
@@ -55,18 +55,28 @@ class CatalogImageApiSerializer(serializers.ModelSerializer):
         #print('to_representation: ', instance)
     #    return super().to_representation(instance)
     
-class CatalogImageSerializer(serializers.HyperlinkedModelSerializer):
+class ProductVarientSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CatalogImageVarient
+        fields = '__all__'
+        
+        
+class CatalogImageSerializer(serializers.ModelSerializer):
+
     colors_list = serializers.SerializerMethodField('_get_colors')
     id = serializers.IntegerField(read_only=True)
     def _get_colors(self, obj):
-        serializer = ColorSerializer(obj.colors,context=self.context, many=True)
+        serializer = ColorSerializer(obj.colors, many=True)
         return serializer.data
     sizes_list = serializers.SerializerMethodField('_get_sizes')
     def _get_sizes(self, obj):
-        serializer = ProductSizeSerializer(obj.sizes,context=self.context, many=True)
+        serializer = ProductSizeSerializer(obj.sizes, many=True)
         return serializer.data
 
-
+    varient_list = serializers.SerializerMethodField('_get_varients')
+    def _get_varients(self, obj):
+        serializer = ProductVarientSerializer(obj.varients, many=True)
+        return serializer.data
     class Meta:
         model = CatalogImage
         #fields = '__all__'

@@ -3,12 +3,19 @@ from django.contrib import admin
 from numpy import integer
 
 from catalogAlbum.models import CatalogAlbum
-from .models import MsCrmBusinessSelectToIntrests, MsCrmBusinessTypeSelect, MsCrmIntrest, MsCrmIntrestsGroups, MsCrmUser
+from .models import LeadSubmit, MsCrmBusinessSelectToIntrests, MsCrmBusinessTypeSelect, MsCrmIntrest, MsCrmIntrestsGroups, MsCrmUser
 from advanced_filters.admin import AdminAdvancedFiltersMixin
 from django.http import HttpResponse
 import io
 import xlsxwriter
 from django.utils.html import mark_safe
+
+class LeadSubmitAdmin(admin.ModelAdmin):
+    list_display = ('id', 'bussiness_name','address','name','phone','created_at','updated_at',)   
+    filter_horizontal= ('businessTypeSelects',)
+admin.site.register(LeadSubmit, LeadSubmitAdmin)
+
+
 class MsCrmIntrestsGroupsAdmin(AdminAdvancedFiltersMixin, admin.ModelAdmin):
     list_display = ('name','intrests_list')
     readonly_fields = ('intrests_list',)
