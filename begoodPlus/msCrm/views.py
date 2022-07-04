@@ -11,6 +11,49 @@ import pandas as pd
 from django.shortcuts import render,redirect
 from django.contrib import messages
 
+def fix_ms_crm(request):
+    if request.user and request.user.is_superuser:
+        
+        if request.method == "GET":
+            return render(request, 'msCrm/fix_ms_crm.html')
+        elif request.method == "POST":
+            # iterate over all msCrmUsers and resave them
+            msCrmUsers = MsCrmUser.objects.all()
+            for msCrmUser in msCrmUsers:
+                msCrmUser.save()
+
+            
+            
+            file = request.FILES['file']
+            df = pd.read_excel(file, header=0, dtype=str)
+            for index, row in df.iterrows():
+                phone = str(row['טלפון'])
+                phone = phone.replace('\u200f', '')
+                phone = phone.replace('\u202a', '')
+                phone = phone.replace('\u202c', '')
+                phone = phone.replace('\u200f', '')
+                phone = phone.replace('⁩', '')
+                phone = phone.replace('⁦', '')
+                phone = ''.join(e for e in phone if e.isalnum())
+                if phone.startswith('05'):
+                    phone = '972' + phone[1:]
+                if phone.startswith('+'):
+                    phone = phone[1:]
+                
+                
+                # find the user with the phone number
+                user = MsCrmUser.objects.filter(phone=phone)
+                if user.exists():
+                    user = user.first()
+                    businessSelectStr = row['select']
+                    businessSelectObj = MsCrmBusinessTypeSelect.objects.filter(name=businessSelectStr)
+                    if businessSelectObj.exists():
+                        businessSelectObj = businessSelectObj.first()
+                        user.businessSelect = businessSelectObj
+                        user.save()
+            return redirect('/admin/msCrm/mscrmuser/')
+
+
 @api_view(['GET'])
 def get_all_mscrm_phone_contacts(request):
     if(request.user.is_superuser):
