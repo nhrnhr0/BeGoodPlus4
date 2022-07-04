@@ -6,8 +6,9 @@ from django.utils.html import mark_safe
 
 class MsCrmBusinessTypeSelect(models.Model):
     name = models.CharField(max_length=100, unique=True)
+    order = models.IntegerField(default=0)
     class Meta():
-        ordering = ['id',]
+        ordering = ['order',]
 
     def __str__(self):
         return self.name
@@ -67,3 +68,19 @@ class MsCrmUser(models.Model):
             phone = '972' + phone[1:]
         
         return '+' + phone
+    
+
+
+
+
+# api_save_lead
+class LeadSubmit(models.Model):
+    bussiness_name = models.CharField(max_length=100, verbose_name=_('business name'))
+    businessTypeSelects = models.ManyToManyField(to=MsCrmBusinessTypeSelect, verbose_name=_('business type'))
+    businessTypeCustom = models.CharField(max_length=100, null=True, blank=True, verbose_name=_('business type custom'))
+    address = models.CharField(max_length=100, null=True, blank=True, verbose_name=_('address'))
+    name = models.CharField(max_length=100, verbose_name=_('name'))
+    phone = models.CharField(max_length=100, verbose_name=_('phone'))
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
