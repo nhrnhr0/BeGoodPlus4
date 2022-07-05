@@ -11,6 +11,7 @@ import decimal
 from productColor.models import ProductColor
 from productSize.models import ProductSize
 from catalogLogos.models import CatalogLogo
+from client.models import Client
 
 class LogoClientApi(serializers.ModelSerializer):
     class Meta:
@@ -65,10 +66,15 @@ class ImageClientApi(serializers.ModelSerializer):
             if request.user.is_authenticated and request.user.client:
                 if request.user.client:
                     tariff = request.user.client.tariff
-                    price = obj.client_price + (obj.client_price * (tariff/100))
-                    price = round(price * 2) / 2 if price > 50 else "{:.2f}".format(price)
-                    return decimal.Decimal(price).normalize()
-                return obj.client_price
+                    if request.user.is_superuser and request.GET.get('actAs'):
+                        user_id = request.GET.get('actAs')
+                        client = Client.objects.get(user_id=user_id)
+                        tariff = client.tariff
+                else:
+                    tariff = 0
+                price = obj.client_price + (obj.client_price * (tariff/100))
+                price = round(price * 2) / 2 if price > 50 else "{:.2f}".format(price)
+                return decimal.Decimal(price).normalize()
         return 0
 class ColorClientApi(serializers.ModelSerializer):
     class Meta:

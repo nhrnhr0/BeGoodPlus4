@@ -35,6 +35,9 @@ class MsCrmPhoneContactsSerializer(serializers.ModelSerializer):
         phone = phone.replace('\u202a', '')
         phone = phone.replace('\u202c', '')
         phone = phone.replace('\u200f', '')
+        phone = phone.replace('⁩', '')
+        phone = phone.replace('⁦', '')
+        phone = ''.join(e for e in phone if e.isalnum())
         if phone.startswith('05'):
             phone = '+972' + phone
         if phone[0] != '+':

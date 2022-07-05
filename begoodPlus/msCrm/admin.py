@@ -11,8 +11,8 @@ import xlsxwriter
 from django.utils.html import mark_safe
 
 class LeadSubmitAdmin(admin.ModelAdmin):
-    list_display = ('id', 'bussiness_name','address','name','phone','created_at','updated_at',)   
-    filter_horizontal= ('businessTypeSelects',)
+    list_display = ('id', 'businessType','bussiness_name','address','name','phone','created_at','updated_at',)   
+    #filter_horizontal= ('businessTypeSelects',)
 admin.site.register(LeadSubmit, LeadSubmitAdmin)
 
 

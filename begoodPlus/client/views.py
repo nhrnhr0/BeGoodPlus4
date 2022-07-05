@@ -182,7 +182,10 @@ def userLogEntryView(request):
         
 import uuid
 def get_active_session_logger(uid, device, user):
-    my_uid=  str(uuid.UUID(uid))
+    try:
+        my_uid=  str(uuid.UUID(uid))
+    except:
+        my_uid = str(uuid.uuid4())
     ret , created= UserSessionLogger.objects.get_or_create(uid=my_uid, device=device, user_id=user.id, is_active=True)
     print('get_active_session_logger: ', ret,' created: ', created)
     return ret
