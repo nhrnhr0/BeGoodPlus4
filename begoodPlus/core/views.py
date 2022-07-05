@@ -230,7 +230,7 @@ def svelte_cart_form(request):
         email = body['email'] or ''
         phone = body['phone'] or ''
         business_name = body['business_name'] or ''
-        uuid = body['uuid'] or ''
+        my_uuid = body['uuid'] or ''
         message = body['message'] or ''
         order_type = body['order_type'] or ''
         products = body['products'] or ''
@@ -252,7 +252,10 @@ def svelte_cart_form(request):
                 agent = request.user
             else:
                 user_id = request.user
-        db_cart = SvelteCartModal.objects.create(user=user_id, device=device, uid=uuid, businessName=business_name,
+        # if uuid is not a valid uuid, generate a new one
+        if not my_uuid or my_uuid == 'undefined':
+            my_uuid = str(uuid.uuid4())
+        db_cart = SvelteCartModal.objects.create(user=user_id, device=device, uid=my_uuid, businessName=business_name,
                                                  name=name, phone=phone, email=email, message=message, agent=agent, order_type=order_type)
         # data.products.set(products)
         db_cart.productsRaw = raw_cart
