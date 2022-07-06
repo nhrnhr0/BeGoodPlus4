@@ -4,6 +4,8 @@ from django.utils.translation import gettext_lazy  as _
 from catalogAlbum.models import CatalogAlbum
 from django.utils.html import mark_safe
 
+from client.models import Client
+
 class MsCrmBusinessTypeSelect(models.Model):
     name = models.CharField(max_length=100, unique=True)
     order = models.IntegerField(default=0)
@@ -52,6 +54,11 @@ class MsCrmUser(models.Model):
     want_whatsapp = models.BooleanField(default=True, verbose_name=_('want whatsapp'))
     flashy_contact_id = models.CharField(max_length=256, null=True, blank=True, verbose_name=_('flashy contact id'))
     intrests = models.ManyToManyField(CatalogAlbum, blank=True, verbose_name=_('intrested'))
+    
+    clients = models.ManyToManyField(to=Client, blank=True, verbose_name=_('clients'), related_name='ms_crm_users')
+    def __str__(self):
+        return str(self.name) + '[' + str(self.phone) + ']'
+    
     def save(self, *args, **kwargs):
         if self.phone:
             # remove the first char of self.get_clean_phonenumber()

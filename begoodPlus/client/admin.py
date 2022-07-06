@@ -1,20 +1,35 @@
 import io
 from django.contrib import admin
 from django.http.response import HttpResponse
+from matplotlib import widgets
 from rest_framework.decorators import action
 from django.utils.translation import gettext_lazy  as _
+
+from msCrm.models import MsCrmUser
 
 # Register your models here.
 from .models import Client, ClientOrganizations, PaymentTime, PaymantWay, ClientType, UserLogEntry
 import zipfile
 
+from django import forms
+class MsCrmUserInlineForm(forms.ModelForm):
+    class Meta:
+        model = MsCrmUser
+        fields = '__all__'
+class MsCrmUserInline(admin.TabularInline):
+    model = Client.ms_crm_users.through
+    extra= 1
+    form = MsCrmUserInlineForm
+    #model = MsCrmUser.clients.through
+
 class ClientAdmin(admin.ModelAdmin):
-    list_display = ('created_at','__str__', 'user', 'businessName', 'extraName','show_prices','tariff')
+    list_display = ('created_at', 'user', 'businessName', 'extraName','show_prices','tariff')
     actions = ['generate_user_products_from_sessions', 'make_show_prices_active', 'make_show_prices_inactive']
     filter_horizontal = ('categorys',)
+    #filter_vertical = ('ms_crm_users',)
     search_fields = ('businessName', 'user__username', 'email','howPay__name','whenPay__name',)
     list_filter = ('storeType', 'clientType',)
-    
+    inlines = [MsCrmUserInline]
     def make_show_prices_inactive(self, request, queryset):
         queryset.update(show_prices=False)
         self.message_user(request, _("Show prices was set to False"))
