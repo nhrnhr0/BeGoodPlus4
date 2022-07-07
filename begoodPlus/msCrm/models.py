@@ -2,8 +2,8 @@ from http import client
 from itertools import product
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from begoodPlus.catalogImages.models import CatalogImage
-from begoodPlus.client.models import Client
+from catalogImages.models import CatalogImage
+from client.models import Client
 
 from catalogAlbum.models import CatalogAlbum
 from django.utils.html import mark_safe
@@ -97,7 +97,7 @@ class MsCrmWhatsappMessagesSent(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     crmUser = models.ForeignKey(
-        to=MsCrmUser, on_delete=models.SET_NULL, verbose_name=_('crm user'))
+        to=MsCrmUser, on_delete=models.CASCADE, verbose_name=_('crm user'))
     message = models.TextField(verbose_name=_('message'))
     products = models.ManyToManyField(
-        to=CatalogImage, on_delete=models.SET_NULL, verbose_name=_('products'))
+        to=CatalogImage, verbose_name=_('products'))
