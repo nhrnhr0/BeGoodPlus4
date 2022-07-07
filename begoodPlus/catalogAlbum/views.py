@@ -2,13 +2,20 @@ from django.shortcuts import redirect, render
 from django.urls.base import reverse
 
 # Create your views here.
-from catalogAlbum.models import CatalogAlbum
-from .serializers import CatalogAlbumSerializer
+from catalogAlbum.models import CatalogAlbum, TopLevelCategory
+from .serializers import CatalogAlbumSerializer, TopLevelCategorySerializer
 from django.http import JsonResponse
 
 from rest_framework import viewsets
+from rest_framework.decorators import api_view
 from rest_framework.renderers import JSONRenderer
 
+@api_view(['GET'])
+def get_main_categories(request):
+    qs = TopLevelCategory.objects.all()
+    ser = TopLevelCategorySerializer(qs, many=True)
+    data = ser.data
+    return JsonResponse(data, safe=False)
 
 class CatalogAlbumViewSet(viewsets.ModelViewSet):
     queryset = CatalogAlbum.objects.all()

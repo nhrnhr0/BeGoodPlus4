@@ -1,8 +1,16 @@
 from rest_framework import serializers
 
-from .models import CatalogAlbum
+from .models import CatalogAlbum, TopLevelCategory
 from catalogImages.serializers import CatalogImageSerializer
 from color.serializers import ColorSerializer
+
+class TopLevelCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TopLevelCategory
+        fields = ('id', 'name', 'get_image','albums',)
+        ordering = ('my_order',)
+
+
 
 class CatalogAlbumSerializer(serializers.ModelSerializer):
     images_list = serializers.SerializerMethodField('_get_images')

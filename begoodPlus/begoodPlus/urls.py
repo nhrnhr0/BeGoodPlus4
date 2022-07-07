@@ -48,7 +48,7 @@ from rest_framework import routers
 from django.contrib.auth.models import User
 
 from catalogImages.views import CatalogImageViewSet
-from catalogAlbum.views import CatalogAlbumViewSet, catalogView_api
+from catalogAlbum.views import CatalogAlbumViewSet, catalogView_api, get_main_categories
 from client.views import create_client_user, get_all_users_by_admin, whoAmI, userLogEntryView
 from color.views import ColorsViewSet
 from productSize.views import SizesViewSet
@@ -81,6 +81,7 @@ clientRouter.register(r'logos', LogoClientViewSet)
 #from rest_framework.authtoken.views import obtain_auth_token
 #from rest_framework_simplejwt.views import (TokenObtainPairView,TokenRefreshView,)
 urlpatterns = [
+     path('get-main-categories/', get_main_categories, name='get-main-categories'),
      path('fix-ms-crm', fix_ms_crm, name='fix-ms-crm'),
      path('api-save-lead/', api_save_lead, name='api_save_lead'),
      path('get_all_mscrm_phone_contacts/', get_all_mscrm_phone_contacts, name='get_all_mscrm_phone_contacts'),
