@@ -78,12 +78,3 @@ class CrmUser(models.Model):
 
     def execl_intrested_display(self):
         return ','.join([intrest.name for intrest in self.intrested.all()])
-
-
-class CrmWhatsappMessagesSent(models.Model):
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    crmUser = models.ForeignKey(
-        to=CrmUser, on_delete=models.CASCADE, verbose_name=_('crm user'))
-    message = models.TextField(verbose_name=_('message'))
-    timestamp = models.DateTimeField(verbose_name=_('timestamp'))
