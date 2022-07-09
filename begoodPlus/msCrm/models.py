@@ -106,14 +106,16 @@ class MsCrmWhasappImageProduct(models.Model):
     left = models.IntegerField(verbose_name=('left'))
     top = models.IntegerField(verbose_name=('top'))
     whatsapp_message = models.ForeignKey(
-        to=MsCrmWhatsappMessage, on_delete=models.CASCADE, verbose_name=('whatsappMessage'))
+        to=MsCrmWhatsappMessage, on_delete=models.CASCADE, verbose_name=('whatsappMessage'), related_name='whatsappImageProducts')
 
 
 class MsCrmWhatsappMessagesSent(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     crmUser = models.ForeignKey(
-        to=MsCrmUser, on_delete=models.CASCADE, verbose_name=_('crmUser'))
+        to=MsCrmUser, on_delete=models.CASCADE, verbose_name=_('crmUser'), related_name='whatsappMessagesSent')
     whatsapp_message = models.ForeignKey(
-        to=MsCrmWhatsappMessage, verbose_name=('whatsappMessage'),
-        on_delete=models.CASCADE)
+        to=MsCrmWhatsappMessage, verbose_name=('whatsappMessage'), related_name='whatsappMessagesSent', on_delete=models.CASCADE)
+
+    class Meta():
+        ordering = ['created_at', ]

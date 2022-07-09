@@ -6,9 +6,9 @@ from rest_framework.permissions import AllowAny
 from catalogAlbum.models import CatalogAlbum
 from .models import MsCrmBusinessTypeSelect, MsCrmIntrest, MsCrmIntrestsGroups, MsCrmUser
 from .tasks import new_user_subscribed_task
-from .serializers import MsCrmIntrestSerializer, MsCrmBusinessTypeSerializer, MsCrmIntrestsGroupsSerializer
+from .serializers import MsCrmIntrestSerializer, MsCrmBusinessTypeSerializer, MsCrmIntrestsGroupsSerializer, MsCrmUserWhatsappCampaignSerializer
 import pandas as pd
-from django.shortcuts import render,redirect
+from django.shortcuts import render, redirect
 from django.contrib import messages
 
 # Create your views here.
@@ -16,21 +16,23 @@ from django.contrib import messages
 
 def import_mscrm_from_exel(request):
     if request.user and request.user.is_superuser:
-        
+
         if request.method == 'POST':
             xls = pd.ExcelFile(request.FILES['file'])
-            df1 =  pd.read_excel(xls, 'Sheet1')
+            df1 = pd.read_excel(xls, 'Sheet1')
             users_created_counter = 0
             users_updated_counter = 0
-            all_categories = CatalogAlbum.objects.filter(is_public=True)#.values_list('title', flat=True)
-            
+            all_categories = CatalogAlbum.objects.filter(
+                is_public=True)  # .values_list('title', flat=True)
+
             for index, row in df1.iterrows():
                 bname = row['שם העסק']
                 name = row['שם']
                 select = None
                 if isinstance(row['select'], str):
                     try:
-                        select = MsCrmBusinessTypeSelect.objects.get(name=row['select'])
+                        select = MsCrmBusinessTypeSelect.objects.get(
+                            name=row['select'])
                     except:
                         select = None
                 customSelect = None
@@ -38,9 +40,9 @@ def import_mscrm_from_exel(request):
                     customSelect = row['עסק לא מוגדר']
                 phone = row['טלפון']
                 if isinstance(phone, str):
-                    phone = phone.replace('-','')
-                    phone= phone.replace(' ','')
-                    phone = phone.replace('\u2069','')
+                    phone = phone.replace('-', '')
+                    phone = phone.replace(' ', '')
+                    phone = phone.replace('\u2069', '')
                 else:
                     phone = None
                 if isinstance(row['אימייל'], str):
@@ -57,8 +59,7 @@ def import_mscrm_from_exel(request):
                 for category in all_categories:
                     if row[category.title] != 'לא':
                         userSelectedCategories.append(category)
-                
-                
+
                 '''intrests = row['תחומי עניין']
                 intrestsObjs = []
                 if isinstance(intrests, str):
@@ -67,9 +68,11 @@ def import_mscrm_from_exel(request):
                     for intr in intrests:
                         intrObj = MsCrmIntrest.objects.get(name=intr)
                         intrestsObjs.append(intrObj)'''
-                crmObjs = MsCrmUser.objects.filter(businessName=bname, name=name)
+                crmObjs = MsCrmUser.objects.filter(
+                    businessName=bname, name=name)
                 if len(crmObjs) == 0:
-                    crmObj = MsCrmUser.objects.create(businessName=bname, name=name, businessSelect=select, businessTypeCustom=customSelect, phone=phone, email=email, want_emails=want_emails, want_whatsapp=want_whatsapp, address=address)
+                    crmObj = MsCrmUser.objects.create(businessName=bname, name=name, businessSelect=select, businessTypeCustom=customSelect,
+                                                      phone=phone, email=email, want_emails=want_emails, want_whatsapp=want_whatsapp, address=address)
                     users_created_counter += 1
                 else:
                     users_updated_counter += 1
@@ -84,15 +87,19 @@ def import_mscrm_from_exel(request):
                     crmObj.want_whatsapp = want_whatsapp
                     if isinstance(address, str):
                         crmObj.address = address
-                        
+
                 crmObj.intrests.set(userSelectedCategories)
-                #crmObj.intrests.set(intrestsObjs)
+                # crmObj.intrests.set(intrestsObjs)
                 crmObj.save()
-            messages.add_message(request, messages.INFO, '{} משתמשים נוצרו'.format(users_created_counter))
-            messages.add_message(request, messages.INFO, '{} משתמשים שונו'.format(users_updated_counter))#, businessTypeCustom=customSelect, phone=phone, email=email, want_emails=want_emails, want_whatsapp=want_whatsapp, address=address)
+            messages.add_message(
+                request, messages.INFO, '{} משתמשים נוצרו'.format(users_created_counter))
+            # , businessTypeCustom=customSelect, phone=phone, email=email, want_emails=want_emails, want_whatsapp=want_whatsapp, address=address)
+            messages.add_message(request, messages.INFO,
+                                 '{} משתמשים שונו'.format(users_updated_counter))
             return redirect('/admin/msCrm/mscrmuser/')
         else:
             return render(request, 'upload_crm_execl2.html')
+
 
 def get_all_interests(request):
     #intrests = MsCrmIntrest.objects.all()
@@ -101,8 +108,9 @@ def get_all_interests(request):
     data = intrests.values_list('title', flat=True)
     ret = []
     for d in data:
-        ret.append({"name":d})
+        ret.append({"name": d})
     return JsonResponse(ret, safe=False)
+
 
 def get_all_business_types(request):
     businessTypes = MsCrmBusinessTypeSelect.objects.all()
@@ -113,50 +121,81 @@ def get_all_business_types(request):
 def get_all_business_types_groups(request):
     if request.user and request.user.is_superuser:
         businessTypesGroups = MsCrmIntrestsGroups.objects.all()
-        data = MsCrmIntrestsGroupsSerializer(businessTypesGroups, many=True).data
+        data = MsCrmIntrestsGroupsSerializer(
+            businessTypesGroups, many=True).data
         return JsonResponse(data, safe=False)
     else:
-        return JsonResponse({"error":"not authorized"}, safe=False)
+        return JsonResponse({"error": "not authorized"}, safe=False)
     # businessTypesGroups = MsCrmIntrestsGroups.objects.all()
     # data = MsCrmIntrestsGroupsSerializer(businessTypesGroups, many=True).data
     # return JsonResponse(data, safe=False)
 
+
+@api_view(['GET'])
+def get_crm_users_for_whatsapp(request):
+    if request.user and request.user.is_superuser:
+        if request.query_params.get('businessTypes') is not None:
+            businessTypes = request.query_params.get(
+                'businessTypes').split(',')
+        else:
+            businessTypes = None
+        if request.query_params.get('catalogAlbums') is not None:
+            catalogImages = request.query_params.get(
+                'catalogAlbums').split(',')
+        else:
+            catalogImages = None
+        if businessTypes == '' or businessTypes is None or businessTypes == []:
+            return JsonResponse([], safe=False)
+        users = MsCrmUser.objects.filter(
+            businessSelect__id__in=businessTypes).select_related('businessSelect')
+        data = MsCrmUserWhatsappCampaignSerializer(
+            users, many=True, context={'catalogAlbums': catalogImages}).data
+        return JsonResponse(data, safe=False)
+    else:
+        return JsonResponse({"error": "not authorized"}, safe=False)
+
 # Create your views here.
+
+
 @api_view(['POST'])
 @permission_classes((AllowAny,))
 def mcrm_lead_register(request):
-    form_data = request.data # 4147
-    
+    form_data = request.data  # 4147
+
     phone = form_data.get('phone', '')
     if (phone.startswith('05')):
         phone = phone[1:]
         phone = '+972' + phone
     phone = phone.replace('-', '')
     phone = phone.replace(' ', '')
-    #phone = phone.replace('\u')
+    # phone = phone.replace('\u')
     phone = phone.replace('\u2066', '')
-    
-    
+
     businessTypes = form_data['business_types']
     for businessType in businessTypes:
         businessType = businessType.strip()
-        businessTypeObj = MsCrmBusinessTypeSelect.objects.get(name=businessType)
-        crmObj, is_created = MsCrmUser.objects.get_or_create(businessName=form_data['business-name'], name=form_data['name'], businessSelect=businessTypeObj, phone=phone)
+        businessTypeObj = MsCrmBusinessTypeSelect.objects.get(
+            name=businessType)
+        crmObj, is_created = MsCrmUser.objects.get_or_create(
+            businessName=form_data['business-name'], name=form_data['name'], businessSelect=businessTypeObj, phone=phone)
         if businessType == 'אחר - פרט למטה':
-            crmObj.businessTypeCustom = form_data.get('business-type-other',crmObj.businessTypeCustom)
+            crmObj.businessTypeCustom = form_data.get(
+                'business-type-other', crmObj.businessTypeCustom)
         if phone != '':
             crmObj.phone = phone
         crmObj.email = form_data.get('email', crmObj.email)
-        crmObj.want_emails = True if form_data.get('mailing-list', None) == 'on' else False
-        crmObj.want_whatsapp = True if form_data.get('whatsapp-list', None) == 'on' else False
+        crmObj.want_emails = True if form_data.get(
+            'mailing-list', None) == 'on' else False
+        crmObj.want_whatsapp = True if form_data.get(
+            'whatsapp-list', None) == 'on' else False
         crmObj.address = form_data.get('address', crmObj.address)
-        intrestObjs=[]
+        intrestObjs = []
         for intrest in form_data['intrests']:
             intrestObjs.append(CatalogAlbum.objects.get(title=intrest))
         crmObj.intrests.set(intrestObjs)
         crmObj.save()
         new_user_subscribed_task.delay(crmObj.id)
-    #new_user_subscribed_task(crmObj.id)
+    # new_user_subscribed_task(crmObj.id)
     return JsonResponse({
         'status': 200,
         'data': 'ok',
