@@ -1,3 +1,4 @@
+import uuid
 from django.shortcuts import render
 from rest_framework.decorators import api_view, permission_classes
 from django.http import JsonResponse
@@ -6,10 +7,11 @@ from rest_framework.permissions import AllowAny
 from catalogAlbum.models import CatalogAlbum
 from .models import MsCrmBusinessTypeSelect, MsCrmIntrest, MsCrmIntrestsGroups, MsCrmUser
 from .tasks import new_user_subscribed_task
-from .serializers import MsCrmIntrestSerializer, MsCrmBusinessTypeSerializer, MsCrmIntrestsGroupsSerializer, MsCrmUserWhatsappCampaignSerializer
+from .serializers import MsCrmIntrestSerializer, MsCrmBusinessTypeSerializer, MsCrmIntrestsGroupsSerializer, MsCrmUserWhatsappCampaignSerializer, MsCrmUsersForExcelSerializer
 import pandas as pd
 from django.shortcuts import render, redirect
 from django.contrib import messages
+from django.http import HttpResponse
 
 # Create your views here.
 
@@ -153,6 +155,26 @@ def get_crm_users_for_whatsapp(request):
         return JsonResponse(data, safe=False)
     else:
         return JsonResponse({"error": "not authorized"}, safe=False)
+
+
+@api_view(['GET'])
+def get_crm_users_numbers_in_excel(request):
+    if request.query_params.get('crmUserIds') is not None:
+        crmUserIds = request.query_params.get(
+            'crmUserIds').split(',')
+        crmUserQuery = MsCrmUser.objects.filter(
+            id__in=crmUserIds).select_related('businessSelect')
+        crmUsers = MsCrmUsersForExcelSerializer(
+            crmUserQuery, many=True).data
+        df = pd.DataFrame(crmUsers)
+        response = HttpResponse(
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = 'attachment; filename="{}.xlsx"'.format(
+            uuid.uuid4())
+        df.to_excel(response, index=False)
+        return response
+    else:
+        return JsonResponse({"error": "Please provide valid crmUserIds as query params"}, safe=False)
 
 # Create your views here.
 

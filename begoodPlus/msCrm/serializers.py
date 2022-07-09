@@ -39,7 +39,7 @@ class MsCrmUserWhatsappCampaignSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = MsCrmUser
-        fields = ('name', 'phone', 'lastMessageWithTimestamp',
+        fields = ('id', 'name', 'phone', 'lastMessageWithTimestamp',
                   'businessTypeSelect', 'productfitAndList')
 
     def get_lastMessageWithTimestamp(self, obj):
@@ -52,3 +52,13 @@ class MsCrmUserWhatsappCampaignSerializer(serializers.ModelSerializer):
 
     def get_productfitAndList(self, obj):
         return ''
+
+
+class MsCrmUsersForExcelSerializer(serializers.ModelSerializer):
+    businessSelect = serializers.CharField(
+        source="businessSelect.name", read_only=True)
+
+    class Meta:
+        model = MsCrmUser
+        fields = ('phone', 'name', 'email',
+                  'businessName', 'businessSelect')

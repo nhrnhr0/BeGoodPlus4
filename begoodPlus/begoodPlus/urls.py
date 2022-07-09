@@ -22,7 +22,7 @@ from clientApi.views import get_all_colors_api, get_all_sizes_api, main_page_api
 from campains.views import admin_get_all_campains, admin_get_campain_products, get_user_campains
 from inventory.views import DocStockEnterViewSet, doc_stock_enter
 # from mcrm.views import , admin_upload_bulk_crm_exel, upload_crm_execl, upload_crm_execl2
-from msCrm.views import get_all_business_types_groups, get_crm_users_for_whatsapp, mcrm_lead_register, get_all_business_types, get_all_interests, import_mscrm_from_exel
+from msCrm.views import get_all_business_types_groups, get_crm_users_for_whatsapp, get_crm_users_numbers_in_excel, mcrm_lead_register, get_all_business_types, get_all_interests, import_mscrm_from_exel
 from core.views import api_logout, autocompleteClick, autocompleteModel, client_product_question, handler404, send_product_photo, set_csrf_token, success_view, svelte_cart_form, svelte_cart_history, svelte_contact_form, test_celery_view, track_cart, verify_unique_field_by_field_excel
 from catalogImages.views import admin_api_get_product_cost_price, all_images_ids, catalogimage_upload_warehouse_excel, get_product_sizes_colors_martix, admin_remove_product_from_cart, admin_add_to_existing_cart
 from clientApi.views import ColorsClientViewSet, ImageClientViewSet, SizesClientViewSet, LogoClientViewSet, get_album_images
@@ -210,6 +210,8 @@ urlpatterns = [
          get_all_business_types_groups, name='crm_get_all_business_types_groups'),
     path('crm-api/get-all-business-users-by-business-types-id',
          get_crm_users_for_whatsapp, name='crm_get_crm_users_for_whatsapp'),
+    path('crm-api/get_crm_users_numbers_in_excel',
+         get_crm_users_numbers_in_excel, name='crm_get_crm_users_numbers_in_excel'),
     #path('admin/crm/crmuser/upload_execl/', upload_crm_execl, name='crm_upload_execl'),
     #path('admin_upload_bulk_crm_exel', admin_upload_bulk_crm_exel, name='admin_upload_bulk_crm_exel'),
     path('admin/crm/crmuser/upload_execl2/',
