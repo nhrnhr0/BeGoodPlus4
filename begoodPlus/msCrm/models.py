@@ -93,11 +93,27 @@ class MsCrmUser(models.Model):
         return '+' + phone
 
 
+class MsCrmWhatsappMessage(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    message = models.TextField(verbose_name=_('message'))
+
+
+class MsCrmWhasappImageProduct(models.Model):
+    product = models.ForeignKey(
+        to=CatalogImage, on_delete=models.CASCADE, verbose_name=_('products'))
+    max_width = models.IntegerField(verbose_name=('maxWidth'))
+    left = models.IntegerField(verbose_name=('left'))
+    top = models.IntegerField(verbose_name=('top'))
+    whatsapp_message = models.ForeignKey(
+        to=MsCrmWhatsappMessage, on_delete=models.CASCADE, verbose_name=('whatsappMessage'))
+
+
 class MsCrmWhatsappMessagesSent(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     crmUser = models.ForeignKey(
-        to=MsCrmUser, on_delete=models.CASCADE, verbose_name=_('crm user'))
-    message = models.TextField(verbose_name=_('message'))
-    products = models.ManyToManyField(
-        to=CatalogImage, verbose_name=_('products'))
+        to=MsCrmUser, on_delete=models.CASCADE, verbose_name=_('crmUser'))
+    whatsapp_message = models.ForeignKey(
+        to=MsCrmWhatsappMessage, verbose_name=('whatsappMessage'),
+        on_delete=models.CASCADE)
