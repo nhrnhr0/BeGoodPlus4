@@ -5,9 +5,9 @@ from django.http import JsonResponse
 from rest_framework.permissions import AllowAny
 
 from catalogAlbum.models import CatalogAlbum
-from .models import MsCrmBusinessTypeSelect, MsCrmIntrest, MsCrmIntrestsGroups, MsCrmUser
+from .models import MsCrmBusinessTypeSelect, MsCrmIntrest, MsCrmIntrestsGroups, MsCrmUser, MsCrmWhatsappMessagesSent
 from .tasks import new_user_subscribed_task
-from .serializers import MsCrmIntrestSerializer, MsCrmBusinessTypeSerializer, MsCrmIntrestsGroupsSerializer, MsCrmUserWhatsappCampaignSerializer, MsCrmUsersForExcelSerializer
+from .serializers import CatalogAlbumOnlyNameSerializer, MsCrmIntrestSerializer, MsCrmBusinessTypeSerializer, MsCrmIntrestsGroupsSerializer, MsCrmUserWhatsappCampaignSerializer, MsCrmUsersForExcelSerializer
 import pandas as pd
 from django.shortcuts import render, redirect
 from django.contrib import messages
@@ -149,10 +149,20 @@ def get_crm_users_for_whatsapp(request):
             catalogImages = []
         if businessTypes == '' or businessTypes is None or businessTypes == []:
             return JsonResponse([], safe=False)
+
+        CatalogAlbumsQuerySet = CatalogAlbum.objects.filter(
+            images__id__in=catalogImages)
+        CatalogAlbums = CatalogAlbumOnlyNameSerializer(
+            CatalogAlbumsQuerySet, many=True).data
+
+        WhatsappMessagesQuerySet = MsCrmWhatsappMessagesSent.objects.order_by(
+            '-created_at').select_related('whatsapp_message')
+
         users = MsCrmUser.objects.filter(
-            businessSelect__id__in=businessTypes).select_related('businessSelect').prefetch_related('intrests')
+            businessSelect__id__in=businessTypes).select_related('businessSelect').prefetch_related(Prefetch('intrests', queryset=CatalogAlbumsQuerySet, to_attr='cached_intrests'), Prefetch('whatsappMessagesSent', queryset=WhatsappMessagesQuerySet, to_attr='cached_whatsappMessagesSent'))
+
         data = MsCrmUserWhatsappCampaignSerializer(
-            users, many=True, context={'catalogImages': catalogImages}).data
+            users, many=True, context={'catalogImages': catalogImages, 'catalogAlbums': CatalogAlbums}).data
         return JsonResponse(data, safe=False)
     else:
         return JsonResponse({"error": "not authorized"}, safe=False)

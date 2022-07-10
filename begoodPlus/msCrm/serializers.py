@@ -43,21 +43,20 @@ class MsCrmUserWhatsappCampaignSerializer(serializers.ModelSerializer):
                   'businessTypeSelect', 'productfitAndList')
 
     def get_lastMessageWithTimestamp(self, obj):
-        whatsappMessageSent = obj.whatsappMessagesSent.order_by(
-            '-created_at').first()
-        if whatsappMessageSent is not None:
-            return '{} - {}'.format(obj.whatsappMessageSent.whatsapp_message.message, obj.whatsappMessageSent.created_at)
+        if obj.cached_whatsappMessagesSent is not None and len(obj.cached_whatsappMessagesSent) > 0:
+            return '{} - {}'.format(obj.cached_whatsappMessagesSent[0].whatsapp_message.message, obj.cached_whatsappMessagesSent[0].created_at)
         else:
             return ''
 
     def get_productfitAndList(self, obj):
-        intrestsQuerySet = obj.intrests.filter(
-            images__id__in=self.context['catalogImages'])
+        intrestsQuerySet = obj.cached_intrests
         intrests = CatalogAlbumOnlyNameSerializer(
             intrestsQuerySet, many=True).data
-
+        CatalogAlbums = self.context['catalogAlbums']
+        percentage = int(len(intrests) / len(CatalogAlbums)
+                         * 100) if len(CatalogAlbums) > 0 else 0
         return {
-            "percentage": 0,
+            "percentage": percentage,
             "list": intrests
         }
 
