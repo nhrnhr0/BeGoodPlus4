@@ -51,7 +51,15 @@ class MsCrmUserWhatsappCampaignSerializer(serializers.ModelSerializer):
             return ''
 
     def get_productfitAndList(self, obj):
-        return ''
+        intrestsQuerySet = obj.intrests.filter(
+            images__id__in=self.context['catalogImages'])
+        intrests = CatalogAlbumOnlyNameSerializer(
+            intrestsQuerySet, many=True).data
+
+        return {
+            "percentage": 0,
+            "list": intrests
+        }
 
 
 class MsCrmUsersForExcelSerializer(serializers.ModelSerializer):

@@ -12,6 +12,7 @@ import pandas as pd
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.http import HttpResponse
+from django.db.models import Prefetch
 
 # Create your views here.
 
@@ -141,17 +142,17 @@ def get_crm_users_for_whatsapp(request):
                 'businessTypes').split(',')
         else:
             businessTypes = None
-        if request.query_params.get('catalogAlbums') is not None:
+        if request.query_params.get('catalogImages') is not None:
             catalogImages = request.query_params.get(
-                'catalogAlbums').split(',')
+                'catalogImages').split(',')
         else:
-            catalogImages = None
+            catalogImages = []
         if businessTypes == '' or businessTypes is None or businessTypes == []:
             return JsonResponse([], safe=False)
         users = MsCrmUser.objects.filter(
-            businessSelect__id__in=businessTypes).select_related('businessSelect')
+            businessSelect__id__in=businessTypes).select_related('businessSelect').prefetch_related('intrests')
         data = MsCrmUserWhatsappCampaignSerializer(
-            users, many=True, context={'catalogAlbums': catalogImages}).data
+            users, many=True, context={'catalogImages': catalogImages}).data
         return JsonResponse(data, safe=False)
     else:
         return JsonResponse({"error": "not authorized"}, safe=False)
