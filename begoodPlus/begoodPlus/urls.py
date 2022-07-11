@@ -14,6 +14,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
+from catalogAlbum.views import get_albums
 from inventory.views import doc_stock_enter_provider_requests_api, get_stock_by_id_api, save_doc_stock_enter_provider_requests, unpivot_inventory_exel, upload_inventory_csv
 from clientApi.views import CustomAuthToken, get_all_varients_api,get_products_info
 from inventory.views import add_doc_stock_enter_ppn, add_doc_stock_enter_ppn_entry, create_enter_doc, enter_doc_edit,delete_doc_stock_enter_ppn_entry, doc_stock_detail_api, doc_stock_list_api, get_all_inventory_api, get_all_warehouses_api,enter_doc_insert_inventory, enter_doc_remove_product, get_doc_stock_enter_ppn_entries, inventory_edit_entry, inventory_get_entry_history, inventory_manual_update_entry, search_ppn, search_warehouses, show_inventory_stock,get_product_inventory,doc_stock_list
@@ -81,6 +82,7 @@ clientRouter.register(r'logos', LogoClientViewSet)
 #from rest_framework.authtoken.views import obtain_auth_token
 #from rest_framework_simplejwt.views import (TokenObtainPairView,TokenRefreshView,)
 urlpatterns = [
+     path('get-albums/', get_albums, name='get-albums'),
      path('get-main-categories/', get_main_categories, name='get-main-categories'),
      path('fix-ms-crm', fix_ms_crm, name='fix-ms-crm'),
      path('api-save-lead/', api_save_lead, name='api_save_lead'),

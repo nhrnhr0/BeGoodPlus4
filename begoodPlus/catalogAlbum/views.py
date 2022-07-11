@@ -1,5 +1,6 @@
 from django.shortcuts import redirect, render
 from django.urls.base import reverse
+from clientApi.serializers import AlbumClientApi
 
 # Create your views here.
 from catalogAlbum.models import CatalogAlbum, TopLevelCategory
@@ -15,6 +16,12 @@ def get_main_categories(request):
     qs = TopLevelCategory.objects.all()
     ser = TopLevelCategorySerializer(qs, many=True)
     data = ser.data
+    return JsonResponse(data, safe=False)
+@api_view(['GET'])
+def get_albums(request):
+    ids = request.GET.get('ids').split(',')
+    albums = CatalogAlbum.objects.filter(id__in=ids)
+    data = AlbumClientApi(albums, many=True).data
     return JsonResponse(data, safe=False)
 
 class CatalogAlbumViewSet(viewsets.ModelViewSet):
