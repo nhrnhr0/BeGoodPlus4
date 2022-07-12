@@ -113,6 +113,7 @@ class CatalogImage(models.Model):
     class Meta():
         verbose_name = _('Catalog image')
         verbose_name_plural = _('Catalog images')
+        ordering = ('-date_created',)
         #ordering = ['throughimage__image_order'] 
         
     def get_cloundinary_url(self):

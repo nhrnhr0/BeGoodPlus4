@@ -27,7 +27,7 @@ from inventory.views import DocStockEnterViewSet, doc_stock_enter
 from msCrm.views import api_save_lead, fix_ms_crm, get_all_business_types_groups, mcrm_lead_register, get_all_business_types, get_all_interests, import_mscrm_from_exel, upload_mscrm_business_select_to_intrests_exel, get_all_mscrm_phone_contacts
 from core.views import api_logout, autocompleteClick, autocompleteModel, client_product_question, handler404, send_product_photo, set_csrf_token, svelte_cart_form, svelte_cart_history, svelte_contact_form, test_celery_view, track_cart, verify_unique_field_by_field_excel
 
-from catalogImages.views import admin_api_get_product_cost_price, all_images_ids, catalogimage_upload_warehouse_excel, get_product_sizes_colors_martix, admin_remove_product_from_cart, admin_add_to_existing_cart
+from catalogImages.views import admin_api_get_product_cost_price, all_images_ids, catalogimage_upload_warehouse_excel, get_product_sizes_colors_martix, admin_remove_product_from_cart, admin_add_to_existing_cart, get_products_viewset
 from clientApi.views import ColorsClientViewSet, ImageClientViewSet, SizesClientViewSet, LogoClientViewSet, get_album_images
 from clientApi.views import AlbumClientViewSet
 from catalogImageDetail.views import SvelteCatalogImageDetailViewSet
@@ -82,6 +82,7 @@ clientRouter.register(r'logos', LogoClientViewSet)
 #from rest_framework.authtoken.views import obtain_auth_token
 #from rest_framework_simplejwt.views import (TokenObtainPairView,TokenRefreshView,)
 urlpatterns = [
+     path('api/v1/products', get_products_viewset.as_view({'get': 'list'}), name='get_products_viewset'),
      path('get-albums/', get_albums, name='get-albums'),
      path('get-main-categories/', get_main_categories, name='get-main-categories'),
      path('fix-ms-crm', fix_ms_crm, name='fix-ms-crm'),

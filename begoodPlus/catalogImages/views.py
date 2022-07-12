@@ -1,6 +1,7 @@
 from django.http.response import JsonResponse
 from django.shortcuts import redirect, render
 from catalogAlbum.models import CatalogAlbum
+from clientApi.serializers import ImageClientApi
 
 from core.models import SvelteCartProductEntery
 from inventory.models import PPN
@@ -10,7 +11,7 @@ from .models import CatalogImage
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework import status
-from .serializers import CatalogImageSerializer, CatalogImageApiSerializer
+from .serializers import CatalogImageIdSerializer, CatalogImageSerializer, CatalogImageApiSerializer
 from rest_framework.request import Request
 from catalogImageDetail.models import CatalogImageDetail
 from django.views.decorators.csrf import csrf_exempt
@@ -20,6 +21,34 @@ from django.contrib import messages
 
 import pandas as pd
 from provider.models import Provider
+from rest_framework.pagination import PageNumberPagination
+from django.db.models import Q
+class StandardResultsSetPagination(PageNumberPagination):
+    page_size = 30
+    page_size_query_param = 'page_size'
+    max_page_size = 1000
+
+class get_products_viewset(viewsets.ModelViewSet):
+    queryset = CatalogImage.objects.all()
+    serializer_class = ImageClientApi
+    pagination_class = StandardResultsSetPagination
+    def get_queryset(self):
+        top_level_category = self.request.GET.get('top_level_id')
+        albums = self.request.GET.get('album_ids', '')
+        if albums == 'all':
+            albums = None
+        else:
+            albums = albums.split('-')#.remove('')
+            try:
+                albums.remove('')
+            except:
+                pass
+        if albums:
+            queryset = CatalogImage.objects.filter(Q(albums__id__in=albums) & Q(albums__topLevelCategory=top_level_category))# 
+        else:
+            queryset = CatalogImage.objects.filter(Q(albums__topLevelCategory=top_level_category))# 
+        #queryset = CatalogImage.objects.all()
+        return queryset
 
 def catalogimage_upload_warehouse_excel(request):
     if request.method == "GET":
