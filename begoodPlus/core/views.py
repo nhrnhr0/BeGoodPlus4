@@ -230,7 +230,7 @@ def svelte_cart_form(request):
         email = body['email'] or ''
         phone = body['phone'] or ''
         business_name = body['business_name'] or ''
-        uuid = body['uuid'] or ''
+        user_uuid = body['uuid'] or ''
         message = body['message'] or ''
         order_type = body['order_type'] or ''
         products = body['products'] or ''
@@ -252,7 +252,13 @@ def svelte_cart_form(request):
                 agent = request.user
             else:
                 user_id = request.user
-        db_cart = SvelteCartModal.objects.create(user=user_id, device=device, uid=uuid, businessName=business_name,
+        # check if uuid is valid
+        
+        try:
+            user_uuid = uuid.UUID(user_uuid)
+        except ValueError:
+            user_uuid = uuid.uuid4()
+        db_cart = SvelteCartModal.objects.create(user=user_id, device=device, uid=user_uuid, businessName=business_name,
                                                  name=name, phone=phone, email=email, message=message, agent=agent, order_type=order_type)
         # data.products.set(products)
         db_cart.productsRaw = raw_cart
@@ -267,8 +273,11 @@ def svelte_cart_form(request):
                 unitPrice = p.get('price')
             else:
                 try:
-                    unitPrice = CatalogImage.objects.get(id=pid).client_price
-                except:
+                    user_id = request.user.id
+                    cimage = CatalogImage.objects.get(id=pid)
+                    price = cimage.get_user_price(user_id)
+                    unitPrice = price#cimage.client_price
+                except CatalogImage.DoesNotExist:
                     unitPrice = 0
             print_desition = p.get('print', False)
             embro = p.get('embro', False)

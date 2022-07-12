@@ -4667,7 +4667,7 @@ var campaineditor = (function () {
     	return child_ctx;
     }
 
-    // (98:0) {#if object_id}
+    // (114:0) {#if object_id}
     function create_if_block(ctx) {
     	let main;
     	let table;
@@ -4683,18 +4683,20 @@ var campaineditor = (function () {
     	let t7;
     	let th4;
     	let t9;
+    	let th5;
+    	let t11;
     	let tbody;
-    	let t10;
+    	let t12;
     	let tr1;
     	let td0;
-    	let t11;
+    	let t13;
     	let td1;
     	let form;
     	let autocomplete;
     	let updating_value;
-    	let t12;
+    	let t14;
     	let td2;
-    	let t13;
+    	let t15;
     	let current;
     	let if_block0 = /*data*/ ctx[2] && create_if_block_3(ctx);
 
@@ -4759,48 +4761,53 @@ var campaineditor = (function () {
     			th3.textContent = "מחיר עלות (לפני מע\"מ)";
     			t7 = space();
     			th4 = element("th");
-    			th4.textContent = "מחיר מוצג ללקוח";
+    			th4.textContent = "מחיר באתר כרגע";
     			t9 = space();
+    			th5 = element("th");
+    			th5.textContent = "מחיר מוצג ללקוח בקמפיין";
+    			t11 = space();
     			tbody = element("tbody");
     			if (if_block0) if_block0.c();
-    			t10 = space();
+    			t12 = space();
     			tr1 = element("tr");
     			td0 = element("td");
-    			t11 = space();
+    			t13 = space();
     			td1 = element("td");
     			form = element("form");
     			create_component(autocomplete.$$.fragment);
-    			t12 = space();
+    			t14 = space();
     			td2 = element("td");
-    			t13 = space();
+    			t15 = space();
     			if (if_block1) if_block1.c();
     			attr_dev(th0, "class", "svelte-6mk2rj");
-    			add_location(th0, file, 108, 4, 2908);
+    			add_location(th0, file, 124, 4, 3324);
     			attr_dev(th1, "class", "svelte-6mk2rj");
-    			add_location(th1, file, 109, 4, 2929);
+    			add_location(th1, file, 125, 4, 3345);
     			attr_dev(th2, "class", "svelte-6mk2rj");
-    			add_location(th2, file, 110, 4, 2947);
+    			add_location(th2, file, 126, 4, 3363);
     			attr_dev(th3, "class", "svelte-6mk2rj");
-    			add_location(th3, file, 111, 4, 2967);
+    			add_location(th3, file, 127, 4, 3383);
     			attr_dev(th4, "class", "svelte-6mk2rj");
-    			add_location(th4, file, 112, 4, 3003);
-    			add_location(tr0, file, 107, 3, 2898);
-    			add_location(thead, file, 106, 2, 2886);
+    			add_location(th4, file, 128, 4, 3419);
+    			attr_dev(th5, "class", "svelte-6mk2rj");
+    			add_location(th5, file, 129, 4, 3448);
+    			add_location(tr0, file, 123, 3, 3314);
+    			add_location(thead, file, 122, 2, 3302);
     			attr_dev(td0, "class", "svelte-6mk2rj");
-    			add_location(td0, file, 207, 4, 5595);
+    			add_location(td0, file, 227, 4, 6100);
     			attr_dev(form, "action", "");
-    			add_location(form, file, 209, 5, 5633);
+    			add_location(form, file, 229, 5, 6138);
     			attr_dev(td1, "colspan", "1");
     			attr_dev(td1, "class", "svelte-6mk2rj");
-    			add_location(td1, file, 208, 4, 5610);
+    			add_location(td1, file, 228, 4, 6115);
     			attr_dev(td2, "class", "svelte-6mk2rj");
-    			add_location(td2, file, 222, 4, 6411);
-    			add_location(tr1, file, 206, 3, 5585);
-    			add_location(tbody, file, 115, 2, 3053);
+    			add_location(td2, file, 242, 4, 6916);
+    			add_location(tr1, file, 226, 3, 6090);
+    			add_location(tbody, file, 132, 2, 3506);
     			attr_dev(table, "class", "main-table svelte-6mk2rj");
-    			add_location(table, file, 105, 1, 2856);
+    			add_location(table, file, 121, 1, 3272);
     			attr_dev(main, "class", "svelte-6mk2rj");
-    			add_location(main, file, 98, 0, 2754);
+    			add_location(main, file, 114, 0, 3170);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, main, anchor);
@@ -4816,19 +4823,21 @@ var campaineditor = (function () {
     			append_dev(tr0, th3);
     			append_dev(tr0, t7);
     			append_dev(tr0, th4);
-    			append_dev(table, t9);
+    			append_dev(tr0, t9);
+    			append_dev(tr0, th5);
+    			append_dev(table, t11);
     			append_dev(table, tbody);
     			if (if_block0) if_block0.m(tbody, null);
-    			append_dev(tbody, t10);
+    			append_dev(tbody, t12);
     			append_dev(tbody, tr1);
     			append_dev(tr1, td0);
-    			append_dev(tr1, t11);
+    			append_dev(tr1, t13);
     			append_dev(tr1, td1);
     			append_dev(td1, form);
     			mount_component(autocomplete, form, null);
-    			append_dev(tr1, t12);
+    			append_dev(tr1, t14);
     			append_dev(tr1, td2);
-    			append_dev(main, t13);
+    			append_dev(main, t15);
     			if (if_block1) if_block1.m(main, null);
     			current = true;
     		},
@@ -4839,7 +4848,7 @@ var campaineditor = (function () {
     				} else {
     					if_block0 = create_if_block_3(ctx);
     					if_block0.c();
-    					if_block0.m(tbody, t10);
+    					if_block0.m(tbody, t12);
     				}
     			} else if (if_block0) {
     				if_block0.d(1);
@@ -4906,14 +4915,14 @@ var campaineditor = (function () {
     		block,
     		id: create_if_block.name,
     		type: "if",
-    		source: "(98:0) {#if object_id}",
+    		source: "(114:0) {#if object_id}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (117:3) {#if data}
+    // (134:3) {#if data}
     function create_if_block_3(ctx) {
     	let each_1_anchor;
     	let each_value = /*data*/ ctx[2];
@@ -4974,14 +4983,14 @@ var campaineditor = (function () {
     		block,
     		id: create_if_block_3.name,
     		type: "if",
-    		source: "(117:3) {#if data}",
+    		source: "(134:3) {#if data}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (118:3) {#each data as product, j}
+    // (135:3) {#each data as product, j}
     function create_each_block(ctx) {
     	let tr;
     	let td0;
@@ -5005,12 +5014,17 @@ var campaineditor = (function () {
     	let t7;
     	let t8;
     	let td4;
-    	let input1;
+    	let t9_value = /*product*/ ctx[18].client_price + "";
     	let t9;
-    	let t10_value = ((/*product*/ ctx[18].newPrice / /*product*/ ctx[18].cost_price - 1) * 100).toFixed(2) + "";
     	let t10;
     	let t11;
+    	let td5;
+    	let input1;
     	let t12;
+    	let t13_value = ((/*product*/ ctx[18].newPrice / /*product*/ ctx[18].cost_price - 1) * 100).toFixed(2) + "";
+    	let t13;
+    	let t14;
+    	let t15;
     	let mounted;
     	let dispose;
 
@@ -5047,33 +5061,39 @@ var campaineditor = (function () {
     			t7 = text(" ₪");
     			t8 = space();
     			td4 = element("td");
+    			t9 = text(t9_value);
+    			t10 = text(" ₪");
+    			t11 = space();
+    			td5 = element("td");
     			input1 = element("input");
-    			t9 = space();
-    			t10 = text(t10_value);
-    			t11 = text(" %");
     			t12 = space();
-    			add_location(button, file, 120, 5, 3132);
+    			t13 = text(t13_value);
+    			t14 = text(" %");
+    			t15 = space();
+    			add_location(button, file, 137, 5, 3585);
     			attr_dev(td0, "class", "svelte-6mk2rj");
-    			add_location(td0, file, 119, 4, 3121);
+    			add_location(td0, file, 136, 4, 3574);
     			attr_dev(input0, "type", "number");
-    			add_location(input0, file, 130, 5, 3372);
+    			add_location(input0, file, 147, 5, 3825);
     			attr_dev(td1, "class", "svelte-6mk2rj");
-    			add_location(td1, file, 129, 4, 3361);
+    			add_location(td1, file, 146, 4, 3814);
     			attr_dev(img, "width", "50px");
     			attr_dev(img, "height", "50px");
     			if (!src_url_equal(img.src, img_src_value = "" + (CLOUDINARY_BASE_URL + /*product*/ ctx[18].cimg))) attr_dev(img, "src", img_src_value);
     			attr_dev(img, "alt", img_alt_value = /*product*/ ctx[18].title);
-    			add_location(img, file, 133, 5, 3449);
-    			add_location(span, file, 134, 5, 3552);
+    			add_location(img, file, 150, 5, 3902);
+    			add_location(span, file, 151, 5, 4005);
     			attr_dev(td2, "class", "svelte-6mk2rj");
-    			add_location(td2, file, 132, 4, 3438);
+    			add_location(td2, file, 149, 4, 3891);
     			attr_dev(td3, "class", "svelte-6mk2rj");
-    			add_location(td3, file, 142, 4, 3708);
-    			attr_dev(input1, "type", "number");
-    			add_location(input1, file, 146, 5, 3769);
+    			add_location(td3, file, 159, 4, 4161);
     			attr_dev(td4, "class", "svelte-6mk2rj");
-    			add_location(td4, file, 145, 4, 3758);
-    			add_location(tr, file, 118, 3, 3111);
+    			add_location(td4, file, 162, 4, 4211);
+    			attr_dev(input1, "type", "number");
+    			add_location(input1, file, 166, 5, 4274);
+    			attr_dev(td5, "class", "svelte-6mk2rj");
+    			add_location(td5, file, 165, 4, 4263);
+    			add_location(tr, file, 135, 3, 3564);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, tr, anchor);
@@ -5095,12 +5115,16 @@ var campaineditor = (function () {
     			append_dev(td3, t7);
     			append_dev(tr, t8);
     			append_dev(tr, td4);
-    			append_dev(td4, input1);
-    			set_input_value(input1, /*product*/ ctx[18].newPrice);
     			append_dev(td4, t9);
     			append_dev(td4, t10);
-    			append_dev(td4, t11);
-    			append_dev(tr, t12);
+    			append_dev(tr, t11);
+    			append_dev(tr, td5);
+    			append_dev(td5, input1);
+    			set_input_value(input1, /*product*/ ctx[18].newPrice);
+    			append_dev(td5, t12);
+    			append_dev(td5, t13);
+    			append_dev(td5, t14);
+    			append_dev(tr, t15);
 
     			if (!mounted) {
     				dispose = [
@@ -5129,12 +5153,13 @@ var campaineditor = (function () {
 
     			if (dirty & /*data*/ 4 && t4_value !== (t4_value = /*product*/ ctx[18].title + "")) set_data_dev(t4, t4_value);
     			if (dirty & /*data*/ 4 && t6_value !== (t6_value = /*product*/ ctx[18].cost_price + "")) set_data_dev(t6, t6_value);
+    			if (dirty & /*data*/ 4 && t9_value !== (t9_value = /*product*/ ctx[18].client_price + "")) set_data_dev(t9, t9_value);
 
     			if (dirty & /*data*/ 4 && to_number(input1.value) !== /*product*/ ctx[18].newPrice) {
     				set_input_value(input1, /*product*/ ctx[18].newPrice);
     			}
 
-    			if (dirty & /*data*/ 4 && t10_value !== (t10_value = ((/*product*/ ctx[18].newPrice / /*product*/ ctx[18].cost_price - 1) * 100).toFixed(2) + "")) set_data_dev(t10, t10_value);
+    			if (dirty & /*data*/ 4 && t13_value !== (t13_value = ((/*product*/ ctx[18].newPrice / /*product*/ ctx[18].cost_price - 1) * 100).toFixed(2) + "")) set_data_dev(t13, t13_value);
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(tr);
@@ -5147,14 +5172,14 @@ var campaineditor = (function () {
     		block,
     		id: create_each_block.name,
     		type: "each",
-    		source: "(118:3) {#each data as product, j}",
+    		source: "(135:3) {#each data as product, j}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (212:7) 
+    // (232:7) 
     function create_item_slot(ctx) {
     	let div2;
     	let div1;
@@ -5177,14 +5202,14 @@ var campaineditor = (function () {
     			attr_dev(img, "alt", img_alt_value = /*item*/ ctx[17].title);
     			set_style(img, "height", "25px");
     			if (!src_url_equal(img.src, img_src_value = "" + (CLOUDINARY_BASE_URL + "f_auto,w_auto/" + /*item*/ ctx[17].cimage))) attr_dev(img, "src", img_src_value);
-    			add_location(img, file, 214, 10, 6182);
+    			add_location(img, file, 234, 10, 6687);
     			html_tag.a = null;
     			attr_dev(div0, "class", "inner");
-    			add_location(div0, file, 213, 9, 6151);
+    			add_location(div0, file, 233, 9, 6656);
     			attr_dev(div1, "class", "search-item");
-    			add_location(div1, file, 212, 8, 6115);
+    			add_location(div1, file, 232, 8, 6620);
     			attr_dev(div2, "slot", "item");
-    			add_location(div2, file, 211, 7, 6054);
+    			add_location(div2, file, 231, 7, 6559);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div2, anchor);
@@ -5214,14 +5239,14 @@ var campaineditor = (function () {
     		block,
     		id: create_item_slot.name,
     		type: "slot",
-    		source: "(212:7) ",
+    		source: "(232:7) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (230:1) {#if need_update}
+    // (250:1) {#if need_update}
     function create_if_block_1(ctx) {
     	let button;
     	let t;
@@ -5237,7 +5262,7 @@ var campaineditor = (function () {
     			if (if_block) if_block.c();
     			t = text("\r\n\t\t\t\tעדכן מידע לשרת");
     			attr_dev(button, "class", "float-btn svelte-6mk2rj");
-    			add_location(button, file, 230, 2, 6489);
+    			add_location(button, file, 250, 2, 6994);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, button, anchor);
@@ -5302,14 +5327,14 @@ var campaineditor = (function () {
     		block,
     		id: create_if_block_1.name,
     		type: "if",
-    		source: "(230:1) {#if need_update}",
+    		source: "(250:1) {#if need_update}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (232:3) {#if updateing}
+    // (252:3) {#if updateing}
     function create_if_block_2(ctx) {
     	let jumper;
     	let current;
@@ -5350,7 +5375,7 @@ var campaineditor = (function () {
     		block,
     		id: create_if_block_2.name,
     		type: "if",
-    		source: "(232:3) {#if updateing}",
+    		source: "(252:3) {#if updateing}",
     		ctx
     	});
 
@@ -5441,6 +5466,23 @@ var campaineditor = (function () {
     		$$invalidate(2, data = JSON.parse(JSON.stringify(resp)));
     		server_data = JSON.parse(JSON.stringify(resp));
     		setInterval(check_server_updates, 500);
+
+    		// add event listener to the window when 
+    		// <input type="submit" value="שמירה" class="default" name="_save">
+    		// is clicked
+    		window.addEventListener('submit', async e => {
+    			debugger;
+
+    			if (need_update) {
+    				try {
+    					await update_data_to_server();
+    				} catch(e) {
+    					console.log(e);
+    				}
+    			}
+
+    			console.log('submit, after update_data_to_server');
+    		});
     	});
 
     	function check_server_updates() {
@@ -5474,7 +5516,7 @@ var campaineditor = (function () {
 
     		console.log('response:', response);
 
-    		response.then(resp => {
+    		return response.then(resp => {
     			console.log('resp:', resp);
     			server_data = JSON.parse(JSON.stringify(resp));
     			$$invalidate(2, data = JSON.parse(JSON.stringify(resp)));
@@ -5499,6 +5541,7 @@ var campaineditor = (function () {
     					catalogImage: item.id,
     					priceTable: [],
     					cost_price: item.cost_price,
+    					client_price: item.client_price,
     					newPrice: item.cost_price * 2
     				};
 

@@ -1,6 +1,5 @@
 
 from django.db import models
-from core.models import SvelteCartModal
 from catalogAlbum.models import ThroughImage
 from catalogImages.models import CatalogImage
 from client.models import Client
@@ -143,5 +142,5 @@ class CartCampain(models.Model):
         'End showing date'), default=datetime.now, blank=False)
     users = models.ManyToManyField(
         to=Client, verbose_name=_('users'), blank=True)
-    cart = models.ForeignKey(SvelteCartModal, verbose_name=_(
+    cart = models.ForeignKey(to='core.SvelteCartModal', verbose_name=_(
         'cart'), on_delete=models.CASCADE, null=True, blank=True, related_name='campain_cart')

@@ -51,11 +51,11 @@ class AdminProductCampainSerilizer(ModelSerializer):
     cimg = serializers.CharField(source='catalogImage.cimage')
     title = serializers.CharField(source='catalogImage.title')
     cost_price = serializers.CharField(source='catalogImage.cost_price')
-
+    client_price = serializers.CharField(source='catalogImage.client_price')
     class Meta:
         model = CampainProduct
         fields = ('id', 'order', 'cimg', 'title', 'catalogImage',
-                  'monthCampain', 'newPrice', 'cost_price')
+                  'monthCampain', 'newPrice', 'cost_price', 'client_price',)
 
 
 class AdminCartCampainSerializer(ModelSerializer):

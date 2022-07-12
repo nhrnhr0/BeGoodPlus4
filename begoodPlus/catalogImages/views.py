@@ -165,7 +165,8 @@ def admin_api_get_product_cost_price(request, product_id):
         ret = {}
         if request.method == "GET":
             catalogImage = CatalogImage.objects.get(pk=product_id)
-            ret = {'cost_price': catalogImage.cost_price}
+            ret = {'cost_price': catalogImage.cost_price,
+                   'client_price': catalogImage.client_price}
         return JsonResponse(ret)
     
 def all_images_ids(request):
