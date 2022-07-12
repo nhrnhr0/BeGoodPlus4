@@ -1,6 +1,5 @@
 
 from django.db import models
-from core.models import SvelteCartModal
 from catalogAlbum.models import ThroughImage
 from catalogImages.models import CatalogImage
 from client.models import Client
@@ -52,11 +51,12 @@ class PriceTable(models.Model):
 
 class CampainProduct(models.Model):
     catalogImage = models.ForeignKey(verbose_name=_(
-        'product'), to=CatalogImage, on_delete=models.SET_NULL, null=True, blank=True)
+        'product'), to=CatalogImage, on_delete=models.CASCADE, null=True, blank=True)
     monthCampain = models.ForeignKey(verbose_name=_(
-        'month campain'), to='MonthCampain', on_delete=models.SET_NULL, null=True, blank=True)
-    priceTable = models.ManyToManyField(
-        verbose_name=_('price table'), to=PriceTable, blank=True)
+        'month campain'), to='MonthCampain', on_delete=models.CASCADE, null=True, blank=True)
+    # priceTable = models.ManyToManyField(
+    #     verbose_name=_('price table'), to=PriceTable, blank=True)
+    newPrice = models.FloatField(verbose_name=_('new price'), default=0)
     order = models.PositiveIntegerField(
         verbose_name=_('order'), default=0, db_index=True)
     #my_order = models.PositiveIntegerField(default=0, blank=False, null=False)
@@ -142,5 +142,5 @@ class CartCampain(models.Model):
         'End showing date'), default=datetime.now, blank=False)
     users = models.ManyToManyField(
         to=Client, verbose_name=_('users'), blank=True)
-    cart = models.ForeignKey(SvelteCartModal, verbose_name=_(
+    cart = models.ForeignKey(to='core.SvelteCartModal', verbose_name=_(
         'cart'), on_delete=models.CASCADE, null=True, blank=True, related_name='campain_cart')
