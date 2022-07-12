@@ -79,9 +79,12 @@ def set_csrf_token(request, factory_id=None):
     This will be `/api/set-csrf-cookie/` on `urls.py`
     """
     if factory_id:
-        uid = str(factory_id)
+        try:
+            uid = str(uuid.uuid4(factory_id))
+        except:
+            uid = str(uuid.uuid4())
     else:
-        uid = str(uuid.uuid4().hex)
+        uid = str(uuid.uuid4())
     return JsonResponse({"details": "CSRF cookie set",
                          'uid': uid,
                          'whoAmI': get_user_info(request.user), }, safe=False)
