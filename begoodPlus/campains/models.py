@@ -52,11 +52,12 @@ class PriceTable(models.Model):
 
 class CampainProduct(models.Model):
     catalogImage = models.ForeignKey(verbose_name=_(
-        'product'), to=CatalogImage, on_delete=models.SET_NULL, null=True, blank=True)
+        'product'), to=CatalogImage, on_delete=models.CASCADE, null=True, blank=True)
     monthCampain = models.ForeignKey(verbose_name=_(
-        'month campain'), to='MonthCampain', on_delete=models.SET_NULL, null=True, blank=True)
-    priceTable = models.ManyToManyField(
-        verbose_name=_('price table'), to=PriceTable, blank=True)
+        'month campain'), to='MonthCampain', on_delete=models.CASCADE, null=True, blank=True)
+    # priceTable = models.ManyToManyField(
+    #     verbose_name=_('price table'), to=PriceTable, blank=True)
+    newPrice = models.FloatField(verbose_name=_('new price'), default=0)
     order = models.PositiveIntegerField(
         verbose_name=_('order'), default=0, db_index=True)
     #my_order = models.PositiveIntegerField(default=0, blank=False, null=False)

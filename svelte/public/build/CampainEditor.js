@@ -850,7 +850,7 @@ var campaineditor = (function () {
     	: /*listItem*/ ctx[108].label
     });
 
-    function get_each_context_1$1(ctx, list, i) {
+    function get_each_context_1(ctx, list, i) {
     	const child_ctx = ctx.slice();
     	child_ctx[111] = list[i];
     	return child_ctx;
@@ -1041,7 +1041,7 @@ var campaineditor = (function () {
     	let each_blocks = [];
 
     	for (let i = 0; i < each_value_1.length; i += 1) {
-    		each_blocks[i] = create_each_block_1$1(get_each_context_1$1(ctx, each_value_1, i));
+    		each_blocks[i] = create_each_block_1(get_each_context_1(ctx, each_value_1, i));
     	}
 
     	const out = i => transition_out(each_blocks[i], 1, 1, () => {
@@ -1071,13 +1071,13 @@ var campaineditor = (function () {
     				let i;
 
     				for (i = 0; i < each_value_1.length; i += 1) {
-    					const child_ctx = get_each_context_1$1(ctx, each_value_1, i);
+    					const child_ctx = get_each_context_1(ctx, each_value_1, i);
 
     					if (each_blocks[i]) {
     						each_blocks[i].p(child_ctx, dirty);
     						transition_in(each_blocks[i], 1);
     					} else {
-    						each_blocks[i] = create_each_block_1$1(child_ctx);
+    						each_blocks[i] = create_each_block_1(child_ctx);
     						each_blocks[i].c();
     						transition_in(each_blocks[i], 1);
     						each_blocks[i].m(each_1_anchor.parentNode, each_1_anchor);
@@ -1202,7 +1202,7 @@ var campaineditor = (function () {
     }
 
     // (1154:6) {#each selectedItem as tagItem}
-    function create_each_block_1$1(ctx) {
+    function create_each_block_1(ctx) {
     	let current;
     	const tag_slot_template = /*#slots*/ ctx[76].tag;
     	const tag_slot = create_slot(tag_slot_template, ctx, /*$$scope*/ ctx[75], get_tag_slot_context);
@@ -1255,7 +1255,7 @@ var campaineditor = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_each_block_1$1.name,
+    		id: create_each_block_1.name,
     		type: "each",
     		source: "(1154:6) {#each selectedItem as tagItem}",
     		ctx
@@ -4661,21 +4661,13 @@ var campaineditor = (function () {
 
     function get_each_context(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[22] = list[i];
-    	child_ctx[23] = list;
-    	child_ctx[24] = i;
+    	child_ctx[18] = list[i];
+    	child_ctx[19] = list;
+    	child_ctx[20] = i;
     	return child_ctx;
     }
 
-    function get_each_context_1(ctx, list, i) {
-    	const child_ctx = ctx.slice();
-    	child_ctx[25] = list[i];
-    	child_ctx[26] = list;
-    	child_ctx[27] = i;
-    	return child_ctx;
-    }
-
-    // (97:0) {#if object_id}
+    // (98:0) {#if object_id}
     function create_if_block(ctx) {
     	let main;
     	let table;
@@ -4707,7 +4699,7 @@ var campaineditor = (function () {
     	let if_block0 = /*data*/ ctx[2] && create_if_block_3(ctx);
 
     	function autocomplete_value_binding(value) {
-    		/*autocomplete_value_binding*/ ctx[15](value);
+    		/*autocomplete_value_binding*/ ctx[11](value);
     	}
 
     	let autocomplete_props = {
@@ -4728,8 +4720,8 @@ var campaineditor = (function () {
     		$$slots: {
     			item: [
     				create_item_slot,
-    				({ label, item }) => ({ 20: label, 21: item }),
-    				({ label, item }) => (label ? 1048576 : 0) | (item ? 2097152 : 0)
+    				({ label, item }) => ({ 16: label, 17: item }),
+    				({ label, item }) => (label ? 65536 : 0) | (item ? 131072 : 0)
     			]
     		},
     		$$scope: { ctx }
@@ -4745,7 +4737,7 @@ var campaineditor = (function () {
     		});
 
     	binding_callbacks.push(() => bind(autocomplete, 'value', autocomplete_value_binding));
-    	autocomplete.$on("focus", /*focus_handler*/ ctx[16]);
+    	autocomplete.$on("focus", /*focus_handler*/ ctx[12]);
     	let if_block1 = /*need_update*/ ctx[1] && create_if_block_1(ctx);
 
     	const block = {
@@ -4767,7 +4759,7 @@ var campaineditor = (function () {
     			th3.textContent = "מחיר עלות (לפני מע\"מ)";
     			t7 = space();
     			th4 = element("th");
-    			th4.textContent = "מחירים";
+    			th4.textContent = "מחיר מוצג ללקוח";
     			t9 = space();
     			tbody = element("tbody");
     			if (if_block0) if_block0.c();
@@ -4783,32 +4775,32 @@ var campaineditor = (function () {
     			t13 = space();
     			if (if_block1) if_block1.c();
     			attr_dev(th0, "class", "svelte-6mk2rj");
-    			add_location(th0, file, 107, 4, 2873);
+    			add_location(th0, file, 108, 4, 2908);
     			attr_dev(th1, "class", "svelte-6mk2rj");
-    			add_location(th1, file, 108, 4, 2894);
+    			add_location(th1, file, 109, 4, 2929);
     			attr_dev(th2, "class", "svelte-6mk2rj");
-    			add_location(th2, file, 109, 4, 2912);
+    			add_location(th2, file, 110, 4, 2947);
     			attr_dev(th3, "class", "svelte-6mk2rj");
-    			add_location(th3, file, 110, 4, 2932);
+    			add_location(th3, file, 111, 4, 2967);
     			attr_dev(th4, "class", "svelte-6mk2rj");
-    			add_location(th4, file, 111, 4, 2968);
-    			add_location(tr0, file, 106, 3, 2863);
-    			add_location(thead, file, 105, 2, 2851);
+    			add_location(th4, file, 112, 4, 3003);
+    			add_location(tr0, file, 107, 3, 2898);
+    			add_location(thead, file, 106, 2, 2886);
     			attr_dev(td0, "class", "svelte-6mk2rj");
-    			add_location(td0, file, 203, 4, 5405);
+    			add_location(td0, file, 207, 4, 5595);
     			attr_dev(form, "action", "");
-    			add_location(form, file, 205, 5, 5443);
+    			add_location(form, file, 209, 5, 5633);
     			attr_dev(td1, "colspan", "1");
     			attr_dev(td1, "class", "svelte-6mk2rj");
-    			add_location(td1, file, 204, 4, 5420);
+    			add_location(td1, file, 208, 4, 5610);
     			attr_dev(td2, "class", "svelte-6mk2rj");
-    			add_location(td2, file, 218, 4, 6221);
-    			add_location(tr1, file, 202, 3, 5395);
-    			add_location(tbody, file, 114, 2, 3009);
+    			add_location(td2, file, 222, 4, 6411);
+    			add_location(tr1, file, 206, 3, 5585);
+    			add_location(tbody, file, 115, 2, 3053);
     			attr_dev(table, "class", "main-table svelte-6mk2rj");
-    			add_location(table, file, 104, 1, 2821);
+    			add_location(table, file, 105, 1, 2856);
     			attr_dev(main, "class", "svelte-6mk2rj");
-    			add_location(main, file, 97, 0, 2719);
+    			add_location(main, file, 98, 0, 2754);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, main, anchor);
@@ -4856,7 +4848,7 @@ var campaineditor = (function () {
 
     			const autocomplete_changes = {};
 
-    			if (dirty & /*$$scope, label, item*/ 271581184) {
+    			if (dirty & /*$$scope, label, item*/ 2293760) {
     				autocomplete_changes.$$scope = { dirty, ctx };
     			}
 
@@ -4914,14 +4906,14 @@ var campaineditor = (function () {
     		block,
     		id: create_if_block.name,
     		type: "if",
-    		source: "(97:0) {#if object_id}",
+    		source: "(98:0) {#if object_id}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (116:3) {#if data}
+    // (117:3) {#if data}
     function create_if_block_3(ctx) {
     	let each_1_anchor;
     	let each_value = /*data*/ ctx[2];
@@ -4982,187 +4974,21 @@ var campaineditor = (function () {
     		block,
     		id: create_if_block_3.name,
     		type: "if",
-    		source: "(116:3) {#if data}",
+    		source: "(117:3) {#if data}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (156:7) {#each product.priceTable as price, i }
-    function create_each_block_1(ctx) {
+    // (118:3) {#each data as product, j}
+    function create_each_block(ctx) {
     	let tr;
     	let td0;
-    	let input0;
-    	let t0;
-    	let td1;
-    	let input1;
-    	let t1;
-    	let div0;
-    	let t2_value = ((/*price*/ ctx[25].cach_price / /*product*/ ctx[22].cost_price - 1) * 100).toFixed(2) + "";
-    	let t2;
-    	let t3;
-    	let t4;
-    	let td2;
-    	let input2;
-    	let t5;
-    	let div1;
-    	let t6_value = ((/*price*/ ctx[25].credit_price / 1.17 / /*price*/ ctx[25].cach_price - 1) * 100).toFixed(2) + "";
-    	let t6;
-    	let t7;
-    	let t8;
-    	let td3;
     	let button;
-    	let mounted;
-    	let dispose;
-
-    	function input0_input_handler() {
-    		/*input0_input_handler*/ ctx[10].call(input0, /*each_value_1*/ ctx[26], /*i*/ ctx[27]);
-    	}
-
-    	function input1_input_handler() {
-    		/*input1_input_handler*/ ctx[11].call(input1, /*each_value_1*/ ctx[26], /*i*/ ctx[27]);
-    	}
-
-    	function input2_input_handler() {
-    		/*input2_input_handler*/ ctx[12].call(input2, /*each_value_1*/ ctx[26], /*i*/ ctx[27]);
-    	}
-
-    	function click_handler_1(...args) {
-    		return /*click_handler_1*/ ctx[13](/*product*/ ctx[22], /*i*/ ctx[27], /*each_value*/ ctx[23], /*j*/ ctx[24], ...args);
-    	}
-
-    	const block = {
-    		c: function create() {
-    			tr = element("tr");
-    			td0 = element("td");
-    			input0 = element("input");
-    			t0 = space();
-    			td1 = element("td");
-    			input1 = element("input");
-    			t1 = space();
-    			div0 = element("div");
-    			t2 = text(t2_value);
-    			t3 = text(" %");
-    			t4 = space();
-    			td2 = element("td");
-    			input2 = element("input");
-    			t5 = space();
-    			div1 = element("div");
-    			t6 = text(t6_value);
-    			t7 = text(" %");
-    			t8 = space();
-    			td3 = element("td");
-    			button = element("button");
-    			button.textContent = "מחק";
-    			attr_dev(input0, "type", "number");
-    			attr_dev(input0, "name", "");
-    			attr_dev(input0, "id", "");
-    			add_location(input0, file, 159, 10, 4040);
-    			attr_dev(td0, "class", "svelte-6mk2rj");
-    			add_location(td0, file, 158, 9, 4024);
-    			attr_dev(input1, "type", "number");
-    			attr_dev(input1, "name", "");
-    			attr_dev(input1, "id", "");
-    			add_location(input1, file, 162, 10, 4144);
-    			attr_dev(div0, "class", "price-diff");
-    			add_location(div0, file, 163, 10, 4221);
-    			attr_dev(td1, "class", "svelte-6mk2rj");
-    			add_location(td1, file, 161, 9, 4128);
-    			attr_dev(input2, "type", "number");
-    			attr_dev(input2, "name", "");
-    			attr_dev(input2, "id", "");
-    			add_location(input2, file, 168, 10, 4385);
-    			attr_dev(div1, "class", "price-diff");
-    			add_location(div1, file, 169, 10, 4464);
-    			attr_dev(td2, "class", "svelte-6mk2rj");
-    			add_location(td2, file, 167, 9, 4369);
-    			add_location(button, file, 174, 10, 4635);
-    			attr_dev(td3, "class", "svelte-6mk2rj");
-    			add_location(td3, file, 173, 9, 4619);
-    			add_location(tr, file, 156, 8, 3998);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, tr, anchor);
-    			append_dev(tr, td0);
-    			append_dev(td0, input0);
-    			set_input_value(input0, /*price*/ ctx[25].amount);
-    			append_dev(tr, t0);
-    			append_dev(tr, td1);
-    			append_dev(td1, input1);
-    			set_input_value(input1, /*price*/ ctx[25].cach_price);
-    			append_dev(td1, t1);
-    			append_dev(td1, div0);
-    			append_dev(div0, t2);
-    			append_dev(div0, t3);
-    			append_dev(tr, t4);
-    			append_dev(tr, td2);
-    			append_dev(td2, input2);
-    			set_input_value(input2, /*price*/ ctx[25].credit_price);
-    			append_dev(td2, t5);
-    			append_dev(td2, div1);
-    			append_dev(div1, t6);
-    			append_dev(div1, t7);
-    			append_dev(tr, t8);
-    			append_dev(tr, td3);
-    			append_dev(td3, button);
-
-    			if (!mounted) {
-    				dispose = [
-    					listen_dev(input0, "input", input0_input_handler),
-    					listen_dev(input1, "input", input1_input_handler),
-    					listen_dev(input2, "input", input2_input_handler),
-    					listen_dev(button, "click", prevent_default(click_handler_1), false, true, false)
-    				];
-
-    				mounted = true;
-    			}
-    		},
-    		p: function update(new_ctx, dirty) {
-    			ctx = new_ctx;
-
-    			if (dirty & /*data*/ 4 && to_number(input0.value) !== /*price*/ ctx[25].amount) {
-    				set_input_value(input0, /*price*/ ctx[25].amount);
-    			}
-
-    			if (dirty & /*data*/ 4 && to_number(input1.value) !== /*price*/ ctx[25].cach_price) {
-    				set_input_value(input1, /*price*/ ctx[25].cach_price);
-    			}
-
-    			if (dirty & /*data*/ 4 && t2_value !== (t2_value = ((/*price*/ ctx[25].cach_price / /*product*/ ctx[22].cost_price - 1) * 100).toFixed(2) + "")) set_data_dev(t2, t2_value);
-
-    			if (dirty & /*data*/ 4 && to_number(input2.value) !== /*price*/ ctx[25].credit_price) {
-    				set_input_value(input2, /*price*/ ctx[25].credit_price);
-    			}
-
-    			if (dirty & /*data*/ 4 && t6_value !== (t6_value = ((/*price*/ ctx[25].credit_price / 1.17 / /*price*/ ctx[25].cach_price - 1) * 100).toFixed(2) + "")) set_data_dev(t6, t6_value);
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(tr);
-    			mounted = false;
-    			run_all(dispose);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_each_block_1.name,
-    		type: "each",
-    		source: "(156:7) {#each product.priceTable as price, i }",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (117:3) {#each data as product, j}
-    function create_each_block(ctx) {
-    	let tr2;
-    	let td0;
-    	let button0;
     	let t1;
     	let td1;
-    	let input;
+    	let input0;
     	let t2;
     	let td2;
     	let img;
@@ -5170,64 +4996,45 @@ var campaineditor = (function () {
     	let img_alt_value;
     	let t3;
     	let span;
-    	let t4_value = /*product*/ ctx[22].title + "";
+    	let t4_value = /*product*/ ctx[18].title + "";
     	let t4;
     	let t5;
     	let td3;
-    	let t6_value = /*product*/ ctx[22].cost_price + "";
+    	let t6_value = /*product*/ ctx[18].cost_price + "";
     	let t6;
     	let t7;
     	let t8;
-    	let td5;
-    	let table;
-    	let thead;
-    	let tr0;
-    	let th0;
-    	let t10;
-    	let th1;
-    	let t12;
-    	let th2;
-    	let t14;
-    	let th3;
-    	let t16;
-    	let tbody;
-    	let t17;
-    	let tr1;
     	let td4;
-    	let button1;
-    	let t19;
+    	let input1;
+    	let t9;
+    	let t10_value = ((/*product*/ ctx[18].newPrice / /*product*/ ctx[18].cost_price - 1) * 100).toFixed(2) + "";
+    	let t10;
+    	let t11;
+    	let t12;
     	let mounted;
     	let dispose;
 
     	function click_handler(...args) {
-    		return /*click_handler*/ ctx[8](/*j*/ ctx[24], ...args);
+    		return /*click_handler*/ ctx[8](/*j*/ ctx[20], ...args);
     	}
 
-    	function input_input_handler() {
-    		/*input_input_handler*/ ctx[9].call(input, /*each_value*/ ctx[23], /*j*/ ctx[24]);
+    	function input0_input_handler() {
+    		/*input0_input_handler*/ ctx[9].call(input0, /*each_value*/ ctx[19], /*j*/ ctx[20]);
     	}
 
-    	let each_value_1 = /*product*/ ctx[22].priceTable;
-    	validate_each_argument(each_value_1);
-    	let each_blocks = [];
-
-    	for (let i = 0; i < each_value_1.length; i += 1) {
-    		each_blocks[i] = create_each_block_1(get_each_context_1(ctx, each_value_1, i));
-    	}
-
-    	function click_handler_2() {
-    		return /*click_handler_2*/ ctx[14](/*product*/ ctx[22], /*each_value*/ ctx[23], /*j*/ ctx[24]);
+    	function input1_input_handler() {
+    		/*input1_input_handler*/ ctx[10].call(input1, /*each_value*/ ctx[19], /*j*/ ctx[20]);
     	}
 
     	const block = {
     		c: function create() {
-    			tr2 = element("tr");
+    			tr = element("tr");
     			td0 = element("td");
-    			button0 = element("button");
-    			button0.textContent = "מחק";
+    			button = element("button");
+    			button.textContent = "מחק";
     			t1 = space();
     			td1 = element("td");
-    			input = element("input");
+    			input0 = element("input");
     			t2 = space();
     			td2 = element("td");
     			img = element("img");
@@ -5239,120 +5046,67 @@ var campaineditor = (function () {
     			t6 = text(t6_value);
     			t7 = text(" ₪");
     			t8 = space();
-    			td5 = element("td");
-    			table = element("table");
-    			thead = element("thead");
-    			tr0 = element("tr");
-    			th0 = element("th");
-    			th0.textContent = "כמות";
-    			t10 = space();
-    			th1 = element("th");
-    			th1.textContent = "מחיר ליח' (לפני מע\"מ)";
-    			t12 = space();
-    			th2 = element("th");
-    			th2.textContent = "מחיר מומלץ לצרכן (כולל מע\"מ)";
-    			t14 = space();
-    			th3 = element("th");
-    			th3.textContent = "פעולות";
-    			t16 = space();
-    			tbody = element("tbody");
-
-    			for (let i = 0; i < each_blocks.length; i += 1) {
-    				each_blocks[i].c();
-    			}
-
-    			t17 = space();
-    			tr1 = element("tr");
     			td4 = element("td");
-    			button1 = element("button");
-    			button1.textContent = "הוסף מחיר";
-    			t19 = space();
-    			add_location(button0, file, 119, 5, 3088);
+    			input1 = element("input");
+    			t9 = space();
+    			t10 = text(t10_value);
+    			t11 = text(" %");
+    			t12 = space();
+    			add_location(button, file, 120, 5, 3132);
     			attr_dev(td0, "class", "svelte-6mk2rj");
-    			add_location(td0, file, 118, 4, 3077);
-    			attr_dev(input, "type", "number");
-    			add_location(input, file, 129, 5, 3328);
+    			add_location(td0, file, 119, 4, 3121);
+    			attr_dev(input0, "type", "number");
+    			add_location(input0, file, 130, 5, 3372);
     			attr_dev(td1, "class", "svelte-6mk2rj");
-    			add_location(td1, file, 128, 4, 3317);
+    			add_location(td1, file, 129, 4, 3361);
     			attr_dev(img, "width", "50px");
     			attr_dev(img, "height", "50px");
-    			if (!src_url_equal(img.src, img_src_value = "" + (CLOUDINARY_BASE_URL + /*product*/ ctx[22].cimg))) attr_dev(img, "src", img_src_value);
-    			attr_dev(img, "alt", img_alt_value = /*product*/ ctx[22].title);
-    			add_location(img, file, 132, 5, 3405);
-    			add_location(span, file, 133, 5, 3508);
+    			if (!src_url_equal(img.src, img_src_value = "" + (CLOUDINARY_BASE_URL + /*product*/ ctx[18].cimg))) attr_dev(img, "src", img_src_value);
+    			attr_dev(img, "alt", img_alt_value = /*product*/ ctx[18].title);
+    			add_location(img, file, 133, 5, 3449);
+    			add_location(span, file, 134, 5, 3552);
     			attr_dev(td2, "class", "svelte-6mk2rj");
-    			add_location(td2, file, 131, 4, 3394);
+    			add_location(td2, file, 132, 4, 3438);
     			attr_dev(td3, "class", "svelte-6mk2rj");
-    			add_location(td3, file, 141, 4, 3664);
-    			attr_dev(th0, "class", "svelte-6mk2rj");
-    			add_location(th0, file, 148, 8, 3770);
-    			attr_dev(th1, "class", "svelte-6mk2rj");
-    			add_location(th1, file, 149, 8, 3793);
-    			attr_dev(th2, "class", "svelte-6mk2rj");
-    			add_location(th2, file, 150, 8, 3833);
-    			attr_dev(th3, "class", "svelte-6mk2rj");
-    			add_location(th3, file, 151, 8, 3880);
-    			add_location(tr0, file, 147, 7, 3756);
-    			add_location(thead, file, 146, 6, 3740);
-    			add_location(button1, file, 187, 9, 5004);
+    			add_location(td3, file, 142, 4, 3708);
+    			attr_dev(input1, "type", "number");
+    			add_location(input1, file, 146, 5, 3769);
     			attr_dev(td4, "class", "svelte-6mk2rj");
-    			add_location(td4, file, 186, 8, 4989);
-    			add_location(tr1, file, 185, 7, 4975);
-    			add_location(tbody, file, 154, 6, 3933);
-    			attr_dev(table, "class", "svelte-6mk2rj");
-    			add_location(table, file, 145, 5, 3725);
-    			attr_dev(td5, "class", "svelte-6mk2rj");
-    			add_location(td5, file, 144, 4, 3714);
-    			add_location(tr2, file, 117, 3, 3067);
+    			add_location(td4, file, 145, 4, 3758);
+    			add_location(tr, file, 118, 3, 3111);
     		},
     		m: function mount(target, anchor) {
-    			insert_dev(target, tr2, anchor);
-    			append_dev(tr2, td0);
-    			append_dev(td0, button0);
-    			append_dev(tr2, t1);
-    			append_dev(tr2, td1);
-    			append_dev(td1, input);
-    			set_input_value(input, /*product*/ ctx[22].order);
-    			append_dev(tr2, t2);
-    			append_dev(tr2, td2);
+    			insert_dev(target, tr, anchor);
+    			append_dev(tr, td0);
+    			append_dev(td0, button);
+    			append_dev(tr, t1);
+    			append_dev(tr, td1);
+    			append_dev(td1, input0);
+    			set_input_value(input0, /*product*/ ctx[18].order);
+    			append_dev(tr, t2);
+    			append_dev(tr, td2);
     			append_dev(td2, img);
     			append_dev(td2, t3);
     			append_dev(td2, span);
     			append_dev(span, t4);
-    			append_dev(tr2, t5);
-    			append_dev(tr2, td3);
+    			append_dev(tr, t5);
+    			append_dev(tr, td3);
     			append_dev(td3, t6);
     			append_dev(td3, t7);
-    			append_dev(tr2, t8);
-    			append_dev(tr2, td5);
-    			append_dev(td5, table);
-    			append_dev(table, thead);
-    			append_dev(thead, tr0);
-    			append_dev(tr0, th0);
-    			append_dev(tr0, t10);
-    			append_dev(tr0, th1);
-    			append_dev(tr0, t12);
-    			append_dev(tr0, th2);
-    			append_dev(tr0, t14);
-    			append_dev(tr0, th3);
-    			append_dev(table, t16);
-    			append_dev(table, tbody);
-
-    			for (let i = 0; i < each_blocks.length; i += 1) {
-    				each_blocks[i].m(tbody, null);
-    			}
-
-    			append_dev(tbody, t17);
-    			append_dev(tbody, tr1);
-    			append_dev(tr1, td4);
-    			append_dev(td4, button1);
-    			append_dev(tr2, t19);
+    			append_dev(tr, t8);
+    			append_dev(tr, td4);
+    			append_dev(td4, input1);
+    			set_input_value(input1, /*product*/ ctx[18].newPrice);
+    			append_dev(td4, t9);
+    			append_dev(td4, t10);
+    			append_dev(td4, t11);
+    			append_dev(tr, t12);
 
     			if (!mounted) {
     				dispose = [
-    					listen_dev(button0, "click", prevent_default(click_handler), false, true, false),
-    					listen_dev(input, "input", input_input_handler),
-    					listen_dev(button1, "click", prevent_default(click_handler_2), false, true, false)
+    					listen_dev(button, "click", prevent_default(click_handler), false, true, false),
+    					listen_dev(input0, "input", input0_input_handler),
+    					listen_dev(input1, "input", input1_input_handler)
     				];
 
     				mounted = true;
@@ -5361,48 +5115,29 @@ var campaineditor = (function () {
     		p: function update(new_ctx, dirty) {
     			ctx = new_ctx;
 
-    			if (dirty & /*data*/ 4 && to_number(input.value) !== /*product*/ ctx[22].order) {
-    				set_input_value(input, /*product*/ ctx[22].order);
+    			if (dirty & /*data*/ 4 && to_number(input0.value) !== /*product*/ ctx[18].order) {
+    				set_input_value(input0, /*product*/ ctx[18].order);
     			}
 
-    			if (dirty & /*data*/ 4 && !src_url_equal(img.src, img_src_value = "" + (CLOUDINARY_BASE_URL + /*product*/ ctx[22].cimg))) {
+    			if (dirty & /*data*/ 4 && !src_url_equal(img.src, img_src_value = "" + (CLOUDINARY_BASE_URL + /*product*/ ctx[18].cimg))) {
     				attr_dev(img, "src", img_src_value);
     			}
 
-    			if (dirty & /*data*/ 4 && img_alt_value !== (img_alt_value = /*product*/ ctx[22].title)) {
+    			if (dirty & /*data*/ 4 && img_alt_value !== (img_alt_value = /*product*/ ctx[18].title)) {
     				attr_dev(img, "alt", img_alt_value);
     			}
 
-    			if (dirty & /*data*/ 4 && t4_value !== (t4_value = /*product*/ ctx[22].title + "")) set_data_dev(t4, t4_value);
-    			if (dirty & /*data*/ 4 && t6_value !== (t6_value = /*product*/ ctx[22].cost_price + "")) set_data_dev(t6, t6_value);
+    			if (dirty & /*data*/ 4 && t4_value !== (t4_value = /*product*/ ctx[18].title + "")) set_data_dev(t4, t4_value);
+    			if (dirty & /*data*/ 4 && t6_value !== (t6_value = /*product*/ ctx[18].cost_price + "")) set_data_dev(t6, t6_value);
 
-    			if (dirty & /*data*/ 4) {
-    				each_value_1 = /*product*/ ctx[22].priceTable;
-    				validate_each_argument(each_value_1);
-    				let i;
-
-    				for (i = 0; i < each_value_1.length; i += 1) {
-    					const child_ctx = get_each_context_1(ctx, each_value_1, i);
-
-    					if (each_blocks[i]) {
-    						each_blocks[i].p(child_ctx, dirty);
-    					} else {
-    						each_blocks[i] = create_each_block_1(child_ctx);
-    						each_blocks[i].c();
-    						each_blocks[i].m(tbody, t17);
-    					}
-    				}
-
-    				for (; i < each_blocks.length; i += 1) {
-    					each_blocks[i].d(1);
-    				}
-
-    				each_blocks.length = each_value_1.length;
+    			if (dirty & /*data*/ 4 && to_number(input1.value) !== /*product*/ ctx[18].newPrice) {
+    				set_input_value(input1, /*product*/ ctx[18].newPrice);
     			}
+
+    			if (dirty & /*data*/ 4 && t10_value !== (t10_value = ((/*product*/ ctx[18].newPrice / /*product*/ ctx[18].cost_price - 1) * 100).toFixed(2) + "")) set_data_dev(t10, t10_value);
     		},
     		d: function destroy(detaching) {
-    			if (detaching) detach_dev(tr2);
-    			destroy_each(each_blocks, detaching);
+    			if (detaching) detach_dev(tr);
     			mounted = false;
     			run_all(dispose);
     		}
@@ -5412,14 +5147,14 @@ var campaineditor = (function () {
     		block,
     		id: create_each_block.name,
     		type: "each",
-    		source: "(117:3) {#each data as product, j}",
+    		source: "(118:3) {#each data as product, j}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (208:7) 
+    // (212:7) 
     function create_item_slot(ctx) {
     	let div2;
     	let div1;
@@ -5429,7 +5164,7 @@ var campaineditor = (function () {
     	let img_src_value;
     	let t;
     	let html_tag;
-    	let raw_value = /*label*/ ctx[20] + "";
+    	let raw_value = /*label*/ ctx[16] + "";
 
     	const block = {
     		c: function create() {
@@ -5439,17 +5174,17 @@ var campaineditor = (function () {
     			img = element("img");
     			t = space();
     			html_tag = new HtmlTag();
-    			attr_dev(img, "alt", img_alt_value = /*item*/ ctx[21].title);
+    			attr_dev(img, "alt", img_alt_value = /*item*/ ctx[17].title);
     			set_style(img, "height", "25px");
-    			if (!src_url_equal(img.src, img_src_value = "" + (CLOUDINARY_BASE_URL + "f_auto,w_auto/" + /*item*/ ctx[21].cimage))) attr_dev(img, "src", img_src_value);
-    			add_location(img, file, 210, 10, 5992);
+    			if (!src_url_equal(img.src, img_src_value = "" + (CLOUDINARY_BASE_URL + "f_auto,w_auto/" + /*item*/ ctx[17].cimage))) attr_dev(img, "src", img_src_value);
+    			add_location(img, file, 214, 10, 6182);
     			html_tag.a = null;
     			attr_dev(div0, "class", "inner");
-    			add_location(div0, file, 209, 9, 5961);
+    			add_location(div0, file, 213, 9, 6151);
     			attr_dev(div1, "class", "search-item");
-    			add_location(div1, file, 208, 8, 5925);
+    			add_location(div1, file, 212, 8, 6115);
     			attr_dev(div2, "slot", "item");
-    			add_location(div2, file, 207, 7, 5864);
+    			add_location(div2, file, 211, 7, 6054);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div2, anchor);
@@ -5460,15 +5195,15 @@ var campaineditor = (function () {
     			html_tag.m(raw_value, div0);
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*item*/ 2097152 && img_alt_value !== (img_alt_value = /*item*/ ctx[21].title)) {
+    			if (dirty & /*item*/ 131072 && img_alt_value !== (img_alt_value = /*item*/ ctx[17].title)) {
     				attr_dev(img, "alt", img_alt_value);
     			}
 
-    			if (dirty & /*item*/ 2097152 && !src_url_equal(img.src, img_src_value = "" + (CLOUDINARY_BASE_URL + "f_auto,w_auto/" + /*item*/ ctx[21].cimage))) {
+    			if (dirty & /*item*/ 131072 && !src_url_equal(img.src, img_src_value = "" + (CLOUDINARY_BASE_URL + "f_auto,w_auto/" + /*item*/ ctx[17].cimage))) {
     				attr_dev(img, "src", img_src_value);
     			}
 
-    			if (dirty & /*label*/ 1048576 && raw_value !== (raw_value = /*label*/ ctx[20] + "")) html_tag.p(raw_value);
+    			if (dirty & /*label*/ 65536 && raw_value !== (raw_value = /*label*/ ctx[16] + "")) html_tag.p(raw_value);
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(div2);
@@ -5479,14 +5214,14 @@ var campaineditor = (function () {
     		block,
     		id: create_item_slot.name,
     		type: "slot",
-    		source: "(208:7) ",
+    		source: "(212:7) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (226:1) {#if need_update}
+    // (230:1) {#if need_update}
     function create_if_block_1(ctx) {
     	let button;
     	let t;
@@ -5502,7 +5237,7 @@ var campaineditor = (function () {
     			if (if_block) if_block.c();
     			t = text("\r\n\t\t\t\tעדכן מידע לשרת");
     			attr_dev(button, "class", "float-btn svelte-6mk2rj");
-    			add_location(button, file, 226, 2, 6299);
+    			add_location(button, file, 230, 2, 6489);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, button, anchor);
@@ -5567,14 +5302,14 @@ var campaineditor = (function () {
     		block,
     		id: create_if_block_1.name,
     		type: "if",
-    		source: "(226:1) {#if need_update}",
+    		source: "(230:1) {#if need_update}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (228:3) {#if updateing}
+    // (232:3) {#if updateing}
     function create_if_block_2(ctx) {
     	let jumper;
     	let current;
@@ -5615,7 +5350,7 @@ var campaineditor = (function () {
     		block,
     		id: create_if_block_2.name,
     		type: "if",
-    		source: "(228:3) {#if updateing}",
+    		source: "(232:3) {#if updateing}",
     		ctx
     	});
 
@@ -5763,7 +5498,8 @@ var campaineditor = (function () {
     					title: item.title,
     					catalogImage: item.id,
     					priceTable: [],
-    					cost_price: item.cost_price
+    					cost_price: item.cost_price,
+    					newPrice: item.cost_price * 2
     				};
 
     				data.push(newProduct);
@@ -5795,43 +5531,15 @@ var campaineditor = (function () {
     		$$invalidate(2, data);
     	};
 
-    	function input_input_handler(each_value, j) {
+    	function input0_input_handler(each_value, j) {
     		each_value[j].order = to_number(this.value);
     		$$invalidate(2, data);
     	}
 
-    	function input0_input_handler(each_value_1, i) {
-    		each_value_1[i].amount = to_number(this.value);
+    	function input1_input_handler(each_value, j) {
+    		each_value[j].newPrice = to_number(this.value);
     		$$invalidate(2, data);
     	}
-
-    	function input1_input_handler(each_value_1, i) {
-    		each_value_1[i].cach_price = to_number(this.value);
-    		$$invalidate(2, data);
-    	}
-
-    	function input2_input_handler(each_value_1, i) {
-    		each_value_1[i].credit_price = to_number(this.value);
-    		$$invalidate(2, data);
-    	}
-
-    	const click_handler_1 = (product, i, each_value, j, e) => {
-    		// product.priceTable[i];
-    		//product.priceTable = product.priceTable;
-    		product.priceTable.splice(i, 1);
-
-    		$$invalidate(2, each_value[j].priceTable = product.priceTable, data);
-    	};
-
-    	const click_handler_2 = (product, each_value, j) => {
-    		product.priceTable.push({
-    			'amount': 1,
-    			'cach_price': product.cost_price * 2,
-    			'credit_price': product.cost_price * 2 * 2
-    		});
-
-    		$$invalidate(2, each_value[j].priceTable = product.priceTable, data);
-    	};
 
     	function autocomplete_value_binding(value) {
     		searchValue = value;
@@ -5893,12 +5601,8 @@ var campaineditor = (function () {
     		autocompleteItemSelected,
     		searchProducts,
     		click_handler,
-    		input_input_handler,
     		input0_input_handler,
     		input1_input_handler,
-    		input2_input_handler,
-    		click_handler_1,
-    		click_handler_2,
     		autocomplete_value_binding,
     		focus_handler
     	];

@@ -76,6 +76,7 @@ import {deepEqual} from './utils/utils.js'
 					catalogImage: item.id,
 					priceTable: [],
 					cost_price: item.cost_price,
+					newPrice: item.cost_price*2,
 				};
 				data.push(newProduct);
 				console.log(data);
@@ -109,7 +110,7 @@ import {deepEqual} from './utils/utils.js'
 				<th>סדר</th>
 				<th>תמונה</th>
 				<th>מחיר עלות (לפני מע"מ)</th>
-				<th>מחירים</th>
+				<th>מחיר מוצג ללקוח</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -143,6 +144,9 @@ import {deepEqual} from './utils/utils.js'
 					{product.cost_price} ₪
 				</td>
 				<td>
+					<input type="number" bind:value={product.newPrice}/>
+					{(((product.newPrice / product.cost_price) - 1)*100).toFixed(2)} %
+					<!--
 					<table>
 						<thead>
 							<tr>
@@ -195,7 +199,7 @@ import {deepEqual} from './utils/utils.js'
 							
 						</tbody>
 					</table>
-					
+					-->
 				</td>
 			</tr>
 			{/each}
