@@ -22,6 +22,21 @@ import {deepEqual} from './utils/utils.js'
 		data = JSON.parse(JSON.stringify(resp));
 		server_data = JSON.parse(JSON.stringify(resp));
 		setInterval(check_server_updates, 500);
+
+		// add event listener to the window when 
+		// <input type="submit" value="שמירה" class="default" name="_save">
+		// is clicked
+		window.addEventListener('submit', async(e) => {
+			debugger;
+			if (need_update) {
+				try {
+					await update_data_to_server();
+				} catch (e) {
+					console.log(e);
+				}
+			}
+			console.log('submit, after update_data_to_server');
+		});
 	});
 	
 
@@ -53,7 +68,7 @@ import {deepEqual} from './utils/utils.js'
 		});
 
 		console.log('response:', response);
-		response.then(resp => {
+		return response.then(resp => {
 			console.log('resp:', resp);
 			server_data = JSON.parse(JSON.stringify(resp));
 			data = JSON.parse(JSON.stringify(resp));
@@ -66,7 +81,7 @@ import {deepEqual} from './utils/utils.js'
 		if(data) {
 			console.log(data);
 			console.log(item);
-			let const_price = admin_api_get_cost_price(item.id).then((resp)=>{
+			admin_api_get_cost_price(item.id).then((resp)=>{
 				console.log('const_price:', resp);
 				item.cost_price  = resp['cost_price']
 				let newProduct = {
@@ -76,6 +91,8 @@ import {deepEqual} from './utils/utils.js'
 					catalogImage: item.id,
 					priceTable: [],
 					cost_price: item.cost_price,
+					client_price: item.client_price,
+					newPrice: item.cost_price*2,
 				};
 				data.push(newProduct);
 				console.log(data);
@@ -109,7 +126,8 @@ import {deepEqual} from './utils/utils.js'
 				<th>סדר</th>
 				<th>תמונה</th>
 				<th>מחיר עלות (לפני מע"מ)</th>
-				<th>מחירים</th>
+				<th>מחיר באתר כרגע</th>
+				<th>מחיר מוצג ללקוח בקמפיין</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -143,6 +161,12 @@ import {deepEqual} from './utils/utils.js'
 					{product.cost_price} ₪
 				</td>
 				<td>
+					{product.client_price} ₪
+				</td>
+				<td>
+					<input type="number" bind:value={product.newPrice}/>
+					{(((product.newPrice / product.cost_price) - 1)*100).toFixed(2)} %
+					<!--
 					<table>
 						<thead>
 							<tr>
@@ -195,7 +219,7 @@ import {deepEqual} from './utils/utils.js'
 							
 						</tbody>
 					</table>
-					
+					-->
 				</td>
 			</tr>
 			{/each}

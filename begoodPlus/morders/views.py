@@ -461,7 +461,7 @@ def morder_edit_order_add_product_entries(request):
             print(color_id, size_id, varient_id, amount)
             if size_id != None and color_id != None:
                 objs = MOrderItemEntry.objects.filter(
-                    product=orderObj,
+                    orderItem=orderObj,
                     color_id=int(color_id) if color_id != None else None,
                     size_id=int(size_id) if size_id != None else None,
                     varient_id=int(varient_id) if varient_id != None else None,
@@ -472,7 +472,7 @@ def morder_edit_order_add_product_entries(request):
                         size_id=int(size_id) if size_id != None else None,
                         varient_id=int(varient_id) if varient_id != None else None,
                     )
-                    obj.product.set([orderObj])
+                    obj.orderItem.set([orderObj])
                 else:
                     obj = objs.first()
                 obj.quantity = int(amount)
