@@ -258,7 +258,7 @@ def svelte_cart_form(request):
         # check if uuid is valid
         
         try:
-            user_uuid = uuid.UUID(user_uuid)
+            user_uuid = uuid.UUID(my_uuid)
         except ValueError:
             user_uuid = uuid.uuid4()
         db_cart = SvelteCartModal.objects.create(user=user_id, device=device, uid=user_uuid, businessName=business_name,
