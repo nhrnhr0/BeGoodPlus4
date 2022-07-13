@@ -1,5 +1,7 @@
 from django.http.response import JsonResponse
 from django.shortcuts import redirect, render
+from campains.models import MonthCampain
+from campains.views import get_user_campains_serializer_data
 from catalogAlbum.models import CatalogAlbum
 from clientApi.serializers import ImageClientApi
 
@@ -23,6 +25,32 @@ import pandas as pd
 from provider.models import Provider
 from rest_framework.pagination import PageNumberPagination
 from django.db.models import Q
+@api_view(['GET'])
+def get_main_albums_for_main_page(request):
+    # main = first public non campain catalogAlbum with topLevelCategory = null
+    main = CatalogAlbum.objects.filter(is_public=True, is_campain=False, topLevelCategory__isnull=True).first()
+    main_response = {}
+    if main:
+        print('main:' ,main)
+        images = main.images.filter(is_active=True).order_by('throughimage__image_order')
+        images = images.prefetch_related('colors','sizes','albums','varients').select_related('packingTypeClient')
+        ser = ImageClientApi(images, many=True,context={
+            'request': request
+        })
+        main_response['images'] = ser.data
+        main_response['album_id'] = main.id
+        main_response['album_title'] = main.title
+        main_response['cimage'] = main.cimage
+        
+    campains_response = {}
+    if request.user and request.user.is_authenticated:
+        campains_response = get_user_campains_serializer_data(request.user)
+    
+    return JsonResponse({
+        #'main': main_response,
+        'campains': campains_response
+    })
+
 class StandardResultsSetPagination(PageNumberPagination):
     page_size = 30
     page_size_query_param = 'page_size'
