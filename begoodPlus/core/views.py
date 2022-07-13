@@ -79,9 +79,12 @@ def set_csrf_token(request, factory_id=None):
     This will be `/api/set-csrf-cookie/` on `urls.py`
     """
     if factory_id:
-        uid = str(factory_id)
+        try:
+            uid = str(uuid.uuid4(factory_id))
+        except:
+            uid = str(uuid.uuid4())
     else:
-        uid = str(uuid.uuid4().hex)
+        uid = str(uuid.uuid4())
     return JsonResponse({"details": "CSRF cookie set",
                          'uid': uid,
                          'whoAmI': get_user_info(request.user), }, safe=False)
@@ -252,10 +255,13 @@ def svelte_cart_form(request):
                 agent = request.user
             else:
                 user_id = request.user
-        # if uuid is not a valid uuid, generate a new one
-        if not my_uuid or my_uuid == 'undefined':
-            my_uuid = str(uuid.uuid4())
-        db_cart = SvelteCartModal.objects.create(user=user_id, device=device, uid=my_uuid, businessName=business_name,
+        # check if uuid is valid
+        
+        try:
+            user_uuid = uuid.UUID(user_uuid)
+        except ValueError:
+            user_uuid = uuid.uuid4()
+        db_cart = SvelteCartModal.objects.create(user=user_id, device=device, uid=user_uuid, businessName=business_name,
                                                  name=name, phone=phone, email=email, message=message, agent=agent, order_type=order_type)
         # data.products.set(products)
         db_cart.productsRaw = raw_cart
@@ -270,8 +276,11 @@ def svelte_cart_form(request):
                 unitPrice = p.get('price')
             else:
                 try:
-                    unitPrice = CatalogImage.objects.get(id=pid).client_price
-                except:
+                    user_id = request.user.id
+                    cimage = CatalogImage.objects.get(id=pid)
+                    price = cimage.get_user_price(user_id)
+                    unitPrice = price#cimage.client_price
+                except CatalogImage.DoesNotExist:
                     unitPrice = 0
             print_desition = p.get('print', False)
             embro = p.get('embro', False)
