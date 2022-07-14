@@ -9,6 +9,7 @@ from catalogAlbum.models import CatalogAlbum
 from rest_framework import serializers
 from django_filters.rest_framework import DjangoFilterBackend
 import decimal
+from core.pagination import StandardResultsSetPagination
 from productColor.models import ProductColor
 from productSize.models import ProductSize
 from catalogLogos.models import CatalogLogo
@@ -68,7 +69,10 @@ class ImageClientApi(serializers.ModelSerializer):
             if request.user.is_authenticated and request.user.client:
                 if request.user.client:
                     catalogImage_id = obj.id
-                    user_id = request.user.id
+                    if request.user.is_superuser and request.GET.get('actAs'):
+                        user_id = request.GET.get('actAs')
+                    else:
+                        user_id = request.user.id
                     # check if the product is in any campaign of the client
                     # campain = MonthCampain.objects.filter(users__user_id=user_id, products__id=catalogImage_id).first()
                     # israel

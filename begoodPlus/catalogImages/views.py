@@ -1,11 +1,15 @@
+from django.http import HttpRequest
 from django.http.response import JsonResponse
 from django.shortcuts import redirect, render
-from campains.models import MonthCampain
+import pytz
+from campains.models import CampainProduct, MonthCampain
 from campains.views import get_user_campains_serializer_data
 from catalogAlbum.models import CatalogAlbum
+from client.models import Client
 from clientApi.serializers import ImageClientApi
 
 from core.models import SvelteCartProductEntery
+from core.pagination import StandardResultsSetPagination
 from inventory.models import PPN
 from productColor.models import ProductColor
 from productSize.models import ProductSize
@@ -20,41 +24,166 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view
 import json
 from django.contrib import messages
-
+from django.urls import reverse
+import decimal
 import pandas as pd
 from provider.models import Provider
 from rest_framework.pagination import PageNumberPagination
 from django.db.models import Q
+from rest_framework import serializers
+from datetime import datetime
+from rest_framework.views import APIView
+class SlimCatalogImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CatalogImage
+        fields = ('id', 'title', 'cimage', 'price', 'new_price')
+    new_price = serializers.SerializerMethodField('_get_new_price')
+    price = serializers.SerializerMethodField('_get_price')
+    def get_user_id(self):
+        request = self.context.get('request', None)
+        ret_user_id = None
+        if request:
+            if request.user.is_authenticated and request.user.client:
+                if request.user.client:
+                    if request.user.is_superuser and request.GET.get('actAs'):
+                        ret_user_id = request.GET.get('actAs')
+                    else:
+                        ret_user_id = request.user.id
+        return ret_user_id
+    def __init__(self, instance=None, data=None, **kwargs):
+        super().__init__(instance, data, **kwargs)
+        self.user_id = self.get_user_id()
+        if self.user_id:
+            self.client = Client.objects.get(user_id=self.user_id)
+            self.tariff = self.client.tariff
+        else:
+            self.tariff = 0
+            self.client = None
+            
+        # find user active campains with the products
+        tz = pytz.timezone('Israel')
+        catalogImage_ids = [i.id for i in instance]
+        # campainProduct = CampainProduct.objects.filter(monthCampain__users__user_id=user_id, catalogImage_id=catalogImage_id,monthCampain__is_shown=True,monthCampain__startTime__lte=datetime.now(tz),monthCampain__endTime__gte=datetime.now(tz)).first()
+        campainProducts = CampainProduct.objects.filter(monthCampain__users__user_id=self.user_id, catalogImage_id__in=catalogImage_ids,monthCampain__is_shown=True,monthCampain__startTime__lte=datetime.now(tz),monthCampain__endTime__gte=datetime.now(tz))
+        
+        # create dict if catalogImage_id as key and newPrice as value
+        self.campainProducts_dict = {}
+        for campainProduct in campainProducts:
+            self.campainProducts_dict[campainProduct.catalogImage_id] = campainProduct.newPrice
+            
+    def _get_new_price(self, obj):
+        # print(self.user_id)
+        # request = self.context.get('request', None)
+        # if request:
+        #     if request.user.is_authenticated and request.user.client:
+        #         if request.user.client:
+        #             catalogImage_id = obj.id
+        #             if request.user.is_superuser and request.GET.get('actAs'):
+        #                 user_id = request.GET.get('actAs')
+        #             else:
+        #                 user_id = request.user.id
+        #             # check if the product is in any campaign of the client
+        #             # campain = MonthCampain.objects.filter(users__user_id=user_id, products__id=catalogImage_id).first()
+        #             # israel
+        
+        #campainProduct = campainProduct.first()
+        #campainProduct = None
+        if obj.id in self.campainProducts_dict:
+            return self.campainProducts_dict[obj.id]
+        else:
+            return None
+        
+    
+    def _get_price(self, obj):
+        # request = self.context.get('request', None)
+        # if request:
+        #     if request.user.is_authenticated and request.user.client:
+        #         if request.user.client:
+        #             tariff = request.user.client.tariff
+        #             if request.user.is_superuser and request.GET.get('actAs'):
+        #                 user_id = request.GET.get('actAs')
+        #                 client = Client.objects.get(user_id=user_id)
+        #                 tariff = client.tariff
+        #         else:
+        #             tariff = 0
+        if self.client:
+            price = obj.client_price + (obj.client_price * (self.tariff/100))
+            price = round(price * 2) / 2 if price > 50 else "{:.2f}".format(price)
+            return float(decimal.Decimal(price).normalize())
+        else:
+            return 0
+class AlbumImagesApiView(APIView, StandardResultsSetPagination):
+    def get_queryset(self):
+        # get the album id from the url
+        # album_id = self.request.GET.get('album_id')
+        # get the album object
+        # get the images for the album
+        images = self.album.images.order_by('throughimage__image_order')
+        # return paginated images
+        return self.paginate_queryset(images, self.request)
+    
+    def get(self, request, album_id=None):
+        self.request = request
+        self.album_id = album_id or request.GET.get('album_id')
+        self.album = CatalogAlbum.objects.get(id=self.album_id)
+        products = self.get_queryset()
+        serializer = SlimCatalogImageSerializer(products, many=True, context={'request': request})
+        response = self.get_paginated_response(serializer.data)
+        response.data['album'] ={
+            'id': self.album_id,
+            'title': self.album.title,
+            'cimage': self.album.cimage
+        }
+        return response
+        return response
 @api_view(['GET'])
 def get_main_albums_for_main_page(request):
     # main = first public non campain catalogAlbum with topLevelCategory = null
-    main = CatalogAlbum.objects.filter(is_public=True, is_campain=False, topLevelCategory__isnull=True).first()
-    main_response = {}
-    if main:
-        print('main:' ,main)
-        images = main.images.filter(is_active=True).order_by('throughimage__image_order')
-        images = images.prefetch_related('colors','sizes','albums','varients').select_related('packingTypeClient')
-        ser = ImageClientApi(images, many=True,context={
-            'request': request
-        })
-        main_response['images'] = ser.data
-        main_response['album_id'] = main.id
-        main_response['album_title'] = main.title
-        main_response['cimage'] = main.cimage
+    mains = CatalogAlbum.objects.filter(is_public=True, is_campain=False, topLevelCategory__isnull=True)
+    # get AlbumImagesApiView for each main
+    mains_ret = []
+    for main in mains:
+        my_request = request._request
         
-    campains_response = {}
-    if request.user and request.user.is_authenticated:
-        campains_response = get_user_campains_serializer_data(request.user)
+        # my_request.GET = request.GET.copy()
+        # my_request.GET['album_id'] = main.id
+        
+        # change request to AlbumImagesApiView
+        path = '/my-api/get-album-images/'+str(main.id)
+        my_request.path = path
+        my_request.GET = request.GET.copy()
+        my_request.GET['album_id'] = main.id
+        # my_request.GET = request.GET.copy()
+        # my_request.GET['album_id'] = main.id
+        main_ret = {
+            'id': main.id,
+            'title': main.title,
+            'cimage': main.cimage,
+            'images': AlbumImagesApiView.as_view()(my_request).data
+        }
+        mains_ret.append(main_ret)
+    # if main:
+    #     print('main:' ,main)
+    #     images = main.images.filter(is_active=True).order_by('throughimage__image_order')
+    #     images = images.prefetch_related('colors','sizes','albums','varients').select_related('packingTypeClient')
+    #     ser = ImageClientApi(images, many=True,context={
+    #         'request': request
+    #     })
+    #     main_response['images'] = ser.data
+    #     main_response['album_id'] = main.id
+    #     main_response['album_title'] = main.title
+    #     main_response['cimage'] = main.cimage
+        
+    # campains_response = {}
+    # if request.user and request.user.is_authenticated:
+    #     campains_response = get_user_campains_serializer_data(request.user)
     
-    return JsonResponse({
-        #'main': main_response,
-        'campains': campains_response
-    })
+    # return JsonResponse({
+    #     #'main': main_response,
+    #     'campains': campains_response
+    # })
+    return JsonResponse(mains_ret, safe=False)
 
-class StandardResultsSetPagination(PageNumberPagination):
-    page_size = 30
-    page_size_query_param = 'page_size'
-    max_page_size = 1000
 
 class get_products_viewset(viewsets.ModelViewSet):
     queryset = CatalogImage.objects.all()
