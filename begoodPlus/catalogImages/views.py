@@ -4,12 +4,12 @@ from django.shortcuts import redirect, render
 import pytz
 from campains.models import CampainProduct, MonthCampain
 from campains.views import get_user_campains_serializer_data
-from catalogAlbum.models import CatalogAlbum
+from catalogAlbum.models import CatalogAlbum, ThroughImage
 from client.models import Client
 from clientApi.serializers import ImageClientApi
 
 from core.models import SvelteCartProductEntery
-from core.pagination import StandardResultsSetPagination
+from core.pagination import CurserResultsSetPagination, StandardResultsSetPagination
 from inventory.models import PPN
 from productColor.models import ProductColor
 from productSize.models import ProductSize
@@ -33,6 +33,7 @@ from django.db.models import Q
 from rest_framework import serializers
 from datetime import datetime
 from rest_framework.views import APIView
+
 class SlimCatalogImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = CatalogImage
@@ -62,7 +63,7 @@ class SlimCatalogImageSerializer(serializers.ModelSerializer):
             
         # find user active campains with the products
         tz = pytz.timezone('Israel')
-        catalogImage_ids = [i.id for i in instance]
+        catalogImage_ids = [i.id for i in instance] if instance else []
         # campainProduct = CampainProduct.objects.filter(monthCampain__users__user_id=user_id, catalogImage_id=catalogImage_id,monthCampain__is_shown=True,monthCampain__startTime__lte=datetime.now(tz),monthCampain__endTime__gte=datetime.now(tz)).first()
         campainProducts = CampainProduct.objects.filter(monthCampain__users__user_id=self.user_id, catalogImage_id__in=catalogImage_ids,monthCampain__is_shown=True,monthCampain__startTime__lte=datetime.now(tz),monthCampain__endTime__gte=datetime.now(tz))
         
@@ -72,22 +73,6 @@ class SlimCatalogImageSerializer(serializers.ModelSerializer):
             self.campainProducts_dict[campainProduct.catalogImage_id] = campainProduct.newPrice
             
     def _get_new_price(self, obj):
-        # print(self.user_id)
-        # request = self.context.get('request', None)
-        # if request:
-        #     if request.user.is_authenticated and request.user.client:
-        #         if request.user.client:
-        #             catalogImage_id = obj.id
-        #             if request.user.is_superuser and request.GET.get('actAs'):
-        #                 user_id = request.GET.get('actAs')
-        #             else:
-        #                 user_id = request.user.id
-        #             # check if the product is in any campaign of the client
-        #             # campain = MonthCampain.objects.filter(users__user_id=user_id, products__id=catalogImage_id).first()
-        #             # israel
-        
-        #campainProduct = campainProduct.first()
-        #campainProduct = None
         if obj.id in self.campainProducts_dict:
             return self.campainProducts_dict[obj.id]
         else:
@@ -95,45 +80,62 @@ class SlimCatalogImageSerializer(serializers.ModelSerializer):
         
     
     def _get_price(self, obj):
-        # request = self.context.get('request', None)
-        # if request:
-        #     if request.user.is_authenticated and request.user.client:
-        #         if request.user.client:
-        #             tariff = request.user.client.tariff
-        #             if request.user.is_superuser and request.GET.get('actAs'):
-        #                 user_id = request.GET.get('actAs')
-        #                 client = Client.objects.get(user_id=user_id)
-        #                 tariff = client.tariff
-        #         else:
-        #             tariff = 0
         if self.client:
             price = obj.client_price + (obj.client_price * (self.tariff/100))
             price = round(price * 2) / 2 if price > 50 else "{:.2f}".format(price)
             return float(decimal.Decimal(price).normalize())
         else:
             return 0
-class AlbumImagesApiView(APIView, StandardResultsSetPagination):
+
+
+class SlimThroughImageSerializer(serializers.ModelSerializer):
+    catalogImage = SlimCatalogImageSerializer()
+    class Meta:
+        model = ThroughImage
+        fields = ('catalogImage',)
+
+class AlbumImagesApiView(APIView, CurserResultsSetPagination):
+    ordering = ('image_order','id',)
     def get_queryset(self):
         # get the album id from the url
         # album_id = self.request.GET.get('album_id')
         # get the album object
         # get the images for the album
-        images = self.album.images.order_by('throughimage__image_order')
+        ##images = self.album.images.order_by('throughimage__image_order')
+        if self.top_album:
+            qs = ThroughImage.objects.filter(catalogAlbum__topLevelCategory__id=self.top_album).order_by('image_order')
+            #qs = CatalogImage.objects.filter(albums__topLevelCategory__id=self.top_album).order_by('throughimage__image_order')
         # return paginated images
+        if self.album_id:
+            qs = ThroughImage.objects.filter(catalogAlbum__id=self.album_id).order_by('image_order')
+            #qs = CatalogImage.objects.filter(albums__id=self.album_id).order_by('throughimage__image_order')
+        qs = qs.select_related('catalogImage')
+        return self.paginate_queryset(qs, self.request)
+        
+        # get all the catalogImage from the qs as images    
+        #images = [i.catalogImage for i in qs]
         return self.paginate_queryset(images, self.request)
     
-    def get(self, request, album_id=None):
+    def get(self, request):
         self.request = request
-        self.album_id = album_id or request.GET.get('album_id')
-        self.album = CatalogAlbum.objects.get(id=self.album_id)
+        self.album_id = request.GET.get('album_id')
+        self.top_album = request.GET.get('top')
+        
+        #self.album = CatalogAlbum.objects.get(id=self.album_id)
         products = self.get_queryset()
-        serializer = SlimCatalogImageSerializer(products, many=True, context={'request': request})
+        #serializer = SlimCatalogImageSerializer(products, many=True, context={'request': request})
+        serializer = SlimThroughImageSerializer(products, many=True, context={'request': request})
         response = self.get_paginated_response(serializer.data)
-        response.data['album'] ={
-            'id': self.album_id,
-            'title': self.album.title,
-            'cimage': self.album.cimage
+        response.data['info'] ={
+            'album_id': self.album_id,
+            'top': self.top_album,
+            'query_string': request.GET.urlencode()
         }
+        return response
+            
+            #'title': self.album.title,
+            #'cimage': self.album.cimage
+        #}
         return response
         return response
 @api_view(['GET'])
@@ -149,7 +151,7 @@ def get_main_albums_for_main_page(request):
         # my_request.GET['album_id'] = main.id
         
         # change request to AlbumImagesApiView
-        path = '/my-api/get-album-images/'+str(main.id)
+        path = '/my-api/get-album-images?album='+ str(main.id)
         my_request.path = path
         my_request.GET = request.GET.copy()
         my_request.GET['album_id'] = main.id
