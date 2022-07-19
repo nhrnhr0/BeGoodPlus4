@@ -12,8 +12,9 @@
 <script >
     function download_image() {
         var node = document.getElementById('to_image');
-
-        domtoimage.toPng(node)
+        domtoimage.toPng(node, {
+            quality: 1,
+        })
         .then(function (dataUrl) {
             var img = new Image();
             img.src = dataUrl;
@@ -55,7 +56,7 @@
                     </td>
                     <td>
                         <div class="product-price">
-                            {{product.price}} ש"ח
+                            {{product.price}} <br> ש"ח
                         </div>
                     </td>
 
@@ -74,6 +75,9 @@
 
 
 <style>
+    :root {
+        --my-font-size: 2rem;
+    }
     .download-btn-wraper{ 
         display: flex;
         justify-content: center;
@@ -112,18 +116,34 @@
           }
           main table tr:nth-child(even) {
               background-color: #ccc;
+
           }
           main table tr td .product-title {
-              font-size: 20px;
+              font-size: var(--my-font-size);
               font-weight: bold;
+              text-align: start;
+              padding-right: 10px;
           }
   
           main table tr td .product-price {
-              font-size: 20px;
+              font-size: var(--my-font-size);
               font-weight: bold;
+              
+              border-radius:50%;
+                width:100px;
+                height: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+          }
+          main table tr:nth-child(even) td .product-price {
+                background-color: white;
+          }
+          main table tr:nth-child(odd) td .product-price {
+                background-color: #ccc;
           }
             main table tr td .num {
-                font-size: 20px;
+                font-size: var(--my-font-size);
                 font-weight: bold;
             }
       </style>
