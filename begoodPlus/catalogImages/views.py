@@ -20,7 +20,25 @@ from django.contrib import messages
 
 import pandas as pd
 from provider.models import Provider
-
+def create_image_from_exel(request):
+    context= {}
+    if(request.method == "POST"):
+        products= []
+        productNameCol = request.POST['product_name']
+        productPriceCol = request.POST['product_price']
+        file = request.FILES['file']
+        df = pd.read_excel(file)
+        df = df.fillna('')
+        for index, row in df.iterrows():
+            productName = row[productNameCol]
+            productPrice = row[productPriceCol]
+            obj = CatalogImage.objects.filter(title=productName)
+            obj = obj.first()
+            if(obj is not None):
+                products.append({'title': obj.title, 'price': productPrice, 'id': obj.id, 'cimage': obj.cimage})
+        context['products'] = products
+        return render(request, 'catalogImages/create_image_from_exel_result.html', context=context)
+    return render(request, 'catalogImages/create_image_from_exel.html', context=context)
 def catalogimage_upload_warehouse_excel(request):
     if request.method == "GET":
         return render(request, 'catalogImages/catalogimage_upload_full_excel.html')

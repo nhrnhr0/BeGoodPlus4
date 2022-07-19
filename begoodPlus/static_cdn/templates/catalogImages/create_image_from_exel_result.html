@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image/2.6.0/dom-to-image.min.js" integrity="sha512-01CJ9/g7e8cUmY0DFTMcUw/ikS799FHiOA0eyHsUWfOetgbx/t6oV4otQ5zXKQyIrQGTHSmRVPIgrgLcZi/WMA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <title>Document</title>
+</head>
+<!-- create a printable page at the size of a4 with the products names, prices, and image -->
+
+<script >
+    function download_image() {
+        var node = document.getElementById('to_image');
+
+        domtoimage.toPng(node)
+        .then(function (dataUrl) {
+            var img = new Image();
+            img.src = dataUrl;
+            var a = document.createElement("a");
+            a.href = dataUrl;
+            a.download = "my_image.png";
+            document.body.appendChild(a);
+            a.click();
+        })
+        .catch(function (error) {
+            console.error('oops, something went wrong!', error);
+        });
+    }
+</script>
+<body>
+    <main>
+        <div class="download-btn-wraper">
+            <button class="download-btn" onclick="download_image()">הורד תמונה</button>
+        </div>
+        <table id="to_image">
+            <tr>
+                <th>#</th>
+                <th>תמונה</th>
+                <th>שם המוצר</th>
+                <th>מחיר</th>
+            </tr>
+            {% for product in products %}
+                <tr>
+                    <td>
+                        <div class="num">
+                            {{forloop.counter}}
+                        </div>
+                    </td>
+                    <td><img width="51mm" height="51mm" src="https://res.cloudinary.com/ms-global/image/upload/{{product.cimage}}" alt=""></td>
+                    <td>
+                        <div class="product-title">
+                            {{product.title}}
+                        </div>
+                    </td>
+                    <td>
+                        <div class="product-price">
+                            {{product.price}} ש"ח
+                        </div>
+                    </td>
+
+                </tr>
+            {% endfor %}
+        </table>
+    </main>
+    {% for row in ret %}
+        <!-- row:
+            {'title': 'תותח מים איכותי 42 ס"מ חדש', 'price': 11.5, 'id': 795, 'cimage': 'v1650280799/site/products/7299990222902-removebg-preview'}
+        -->
+        
+    {% endfor %}
+</body>
+</html>
+
+
+<style>
+    .download-btn-wraper{ 
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 20px;
+    }
+    .download-btn {
+        background-color: #00bcd4;
+        color: #fff;
+        border-radius: 5px;
+        padding: 10px;
+        margin: 10px;
+        cursor: pointer;
+    }
+    html, body {
+      background-color: #ccc;
+  }
+          main {
+              width: 210mm;
+              margin: auto;
+              background-color: white;
+          }
+          main table {
+              direction: rtl;
+              width: 100%;
+              border-collapse: collapse;
+              text-align: center;
+              background-color: white;
+          }
+          main table tr {
+              border:1px solid black;
+          }
+          main table th {
+              border:1px solid black;
+              padding: 5px;
+          }
+          main table tr:nth-child(even) {
+              background-color: #ccc;
+          }
+          main table tr td .product-title {
+              font-size: 20px;
+              font-weight: bold;
+          }
+  
+          main table tr td .product-price {
+              font-size: 20px;
+              font-weight: bold;
+          }
+            main table tr td .num {
+                font-size: 20px;
+                font-weight: bold;
+            }
+      </style>
