@@ -4,6 +4,7 @@ from django.shortcuts import redirect, render
 import pytz
 from campains.models import CampainProduct, MonthCampain
 from campains.views import get_user_campains_serializer_data
+import catalogAlbum
 from catalogAlbum.models import CatalogAlbum, ThroughImage
 from client.models import Client
 from clientApi.serializers import ImageClientApi
@@ -33,7 +34,7 @@ from django.db.models import Q
 from rest_framework import serializers
 from datetime import datetime
 from rest_framework.views import APIView
-
+import time
 class SlimCatalogImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = CatalogImage
@@ -90,9 +91,12 @@ class SlimCatalogImageSerializer(serializers.ModelSerializer):
 
 class SlimThroughImageSerializer(serializers.ModelSerializer):
     catalogImage = SlimCatalogImageSerializer()
+    catalogAlbum__title = serializers.SerializerMethodField('_get_catalogAlbum_title')
+    def _get_catalogAlbum_title(self, obj):
+        return obj.catalogAlbum.title
     class Meta:
         model = ThroughImage
-        fields = ('catalogImage',)
+        fields = ('catalogImage','catalogAlbum','image_order','catalogAlbum__title')
 
 class AlbumImagesApiView(APIView, CurserResultsSetPagination):
     ordering = ('image_order','id',)
@@ -109,7 +113,7 @@ class AlbumImagesApiView(APIView, CurserResultsSetPagination):
         if self.album_id:
             qs = ThroughImage.objects.filter(catalogAlbum__id=self.album_id).order_by('image_order')
             #qs = CatalogImage.objects.filter(albums__id=self.album_id).order_by('throughimage__image_order')
-        qs = qs.select_related('catalogImage')
+        qs = qs.select_related('catalogImage','catalogAlbum')
         return self.paginate_queryset(qs, self.request)
         
         # get all the catalogImage from the qs as images    
@@ -126,11 +130,16 @@ class AlbumImagesApiView(APIView, CurserResultsSetPagination):
         #serializer = SlimCatalogImageSerializer(products, many=True, context={'request': request})
         serializer = SlimThroughImageSerializer(products, many=True, context={'request': request})
         response = self.get_paginated_response(serializer.data)
+        top_albums = CatalogAlbum.objects.filter(topLevelCategory__id=self.top_album).order_by('album_order').values('id','title', 'cimage')
+        print('top_albums = ', top_albums)
         response.data['info'] ={
             'album_id': self.album_id,
             'top': self.top_album,
-            'query_string': request.GET.urlencode()
+            'query_string': request.GET.urlencode(),
+            'top_albums': top_albums
         }
+        # sleep 1 sec
+        time.sleep(1)
         return response
             
             #'title': self.album.title,

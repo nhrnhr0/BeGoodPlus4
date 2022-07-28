@@ -142,7 +142,7 @@ from adminsortable.models import Sortable
 class ThroughImage(Sortable):
     catalogImage = SortableForeignKey(CatalogImage, on_delete=models.CASCADE, verbose_name=_('catalog image'))
     catalogAlbum = models.ForeignKey(CatalogAlbum, on_delete=models.CASCADE, verbose_name=_('catalog album'))
-
+    
     image_order = models.PositiveIntegerField(default=0, editable=False, db_index=True)
     class Meta(Sortable.Meta):
         ordering = ['image_order']
