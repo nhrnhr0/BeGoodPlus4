@@ -98,6 +98,17 @@ class SlimThroughImageSerializer(serializers.ModelSerializer):
         model = ThroughImage
         fields = ('catalogImage','catalogAlbum','image_order','catalogAlbum__title')
 
+def get_main_info(request):
+    album_id = request.GET.get('album_id')
+    top_album = request.GET.get('top')
+    top_albums = list(CatalogAlbum.objects.filter(topLevelCategory__id=top_album).order_by('album_order').values('id','title', 'cimage', 'is_public'))
+    ret = {
+            'album_id': album_id,
+            'top': top_album,
+            'query_string': request.GET.urlencode(),
+            'top_albums': top_albums
+        }
+    return JsonResponse(ret)
 class AlbumImagesApiView(APIView, CurserResultsSetPagination):
     ordering = ('image_order','id',)
     def get_queryset(self):
@@ -130,22 +141,16 @@ class AlbumImagesApiView(APIView, CurserResultsSetPagination):
         #serializer = SlimCatalogImageSerializer(products, many=True, context={'request': request})
         serializer = SlimThroughImageSerializer(products, many=True, context={'request': request})
         response = self.get_paginated_response(serializer.data)
-        top_albums = CatalogAlbum.objects.filter(topLevelCategory__id=self.top_album).order_by('album_order').values('id','title', 'cimage')
-        print('top_albums = ', top_albums)
-        response.data['info'] ={
-            'album_id': self.album_id,
-            'top': self.top_album,
-            'query_string': request.GET.urlencode(),
-            'top_albums': top_albums
-        }
-        # sleep 1 sec
-        time.sleep(1)
-        return response
-            
-            #'title': self.album.title,
-            #'cimage': self.album.cimage
-        #}
-        return response
+        # top_albums = CatalogAlbum.objects.filter(topLevelCategory__id=self.top_album).order_by('album_order').values('id','title', 'cimage')
+        # print('top_albums = ', top_albums)
+        # response.data['info'] ={
+        #     'album_id': self.album_id,
+        #     'top': self.top_album,
+        #     'query_string': request.GET.urlencode(),
+        #     'top_albums': top_albums
+        # }
+        # # sleep 1 sec
+        # time.sleep(1)
         return response
 @api_view(['GET'])
 def get_main_albums_for_main_page(request):
