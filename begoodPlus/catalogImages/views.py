@@ -64,7 +64,13 @@ class SlimCatalogImageSerializer(serializers.ModelSerializer):
             
         # find user active campains with the products
         tz = pytz.timezone('Israel')
-        catalogImage_ids = [i.id for i in instance] if instance else []
+        try:
+            catalogImage_ids = [i.id for i in instance] if instance else []
+        except:
+            if instance:
+                catalogImage_ids = [instance.id]
+            else:
+                catalogImage_ids = []
         # campainProduct = CampainProduct.objects.filter(monthCampain__users__user_id=user_id, catalogImage_id=catalogImage_id,monthCampain__is_shown=True,monthCampain__startTime__lte=datetime.now(tz),monthCampain__endTime__gte=datetime.now(tz)).first()
         campainProducts = CampainProduct.objects.filter(monthCampain__users__user_id=self.user_id, catalogImage_id__in=catalogImage_ids,monthCampain__is_shown=True,monthCampain__startTime__lte=datetime.now(tz),monthCampain__endTime__gte=datetime.now(tz))
         
@@ -72,7 +78,7 @@ class SlimCatalogImageSerializer(serializers.ModelSerializer):
         self.campainProducts_dict = {}
         for campainProduct in campainProducts:
             self.campainProducts_dict[campainProduct.catalogImage_id] = campainProduct.newPrice
-            
+        print('done serializer init')
     def _get_new_price(self, obj):
         if obj.id in self.campainProducts_dict:
             return self.campainProducts_dict[obj.id]
@@ -109,6 +115,20 @@ def get_main_info(request):
             'top_albums': top_albums
         }
     return JsonResponse(ret)
+
+def get_products_slim(request):
+    product_ids = request.GET.getlist('pid[]')
+    if product_ids:
+        catalogImage = CatalogImage.objects.filter(id__in=product_ids)
+        catalogImage_serializer = SlimCatalogImageSerializer(catalogImage, many=True, context={'request': request})
+        #print('catalogImage_serializer.is_valid', catalogImage_serializer.is_valid())
+        #print(catalogImage_serializer.errors)
+        data = catalogImage_serializer.data
+        return JsonResponse(data, safe=False)
+    else:
+        return JsonResponse({'error': 'no product_ids provided'})
+    
+
 class AlbumImagesApiView(APIView, CurserResultsSetPagination):
     ordering = ('image_order','id',)
     def get_queryset(self):

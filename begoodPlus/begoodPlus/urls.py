@@ -16,7 +16,7 @@ Including another URLconf
 
 from catalogAlbum.views import get_albums
 from inventory.views import doc_stock_enter_provider_requests_api, get_stock_by_id_api, save_doc_stock_enter_provider_requests, unpivot_inventory_exel, upload_inventory_csv
-from clientApi.views import CustomAuthToken, get_all_varients_api,get_products_info
+from clientApi.views import CustomAuthToken, get_all_varients_api,get_products_info, get_products_info2
 from inventory.views import add_doc_stock_enter_ppn, add_doc_stock_enter_ppn_entry, create_enter_doc, enter_doc_edit,delete_doc_stock_enter_ppn_entry, doc_stock_detail_api, doc_stock_list_api, get_all_inventory_api, get_all_warehouses_api,enter_doc_insert_inventory, enter_doc_remove_product, get_doc_stock_enter_ppn_entries, inventory_edit_entry, inventory_get_entry_history, inventory_manual_update_entry, search_ppn, search_warehouses, show_inventory_stock,get_product_inventory,doc_stock_list
 
 from clientApi.views import get_all_colors_api, get_all_sizes_api, main_page_api
@@ -27,7 +27,7 @@ from inventory.views import DocStockEnterViewSet, doc_stock_enter
 from msCrm.views import api_save_lead, fix_ms_crm, get_all_business_types_groups, mcrm_lead_register, get_all_business_types, get_all_interests, import_mscrm_from_exel, upload_mscrm_business_select_to_intrests_exel, get_all_mscrm_phone_contacts
 from core.views import api_logout, autocompleteClick, autocompleteModel, client_product_question, handler404, send_product_photo, set_csrf_token, svelte_cart_form, svelte_cart_history, svelte_contact_form, test_celery_view, track_cart, verify_unique_field_by_field_excel
 
-from catalogImages.views import AlbumImagesApiView, admin_api_get_product_cost_price, all_images_ids, catalogimage_upload_warehouse_excel, get_main_albums_for_main_page, get_main_info, get_product_sizes_colors_martix, admin_remove_product_from_cart, admin_add_to_existing_cart, get_products_viewset
+from catalogImages.views import AlbumImagesApiView, admin_api_get_product_cost_price, all_images_ids, catalogimage_upload_warehouse_excel, get_main_albums_for_main_page, get_main_info, get_product_sizes_colors_martix, admin_remove_product_from_cart, admin_add_to_existing_cart, get_products_slim, get_products_viewset
 from clientApi.views import ColorsClientViewSet, ImageClientViewSet, SizesClientViewSet, LogoClientViewSet, get_album_images
 from clientApi.views import AlbumClientViewSet
 from catalogImageDetail.views import SvelteCatalogImageDetailViewSet
@@ -84,6 +84,8 @@ clientRouter.register(r'logos', LogoClientViewSet)
 urlpatterns = [
      #path('my-api/main/main', MainAlbumsViewSet.as_view({'get': 'list'})),
      path('my-api/get-main-info', get_main_info, name='get_main_info'),
+     path('my-api/get-product-slim', get_products_slim, name='get_producs_slim'),
+     path('my-api/get-product-info', get_products_info2, name='get_products_info2'),
      path('my-api/get-album-images', AlbumImagesApiView.as_view(), name='album_images'),
      path('my-api/get-main-albums', get_main_albums_for_main_page, name='get_main_albums_for_main_page'),
      path('api/v1/products', get_products_viewset.as_view({'get': 'list'}), name='get_products_viewset'),
