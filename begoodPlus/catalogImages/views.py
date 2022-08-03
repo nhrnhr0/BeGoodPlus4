@@ -128,7 +128,13 @@ def get_products_slim(request):
     else:
         return JsonResponse({'error': 'no product_ids provided'})
     
-
+def get_similar_products(request, product_id):
+    product = CatalogImage.objects.get(id=product_id)
+    similar_products = CatalogImage.objects.filter(Q(albums__id__in=product.albums.all()) & ~Q(id=product.id)).order_by('?')[:500]
+    catalogImage_serializer = SlimCatalogImageSerializer(similar_products, many=True, context={'request': request})
+    data = catalogImage_serializer.data
+    return JsonResponse(data, safe=False)
+    
 class AlbumImagesApiView(APIView, CurserResultsSetPagination):
     ordering = ('image_order','id',)
     def get_queryset(self):
