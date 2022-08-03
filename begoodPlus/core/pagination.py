@@ -6,7 +6,7 @@ class StandardResultsSetPagination(PageNumberPagination):
     max_page_size = 1000
     
 class CurserResultsSetPagination(pagination.CursorPagination):
-    page_size = 150#150
+    page_size = 35#150
     page_size_query_param = 'page_size'
     max_page_size = 1000
     ordering = '-id'

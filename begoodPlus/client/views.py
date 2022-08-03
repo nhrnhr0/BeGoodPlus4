@@ -86,7 +86,7 @@ def create_client_user(request):
 @api_view(['GET'])
 def get_all_users_by_admin(request):
     if request.user.is_superuser:
-        clients = Client.objects.all()
+        clients = Client.objects.all().select_related('user')
         data = [{'id':client.pk, 'username':client.user.username, 'businessName':client.businessName,'email': client.email, 'privateCompany': client.privateCompany, } for client in clients]
         return JsonResponse(data, safe=False)
     else:

@@ -96,7 +96,18 @@ class SlimCatalogImageSerializer(serializers.ModelSerializer):
 
 
 class SlimThroughImageSerializer(serializers.ModelSerializer):
-    catalogImage = SlimCatalogImageSerializer()
+
+    def __init__(self, instance=None, data=..., **kwargs):
+        super().__init__(instance, data, **kwargs)
+        
+    
+    catalogImage = serializers.SerializerMethodField('getSlimCatalogImageSerializer')
+    
+    def getSlimCatalogImageSerializer(self, obj):
+        ob = CatalogImage.objects.get(id=obj.catalogImage_id)
+        ret = SlimCatalogImageSerializer(instance=obj.catalogImage, context=self.context)
+        data = ret.data
+        return data
     catalogAlbum__title = serializers.SerializerMethodField('_get_catalogAlbum_title')
     def _get_catalogAlbum_title(self, obj):
         return obj.catalogAlbum.title
@@ -151,7 +162,9 @@ class AlbumImagesApiView(APIView, CurserResultsSetPagination):
             qs = ThroughImage.objects.filter(catalogAlbum__id=self.album_id).order_by('image_order')
             #qs = CatalogImage.objects.filter(albums__id=self.album_id).order_by('throughimage__image_order')
         qs = qs.select_related('catalogImage','catalogAlbum')
-        return self.paginate_queryset(qs, self.request)
+        qs= self.paginate_queryset(qs, self.request)
+        # return all the catalogImages of the qs
+        return qs
         
         # get all the catalogImage from the qs as images    
         #images = [i.catalogImage for i in qs]
@@ -164,8 +177,9 @@ class AlbumImagesApiView(APIView, CurserResultsSetPagination):
         
         #self.album = CatalogAlbum.objects.get(id=self.album_id)
         products = self.get_queryset()
+        products = [o.catalogImage for o in products]
         #serializer = SlimCatalogImageSerializer(products, many=True, context={'request': request})
-        serializer = SlimThroughImageSerializer(products, many=True, context={'request': request})
+        serializer = SlimCatalogImageSerializer(products, many=True, context={'request': request})
         response = self.get_paginated_response(serializer.data)
         # top_albums = CatalogAlbum.objects.filter(topLevelCategory__id=self.top_album).order_by('album_order').values('id','title', 'cimage')
         # print('top_albums = ', top_albums)
