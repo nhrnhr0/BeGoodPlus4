@@ -47,8 +47,8 @@ class SlimCatalogImageSerializer(serializers.ModelSerializer):
         if request:
             if request.user.is_authenticated and request.user.client:
                 if request.user.client:
-                    if request.user.is_superuser and request.GET.get('actAs'):
-                        ret_user_id = request.GET.get('actAs')
+                    if request.user.is_superuser and request.COOKIES.get('actAs'):
+                        ret_user_id = request.COOKIES.get('actAs')
                     else:
                         ret_user_id = request.user.id
         return ret_user_id
@@ -61,7 +61,7 @@ class SlimCatalogImageSerializer(serializers.ModelSerializer):
         else:
             self.tariff = 0
             self.client = None
-            
+        #print('====> self.user_id', self.client, 'tariff', self.tariff)
         # find user active campains with the products
         tz = pytz.timezone('Israel')
         try:
@@ -78,7 +78,7 @@ class SlimCatalogImageSerializer(serializers.ModelSerializer):
         self.campainProducts_dict = {}
         for campainProduct in campainProducts:
             self.campainProducts_dict[campainProduct.catalogImage_id] = campainProduct.newPrice
-        print('done serializer init')
+        #print('done serializer init')
     def _get_new_price(self, obj):
         if obj.id in self.campainProducts_dict:
             return self.campainProducts_dict[obj.id]
