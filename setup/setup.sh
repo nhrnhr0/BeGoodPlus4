@@ -4,9 +4,7 @@
 sudo apt update && sudo apt install supervisor
 sudo apt install nginx
 sudo apt install python3.8-venv -y
-cd /home/ubuntu/
-git clone https://github.com/nhrnhr0/BeGoodPlus4.git
-cd BeGoodPlus4/
+cd /home/ubuntu/BeGoodPlus4/
 python3 -m venv env
 cp -r ./setup/supervisor/* /etc/supervisor/conf.d/
 cp -r ./setup/nginx/* /etc/nginx/conf.d/
