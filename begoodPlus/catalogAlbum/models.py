@@ -54,7 +54,7 @@ class TopLevelCategory(models.Model):
     my_order = models.PositiveIntegerField(default=0, blank=True, null=True, db_index=True, unique=True)
     image = CloudinaryField('image', blank=True, null=True, public_id='topLevelCategory/' + datetime.datetime.now().strftime('%Y-%m-%d-%H_%M_%S_%f'), format='png')
     
-    get_image = property(lambda self: self.image.url[len('https://res.cloudinary.com/ms-global/image/upload/'):] if self.image else self.albums.order_by('album_order').first().cimage)
+    get_image = property(lambda self: self.image.url[len('https://res.cloudinary.com/ms-global/image/upload/'):] if self.image else '' if self.albums.order_by('album_order').first() == None else self.albums.order_by('album_order').first().cimage)
     def __str__(self) -> str:
         return self.name
     class Meta:

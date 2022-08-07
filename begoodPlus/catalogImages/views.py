@@ -2,6 +2,7 @@ from django.http import HttpRequest
 from django.http.response import JsonResponse
 from django.shortcuts import redirect, render
 import pytz
+from catalogAlbum.models import TopLevelCategory
 from campains.models import CampainProduct, MonthCampain
 from campains.views import get_user_campains_serializer_data
 import catalogAlbum
@@ -117,16 +118,57 @@ class SlimThroughImageSerializer(serializers.ModelSerializer):
 
 def get_main_info(request):
     album_id = request.GET.get('album_id')
-    top_album = request.GET.get('top')
-    top_albums = list(CatalogAlbum.objects.filter(topLevelCategory__id=top_album).order_by('album_order').values('id','title', 'cimage', 'is_public'))
+    top_album = request.GET.get('top', None)
+    product_id = request.GET.get('product_id', None)
+    if top_album:
+        top_albums = list(CatalogAlbum.objects.filter(topLevelCategory__id=top_album).order_by('album_order').values('id','title', 'cimage', 'is_public'))  
+    else:
+        top_albums = list(CatalogAlbum.objects.filter(is_public=True).order_by('album_order').values('id','title', 'cimage', 'is_public'))
     ret = {
             'album_id': album_id,
             'top': top_album,
             'query_string': request.GET.urlencode(),
             'top_albums': top_albums
         }
+    # create og meta to retrun, can be product_id or album_id or top_album by this priority order
+    if product_id:
+        ret['og_meta'] = get_product_og_meta(product_id)
+    elif album_id:
+        ret['og_meta'] = get_album_og_meta(album_id)
+    elif top_album:
+        ret['og_meta'] = get_top_album_og_meta(top_album)
+    else:
+        ret['og_meta'] = {}
+    
     return JsonResponse(ret)
 
+def get_product_og_meta(product_id):
+    product = CatalogImage.objects.get(id=product_id)
+    # 
+    return {
+        'icon': 'https://res.cloudinary.com/ms-global/image/upload/c_scale,w_365/c_scale,u_v1649744644:msAssets:image_5_qo7yhx.jpg,w_500/' +product.cimage,
+        'title': product.title,
+        'description': product.description[:175] + '...',
+    }
+def get_album_og_meta(album_id):
+    album = CatalogAlbum.objects.get(id=album_id)
+    return {
+        'icon': 'https://res.cloudinary.com/ms-global/image/upload/c_scale,w_365/c_scale,u_v1649744644:msAssets:image_5_qo7yhx.jpg,w_500/' + album.cimage,
+        'title': album.title,
+        'description': album.description[:175] + '...',
+        'keywords': album.keywords,
+    }
+def get_top_album_og_meta(top_album):
+    top_album = TopLevelCategory.objects.get(id=top_album)
+    if not top_album.image:
+        icon = 'https://res.cloudinary.com/ms-global/image/upload/c_scale,w_365/c_scale,u_v1649744644:msAssets:image_5_qo7yhx.jpg,w_500/' + CatalogAlbum.objects.filter(topLevelCategory__id=top_album.id).first().cimage
+    else:
+        icon = 'https://res.cloudinary.com/ms-global/image/upload/c_scale,w_365/c_scale,u_v1649744644:msAssets:image_5_qo7yhx.jpg,w_500/' + top_album.image.public_id
+    return {
+        'icon': icon,
+        'title': top_album.name,
+    }
+    
 def get_products_slim(request):
     product_ids = request.GET.getlist('pid[]')
     if product_ids:
