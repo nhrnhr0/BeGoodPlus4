@@ -4,14 +4,15 @@ from rest_framework.decorators import api_view, permission_classes
 from django.http import JsonResponse
 from rest_framework.permissions import AllowAny
 
-from .models import LeadSubmit, MsCrmBusinessSelectToIntrests, MsCrmBusinessTypeSelect, MsCrmIntrest, MsCrmIntrestsGroups, MsCrmUser
+from .models import LeadSubmit, MsCrmBusinessSelectToIntrests, MsCrmBusinessTypeSelect, MsCrmIntrest, MsCrmIntrestsGroups, MsCrmUser, MsCrmWhatsappMessagesSent
 from .tasks import new_user_subscribed_task
-from .serializers import MsCrmIntrestSerializer, MsCrmBusinessTypeSerializer, MsCrmIntrestsGroupsSerializer, MsCrmPhoneContactsSerializer
+from .serializers import CatalogAlbumOnlyNameSerializer, MsCrmIntrestSerializer, MsCrmBusinessTypeSerializer, MsCrmIntrestsGroupsSerializer, MsCrmPhoneContactsSerializer, MsCrmUserWhatsappCampaignSerializer, MsCrmUsersForExcelSerializer
 import pandas as pd
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.http import HttpResponse
 from django.db.models import Prefetch
+from catalogAlbum.models import CatalogAlbum
 
 def fix_ms_crm(request):
     if request.user and request.user.is_superuser:

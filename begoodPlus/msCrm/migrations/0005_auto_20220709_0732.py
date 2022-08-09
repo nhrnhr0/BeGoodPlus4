@@ -22,11 +22,11 @@ class Migration(migrations.Migration):
                 ('message', models.TextField(verbose_name='message')),
             ],
         ),
-        migrations.AddField(
-            model_name='mscrmuser',
-            name='clients',
-            field=models.ManyToManyField(blank=True, to='client.Client', verbose_name='clients'),
-        ),
+        # migrations.AddField(
+        #     model_name='mscrmuser',
+        #     name='clients',
+        #     field=models.ManyToManyField(blank=True, to='client.Client', verbose_name='clients'),
+        # ),
         migrations.CreateModel(
             name='MsCrmWhatsappMessagesSent',
             fields=[
