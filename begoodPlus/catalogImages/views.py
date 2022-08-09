@@ -29,6 +29,7 @@ from django.contrib import messages
 from django.urls import reverse
 import decimal
 import pandas as pd
+from django.db.models import Q
 from provider.models import Provider
 from rest_framework.pagination import PageNumberPagination
 from django.db.models import Q
@@ -117,24 +118,27 @@ class SlimThroughImageSerializer(serializers.ModelSerializer):
         fields = ('catalogImage','catalogAlbum','image_order','catalogAlbum__title')
 
 def get_main_info(request):
-    album_id = request.GET.get('album_id')
-    top_album = request.GET.get('top', None)
+    album_slug = request.GET.get('album')
+    top_album_slug = request.GET.get('top', None)
+    top_album = None
     product_id = request.GET.get('product_id', None)
-    if top_album:
-        top_albums = list(CatalogAlbum.objects.filter(topLevelCategory__id=top_album).order_by('album_order').values('id','title', 'cimage', 'is_public'))  
+    if top_album_slug:
+        top_album = TopLevelCategory.objects.get(slug=top_album_slug)
+        top_albums = list(CatalogAlbum.objects.filter(topLevelCategory=top_album).order_by('album_order').values('id','title', 'cimage', 'is_public', 'slug',))  
     else:
-        top_albums = list(CatalogAlbum.objects.filter(is_public=True).order_by('album_order').values('id','title', 'cimage', 'is_public'))
+        top_albums = []#list(CatalogAlbum.objects.filter(is_public=True).order_by('album_order').values('id','title', 'cimage', 'is_public', 'slug',))
     ret = {
-            'album_id': album_id,
-            'top': top_album,
+            'album_id': top_album_slug,
+            'top': top_album.slug if top_album else '',
             'query_string': request.GET.urlencode(),
             'top_albums': top_albums
         }
     # create og meta to retrun, can be product_id or album_id or top_album by this priority order
     if product_id:
         ret['og_meta'] = get_product_og_meta(product_id)
-    elif album_id:
-        ret['og_meta'] = get_album_og_meta(album_id)
+    elif album_slug:
+        album = CatalogAlbum.objects.get(slug=album_slug)
+        ret['og_meta'] = get_album_og_meta(album)
     elif top_album:
         ret['og_meta'] = get_top_album_og_meta(top_album)
     else:
@@ -150,8 +154,7 @@ def get_product_og_meta(product_id):
         'title': product.title,
         'description': product.description[:175] + '...',
     }
-def get_album_og_meta(album_id):
-    album = CatalogAlbum.objects.get(id=album_id)
+def get_album_og_meta(album):
     return {
         'icon': 'https://res.cloudinary.com/ms-global/image/upload/c_scale,w_365/c_scale,u_v1649744644:msAssets:image_5_qo7yhx.jpg,w_500/' + album.cimage,
         'title': album.title,
@@ -159,9 +162,12 @@ def get_album_og_meta(album_id):
         'keywords': album.keywords,
     }
 def get_top_album_og_meta(top_album):
-    top_album = TopLevelCategory.objects.get(id=top_album)
     if not top_album.image:
-        icon = 'https://res.cloudinary.com/ms-global/image/upload/c_scale,w_365/c_scale,u_v1649744644:msAssets:image_5_qo7yhx.jpg,w_500/' + CatalogAlbum.objects.filter(topLevelCategory__id=top_album.id).first().cimage
+        first_album= CatalogAlbum.objects.filter(Q(topLevelCategory__id=top_album.id) & ~Q(cimage='')).first()
+        if first_album:
+            icon = 'https://res.cloudinary.com/ms-global/image/upload/c_scale,w_365/c_scale,u_v1649744644:msAssets:image_5_qo7yhx.jpg,w_500/' + first_album.cimage
+        else:
+            icon = ''
     else:
         icon = 'https://res.cloudinary.com/ms-global/image/upload/c_scale,w_365/c_scale,u_v1649744644:msAssets:image_5_qo7yhx.jpg,w_500/' + top_album.image.public_id
     return {
@@ -197,11 +203,11 @@ class AlbumImagesApiView(APIView, CurserResultsSetPagination):
         # get the images for the album
         ##images = self.album.images.order_by('throughimage__image_order')
         if self.top_album:
-            qs = ThroughImage.objects.filter(catalogAlbum__topLevelCategory__id=self.top_album).order_by('image_order')
+            qs = ThroughImage.objects.filter(catalogAlbum__topLevelCategory__slug=self.top_album).order_by('image_order')
             #qs = CatalogImage.objects.filter(albums__topLevelCategory__id=self.top_album).order_by('throughimage__image_order')
         # return paginated images
-        if self.album_id:
-            qs = ThroughImage.objects.filter(catalogAlbum__id=self.album_id).order_by('image_order')
+        if self.album:
+            qs = ThroughImage.objects.filter(catalogAlbum=self.album).order_by('image_order')
             #qs = CatalogImage.objects.filter(albums__id=self.album_id).order_by('throughimage__image_order')
         qs = qs.select_related('catalogImage','catalogAlbum')
         qs= self.paginate_queryset(qs, self.request)
@@ -214,9 +220,17 @@ class AlbumImagesApiView(APIView, CurserResultsSetPagination):
     
     def get(self, request):
         self.request = request
-        self.album_id = request.GET.get('album_id')
+        album_slug = request.GET.get('album')
         self.top_album = request.GET.get('top')
-        
+        if album_slug:
+            self.album = CatalogAlbum.objects.get(slug=album_slug)
+        else:
+            self.album = None
+            
+            cmp_slug = request.GET.get('cmp', None)
+            
+            if cmp_slug:
+                self.album = CatalogAlbum.objects.get(slug=cmp_slug)
         #self.album = CatalogAlbum.objects.get(id=self.album_id)
         products = self.get_queryset()
         products = [o.catalogImage for o in products]

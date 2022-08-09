@@ -7,7 +7,7 @@ from color.serializers import ColorSerializer
 class TopLevelCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = TopLevelCategory
-        fields = ('id', 'name', 'get_image','albums',)
+        fields = ('id', 'name', 'get_image','albums','slug','my_order',)
         ordering = ('my_order',)
 
 

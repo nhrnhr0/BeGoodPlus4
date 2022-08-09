@@ -48,23 +48,30 @@ import datetime
 from adminsortable.models import Sortable
 from cloudinary.models import CloudinaryField
 import datetime
-
+from django.utils.text import slugify
 class TopLevelCategory(models.Model):
     name = models.CharField(max_length=50, unique=True)
     my_order = models.PositiveIntegerField(default=0, blank=True, null=True, db_index=True, unique=True)
     image = CloudinaryField('image', blank=True, null=True, public_id='topLevelCategory/' + datetime.datetime.now().strftime('%Y-%m-%d-%H_%M_%S_%f'), format='png')
-    
+    slug = models.SlugField(max_length=120, verbose_name=_("slug"), unique=True, blank=True, null=True, allow_unicode=True)
     get_image = property(lambda self: self.image.url[len('https://res.cloudinary.com/ms-global/image/upload/'):] if self.image else '' if self.albums.order_by('album_order').first() == None else self.albums.order_by('album_order').first().cimage)
     def __str__(self) -> str:
         return self.name
     class Meta:
         ordering = ('my_order',)
     def image_display(self):
-        return mark_safe('<img src="{}" width="50" height="50" />'.format(CLOUDINARY_BASE_URL + self.get_image))
+        img = self.get_image
+        return mark_safe('<img src="{}" width="50" height="50" />'.format(CLOUDINARY_BASE_URL + img))
+    
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name, allow_unicode=True)
+        super(TopLevelCategory, self).save(*args, **kwargs)
+    
 class CatalogAlbum(MPTTModel):
     topLevelCategory = models.ForeignKey(to="TopLevelCategory", on_delete=models.SET_NULL, null=True, blank=True, related_name='albums')
     title = models.CharField(max_length=120, verbose_name=_("title"))
-    slug = models.SlugField(max_length=120, verbose_name=_("slug"))
+    slug = models.SlugField(max_length=120, verbose_name=_("slug"), unique=True, blank=True, null=True, allow_unicode=True)
     description= models.TextField(verbose_name=_('description'), default='', blank=True)
     fotter = models.TextField(verbose_name=_('fotter'), default='', blank=True)
     keywords = models.TextField(verbose_name=_('keyworks'), default='', blank=True)
@@ -82,6 +89,9 @@ class CatalogAlbum(MPTTModel):
         if self.cimage == '' and self.id != None:
             img = self.images.order_by('throughimage__image_order').first()
             self.cimage = img.cimage
+            
+        if not self.slug or self.slug == '' or CatalogAlbum.objects.filter(slug=self.slug).count() > 1:
+            self.slug = slugify(self.title, allow_unicode=True)
         super(CatalogAlbum, self).save(*args, **kwargs)
         
         
