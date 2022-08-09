@@ -22,4 +22,9 @@ class CatalogAlbumSerializer(serializers.ModelSerializer):
         model = CatalogAlbum
         #fields = '__all__'
         exclude = ('images',)
-        
+    
+class CatalogAlbumSlimSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = CatalogAlbum
+        fields = ('id','topLevelCategory','title','slug','is_public','is_campain','cimage','album_order',)

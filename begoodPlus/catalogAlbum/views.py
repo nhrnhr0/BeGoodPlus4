@@ -4,13 +4,17 @@ from clientApi.serializers import AlbumClientApi
 
 # Create your views here.
 from catalogAlbum.models import CatalogAlbum, TopLevelCategory
-from .serializers import CatalogAlbumSerializer, TopLevelCategorySerializer
+from .serializers import CatalogAlbumSerializer, CatalogAlbumSlimSerializer, TopLevelCategorySerializer
 from django.http import JsonResponse
 
 from rest_framework import viewsets
 from rest_framework.decorators import api_view
 from rest_framework.renderers import JSONRenderer
-
+@api_view(['GET'])
+def get_catalog_albums(request):
+    albums = CatalogAlbum.objects.filter(is_public=True,is_campain=False,).order_by('topLevelCategory','album_order')
+    serializer = CatalogAlbumSlimSerializer(albums, many=True)
+    return JsonResponse(serializer.data, safe=False)
 @api_view(['GET'])
 def get_main_categories(request):
     qs = TopLevelCategory.objects.all()
