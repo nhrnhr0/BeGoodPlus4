@@ -81,8 +81,8 @@ def admin_get_campain_products(request, campain_id):
             
 
             products = CampainProduct.objects.filter(monthCampain=campain)
-            for p in products:
-                p.priceTable.all().delete()
+            # for p in products:
+            #     p.priceTable.all().delete()
                 #prices = PriceTable.objects.filter(campainProduct=p)
                 #prices.delete()
             products.delete()
@@ -91,15 +91,16 @@ def admin_get_campain_products(request, campain_id):
                 id=prod.get('id')
                 order=prod.get('order')
                 catalogImage=prod.get('catalogImage')
-                priceTable=prod.get('priceTable')
+                #priceTable=prod.get('priceTable')
+                newPrice = prod.get('newPrice')
                 
-                data, is_created = CampainProduct.objects.get_or_create(id=id,monthCampain=campain,order=order,catalogImage_id=catalogImage)
+                data, is_created = CampainProduct.objects.get_or_create(id=id,monthCampain=campain,order=order,catalogImage_id=catalogImage, newPrice=newPrice)
                 
-                prices = []
-                for price in priceTable:
-                    pri = PriceTable.objects.create(**price)
-                    prices.append(pri)
-                data.priceTable.set(prices)
+                # prices = []
+                # for price in priceTable:
+                #     pri = PriceTable.objects.create(**price)
+                #     prices.append(pri)
+                # data.priceTable.set(prices)
                 print(is_created, data)
                 new_products.append(data)
             #serializer = AdminProductCampainSerilizer(data, many=True)

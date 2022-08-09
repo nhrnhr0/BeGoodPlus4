@@ -4,18 +4,119 @@ from rest_framework.decorators import api_view, permission_classes
 from django.http import JsonResponse
 from rest_framework.permissions import AllowAny
 
-from catalogAlbum.models import CatalogAlbum
-from .models import MsCrmBusinessTypeSelect, MsCrmIntrest, MsCrmIntrestsGroups, MsCrmUser, MsCrmWhatsappMessagesSent
+from .models import LeadSubmit, MsCrmBusinessSelectToIntrests, MsCrmBusinessTypeSelect, MsCrmIntrest, MsCrmIntrestsGroups, MsCrmUser
 from .tasks import new_user_subscribed_task
-from .serializers import CatalogAlbumOnlyNameSerializer, MsCrmIntrestSerializer, MsCrmBusinessTypeSerializer, MsCrmIntrestsGroupsSerializer, MsCrmUserWhatsappCampaignSerializer, MsCrmUsersForExcelSerializer
+from .serializers import MsCrmIntrestSerializer, MsCrmBusinessTypeSerializer, MsCrmIntrestsGroupsSerializer, MsCrmPhoneContactsSerializer
 import pandas as pd
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.http import HttpResponse
 from django.db.models import Prefetch
 
-# Create your views here.
+def fix_ms_crm(request):
+    if request.user and request.user.is_superuser:
+        
+        if request.method == "GET":
+            return render(request, 'msCrm/fix_ms_crm.html')
+        elif request.method == "POST":
+            # iterate over all msCrmUsers and resave them
+            msCrmUsers = MsCrmUser.objects.all()
+            for msCrmUser in msCrmUsers:
+                msCrmUser.save()
 
+            
+            
+            file = request.FILES['file']
+            df = pd.read_excel(file, header=0, dtype=str)
+            for index, row in df.iterrows():
+                phone = str(row['טלפון'])
+                phone = phone.replace('\u200f', '')
+                phone = phone.replace('\u202a', '')
+                phone = phone.replace('\u202c', '')
+                phone = phone.replace('\u200f', '')
+                phone = phone.replace('⁩', '')
+                phone = phone.replace('⁦', '')
+                phone = ''.join(e for e in phone if e.isalnum())
+                if phone.startswith('05'):
+                    phone = '972' + phone[1:]
+                if phone.startswith('+'):
+                    phone = phone[1:]
+                
+                
+                # find the user with the phone number
+                user = MsCrmUser.objects.filter(phone=phone)
+                if user.exists():
+                    user = user.first()
+                    businessSelectStr = row['select']
+                    businessSelectObj = MsCrmBusinessTypeSelect.objects.filter(name=businessSelectStr)
+                    if businessSelectObj.exists():
+                        businessSelectObj = businessSelectObj.first()
+                        user.businessSelect = businessSelectObj
+                        user.save()
+            return redirect('/admin/msCrm/mscrmuser/')
+
+
+@api_view(['GET'])
+def get_all_mscrm_phone_contacts(request):
+    if(request.user.is_superuser):
+        phoneContacts = MsCrmUser.objects.filter(phone__isnull=False)
+        data = MsCrmPhoneContactsSerializer(phoneContacts, many=True).data
+        return JsonResponse(data, safe=False)
+    else:
+        return JsonResponse({"error":"not authorized"}, safe=False)
+# Create your views here.
+def upload_mscrm_business_select_to_intrests_exel(request):
+    if request.user and request.user.is_superuser:
+        
+        if request.method == "GET":
+            return render(request, 'msCrm/upload_mscrm_business_select_to_intrests_exel.html')
+        elif request.method == "POST":
+            
+            b_select_to_intrests = MsCrmBusinessSelectToIntrests.objects.all()
+            
+            file = request.FILES['file']
+            sheetName = request.POST.get('sheetName')
+            xls = pd.ExcelFile(file)
+            df1 =  pd.read_excel(xls, sheetName,header=0,dtype=str)
+            existing_phone_count = 0
+            new_phone_count = 0
+            print(df1.head())
+            for index, row in df1.iterrows():
+                b_name = row['שם העסק']#str(row['שם העסק'])
+                b_select_name = str(row['תחום עיסוק לפי אדמין'])
+                if b_select_name == 'nan' or b_select_name == '' or b_select_name == 'None':
+                    continue
+                
+                businessSelectObj=MsCrmBusinessTypeSelect.objects.get(name=b_select_name)
+                contact_man = str(row['איש קשר'])
+                if contact_man == 'nan':
+                    contact_man = b_name.split(' ')[0]
+                phone = row['טלפון']
+                if phone.startswith('05'):
+                    phone = '972' + phone[1:]
+                #print(index,b_select_name, contact_man)
+                if MsCrmUser.objects.filter(phone=phone).exists():
+                    existing_phone_count += 1
+                    continue
+                else:
+                    new_phone_count += 1
+                
+                user = MsCrmUser.objects.create(
+                    businessName=b_name,
+                    businessSelect=businessSelectObj,
+                    name=contact_man,
+                    phone=phone
+                )
+                entrys = b_select_to_intrests.filter(businessSelect=businessSelectObj)
+                if entrys.exists():
+                    entry = entrys.first()
+                    user.intrests.set(entry.intrests.all())
+                user.save()
+            messages.add_message(request, messages.INFO, '{} מספר מספרי טלפון חדשים ו{} מספר מספרי טלפון קיימים'.format(new_phone_count, existing_phone_count))
+            return redirect('/admin/msCrm/mscrmuser/')
+        #return render(request, 'msCrm/upload_mscrm_business_select_to_intrests_exel.html')
+    else:
+        return redirect('admin/login/?next=' + request.path)
 
 def import_mscrm_from_exel(request):
     if request.user and request.user.is_superuser:
@@ -234,4 +335,25 @@ def mcrm_lead_register(request):
         'data': 'ok',
         'id': crmObj.id,
         'is_created': is_created,
+    })
+@api_view(['POST'])
+def api_save_lead(request):
+    form_data = request.data
+    phone = form_data.get('bussiness_phone', '')
+    if (phone.startswith('05')):
+        phone = phone[1:]
+        phone = '+972' + phone
+    phone = phone.replace('-', '')
+    phone = phone.replace(' ', '')
+    obj = LeadSubmit.objects.create(
+        bussiness_name=form_data['bussiness_name'],
+        businessType=form_data.get('bussiness_type', ''),
+        address=form_data.get('bussiness_address', ''),
+        name=form_data.get('bussiness_contact_name', ''),
+        phone=phone
+    )
+    return JsonResponse({
+        'status': 200,
+        'data': 'ok',
+        'id': obj.id,
     })

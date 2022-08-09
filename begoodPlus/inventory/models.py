@@ -15,6 +15,7 @@ from django.db.models.signals import m2m_changed
 from django.db.models import Count
 from django.utils.html import mark_safe
 
+
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 # Create your models here.
@@ -25,6 +26,18 @@ from django.contrib.contenttypes.models import ContentType
 # - providerProductName
 # - fastProductTitle - text - autofill with product->title
 # provider_id & providerProductName are unique together
+
+class ProviderRequest(models.Model):
+    provider = models.ForeignKey(to=Provider, on_delete=models.CASCADE, related_name='provider_request')
+    size= models.ForeignKey(to=ProductSize, on_delete=models.SET_DEFAULT, default=108, null=True, blank=True)
+    varient = models.ForeignKey(to=CatalogImageVarient, on_delete=models.CASCADE, null=True, blank=True)
+    color = models.ForeignKey(to=Color, on_delete=models.SET_DEFAULT,default=76, null=True, blank=True)
+    force_physical_barcode = models.BooleanField(default=False)
+    quantity = models.IntegerField(default=0)
+    class Meta:
+        ordering = ['provider', 'color', 'varient','force_physical_barcode', 'size']
+
+
 class PPN(models.Model):
     product = models.ForeignKey(to=CatalogImage, on_delete=models.DO_NOTHING, verbose_name=_('product'))
     provider = models.ForeignKey(to=Provider, on_delete=models.SET_DEFAULT, default=7, verbose_name=_('provider'))
@@ -132,6 +145,7 @@ class DocStockEnter(models.Model):
     isAplied = models.BooleanField(default=False)
     byUser = models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
     new_products = models.JSONField(null=True, blank=True)
+    
     '''def apply_doc(self):
         for item in self.items.all():
             sku = item.sku
@@ -188,6 +202,9 @@ class SKUM(models.Model):
 # - sku  - FK SKUM
 # - amount - int
 # - price - float
+
+
+
 class ProductEnterItems(models.Model):
     #sku = models.ForeignKey(to=SKUM, on_delete=models.SET_DEFAULT, default=1)
     ppn = models.ForeignKey(to=PPN, on_delete=models.CASCADE)
@@ -240,3 +257,9 @@ class ProductEnterItemsEntries(models.Model):
         color = self.color.name if self.color else ''
         verient = self.verient.name if self.verient else ''
         return size + ' ' + color + ' ' + verient + ' | ' + str(self.quantity)
+    
+# class ProviderEnterItems(models.Model):
+#     from inventory.models import ProviderRequest
+#     providerRequest = models.ForeignKey(to='ProviderRequest', on_delete=models.CASCADE)
+#     quantity = models.IntegerField(default=0)
+#     providerEnterItems = models.ForeignKey(to=ProductEnterItems, on_delete=models.CASCADE)

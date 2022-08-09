@@ -9,7 +9,10 @@ from productSize.models import ProductSize
 from packingType.models import PackingType
 from provider.models import Provider
 import datetime
-
+class CatalogImageIdSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CatalogImage
+        fields = ('id',)
 # I don't think this is used somewhere.
 class CatalogImageApiSerializer(serializers.ModelSerializer):
     class Meta:

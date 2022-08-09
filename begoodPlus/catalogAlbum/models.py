@@ -2,6 +2,7 @@ from django.db import models
 from django.urls.base import reverse
 # Create your models here.
 from django.utils.translation import gettext_lazy  as _
+from begoodPlus.settings.base import CLOUDINARY_BASE_URL
 
 
 from catalogImages.models import CatalogImage
@@ -45,17 +46,23 @@ class CatalogAlbum(models.Model):
 from mptt.models import MPTTModel, TreeForeignKey
 import datetime
 from adminsortable.models import Sortable
+from cloudinary.models import CloudinaryField
+import datetime
 
 class TopLevelCategory(models.Model):
     name = models.CharField(max_length=50, unique=True)
     my_order = models.PositiveIntegerField(default=0, blank=True, null=True, db_index=True, unique=True)
+    image = CloudinaryField('image', blank=True, null=True, public_id='topLevelCategory/' + datetime.datetime.now().strftime('%Y-%m-%d-%H_%M_%S_%f'), format='png')
+    
+    get_image = property(lambda self: self.image.url[len('https://res.cloudinary.com/ms-global/image/upload/'):] if self.image else '' if self.albums.order_by('album_order').first() == None else self.albums.order_by('album_order').first().cimage)
     def __str__(self) -> str:
         return self.name
     class Meta:
         ordering = ('my_order',)
-
+    def image_display(self):
+        return mark_safe('<img src="{}" width="50" height="50" />'.format(CLOUDINARY_BASE_URL + self.get_image))
 class CatalogAlbum(MPTTModel):
-    topLevelCategory = models.ForeignKey(to="TopLevelCategory", on_delete=models.SET_NULL, null=True, blank=True, related_name='topLevelCategory')
+    topLevelCategory = models.ForeignKey(to="TopLevelCategory", on_delete=models.SET_NULL, null=True, blank=True, related_name='albums')
     title = models.CharField(max_length=120, verbose_name=_("title"))
     slug = models.SlugField(max_length=120, verbose_name=_("slug"))
     description= models.TextField(verbose_name=_('description'), default='', blank=True)
@@ -135,7 +142,7 @@ from adminsortable.models import Sortable
 class ThroughImage(Sortable):
     catalogImage = SortableForeignKey(CatalogImage, on_delete=models.CASCADE, verbose_name=_('catalog image'))
     catalogAlbum = models.ForeignKey(CatalogAlbum, on_delete=models.CASCADE, verbose_name=_('catalog album'))
-
+    
     image_order = models.PositiveIntegerField(default=0, editable=False, db_index=True)
     class Meta(Sortable.Meta):
         ordering = ['image_order']

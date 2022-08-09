@@ -64,6 +64,16 @@ def get_products_info(request):
     })
     return Response(ser.data)
 
+@api_view(['GET'])
+@renderer_classes((JSONRenderer,))
+def get_products_info2(request):
+    ids = request.GET.getlist('pid[]')
+    images = CatalogImage.objects.filter(id__in=ids)
+    images = images.prefetch_related('colors','sizes','albums','varients').select_related('packingTypeClient')
+    ser = ImageClientApi(images, many=True,context={
+        'request': request
+    })
+    return Response(ser.data)
 @api_view(('GET',))
 @renderer_classes((JSONRenderer,))
 def get_album_images(request, pk):
@@ -136,7 +146,11 @@ class CustomAuthToken(ObtainAuthToken):
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data,
                                            context={'request': request})
-        serializer.is_valid(raise_exception=True)
+        
+        if not serializer.is_valid(raise_exception=False):
+            return Response({'error': serializer.errors}, status=200)
+            
+        
         user = serializer.validated_data['user']
         
         login(request, user)

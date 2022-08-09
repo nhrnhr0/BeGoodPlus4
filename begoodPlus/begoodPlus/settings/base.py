@@ -310,7 +310,6 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static_cdn"),
     Path(BASE_DIR).parent / "svelte" / "public" / "build",
 ]
-
 MEDIA_URL= '/media/'
 MEDIA_ROOT = os.path.join(STATIC_ROOT, 'media_root/')
 CLOUDINARY_BASE_URL = 'https://res.cloudinary.com/ms-global/image/upload/'

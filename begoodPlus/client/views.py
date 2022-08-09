@@ -86,7 +86,7 @@ def create_client_user(request):
 @api_view(['GET'])
 def get_all_users_by_admin(request):
     if request.user.is_superuser:
-        clients = Client.objects.all()
+        clients = Client.objects.all().select_related('user')
         data = [{'id':client.pk, 'username':client.user.username, 'businessName':client.businessName,'email': client.email, 'privateCompany': client.privateCompany, } for client in clients]
         return JsonResponse(data, safe=False)
     else:
@@ -182,7 +182,10 @@ def userLogEntryView(request):
         
 import uuid
 def get_active_session_logger(uid, device, user):
-    my_uid=  str(uuid.UUID(uid))
+    try:
+        my_uid=  str(uuid.UUID(uid))
+    except:
+        my_uid = str(uuid.uuid4())
     ret , created= UserSessionLogger.objects.get_or_create(uid=my_uid, device=device, user_id=user.id, is_active=True)
     print('get_active_session_logger: ', ret,' created: ', created)
     return ret

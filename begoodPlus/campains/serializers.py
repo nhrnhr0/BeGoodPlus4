@@ -18,13 +18,14 @@ class priceTableSerializer(ModelSerializer):
 
 class ClientProductCampainSerilizer(ModelSerializer):
     catalogImage = ImageClientApi('catalogImage')
-    priceTable = priceTableSerializer(many=True)
+    #priceTable = priceTableSerializer(many=True)
+    
     #cimg = serializers.CharField(source='catalogImage.cimage')
     #title = serializers.CharField(source='catalogImage.title')
 
     class Meta:
         model = CampainProduct
-        fields = ('id', 'priceTable', 'catalogImage')
+        fields = ('id', 'catalogImage', 'newPrice', 'order',)
 
 
 class ClientMonthCampainSerializer(ModelSerializer):
@@ -46,15 +47,15 @@ class AdminMonthCampainSerializer(ModelSerializer):
 
 class AdminProductCampainSerilizer(ModelSerializer):
     #catalogImage = CatalogImageApiSerializer('catalogImage')
-    priceTable = priceTableSerializer(many=True)
+    #priceTable = priceTableSerializer(many=True)
     cimg = serializers.CharField(source='catalogImage.cimage')
     title = serializers.CharField(source='catalogImage.title')
     cost_price = serializers.CharField(source='catalogImage.cost_price')
-
+    client_price = serializers.CharField(source='catalogImage.client_price')
     class Meta:
         model = CampainProduct
         fields = ('id', 'order', 'cimg', 'title', 'catalogImage',
-                  'monthCampain', 'priceTable', 'cost_price')
+                  'monthCampain', 'newPrice', 'cost_price', 'client_price',)
 
 
 class AdminCartCampainSerializer(ModelSerializer):

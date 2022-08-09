@@ -1,14 +1,17 @@
 from ast import Return
 import datetime
 from gettext import Catalog
+import io
+import zipfile
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
+from matplotlib.pyplot import annotate
 
 from catalogImages.models import CatalogImage
-from inventory.models import WarehouseStock
+from inventory.models import PPN, WarehouseStock
 from provider.models import Provider
 from smartbee.models import SmartbeeTokens
-from .serializers import AdminMOrderItemSerializer, AdminMOrderListSerializer, AdminMOrderSerializer, AdminProviderRequestrSerializer, AdminProviderResuestSerializerWithMOrder, MOrderCollectionSerializer
+from .serializers import AdminMOrderItemSerializer, AdminMOrderListSerializer, AdminMOrderSerializer, AdminProviderRequestrInfoSerializer, AdminProviderRequestrSerializer, AdminProviderResuestSerializerWithMOrder, MOrderCollectionSerializer
 from morders.models import CollectedInventory, MOrder, MOrderItem, MOrderItemEntry, ProviderRequest, TakenInventory
 from rest_framework import status
 import json
@@ -17,11 +20,24 @@ from django.shortcuts import render
 from io import BytesIO
 from django.http import HttpResponse
 from django.db import connection, reset_queries
+from django.db.models import F
 
 from django.template.loader import get_template
 #from docxtpl import DocxTemplate
 from productSize.models import ProductSize
 from docx.enum.table import WD_TABLE_DIRECTION
+
+
+def request_provider_info_admin(request, ppn_id):
+    if not request.user.is_superuser:
+        return HttpResponseRedirect('/admin/login/?next=' + request.path)
+    ppn_obj = PPN.objects.get(id=ppn_id)
+    product_id= ppn_obj.product_id
+    provider_id = ppn_obj.provider_id
+    obj = ProviderRequest.objects.filter(orderItem__product=product_id, provider=provider_id)
+    serializer = AdminProviderRequestrInfoSerializer(obj, many=True)
+    return JsonResponse(serializer.data, status=status.HTTP_200_OK, safe=False)
+
 
 @api_view(['GET'])
 def get_all_orders(request):
@@ -45,21 +61,38 @@ def provider_request_update_entry_admin(request):
         obj = ProviderRequest.objects.get(id=data['id'])
         obj.quantity = data['quantity']
     else:
-        obj = ProviderRequest.objects.create(
+        morderItem = MOrderItem.objects.get(product_id=data['product']['id'], morder=data['morder'])
+        objs = ProviderRequest.objects.filter(
             provider_id=data['provider'],
             size_id=data['size'],
             varient_id=data['varient'],
             color_id=data['color'],
             force_physical_barcode=data['force_physical_barcode'],
-            quantity=data['quantity'],
+            orderItem=morderItem
         )
+        if objs.exists():
+            obj = objs.first()
+            obj.quantity = data['quantity']
+        else:
+            obj = ProviderRequest.objects.create(
+                provider_id=data['provider'],
+                size_id=data['size'],
+                varient_id=data['varient'],
+                color_id=data['color'],
+                force_physical_barcode=data['force_physical_barcode'],
+                quantity=data['quantity'],
+            )
+            obj.orderItem.add(morderItem)
         #morder = MOrder.objects.get(id=data['morder'])
-        morderItem = MOrderItem.objects.get(product_id=data['product']['id'], morder=data['morder'])
-        obj.orderItem.add(morderItem)
+        
     print(obj)
-    data = AdminProviderResuestSerializerWithMOrder(obj).data
     obj.save()
-    return JsonResponse({'success': 'success', 'data': data}, status=status.HTTP_200_OK)
+    if obj.quantity <= 0:
+        obj.delete()
+        return JsonResponse({'status': 'Entry deleted'}, status=status.HTTP_200_OK)
+    else:
+        data = AdminProviderResuestSerializerWithMOrder(obj).data
+        return JsonResponse({'status': 'success', 'data': data}, status=status.HTTP_200_OK)
 def create_provider_docs(request):
     if not request.user.is_superuser:
         return JsonResponse({'error': 'You are not authorized to perform this action'}, status=status.HTTP_401_UNAUTHORIZED)
@@ -75,7 +108,11 @@ def create_provider_docs(request):
         provider_requests_ids = json.loads(request.GET.get('ids'))
         objs = ProviderRequest.objects.filter(id__in=provider_requests_ids)
         print(objs)
-        vals = objs.values('provider__name','orderItem__product__title','size__size','varient__name','color__name',).annotate(total_quantity=Sum('quantity')).order_by('provider__name','orderItem__product__title','size__size','varient__name','color__name')
+        #orderItem__product__title =  orderItem.first()__product__title
+        vals = objs.values(ספק=F('provider__name'),מוצר=F('orderItem__product__title'),מידה=F('size__size'),מודל=F('varient__name'),צבע=F('color__name',))\
+                                .annotate(כמות=Sum('quantity'))\
+                                .order_by('ספק','מוצר','מידה','מודל','צבע')
+                
         
         
         
@@ -83,21 +120,41 @@ def create_provider_docs(request):
         print(vals)
         providers_split = {}
         for val in vals:
-            if val['provider__name'] not in providers_split:
-                providers_split[val['provider__name']] = {'products':[]}
-            providers_split[val['provider__name']]['products'].append(val)
+            if val['ספק'] not in providers_split:
+                providers_split[val['ספק']] = {'products':[]}
+            providers_split[val['ספק']]['products'].append(val)
         print(providers_split)
         for provider_name, data in providers_split.items():
             sizes_set = set()
             for product in data['products']:
-                sizes_set.add(product['size__size'])
+                sizes_set.add(product['מידה'])
             sizes_list = list(sizes_set)
             sizes_list.sort(key=lambda x: sizes[x])
             data['sizes_list'] = sizes_list
-        
+        docs = []
         for provider_name, data in providers_split.items():
             document = create_providers_docx(data)
+            docs.append({'doc': document, 'name': provider_name})
 
+        
+        zip_buffer = io.BytesIO()
+        with zipfile.ZipFile(zip_buffer, "a", zipfile.ZIP_DEFLATED, False) as zip_file:
+            for doc in docs:
+                file_stream = io.BytesIO()
+                data = doc['doc']
+                data.save(file_stream)
+                file_name = doc['name'] + '.docx'
+                file_stream.seek(0)
+                zip_file.writestr(file_name , file_stream.getvalue())
+        zip_buffer.seek(0)
+        response = HttpResponse(zip_buffer.read(), content_type="application/zip")
+        response['Content-Disposition'] = 'attachment; filename="products.zip"'
+        return response
+        
+        # create a zip file with all the docs with the name
+        # provider_name_date.zip
+
+        
         response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
         response['Content-Disposition'] = 'attachment; filename=download.docx'
         document.save(response)
@@ -166,9 +223,9 @@ def create_providers_docx(doc_data):
         
         
         data = doc_data['products'] # [{'provider__name': 'defult provider', 'orderItem__product__title': 'חולצת דרייפיט שרוול ארוך', 'size__size': 'ONE SIZE', 'varient__name': None, 'color__name': 'שחור', 'total_quantity': 4}, {'provider__name': 'אוניברסל פרטס', 'orderItem__product__title': "בידורית 12 אינץ' power", 'size__size': '38', 'varient__name': None, 'color__name': 'no color', 'total_quantity': 10},...
-        indexs = ['orderItem__product__title','varient__name', 'color__name']
-        column = 'size__size'
-        value = 'total_quantity'
+        indexs = ['מוצר','מודל', 'צבע']
+        column = 'מידה'
+        value = 'כמות'
         pivot_table = PivotReshape(data=data, index=indexs, columns=[column], value=value)
         data = pivot_table.pivot()
         key_cols = pivot_table.col_keys_list
@@ -195,12 +252,12 @@ def create_providers_docx(doc_data):
         
         
         t = document.add_table( 1,len(headers_keys))
-        headers_keys = reversed(headers_keys)
+        header_len = len(headers_keys)
+        rev_headers_keys = reversed(headers_keys)
         t.direction = WD_TABLE_DIRECTION.RTL
         header = t.rows[0].cells
-        header_len = len(headers_keys)
-        for idx, head in enumerate(headers_keys):
-            header[header_len - idx] = str(head)
+        for idx, head in enumerate(rev_headers_keys):
+            header[header_len - idx - 1].text = str(head)
         
         # header[0].text = 'שם מוצר'
         # header[1].text = 'מודל'
@@ -211,8 +268,8 @@ def create_providers_docx(doc_data):
         for _, row_data in data.items():
             print(row_data)
             row = t.add_row()
-
-            for header_key in headers_keys:
+            rev_headers_keys = reversed(headers_keys)
+            for idx, header_key in enumerate(rev_headers_keys):
                 print(row_data['data'].get(header_key, None), ' - ', header_key)
                 row.cells[headers_keys.index(header_key)].text = str(row_data['data'].get(header_key, None))
         
@@ -404,7 +461,7 @@ def morder_edit_order_add_product_entries(request):
             print(color_id, size_id, varient_id, amount)
             if size_id != None and color_id != None:
                 objs = MOrderItemEntry.objects.filter(
-                    product=orderObj,
+                    orderItem=orderObj,
                     color_id=int(color_id) if color_id != None else None,
                     size_id=int(size_id) if size_id != None else None,
                     varient_id=int(varient_id) if varient_id != None else None,
@@ -415,7 +472,7 @@ def morder_edit_order_add_product_entries(request):
                         size_id=int(size_id) if size_id != None else None,
                         varient_id=int(varient_id) if varient_id != None else None,
                     )
-                    obj.product.set([orderObj])
+                    obj.orderItem.set([orderObj])
                 else:
                     obj = objs.first()
                 obj.quantity = int(amount)

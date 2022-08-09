@@ -8,12 +8,13 @@ from client.models import Client
 from catalogAlbum.models import CatalogAlbum
 from django.utils.html import mark_safe
 
+from client.models import Client
 
 class MsCrmBusinessTypeSelect(models.Model):
     name = models.CharField(max_length=100, unique=True)
-
+    order = models.IntegerField(default=0)
     class Meta():
-        ordering = ['id', ]
+        ordering = ['order',]
 
     def __str__(self):
         return self.name
@@ -48,6 +49,9 @@ class MsCrmIntrestsGroups(models.Model):
         return self.name
 # Create your models here.
 
+class MsCrmBusinessSelectToIntrests(models.Model):
+    businessSelect = models.OneToOneField(to=MsCrmBusinessTypeSelect, on_delete=models.CASCADE, verbose_name=_('business'))
+    intrests = models.ManyToManyField(CatalogAlbum, blank=True, verbose_name=_('intrested'))
 
 class MsCrmUser(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
@@ -76,10 +80,22 @@ class MsCrmUser(models.Model):
     clients = models.ManyToManyField(
         to=Client, blank=True, verbose_name=_('clients'))
 
+
+    clients = models.ManyToManyField(to=Client, blank=True, verbose_name=_('clients'), related_name='ms_crm_users')
+    def __str__(self):
+        return str(self.name) + '[' + str(self.phone) + ']'
+    
+    def save(self, *args, **kwargs):
+        if self.phone:
+            # remove the first char of self.get_clean_phonenumber()
+            self.phone = self.get_clean_phonenumber()[1:]
+        super().save(*args, **kwargs)
     def get_clean_phonenumber(self):
         # remove \u2066 and ⁩ and '+'
         # then add one + at the begining and return
         phone = self.phone
+        phone = phone.replace(' ' , '')
+        phone = phone.replace('-', '')
         phone = phone.replace('\u200f', '')
         phone = phone.replace('\u202a', '')
         phone = phone.replace('\u202c', '')
@@ -89,7 +105,6 @@ class MsCrmUser(models.Model):
         phone = phone.replace('+', '')
         if phone.startswith('05'):
             phone = '972' + phone[1:]
-
         return '+' + phone
 
 
@@ -119,3 +134,19 @@ class MsCrmWhatsappMessagesSent(models.Model):
 
     class Meta():
         ordering = ['created_at', ]
+    
+
+
+
+
+# api_save_lead
+class LeadSubmit(models.Model):
+    bussiness_name = models.CharField(max_length=100, verbose_name=_('business name'))
+    businessType = models.CharField(max_length=254, verbose_name=_('business type'))
+    #businessTypeCustom = models.CharField(max_length=100, null=True, blank=True, verbose_name=_('business type custom'))
+    address = models.CharField(max_length=100, null=True, blank=True, verbose_name=_('address'))
+    name = models.CharField(max_length=100, verbose_name=_('name'))
+    phone = models.CharField(max_length=100, verbose_name=_('phone'))
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    

@@ -1,4 +1,7 @@
+
+from datetime import datetime
 from email.policy import default
+import decimal
 from django.db import models
 from django.utils.translation import gettext_lazy  as _
 from PIL import Image
@@ -7,6 +10,7 @@ from django.core.files.base import ContentFile
 from django.utils.html import mark_safe
 from django.conf import settings
 from django.urls import reverse
+import pytz
 from begoodPlus.settings.base import CLOUDINARY_BASE_URL
 from catalogImageAttrs.models import ProductPrices
 
@@ -84,6 +88,28 @@ class CatalogImage(models.Model):
     ]
     discount = models.CharField(max_length=50, choices=DISCOUNT_TYPES, default=NO_DISCOUNT, null=True, blank=True)
     
+    
+    def get_user_price(self, user_id):
+        from campains.models import CampainProduct
+        if user_id == None:
+            return decimal.Decimal(self.client_price).normalize()
+        catalogImage_id = self.id
+        # check if the product is in any campaign of the client
+        # campain = MonthCampain.objects.filter(users__user_id=user_id, products__id=catalogImage_id).first()
+        # israel
+        tz = pytz.timezone('Israel')
+        
+        campainProduct = CampainProduct.objects.filter(monthCampain__users__user_id=user_id, catalogImage_id=catalogImage_id,monthCampain__is_shown=True,monthCampain__startTime__lte=datetime.now(tz),monthCampain__endTime__gte=datetime.now(tz)).first()
+        #campainProduct = campainProduct.first()
+        if campainProduct:
+            return decimal.Decimal(campainProduct.newPrice).normalize()
+        else:
+            from client.models import Client
+            client = Client.objects.get(user_id=user_id)
+            tariff = client.tariff
+            price = self.client_price + (self.client_price * (tariff/100))
+            price = round(price * 2) / 2 if price > 50 else "{:.2f}".format(price)
+            return decimal.Decimal(price).normalize()
     def price_component(buy, sell):
         prcent = ((buy / sell) - 1)*100
         precent_clr ="green" if prcent>0 else "red"
@@ -113,6 +139,7 @@ class CatalogImage(models.Model):
     class Meta():
         verbose_name = _('Catalog image')
         verbose_name_plural = _('Catalog images')
+        ordering = ('-date_created',)
         #ordering = ['throughimage__image_order'] 
         
     def get_cloundinary_url(self):

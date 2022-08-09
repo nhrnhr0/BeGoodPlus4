@@ -11,7 +11,7 @@ from catalogImages.models import CatalogImage
 from client.models import Client
 from color.models import Color
 from core.models import SvelteCartModal
-from inventory.models import WarehouseStock
+from inventory.models import ProviderRequest, WarehouseStock
 from productSize.models import ProductSize
 from catalogImages.models import CatalogImageVarient
 from provider.models import Provider
@@ -56,15 +56,6 @@ class MOrderItemEntry(models.Model):
             raise ValidationError("This product has already been added")
 
 
-class ProviderRequest(models.Model):
-    provider = models.ForeignKey(to=Provider, on_delete=models.CASCADE, related_name='provider_request')
-    size= models.ForeignKey(to=ProductSize, on_delete=models.SET_DEFAULT, default=108, null=True, blank=True)
-    varient = models.ForeignKey(to=CatalogImageVarient, on_delete=models.CASCADE, null=True, blank=True)
-    color = models.ForeignKey(to=Color, on_delete=models.SET_DEFAULT,default=76, null=True, blank=True)
-    force_physical_barcode = models.BooleanField(default=False)
-    quantity = models.IntegerField(default=0)
-    class Meta:
-        ordering = ['provider', 'color', 'varient','force_physical_barcode', 'size']
 
 class MOrderItem(models.Model):
     """
@@ -102,9 +93,9 @@ class MOrder(models.Model):
     cart = models.ForeignKey(to=SvelteCartModal, on_delete=models.SET_NULL, null=True)
     client = models.ForeignKey(to=Client, on_delete=models.SET_NULL, null=True)
     agent = models.ForeignKey(to=User, on_delete=models.SET_NULL, null=True)
-    name = models.CharField(max_length=100)
-    phone = models.CharField(max_length=100)
-    email = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, blank=True, null=True)
+    phone = models.CharField(max_length=100, blank=True, null=True)
+    email = models.CharField(max_length=100, blank=True, null=True)
     status = models.CharField(max_length=100, choices=[('new', 'חדש'), ('in_progress', 'בתהליך'), ('done', 'גמור')])
     products = models.ManyToManyField(to=MOrderItem, blank=True, related_name='morder')
     message = models.TextField(null=True, blank=True)

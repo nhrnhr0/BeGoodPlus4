@@ -497,16 +497,16 @@ class Client(models.Model):
         primary_key=True,
         verbose_name=_('user'))
     def __str__(self):
-        try:
-            #mtype = str(self.CLIENT_TYPE._display_map.get(int(self.clientType)))
-            pass
-        except:
-            pass
-        if self.clientType == None:
-            self.clientType = CLIENT_TYPE_ND
-        mtype = CLIENT_TYPES_DICT.get(self.clientType)
-        
-        ret = self.businessName + ' - ' + str(mtype)
+        # try:
+        #     #mtype = str(self.CLIENT_TYPE._display_map.get(int(self.clientType)))
+        #     pass
+        # except:
+        #     pass
+        # if self.clientType == None:
+        #     self.clientType = CLIENT_TYPE_ND
+        # mtype = CLIENT_TYPES_DICT.get(self.clientType)
+        username = (' - ' + self.user.username) if self.user else ''
+        ret = str(self.user.id) + ') ' + self.businessName + username
         return ret
     businessName = models.CharField(verbose_name=_('business name '), max_length=120)
     email = models.EmailField(verbose_name=_('email'), max_length=120)

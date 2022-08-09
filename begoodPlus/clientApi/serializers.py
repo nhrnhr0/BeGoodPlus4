@@ -2,16 +2,20 @@
 
 
 from django.db import models
+from campains.models import MonthCampain, CampainProduct
 from catalogImages.serializers import CatalogImageSerializer
 from catalogImages.models import CatalogImage
 from catalogAlbum.models import CatalogAlbum
 from rest_framework import serializers
 from django_filters.rest_framework import DjangoFilterBackend
 import decimal
+from core.pagination import StandardResultsSetPagination
 from productColor.models import ProductColor
 from productSize.models import ProductSize
 from catalogLogos.models import CatalogLogo
-
+from datetime import datetime
+import pytz
+from client.models import Client
 class LogoClientApi(serializers.ModelSerializer):
     class Meta:
         model = CatalogLogo
@@ -45,10 +49,10 @@ class ImageClientApi(serializers.ModelSerializer):
     varients = VarientSerializer(read_only=True, many=True)
     #current_user = serializers.SerializerMethodField('_user')
     price = serializers.SerializerMethodField('_get_price')
-    
+    newPrice = serializers.SerializerMethodField('_get_new_price')
     class Meta:
         model = CatalogImage
-        fields = ('id','title','description','cimage','colors','sizes','varients','can_tag','discount', 'albums','amountSinglePack','amountCarton', 'show_sizes_popup', 'client_price', 'out_of_stock', 'barcode', 'has_physical_barcode','price')
+        fields = ('id','title','description','cimage','colors','sizes','varients','can_tag','discount', 'albums','amountSinglePack','amountCarton', 'show_sizes_popup', 'client_price', 'out_of_stock', 'barcode', 'has_physical_barcode','price', 'newPrice')
         filter_backends = [DjangoFilterBackend]
         filterset_fields = ['albums']
     # Use this method for the custom field
@@ -59,16 +63,42 @@ class ImageClientApi(serializers.ModelSerializer):
     #             return request.user.client.businessName if request.user.client else ''
     #         else:
     #             return ''
+    def _get_new_price(self, obj):
+        request = self.context.get('request', None)
+        if request:
+            if request.user.is_authenticated and request.user.client:
+                if request.user.client:
+                    catalogImage_id = obj.id
+                    if request.user.is_superuser and request.GET.get('actAs'):
+                        user_id = request.GET.get('actAs')
+                    else:
+                        user_id = request.user.id
+                    # check if the product is in any campaign of the client
+                    # campain = MonthCampain.objects.filter(users__user_id=user_id, products__id=catalogImage_id).first()
+                    # israel
+                    tz = pytz.timezone('Israel')
+                    
+                    campainProduct = CampainProduct.objects.filter(monthCampain__users__user_id=user_id, catalogImage_id=catalogImage_id,monthCampain__is_shown=True,monthCampain__startTime__lte=datetime.now(tz),monthCampain__endTime__gte=datetime.now(tz)).first()
+                    #campainProduct = campainProduct.first()
+                    if campainProduct:
+                        return campainProduct.newPrice
+                return None
+        return None
     def _get_price(self, obj):
         request = self.context.get('request', None)
         if request:
             if request.user.is_authenticated and request.user.client:
                 if request.user.client:
                     tariff = request.user.client.tariff
-                    price = obj.client_price + (obj.client_price * (tariff/100))
-                    price = round(price * 2) / 2 if price > 50 else "{:.2f}".format(price)
-                    return decimal.Decimal(price).normalize()
-                return obj.client_price
+                    if request.user.is_superuser and request.GET.get('actAs'):
+                        user_id = request.GET.get('actAs')
+                        client = Client.objects.get(user_id=user_id)
+                        tariff = client.tariff
+                else:
+                    tariff = 0
+                price = obj.client_price + (obj.client_price * (tariff/100))
+                price = round(price * 2) / 2 if price > 50 else "{:.2f}".format(price)
+                return decimal.Decimal(price).normalize()
         return 0
 class ColorClientApi(serializers.ModelSerializer):
     class Meta:
