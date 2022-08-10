@@ -256,14 +256,14 @@ def svelte_cart_form(request):
             else:
                 user_id = request.user
         # check if uuid is valid
-        
+
         try:
             user_uuid = uuid.UUID(my_uuid)
         except ValueError:
             user_uuid = uuid.uuid4()
         db_cart = SvelteCartModal.objects.create(user=user_id, device=device, uid=user_uuid, businessName=business_name,
                                                  name=name, phone=phone, email=email, message=message, agent=agent, order_type=order_type)
-        # data.products.set(products)   
+        # data.products.set(products)
         db_cart.productsRaw = raw_cart
         # products = [{'id': 5, 'amount': 145, 'mentries': {...}}, {'id': 18, 'amount': 0, 'mentries': {...}}, {'id': 138, 'amount': 0}]
         data = []
@@ -279,7 +279,7 @@ def svelte_cart_form(request):
                     user_id = request.user.id
                     cimage = CatalogImage.objects.get(id=pid)
                     price = cimage.get_user_price(user_id)
-                    unitPrice = price#cimage.client_price
+                    unitPrice = price  # cimage.client_price
                 except CatalogImage.DoesNotExist:
                     unitPrice = 0
             print_desition = p.get('print', False)
@@ -316,7 +316,7 @@ def svelte_cart_history(request):
             'detail': 'User is not authenticated',
         })
     previous_carts = list(
-        SvelteCartModal.objects.all().filter(user_id=request.user).order_by('-created_date').values('user','user__username', 'name','businessName','productsRaw','message','created_date','agent','agent__client__businessName'))
+        SvelteCartModal.objects.all().filter(user_id=request.user).order_by('-created_date').values('user', 'user__username', 'name', 'businessName', 'productsRaw', 'message', 'created_date', 'agent', 'agent__client__businessName'))
     return JsonResponse(previous_carts, safe=False)
 
 
@@ -402,29 +402,33 @@ def get_session_key(request):
 #from .tasks import save_user_search
 def convert_to_heb(txt):
     fix_txt_list = []
-    heb_case = { 'a': 'ש', 'b': 'נ', 'c': 'ב', 'd': 'ג', 'e': 'ק', 'f': 'כ', 'g': 'ע', 'h': 'י', 'i': 'ן', 'j': 'ח', 'k': 'ל', 'l': 'ך', 'm': 'צ', 'n': 'מ', 'o': 'ם', 'p': 'פ', 'q': '/', 'r': 'ר', 's': 'ד', 't': 'א', 'u': 'ו', 'v': 'ה', 'w': '\'', 'x': 'ס', 'y': 'ט', 'z': 'ז', ';': 'ף', '.': 'ץ', ',': 'ת', 'A': 'ש', 'B': 'נ', 'C': 'ב', 'D': 'ג', 'E': 'ק', 'F': 'כ', 'G': 'ע', 'H': 'י', 'I': 'ן', 'J': 'ח', 'K': 'ל', 'L': 'ך', 'M': 'צ', 'N': 'מ', 'O': 'ם', 'P': 'פ', 'Q': '/', 'R': 'ר', 'S': 'ד', 'T': 'א', 'U': 'ו', 'V': 'ה', 'W': "'", 'X': 'ס', 'Y': 'ט', 'Z': 'ז', }
+    heb_case = {'a': 'ש', 'b': 'נ', 'c': 'ב', 'd': 'ג', 'e': 'ק', 'f': 'כ', 'g': 'ע', 'h': 'י', 'i': 'ן', 'j': 'ח', 'k': 'ל', 'l': 'ך', 'm': 'צ', 'n': 'מ', 'o': 'ם', 'p': 'פ', 'q': '/', 'r': 'ר', 's': 'ד', 't': 'א', 'u': 'ו', 'v': 'ה', 'w': '\'', 'x': 'ס', 'y': 'ט', 'z': 'ז', ';': 'ף',
+                '.': 'ץ', ',': 'ת', 'A': 'ש', 'B': 'נ', 'C': 'ב', 'D': 'ג', 'E': 'ק', 'F': 'כ', 'G': 'ע', 'H': 'י', 'I': 'ן', 'J': 'ח', 'K': 'ל', 'L': 'ך', 'M': 'צ', 'N': 'מ', 'O': 'ם', 'P': 'פ', 'Q': '/', 'R': 'ר', 'S': 'ד', 'T': 'א', 'U': 'ו', 'V': 'ה', 'W': "'", 'X': 'ס', 'Y': 'ט', 'Z': 'ז', }
     for char in txt:
         if char in heb_case:
             fix_txt_list.append(heb_case[char])
         else:
             fix_txt_list.append(char)
     return ''.join(fix_txt_list)
+
+
 def autocompleteModel(request):
     start = time.time()
     # if request.is_ajax():
     q = request.GET.get('q', '')
     q2 = convert_to_heb(q)
     show_hidden = request.GET.get('show_hidden', False)
-    
-    products_qs = CatalogImage.objects.filter(\
-        Q(title__icontains=q) | Q(title__icontains=q2) | \
-        Q(albums__title__icontains=q) | Q(albums__title__icontains=q2) | \
-        Q(albums__keywords__icontains=q) | Q(albums__keywords__icontains=q2) | \
-        Q(barcode__icontains=q) | Q(barcode__icontains=q2) \
-        ).distinct()
-        
+
+    products_qs = CatalogImage.objects.filter(
+        Q(title__icontains=q) | Q(title__icontains=q2) |
+        Q(albums__title__icontains=q) | Q(albums__title__icontains=q2) |
+        Q(albums__keywords__icontains=q) | Q(albums__keywords__icontains=q2) |
+        Q(barcode__icontains=q) | Q(barcode__icontains=q2)
+    ).distinct()
+
     if not show_hidden:
-        products_qs = products_qs.filter(Q(is_active=True) & ~Q(albums=None) & Q(albums__is_public=True))
+        products_qs = products_qs.filter(Q(is_active=True) & ~Q(
+            albums=None) & Q(albums__is_public=True))
     #  & (~Q(albums=None) & Q(is_active = True)
 #
     # is_hidden=False
