@@ -8,7 +8,8 @@ from begoodPlus.settings.base import CLOUDINARY_BASE_URL
 from catalogImages.models import CatalogImage
 from django.utils.html import mark_safe
 from itertools import chain
-
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
 '''
 class CatalogAlbum(models.Model):
     title = models.CharField(max_length=120, verbose_name=_("title"))
@@ -47,6 +48,7 @@ from mptt.models import MPTTModel, TreeForeignKey
 import datetime
 from adminsortable.models import Sortable
 from cloudinary.models import CloudinaryField
+import uuid
 import datetime
 from django.utils.text import slugify
 class TopLevelCategory(models.Model):
@@ -67,7 +69,10 @@ class TopLevelCategory(models.Model):
         if not self.slug:
             self.slug = slugify(self.name, allow_unicode=True)
         super(TopLevelCategory, self).save(*args, **kwargs)
-    
+
+
+
+
 class CatalogAlbum(MPTTModel):
     topLevelCategory = models.ForeignKey(to="TopLevelCategory", on_delete=models.SET_NULL, null=True, blank=True, related_name='albums')
     title = models.CharField(max_length=120, verbose_name=_("title"))
@@ -79,6 +84,7 @@ class CatalogAlbum(MPTTModel):
     parent = TreeForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='children')
     is_public = models.BooleanField(verbose_name=_('is public'), default=True)
     is_campain = models.BooleanField(verbose_name=_('is campain'), default=False)
+    show_on_main_page = models.BooleanField(verbose_name=_('show on main page'), default=False)
     cimage = models.CharField(max_length=500, verbose_name=_("cimage"), default='', blank=True)
     #campain = models.ForeignKey('MonthCampain', on_delete=models.CASCADE, null=True, blank=True, related_name='album')
     #renew_for = models.DurationField(null=True, blank=True, default=datetime.timedelta(days=3))
@@ -88,7 +94,8 @@ class CatalogAlbum(MPTTModel):
     def save(self, *args, **kwargs):
         if self.cimage == '' and self.id != None:
             img = self.images.order_by('throughimage__image_order').first()
-            self.cimage = img.cimage
+            if img:
+                self.cimage = img.cimage
             
         if not self.slug or self.slug == '' or CatalogAlbum.objects.filter(slug=self.slug).count() > 1:
             self.slug = slugify(self.title, allow_unicode=True)
@@ -145,7 +152,13 @@ class CatalogAlbum(MPTTModel):
     view_in_website_link.short_description = _("view in website")
         #return ret
     '''
-
+@receiver(pre_save, sender=CatalogAlbum)
+def populate_slug(sender, instance, *args, **kwargs):
+    if not instance.slug or instance.slug == '':
+        instance.slug = slugify(instance.title, allow_unicode=True)
+    if CatalogAlbum.objects.filter(slug=instance.slug).count() > (1 - (1 if instance.id == None else 0)):
+        instance.slug = slugify(instance.title, allow_unicode=True) + '-' + str(uuid.uuid4())[:8]
+    pass
 from adminsortable.fields import SortableForeignKey
 from adminsortable.models import Sortable
 

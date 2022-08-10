@@ -131,6 +131,7 @@ class MonthCampain(models.Model):
                 img.save()
                 # self.album.images.add(product)
                 print(img, is_created)
+        self.album.save()
         super(MonthCampain, self).save(*args, **kwargs)
         #[a[0] for a in list(self.products.values_list('id'))]
 # catalogImage,catalogAlbum,image_order

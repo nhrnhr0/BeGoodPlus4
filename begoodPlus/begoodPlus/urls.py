@@ -82,6 +82,7 @@ clientRouter.register(r'logos', LogoClientViewSet)
 #from rest_framework_simplejwt.views import (TokenObtainPairView,TokenRefreshView,)
 urlpatterns = [
      #path('my-api/main/main', MainAlbumsViewSet.as_view({'get': 'list'})),
+     path('get-main-page-albums/', get_main_albums_for_main_page),
      path('my-api/get-similar-products/<int:product_id>', get_similar_products, name='get_similar_products'),
      path('my-api/get-main-info', get_main_info, name='get_main_info'),
      path('my-api/get-product-slim', get_products_slim, name='get_producs_slim'),
