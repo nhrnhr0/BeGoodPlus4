@@ -1,3 +1,4 @@
+from email.policy import default
 from rest_framework import serializers
 
 from .models import CatalogAlbum, TopLevelCategory
@@ -24,7 +25,7 @@ class CatalogAlbumSerializer(serializers.ModelSerializer):
         exclude = ('images',)
     
 class CatalogAlbumSlimSerializer(serializers.ModelSerializer):
-    
+    topLevelCategory__slug = serializers.CharField(source='topLevelCategory.slug',default='')
     class Meta:
         model = CatalogAlbum
-        fields = ('id','topLevelCategory','title','slug','is_public','is_campain','cimage','album_order',)
+        fields = ('id','topLevelCategory','topLevelCategory__slug', 'title','slug','is_public','is_campain','cimage','album_order',)

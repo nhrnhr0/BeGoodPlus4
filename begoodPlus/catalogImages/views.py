@@ -37,6 +37,22 @@ from rest_framework import serializers
 from datetime import datetime
 from rest_framework.views import APIView
 import time
+
+class SearchProductSerializer(serializers.ModelSerializer):
+    public_album_slug = serializers.SerializerMethodField()
+    public_album_id = serializers.SerializerMethodField()
+    public_album_top_slug = serializers.SerializerMethodField()
+    
+    def get_public_album_slug(self, obj):
+        return obj.albums.filter(is_public=True).first().slug
+    def get_public_album_id(self, obj):
+        return obj.albums.filter(is_public=True).first().id
+    def get_public_album_top_slug(self, obj):
+        return obj.albums.filter(is_public=True).first().topLevelCategory.slug
+    class Meta:
+        model = CatalogImage
+        fields = ('id', 'title', 'cimage', 'public_album_slug', 'public_album_id','albums', 'public_album_top_slug')
+
 class SlimCatalogImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = CatalogImage

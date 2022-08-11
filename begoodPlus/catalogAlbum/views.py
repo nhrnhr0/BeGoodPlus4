@@ -12,7 +12,7 @@ from rest_framework.decorators import api_view
 from rest_framework.renderers import JSONRenderer
 @api_view(['GET'])
 def get_catalog_albums(request):
-    albums = CatalogAlbum.objects.filter(is_public=True,is_campain=False,).order_by('topLevelCategory','album_order')
+    albums = CatalogAlbum.objects.filter(is_public=True,is_campain=False,).order_by('topLevelCategory','album_order').select_related('topLevelCategory')
     serializer = CatalogAlbumSlimSerializer(albums, many=True)
     return JsonResponse(serializer.data, safe=False)
 @api_view(['GET'])

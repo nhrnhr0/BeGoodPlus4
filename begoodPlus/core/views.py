@@ -1,3 +1,4 @@
+from catalogImages.views import SearchProductSerializer
 from .models import UserSearchData
 from django.db.models import Value, CharField
 from itertools import chain
@@ -430,9 +431,9 @@ def autocompleteModel(request):
     # is_hidden=False
     ser_context = {'request': request}
     products_qs_short = products_qs[0:20]
-    products_qs_short = products_qs_short.prefetch_related(
-        'colors', 'sizes', 'albums')
-    products = ImageClientApi(products_qs_short, many=True, context={
+    # products_qs_short = products_qs_short.prefetch_related(
+    #     'colors', 'sizes', 'albums')
+    products = SearchProductSerializer(products_qs_short, many=True, context={
         'request': request
     })
     #products = SearchCatalogImageSerializer(products_qs,context=ser_context, many=True)
