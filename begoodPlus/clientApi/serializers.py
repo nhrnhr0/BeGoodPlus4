@@ -98,7 +98,9 @@ class ImageClientApi(serializers.ModelSerializer):
                     tariff = 0
                 price = obj.client_price + (obj.client_price * (tariff/100))
                 price = round(price * 2) / 2 if price > 50 else "{:.2f}".format(price)
-                return decimal.Decimal(price).normalize()
+                ret = decimal.Decimal(price).normalize()
+                ret = float(ret)
+                return ret
         return 0
 class ColorClientApi(serializers.ModelSerializer):
     class Meta:
