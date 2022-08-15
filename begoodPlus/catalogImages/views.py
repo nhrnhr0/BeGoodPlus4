@@ -1,3 +1,4 @@
+from email.policy import default
 from django.http import HttpRequest
 from django.http.response import JsonResponse
 from django.shortcuts import redirect, render
@@ -54,9 +55,11 @@ class SearchProductSerializer(serializers.ModelSerializer):
         fields = ('id', 'title', 'cimage', 'public_album_slug', 'public_album_id','albums', 'public_album_top_slug')
 
 class SlimCatalogImageSerializer(serializers.ModelSerializer):
+    main_public_album_top__slug = serializers.CharField(source='main_public_album.topLevelCategory.slug', default=None)
+    main_public_album__slug = serializers.CharField(source='main_public_album.slug', default=None)
     class Meta:
         model = CatalogImage
-        fields = ('id', 'title', 'cimage', 'price', 'new_price', 'main_public_album',)
+        fields = ('id', 'title', 'cimage', 'price', 'new_price', 'main_public_album__slug','main_public_album_top__slug')
     #main_album = serializers.SerializerMethodField('_get_main_album')
     new_price = serializers.SerializerMethodField('_get_new_price')
     price = serializers.SerializerMethodField('_get_price')
@@ -170,6 +173,15 @@ def get_main_info(request):
             top_albums = list(CatalogAlbum.objects.filter(topLevelCategory=top_album).order_by('album_order').values('id','title', 'cimage', 'is_public', 'slug',))  
     else:
         top_albums = []#list(CatalogAlbum.objects.filter(is_public=True).order_by('album_order').values('id','title', 'cimage', 'is_public', 'slug',))
+    
+    productInfo = None
+    if product_id:
+        product = CatalogImage.objects.get(id=product_id)
+        #productObj = product.select_related('packingTypeClient')
+        productSer = ImageClientApi(product, many=False,context={
+            'request': request
+        })
+        productInfo = productSer.data
     ret = {
             'album_id': top_album_slug,
             'top': top_album.slug if top_album else '',
@@ -179,6 +191,7 @@ def get_main_info(request):
     # create og meta to retrun, can be product_id or album_id or top_album by this priority order
     if product_id:
         ret['og_meta'] = get_product_og_meta(product_id)
+        ret['productInfo'] = productInfo
     elif album_slug:
         album = CatalogAlbum.objects.get(slug=album_slug)
         ret['og_meta'] = get_album_og_meta(album)
@@ -233,10 +246,12 @@ def get_products_slim(request):
         return JsonResponse(data, safe=False)
     else:
         return JsonResponse({'error': 'no product_ids provided'})
-    
+
+@api_view(['GET'])
 def get_similar_products(request, product_id):
     product = CatalogImage.objects.get(id=product_id)
     similar_products = CatalogImage.objects.filter(Q(albums__id__in=product.albums.all()) & ~Q(id=product.id)).order_by('?')[:500]
+    similar_products = similar_products.select_related('main_public_album', 'main_public_album__topLevelCategory')
     catalogImage_serializer = SlimCatalogImageSerializer(similar_products, many=True, context={'request': request})
     data = catalogImage_serializer.data
     return JsonResponse(data, safe=False)
@@ -277,10 +292,10 @@ class AlbumImagesApiView(APIView, CurserResultsSetPagination):
             
         # filter only is_active images for both instances ThroughImage and CatalogImage
         if qs.model is CatalogImage:
-            qs = qs.prefetch_related('albums',)
+            qs = qs.prefetch_related('albums',).select_related('main_public_album','main_public_album__topLevelCategory')
             qs = qs.filter(is_active=True)
         else:
-            qs = qs.prefetch_related('catalogImage', 'catalogImage__albums')
+            qs = qs.prefetch_related('catalogImage', 'catalogImage__albums').select_related('catalogImage__main_public_album','catalogImage__main_public_album__topLevelCategory')
             qs = qs.filter(catalogImage__is_active=True)
     
 
