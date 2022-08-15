@@ -155,7 +155,10 @@ def get_main_info(request):
     top_album = None
     product_id = request.GET.get('product_id', None)
     if top_album_slug:
-        if(top_album_slug == 'campaigns'):
+        if(top_album_slug == 'new'):
+            top_album = FakeTop(0, 'חדשים', 'new', True)
+            top_albums = list(CatalogAlbum.objects.filter(is_public=True).order_by('album_order').values('id','title', 'cimage', 'is_public', 'slug',))
+        elif(top_album_slug == 'campaigns'):
             #top_album = class with id, title, slug, cimage, is_public
             top_album = FakeTop(0,'מבצעים', 'campaigns', True)
             
@@ -199,6 +202,8 @@ def get_main_info(request):
         icon = None
         if(top_album_slug == 'campaigns'):
             icon= 'https://res.cloudinary.com/ms-global/image/upload/v1660132407/msAssets/Group_10_copy_10_3_-removebg-preview_1_uq2t66.png'
+        elif (top_album_slug == 'new'):
+            icon = 'https://res.cloudinary.com/ms-global/image/upload/v1660122508/msAssets/icons8-new-product-64_gikxga.png'
         ret['og_meta'] = get_top_album_og_meta(top_album, icon)
     else:
         ret['og_meta'] = {}
@@ -262,7 +267,11 @@ class AlbumImagesApiView(APIView, CurserResultsSetPagination):
     def get_ordering(self, request, queryset, view):
         ret = super().get_ordering(request, queryset, view)
         if self.top_album == 'new' or (self.top_album == 'campaigns' and not self.album):
-            return ('-date_created','id')
+            if (queryset.model == CatalogImage):
+                return ('-date_created','id',)
+            elif (queryset.model == ThroughImage):
+                return ('-catalogImage__date_created','catalogImage__id',)
+                
         else:
             return ret
     
@@ -294,9 +303,11 @@ class AlbumImagesApiView(APIView, CurserResultsSetPagination):
         if qs.model is CatalogImage:
             qs = qs.prefetch_related('albums',).select_related('main_public_album','main_public_album__topLevelCategory')
             qs = qs.filter(is_active=True)
+            qs = qs.distinct()
         else:
             qs = qs.prefetch_related('catalogImage', 'catalogImage__albums').select_related('catalogImage__main_public_album','catalogImage__main_public_album__topLevelCategory')
             qs = qs.filter(catalogImage__is_active=True)
+            qs = qs.distinct()
     
 
         qs= self.paginate_queryset(qs, self.request)
