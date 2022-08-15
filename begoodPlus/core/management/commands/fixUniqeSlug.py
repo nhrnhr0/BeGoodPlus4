@@ -16,3 +16,4 @@ class Command(BaseCommand):
         all_catalog_images = CatalogImage.objects.all()
         for catalog_image in all_catalog_images:
             catalog_image.save()
+    print('done')

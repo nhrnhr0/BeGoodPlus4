@@ -3,6 +3,16 @@
 from django.db import migrations, models
 
 
+def rename_slug_duplicates(apps, schema_editor):
+    CatalogAlbum = apps.get_model('catalogAlbum', 'CatalogAlbum')
+    print('Rename slug duplicates for CatalogAlbum')
+    
+    for album in CatalogAlbum.objects.all():
+        if album.slug and CatalogAlbum.objects.filter(slug=album.slug).count() > 1:
+            album.slug = None
+            album.save()
+        
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -10,6 +20,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.RunPython(rename_slug_duplicates), # Include the remove duplicates operation
         migrations.AlterField(
             model_name='catalogalbum',
             name='slug',
