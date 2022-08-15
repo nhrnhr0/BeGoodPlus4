@@ -99,6 +99,11 @@ class CatalogAlbum(MPTTModel):
             
         if not self.slug or self.slug == '' or CatalogAlbum.objects.filter(slug=self.slug).count() > 1:
             self.slug = slugify(self.title, allow_unicode=True)
+            if CatalogAlbum.objects.filter(slug=self.slug).exists():
+                    if self.id:
+                        self.slug = self.slug + '-' + str(self.id)
+                    else:
+                        self.slug = self.slug + '-' + str(uuid.uuid4()).split('-')[1]
         super(CatalogAlbum, self).save(*args, **kwargs)
         
         

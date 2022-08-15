@@ -82,6 +82,9 @@ class CatalogImage(models.Model):
     NO_DISCOUNT = ''
     DISCOUNT_10_PRES = '/static/assets/catalog/imgs/discount_10.gif'
     DISCOUNT_20_PRES = '/static/assets/catalog/imgs/discount_20.gif'
+    
+    main_public_album = models.ForeignKey(to='catalogAlbum.CatalogAlbum', related_name='main_album', on_delete=models.SET_NULL, null=True, blank=True)
+
 
 
     DISCOUNT_TYPES = [
@@ -203,6 +206,13 @@ class CatalogImage(models.Model):
             self.show_sizes_popup = False
         self.save()
     
+    def recalculate_main_public_album(self):
+        alb = self.albums.filter(is_public=True).first()
+        if alb:
+            self.main_public_album = alb
+            
+            
+            
     def save(self, *args, **kwargs):
         if self.update_image_to_cloudinary:
             # fails if your don't upload an image, so don't upload image to cloudinary
@@ -236,8 +246,12 @@ class CatalogImage(models.Model):
                     self.slug = self.slug + '-' + str(self.id)
                 else:
                     self.slug = self.slug + '-' + str(uuid.uuid4()).split('-')[1]
-        super(CatalogImage, self).save(*args,**kwargs)
         
+        if not self.main_public_album:
+            self.recalculate_main_public_album()
+        super(CatalogImage, self).save(*args,**kwargs)
+    
+    
     def render_thumbnail(self, *args, **kwargs):
         ret = ''
         if self.cimage:

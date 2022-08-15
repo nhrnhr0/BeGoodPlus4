@@ -37,7 +37,7 @@ from rest_framework import serializers
 from datetime import datetime
 from rest_framework.views import APIView
 import time
-
+from django.db.models.query import QuerySet
 class SearchProductSerializer(serializers.ModelSerializer):
     public_album_slug = serializers.SerializerMethodField()
     public_album_id = serializers.SerializerMethodField()
@@ -56,7 +56,8 @@ class SearchProductSerializer(serializers.ModelSerializer):
 class SlimCatalogImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = CatalogImage
-        fields = ('id', 'title', 'cimage', 'price', 'new_price')
+        fields = ('id', 'title', 'cimage', 'price', 'new_price', 'main_public_album',)
+    #main_album = serializers.SerializerMethodField('_get_main_album')
     new_price = serializers.SerializerMethodField('_get_new_price')
     price = serializers.SerializerMethodField('_get_price')
     def get_user_id(self):
@@ -103,7 +104,11 @@ class SlimCatalogImageSerializer(serializers.ModelSerializer):
         else:
             return None
         
-    
+    # def _get_main_album(self, obj):
+    #     alb = obj.albums.filter(is_public=True).first()
+    #     if alb:
+    #         return alb.id
+    #     return None
     def _get_price(self, obj):
         if self.client:
             price = obj.client_price + (obj.client_price * (self.tariff/100))
@@ -269,6 +274,16 @@ class AlbumImagesApiView(APIView, CurserResultsSetPagination):
             qs = ThroughImage.objects.filter(catalogAlbum=self.album).order_by('image_order')
             #qs = CatalogImage.objects.filter(albums__id=self.album_id).order_by('throughimage__image_order')
             qs = qs.select_related('catalogImage','catalogAlbum')
+            
+        # filter only is_active images for both instances ThroughImage and CatalogImage
+        if qs.model is CatalogImage:
+            qs = qs.prefetch_related('albums',)
+            qs = qs.filter(is_active=True)
+        else:
+            qs = qs.prefetch_related('catalogImage', 'catalogImage__albums')
+            qs = qs.filter(catalogImage__is_active=True)
+    
+
         qs= self.paginate_queryset(qs, self.request)
         # return all the catalogImages of the qs
         return qs

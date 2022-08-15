@@ -91,6 +91,7 @@ urlpatterns = [
      #path('my-api/get-main-albums', get_main_albums_for_main_page, name='get_main_albums_for_main_page'),
      path('api/v1/products', get_products_viewset.as_view({'get': 'list'}), name='get_products_viewset'),
      path('get-albums/', get_albums, name='get-albums'),
+     path('get-catalog-albums/<int:id>', get_catalog_albums, name='get-catalog-albums'),
      path('get-catalog-albums/', get_catalog_albums, name='get-catalog-albums'),
      path('get-main-categories/', get_main_categories, name='get-main-categories'),
      path('fix-ms-crm', fix_ms_crm, name='fix-ms-crm'),
