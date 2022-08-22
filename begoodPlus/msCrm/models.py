@@ -45,7 +45,7 @@ class MsCrmUser(models.Model):
     businessSelect = models.ForeignKey(to=MsCrmBusinessTypeSelect, on_delete=models.SET_NULL, verbose_name=_('business'), null=True, blank=True)
     businessTypeCustom = models.CharField(max_length=100, null=True, blank=True, verbose_name=_('business type custom'))
     name = models.CharField(max_length=100, verbose_name=_('name'))
-    phone = models.CharField(max_length=100, null=True, blank=True, verbose_name=_('phone'))
+    phone = models.CharField(max_length=100, null=True, blank=True, verbose_name=_('phone'), unique=True)
     email = models.EmailField(max_length=100, null=True, blank=True, verbose_name=_('email'))
     address = models.CharField(max_length=100, null=True, blank=True, verbose_name=_('address'))
     want_emails = models.BooleanField(default=True, verbose_name=_('want emails'))
