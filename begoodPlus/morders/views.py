@@ -487,7 +487,7 @@ def edit_morder(request, id):
         return HttpResponseRedirect('/admin/login/?next=' + request.path)
     context = {}
     context['my_data'] = {'id': id}
-    return render(request, 'morder_edit.html', context=context)
+    return render(request, 'morder_edit2.html', context=context)
 
 def api_delete_order_data_item(request, row_id):
     if not request.user.is_superuser:
@@ -852,7 +852,7 @@ def api_get_order_data2(request, id):
     order = MOrder.objects.select_related('client','agent').prefetch_related('products__toProviders', 'products','products__product__albums','products__taken', 'products__entries','products__entries__color','products__entries__size','products__entries__varient',).get(id=id)# 'products__taken__quantity','products__taken__color','products__taken__size','products__taken__varient','products__taken__barcode','products__taken__has_physical_barcode','products__taken__provider')
     data = AdminMOrderSerializer(order).data
     return JsonResponse(data, status=status.HTTP_200_OK)
-@api_view(['GET'])
+@api_view(['GET', 'POST'])
 def api_get_order_data(request, id):
     if not request.user.is_superuser:
         return JsonResponse({'status':'error'}, status=status.HTTP_403_FORBIDDEN)
@@ -905,19 +905,31 @@ def api_get_order_data(request, id):
                     {'id': 112, 'quantity': 0, 'color': 78, 'size': 91, 'varient': None, 'color_name': 'לבן', 'size_name': '2XL', 'varient_name': ''}
                 '''
                 e = p.entries.filter(id=entry['id'])
+                qyt = entry.get('quantity', '')
+                print('qyt', qyt)
+                qyt = int(qyt) if qyt != "" else 0
+                
                 if len(e) != 0:
                     e = e.first()
+                    # e.color_id = entry['color']
+                    # e.size_id = entry['size']
+                    # e.varient_id = entry.get('varient', None)
+                    if qyt > 0:
+                        e.quantity = qyt
+                        e.save()
+                    else:
+                        e.delete()
                 else:
-                    e = MOrderItemEntry()
-                    e.morder_item = p
-                    print('e1', e, 'save')
-                    e.save()
-                e.quantity = entry['quantity']
-                e.color_id = entry['color']
-                e.size_id = entry['size']
-                e.varient_id = entry['varient']
-                print('e2', e, 'save')
-                e.save()
+                    if qyt > 0:
+                        e = MOrderItemEntry(quantity =qyt,color_id = entry['color'],size_id = entry['size'],varient_id = entry.get('varient', None))
+                        e.morder_item = p
+                        print('e1', e, 'save')
+                        e.save()
+                        p.entries.add(e)
+                # e.
+                
+                # print('e2', e, 'save')
+                
         print('order', order, 'save')
         order.save()
         return JsonResponse({'status':'ok'}, status=status.HTTP_200_OK)

@@ -97,13 +97,12 @@ class AdminMOrderItemSerializer(serializers.ModelSerializer):
     entries = AdminMOrderItemEntrySerializer(many=True, read_only=True)
     providers = serializers.SerializerMethodField('get_providers')
     pbarcode = serializers.CharField(source='product.barcode')
-    # colors = serializers.SerializerMethodField('get_colors')
-    # sizes = serializers.SerializerMethodField('get_sizes')
-    # verients = serializers.SerializerMethodField('get_verients')
+    colors = serializers.SerializerMethodField('get_colors')
+    sizes = serializers.SerializerMethodField('get_sizes')
+    verients = serializers.SerializerMethodField('get_verients')
     available_inventory = serializers.SerializerMethodField('get_available_inventory')
     product = serializers.SerializerMethodField('get_product_serializer')
     toProviders = AdminProviderRequestrSerializer(many=True, read_only=True)
-    
     def get_product_serializer(self, obj):
         # serializer_context = {'request': self.context.get('request') }
         # product = CatalogImage.objects.get(id=obj.product.id)
@@ -178,7 +177,7 @@ class AdminMOrderItemSerializer(serializers.ModelSerializer):
         return list(ids)
     class Meta:
         model = MOrderItem
-        fields = ('id', 'product',  'price','providers', 'ergent', 'prining', 'embroidery', 'comment','product_name', 'entries','pbarcode','product_cimage','available_inventory','product','priningComment','embroideryComment','toProviders',)
+        fields = ('id', 'product',  'price','providers', 'ergent', 'prining', 'embroidery', 'comment','product_name', 'entries','pbarcode','product_cimage','available_inventory','product','priningComment','embroideryComment','toProviders','colors','sizes','verients',)
     
 
 class AdminMOrderListSerializer(serializers.ModelSerializer):
