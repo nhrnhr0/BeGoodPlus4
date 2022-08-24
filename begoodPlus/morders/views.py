@@ -889,6 +889,8 @@ def api_get_order_data(request, id):
             p.ergent = product['ergent']
             p.prining = product['prining']
             p.embroidery = product['embroidery']
+            p.embroideryComment = product.get('embroideryComment', '')
+            p.priningComment = product.get('priningComment', '')
             p.comment = product['comment']
             p.save()
             all_es = []

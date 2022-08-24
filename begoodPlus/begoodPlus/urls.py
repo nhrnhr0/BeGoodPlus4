@@ -46,7 +46,7 @@ from django.urls import path, include, re_path
 from provider.views import SvelteApiProviderViewSet, search_providers
 from rest_framework import routers
 from django.contrib.auth.models import User
-
+from core.views import submit_exel_to_smartbee
 from catalogImages.views import CatalogImageViewSet
 from catalogAlbum.views import CatalogAlbumViewSet, catalogView_api
 from client.views import create_client_user, get_all_users_by_admin, whoAmI, userLogEntryView
@@ -161,7 +161,7 @@ urlpatterns = [
     path('morders/edit-order-add-provider-entries/<int:entry_id>', morder_edit_order_add_provider_entries,name="morder_edit_order_add_provider_entries"),
     path('morders/view-order-pdf/<int:id>', view_morder_pdf, name='view_morder_pdf'),
     path('morders/view_morder_stock_document/<int:id>', view_morder_stock_document, name='view_morder_stock_document'),
-    
+    path('exel-to-smartbee/', submit_exel_to_smartbee),
     path('morders/list-orders-to-collect', list_orders_to_collect, name='admin_list_orders_to_collect'),
     path('morders/get-order-detail-to-collect', get_order_detail_to_collect, name='admin_get_order_detail_to_collect'),
     path('dashboard/orders-collection/collect/save', dashboard_orders_collection_collect_save, name='admin_dashboard_orders_collection_collect_save'),

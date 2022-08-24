@@ -4,6 +4,7 @@ var morderedit2 = (function () {
     'use strict';
 
     function noop() { }
+    const identity = x => x;
     function assign(tar, src) {
         // @ts-ignore
         for (const k in src)
@@ -40,6 +41,21 @@ var morderedit2 = (function () {
     }
     function is_empty(obj) {
         return Object.keys(obj).length === 0;
+    }
+    function validate_store(store, name) {
+        if (store != null && typeof store.subscribe !== 'function') {
+            throw new Error(`'${name}' is not a store with a 'subscribe' method`);
+        }
+    }
+    function subscribe(store, ...callbacks) {
+        if (store == null) {
+            return noop;
+        }
+        const unsub = store.subscribe(...callbacks);
+        return unsub.unsubscribe ? () => unsub.unsubscribe() : unsub;
+    }
+    function component_subscribe(component, store, callback) {
+        component.$$.on_destroy.push(subscribe(store, callback));
     }
     function create_slot(definition, ctx, $$scope, fn) {
         if (definition) {
@@ -109,8 +125,60 @@ var morderedit2 = (function () {
         }
         return result;
     }
+
+    const is_client = typeof window !== 'undefined';
+    let now = is_client
+        ? () => window.performance.now()
+        : () => Date.now();
+    let raf = is_client ? cb => requestAnimationFrame(cb) : noop;
+
+    const tasks = new Set();
+    function run_tasks(now) {
+        tasks.forEach(task => {
+            if (!task.c(now)) {
+                tasks.delete(task);
+                task.f();
+            }
+        });
+        if (tasks.size !== 0)
+            raf(run_tasks);
+    }
+    /**
+     * Creates a new task that runs on each raf frame
+     * until it returns a falsy value or is aborted
+     */
+    function loop(callback) {
+        let task;
+        if (tasks.size === 0)
+            raf(run_tasks);
+        return {
+            promise: new Promise(fulfill => {
+                tasks.add(task = { c: callback, f: fulfill });
+            }),
+            abort() {
+                tasks.delete(task);
+            }
+        };
+    }
     function append(target, node) {
         target.appendChild(node);
+    }
+    function get_root_for_style(node) {
+        if (!node)
+            return document;
+        const root = node.getRootNode ? node.getRootNode() : node.ownerDocument;
+        if (root && root.host) {
+            return root;
+        }
+        return node.ownerDocument;
+    }
+    function append_empty_stylesheet(node) {
+        const style_element = element('style');
+        append_stylesheet(get_root_for_style(node), style_element);
+        return style_element;
+    }
+    function append_stylesheet(node, style) {
+        append(node.head || node, style);
     }
     function insert(target, node, anchor) {
         target.insertBefore(node, anchor || null);
@@ -150,6 +218,13 @@ var morderedit2 = (function () {
             return fn.call(this, event);
         };
     }
+    function stop_propagation(fn) {
+        return function (event) {
+            event.stopPropagation();
+            // @ts-ignore
+            return fn.call(this, event);
+        };
+    }
     function attr(node, attribute, value) {
         if (value == null)
             node.removeAttribute(attribute);
@@ -177,6 +252,9 @@ var morderedit2 = (function () {
             }
         }
     }
+    function to_number(value) {
+        return value === '' ? null : +value;
+    }
     function children(element) {
         return Array.from(element.childNodes);
     }
@@ -185,6 +263,20 @@ var morderedit2 = (function () {
     }
     function set_style(node, key, value, important) {
         node.style.setProperty(key, value, important ? 'important' : '');
+    }
+    function select_option(select, value) {
+        for (let i = 0; i < select.options.length; i += 1) {
+            const option = select.options[i];
+            if (option.__value === value) {
+                option.selected = true;
+                return;
+            }
+        }
+        select.selectedIndex = -1; // no option should be selected
+    }
+    function select_value(select) {
+        const selected_option = select.querySelector(':checked') || select.options[0];
+        return selected_option && selected_option.__value;
     }
     function toggle_class(element, name, toggle) {
         element.classList[toggle ? 'add' : 'remove'](name);
@@ -226,6 +318,67 @@ var morderedit2 = (function () {
         d() {
             this.n.forEach(detach);
         }
+    }
+
+    const active_docs = new Set();
+    let active = 0;
+    // https://github.com/darkskyapp/string-hash/blob/master/index.js
+    function hash(str) {
+        let hash = 5381;
+        let i = str.length;
+        while (i--)
+            hash = ((hash << 5) - hash) ^ str.charCodeAt(i);
+        return hash >>> 0;
+    }
+    function create_rule(node, a, b, duration, delay, ease, fn, uid = 0) {
+        const step = 16.666 / duration;
+        let keyframes = '{\n';
+        for (let p = 0; p <= 1; p += step) {
+            const t = a + (b - a) * ease(p);
+            keyframes += p * 100 + `%{${fn(t, 1 - t)}}\n`;
+        }
+        const rule = keyframes + `100% {${fn(b, 1 - b)}}\n}`;
+        const name = `__svelte_${hash(rule)}_${uid}`;
+        const doc = get_root_for_style(node);
+        active_docs.add(doc);
+        const stylesheet = doc.__svelte_stylesheet || (doc.__svelte_stylesheet = append_empty_stylesheet(node).sheet);
+        const current_rules = doc.__svelte_rules || (doc.__svelte_rules = {});
+        if (!current_rules[name]) {
+            current_rules[name] = true;
+            stylesheet.insertRule(`@keyframes ${name} ${rule}`, stylesheet.cssRules.length);
+        }
+        const animation = node.style.animation || '';
+        node.style.animation = `${animation ? `${animation}, ` : ''}${name} ${duration}ms linear ${delay}ms 1 both`;
+        active += 1;
+        return name;
+    }
+    function delete_rule(node, name) {
+        const previous = (node.style.animation || '').split(', ');
+        const next = previous.filter(name
+            ? anim => anim.indexOf(name) < 0 // remove specific animation
+            : anim => anim.indexOf('__svelte') === -1 // remove all Svelte animations
+        );
+        const deleted = previous.length - next.length;
+        if (deleted) {
+            node.style.animation = next.join(', ');
+            active -= deleted;
+            if (!active)
+                clear_rules();
+        }
+    }
+    function clear_rules() {
+        raf(() => {
+            if (active)
+                return;
+            active_docs.forEach(doc => {
+                const stylesheet = doc.__svelte_stylesheet;
+                let i = stylesheet.cssRules.length;
+                while (i--)
+                    stylesheet.deleteRule(i);
+                doc.__svelte_rules = {};
+            });
+            active_docs.clear();
+        });
     }
 
     let current_component;
@@ -338,6 +491,20 @@ var morderedit2 = (function () {
             $$.after_update.forEach(add_render_callback);
         }
     }
+
+    let promise;
+    function wait() {
+        if (!promise) {
+            promise = Promise.resolve();
+            promise.then(() => {
+                promise = null;
+            });
+        }
+        return promise;
+    }
+    function dispatch(node, direction, kind) {
+        node.dispatchEvent(custom_event(`${direction ? 'intro' : 'outro'}${kind}`));
+    }
     const outroing = new Set();
     let outros;
     function group_outros() {
@@ -374,6 +541,70 @@ var morderedit2 = (function () {
             });
             block.o(local);
         }
+    }
+    const null_transition = { duration: 0 };
+    function create_in_transition(node, fn, params) {
+        let config = fn(node, params);
+        let running = false;
+        let animation_name;
+        let task;
+        let uid = 0;
+        function cleanup() {
+            if (animation_name)
+                delete_rule(node, animation_name);
+        }
+        function go() {
+            const { delay = 0, duration = 300, easing = identity, tick = noop, css } = config || null_transition;
+            if (css)
+                animation_name = create_rule(node, 0, 1, duration, delay, easing, css, uid++);
+            tick(0, 1);
+            const start_time = now() + delay;
+            const end_time = start_time + duration;
+            if (task)
+                task.abort();
+            running = true;
+            add_render_callback(() => dispatch(node, true, 'start'));
+            task = loop(now => {
+                if (running) {
+                    if (now >= end_time) {
+                        tick(1, 0);
+                        dispatch(node, true, 'end');
+                        cleanup();
+                        return running = false;
+                    }
+                    if (now >= start_time) {
+                        const t = easing((now - start_time) / duration);
+                        tick(t, 1 - t);
+                    }
+                }
+                return running;
+            });
+        }
+        let started = false;
+        return {
+            start() {
+                if (started)
+                    return;
+                started = true;
+                delete_rule(node);
+                if (is_function(config)) {
+                    config = config();
+                    wait().then(go);
+                }
+                else {
+                    go();
+                }
+            },
+            invalidate() {
+                started = false;
+            },
+            end() {
+                if (running) {
+                    cleanup();
+                    running = false;
+                }
+            }
+        };
     }
 
     const globals = (typeof window !== 'undefined'
@@ -637,9 +868,57 @@ var morderedit2 = (function () {
         $inject_state() { }
     }
 
+    const subscriber_queue = [];
+    /**
+     * Create a `Writable` store that allows both updating and reading by subscription.
+     * @param {*=}value initial value
+     * @param {StartStopNotifier=}start start and stop notifications for subscriptions
+     */
+    function writable(value, start = noop) {
+        let stop;
+        const subscribers = new Set();
+        function set(new_value) {
+            if (safe_not_equal(value, new_value)) {
+                value = new_value;
+                if (stop) { // store is ready
+                    const run_queue = !subscriber_queue.length;
+                    for (const subscriber of subscribers) {
+                        subscriber[1]();
+                        subscriber_queue.push(subscriber, value);
+                    }
+                    if (run_queue) {
+                        for (let i = 0; i < subscriber_queue.length; i += 2) {
+                            subscriber_queue[i][0](subscriber_queue[i + 1]);
+                        }
+                        subscriber_queue.length = 0;
+                    }
+                }
+            }
+        }
+        function update(fn) {
+            set(fn(value));
+        }
+        function subscribe(run, invalidate = noop) {
+            const subscriber = [run, invalidate];
+            subscribers.add(subscriber);
+            if (subscribers.size === 1) {
+                stop = start(set) || noop;
+            }
+            run(value);
+            return () => {
+                subscribers.delete(subscriber);
+                if (subscribers.size === 0) {
+                    stop();
+                    stop = null;
+                }
+            };
+        }
+        return { set, update, subscribe };
+    }
+
     /* node_modules\carbon-components-svelte\src\Button\ButtonSkeleton.svelte generated by Svelte v3.44.3 */
 
-    const file$6 = "node_modules\\carbon-components-svelte\\src\\Button\\ButtonSkeleton.svelte";
+    const file$7 = "node_modules\\carbon-components-svelte\\src\\Button\\ButtonSkeleton.svelte";
 
     // (41:0) {:else}
     function create_else_block$5(ctx) {
@@ -663,7 +942,7 @@ var morderedit2 = (function () {
     			toggle_class(div, "bx--btn--sm", /*size*/ ctx[1] === 'small' || /*small*/ ctx[2]);
     			toggle_class(div, "bx--btn--lg", /*size*/ ctx[1] === 'lg');
     			toggle_class(div, "bx--btn--xl", /*size*/ ctx[1] === 'xl');
-    			add_location(div, file$6, 41, 2, 950);
+    			add_location(div, file$7, 41, 2, 950);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -707,7 +986,7 @@ var morderedit2 = (function () {
     }
 
     // (22:0) {#if href}
-    function create_if_block$5(ctx) {
+    function create_if_block$6(ctx) {
     	let a;
     	let t_value = "" + "";
     	let t;
@@ -743,7 +1022,7 @@ var morderedit2 = (function () {
     			toggle_class(a, "bx--btn--sm", /*size*/ ctx[1] === 'small' || /*small*/ ctx[2]);
     			toggle_class(a, "bx--btn--lg", /*size*/ ctx[1] === 'lg');
     			toggle_class(a, "bx--btn--xl", /*size*/ ctx[1] === 'xl');
-    			add_location(a, file$6, 22, 2, 477);
+    			add_location(a, file$7, 22, 2, 477);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, a, anchor);
@@ -786,7 +1065,7 @@ var morderedit2 = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block$5.name,
+    		id: create_if_block$6.name,
     		type: "if",
     		source: "(22:0) {#if href}",
     		ctx
@@ -795,11 +1074,11 @@ var morderedit2 = (function () {
     	return block;
     }
 
-    function create_fragment$6(ctx) {
+    function create_fragment$7(ctx) {
     	let if_block_anchor;
 
     	function select_block_type(ctx, dirty) {
-    		if (/*href*/ ctx[0]) return create_if_block$5;
+    		if (/*href*/ ctx[0]) return create_if_block$6;
     		return create_else_block$5;
     	}
 
@@ -841,7 +1120,7 @@ var morderedit2 = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$6.name,
+    		id: create_fragment$7.name,
     		type: "component",
     		source: "",
     		ctx
@@ -850,7 +1129,7 @@ var morderedit2 = (function () {
     	return block;
     }
 
-    function instance$6($$self, $$props, $$invalidate) {
+    function instance$7($$self, $$props, $$invalidate) {
     	const omit_props_names = ["href","size","small"];
     	let $$restProps = compute_rest_props($$props, omit_props_names);
     	let { $$slots: slots = {}, $$scope } = $$props;
@@ -930,13 +1209,13 @@ var morderedit2 = (function () {
     class ButtonSkeleton extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$6, create_fragment$6, safe_not_equal, { href: 0, size: 1, small: 2 });
+    		init(this, options, instance$7, create_fragment$7, safe_not_equal, { href: 0, size: 1, small: 2 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "ButtonSkeleton",
     			options,
-    			id: create_fragment$6.name
+    			id: create_fragment$7.name
     		});
     	}
 
@@ -968,7 +1247,7 @@ var morderedit2 = (function () {
     var ButtonSkeleton$1 = ButtonSkeleton;
 
     /* node_modules\carbon-components-svelte\src\Button\Button.svelte generated by Svelte v3.44.3 */
-    const file$5 = "node_modules\\carbon-components-svelte\\src\\Button\\Button.svelte";
+    const file$6 = "node_modules\\carbon-components-svelte\\src\\Button\\Button.svelte";
     const get_default_slot_changes = dirty => ({ props: dirty[0] & /*buttonProps*/ 512 });
     const get_default_slot_context = ctx => ({ props: /*buttonProps*/ ctx[9] });
 
@@ -1015,7 +1294,7 @@ var morderedit2 = (function () {
     			if (default_slot) default_slot.c();
     			if (switch_instance) create_component(switch_instance.$$.fragment);
     			set_attributes(button, button_data);
-    			add_location(button, file$5, 169, 2, 4570);
+    			add_location(button, file$6, 169, 2, 4570);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, button, anchor);
@@ -1137,7 +1416,7 @@ var morderedit2 = (function () {
     }
 
     // (149:28) 
-    function create_if_block_2$4(ctx) {
+    function create_if_block_2$5(ctx) {
     	let a;
     	let t;
     	let switch_instance;
@@ -1179,7 +1458,7 @@ var morderedit2 = (function () {
     			if (default_slot) default_slot.c();
     			if (switch_instance) create_component(switch_instance.$$.fragment);
     			set_attributes(a, a_data);
-    			add_location(a, file$5, 150, 2, 4187);
+    			add_location(a, file$6, 150, 2, 4187);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, a, anchor);
@@ -1290,7 +1569,7 @@ var morderedit2 = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_2$4.name,
+    		id: create_if_block_2$5.name,
     		type: "if",
     		source: "(149:28) ",
     		ctx
@@ -1300,7 +1579,7 @@ var morderedit2 = (function () {
     }
 
     // (147:13) 
-    function create_if_block_1$4(ctx) {
+    function create_if_block_1$5(ctx) {
     	let current;
     	const default_slot_template = /*#slots*/ ctx[19].default;
     	const default_slot = create_slot(default_slot_template, ctx, /*$$scope*/ ctx[18], get_default_slot_context);
@@ -1348,7 +1627,7 @@ var morderedit2 = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_1$4.name,
+    		id: create_if_block_1$5.name,
     		type: "if",
     		source: "(147:13) ",
     		ctx
@@ -1358,7 +1637,7 @@ var morderedit2 = (function () {
     }
 
     // (136:0) {#if skeleton}
-    function create_if_block$4(ctx) {
+    function create_if_block$5(ctx) {
     	let buttonskeleton;
     	let current;
 
@@ -1425,7 +1704,7 @@ var morderedit2 = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block$4.name,
+    		id: create_if_block$5.name,
     		type: "if",
     		source: "(136:0) {#if skeleton}",
     		ctx
@@ -1444,7 +1723,7 @@ var morderedit2 = (function () {
     			span = element("span");
     			t = text(/*iconDescription*/ ctx[4]);
     			toggle_class(span, "bx--assistive-text", true);
-    			add_location(span, file$5, 178, 6, 4719);
+    			add_location(span, file$6, 178, 6, 4719);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, span, anchor);
@@ -1479,7 +1758,7 @@ var morderedit2 = (function () {
     			span = element("span");
     			t = text(/*iconDescription*/ ctx[4]);
     			toggle_class(span, "bx--assistive-text", true);
-    			add_location(span, file$5, 159, 6, 4331);
+    			add_location(span, file$6, 159, 6, 4331);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, span, anchor);
@@ -1504,12 +1783,12 @@ var morderedit2 = (function () {
     	return block;
     }
 
-    function create_fragment$5(ctx) {
+    function create_fragment$6(ctx) {
     	let current_block_type_index;
     	let if_block;
     	let if_block_anchor;
     	let current;
-    	const if_block_creators = [create_if_block$4, create_if_block_1$4, create_if_block_2$4, create_else_block$4];
+    	const if_block_creators = [create_if_block$5, create_if_block_1$5, create_if_block_2$5, create_else_block$4];
     	const if_blocks = [];
 
     	function select_block_type(ctx, dirty) {
@@ -1579,7 +1858,7 @@ var morderedit2 = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$5.name,
+    		id: create_fragment$6.name,
     		type: "component",
     		source: "",
     		ctx
@@ -1588,7 +1867,7 @@ var morderedit2 = (function () {
     	return block;
     }
 
-    function instance$5($$self, $$props, $$invalidate) {
+    function instance$6($$self, $$props, $$invalidate) {
     	let buttonProps;
 
     	const omit_props_names = [
@@ -1835,8 +2114,8 @@ var morderedit2 = (function () {
     		init(
     			this,
     			options,
-    			instance$5,
-    			create_fragment$5,
+    			instance$6,
+    			create_fragment$6,
     			safe_not_equal,
     			{
     				kind: 11,
@@ -1864,7 +2143,7 @@ var morderedit2 = (function () {
     			component: this,
     			tagName: "Button",
     			options,
-    			id: create_fragment$5.name
+    			id: create_fragment$6.name
     		});
     	}
 
@@ -2001,7 +2280,7 @@ var morderedit2 = (function () {
 
     /* node_modules\carbon-components-svelte\src\Loading\Loading.svelte generated by Svelte v3.44.3 */
 
-    const file$4 = "node_modules\\carbon-components-svelte\\src\\Loading\\Loading.svelte";
+    const file$5 = "node_modules\\carbon-components-svelte\\src\\Loading\\Loading.svelte";
 
     // (53:0) {:else}
     function create_else_block$3(ctx) {
@@ -2014,7 +2293,7 @@ var morderedit2 = (function () {
     	let t2;
     	let circle;
     	let div_aria_live_value;
-    	let if_block = /*small*/ ctx[0] && create_if_block_2$3(ctx);
+    	let if_block = /*small*/ ctx[0] && create_if_block_2$4(ctx);
 
     	let div_levels = [
     		{ "aria-atomic": "true" },
@@ -2044,21 +2323,21 @@ var morderedit2 = (function () {
     			circle = svg_element("circle");
     			attr_dev(label, "id", /*id*/ ctx[4]);
     			toggle_class(label, "bx--visually-hidden", true);
-    			add_location(label, file$4, 63, 4, 1781);
-    			add_location(title, file$4, 65, 6, 1925);
+    			add_location(label, file$5, 63, 4, 1781);
+    			add_location(title, file$5, 65, 6, 1925);
     			attr_dev(circle, "cx", "50%");
     			attr_dev(circle, "cy", "50%");
     			attr_dev(circle, "r", /*spinnerRadius*/ ctx[5]);
     			toggle_class(circle, "bx--loading__stroke", true);
-    			add_location(circle, file$4, 73, 6, 2133);
+    			add_location(circle, file$5, 73, 6, 2133);
     			attr_dev(svg, "viewBox", "0 0 100 100");
     			toggle_class(svg, "bx--loading__svg", true);
-    			add_location(svg, file$4, 64, 4, 1859);
+    			add_location(svg, file$5, 64, 4, 1859);
     			set_attributes(div, div_data);
     			toggle_class(div, "bx--loading", true);
     			toggle_class(div, "bx--loading--small", /*small*/ ctx[0]);
     			toggle_class(div, "bx--loading--stop", !/*active*/ ctx[1]);
-    			add_location(div, file$4, 53, 2, 1479);
+    			add_location(div, file$5, 53, 2, 1479);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -2084,7 +2363,7 @@ var morderedit2 = (function () {
     				if (if_block) {
     					if_block.p(ctx, dirty);
     				} else {
-    					if_block = create_if_block_2$3(ctx);
+    					if_block = create_if_block_2$4(ctx);
     					if_block.c();
     					if_block.m(svg, circle);
     				}
@@ -2126,7 +2405,7 @@ var morderedit2 = (function () {
     }
 
     // (20:0) {#if withOverlay}
-    function create_if_block$3(ctx) {
+    function create_if_block$4(ctx) {
     	let div1;
     	let div0;
     	let label;
@@ -2137,7 +2416,7 @@ var morderedit2 = (function () {
     	let t2;
     	let circle;
     	let div0_aria_live_value;
-    	let if_block = /*small*/ ctx[0] && create_if_block_1$3(ctx);
+    	let if_block = /*small*/ ctx[0] && create_if_block_1$4(ctx);
     	let div1_levels = [/*$$restProps*/ ctx[6]];
     	let div1_data = {};
 
@@ -2159,27 +2438,27 @@ var morderedit2 = (function () {
     			circle = svg_element("circle");
     			attr_dev(label, "id", /*id*/ ctx[4]);
     			toggle_class(label, "bx--visually-hidden", true);
-    			add_location(label, file$4, 34, 6, 933);
-    			add_location(title, file$4, 36, 8, 1081);
+    			add_location(label, file$5, 34, 6, 933);
+    			add_location(title, file$5, 36, 8, 1081);
     			attr_dev(circle, "cx", "50%");
     			attr_dev(circle, "cy", "50%");
     			attr_dev(circle, "r", /*spinnerRadius*/ ctx[5]);
     			toggle_class(circle, "bx--loading__stroke", true);
-    			add_location(circle, file$4, 44, 8, 1305);
+    			add_location(circle, file$5, 44, 8, 1305);
     			attr_dev(svg, "viewBox", "0 0 100 100");
     			toggle_class(svg, "bx--loading__svg", true);
-    			add_location(svg, file$4, 35, 6, 1013);
+    			add_location(svg, file$5, 35, 6, 1013);
     			attr_dev(div0, "aria-atomic", "true");
     			attr_dev(div0, "aria-labelledby", /*id*/ ctx[4]);
     			attr_dev(div0, "aria-live", div0_aria_live_value = /*active*/ ctx[1] ? 'assertive' : 'off');
     			toggle_class(div0, "bx--loading", true);
     			toggle_class(div0, "bx--loading--small", /*small*/ ctx[0]);
     			toggle_class(div0, "bx--loading--stop", !/*active*/ ctx[1]);
-    			add_location(div0, file$4, 25, 4, 634);
+    			add_location(div0, file$5, 25, 4, 634);
     			set_attributes(div1, div1_data);
     			toggle_class(div1, "bx--loading-overlay", true);
     			toggle_class(div1, "bx--loading-overlay--stop", !/*active*/ ctx[1]);
-    			add_location(div1, file$4, 20, 2, 513);
+    			add_location(div1, file$5, 20, 2, 513);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div1, anchor);
@@ -2206,7 +2485,7 @@ var morderedit2 = (function () {
     				if (if_block) {
     					if_block.p(ctx, dirty);
     				} else {
-    					if_block = create_if_block_1$3(ctx);
+    					if_block = create_if_block_1$4(ctx);
     					if_block.c();
     					if_block.m(svg, circle);
     				}
@@ -2247,7 +2526,7 @@ var morderedit2 = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block$3.name,
+    		id: create_if_block$4.name,
     		type: "if",
     		source: "(20:0) {#if withOverlay}",
     		ctx
@@ -2257,7 +2536,7 @@ var morderedit2 = (function () {
     }
 
     // (67:6) {#if small}
-    function create_if_block_2$3(ctx) {
+    function create_if_block_2$4(ctx) {
     	let circle;
 
     	const block = {
@@ -2267,7 +2546,7 @@ var morderedit2 = (function () {
     			attr_dev(circle, "cy", "50%");
     			attr_dev(circle, "r", /*spinnerRadius*/ ctx[5]);
     			toggle_class(circle, "bx--loading__background", true);
-    			add_location(circle, file$4, 67, 8, 1980);
+    			add_location(circle, file$5, 67, 8, 1980);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, circle, anchor);
@@ -2284,7 +2563,7 @@ var morderedit2 = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_2$3.name,
+    		id: create_if_block_2$4.name,
     		type: "if",
     		source: "(67:6) {#if small}",
     		ctx
@@ -2294,7 +2573,7 @@ var morderedit2 = (function () {
     }
 
     // (38:8) {#if small}
-    function create_if_block_1$3(ctx) {
+    function create_if_block_1$4(ctx) {
     	let circle;
 
     	const block = {
@@ -2304,7 +2583,7 @@ var morderedit2 = (function () {
     			attr_dev(circle, "cy", "50%");
     			attr_dev(circle, "r", /*spinnerRadius*/ ctx[5]);
     			toggle_class(circle, "bx--loading__background", true);
-    			add_location(circle, file$4, 38, 10, 1140);
+    			add_location(circle, file$5, 38, 10, 1140);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, circle, anchor);
@@ -2321,7 +2600,7 @@ var morderedit2 = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_1$3.name,
+    		id: create_if_block_1$4.name,
     		type: "if",
     		source: "(38:8) {#if small}",
     		ctx
@@ -2330,11 +2609,11 @@ var morderedit2 = (function () {
     	return block;
     }
 
-    function create_fragment$4(ctx) {
+    function create_fragment$5(ctx) {
     	let if_block_anchor;
 
     	function select_block_type(ctx, dirty) {
-    		if (/*withOverlay*/ ctx[2]) return create_if_block$3;
+    		if (/*withOverlay*/ ctx[2]) return create_if_block$4;
     		return create_else_block$3;
     	}
 
@@ -2376,7 +2655,7 @@ var morderedit2 = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$4.name,
+    		id: create_fragment$5.name,
     		type: "component",
     		source: "",
     		ctx
@@ -2385,7 +2664,7 @@ var morderedit2 = (function () {
     	return block;
     }
 
-    function instance$4($$self, $$props, $$invalidate) {
+    function instance$5($$self, $$props, $$invalidate) {
     	let spinnerRadius;
     	const omit_props_names = ["small","active","withOverlay","description","id"];
     	let $$restProps = compute_rest_props($$props, omit_props_names);
@@ -2442,7 +2721,7 @@ var morderedit2 = (function () {
     	constructor(options) {
     		super(options);
 
-    		init(this, options, instance$4, create_fragment$4, safe_not_equal, {
+    		init(this, options, instance$5, create_fragment$5, safe_not_equal, {
     			small: 0,
     			active: 1,
     			withOverlay: 2,
@@ -2454,7 +2733,7 @@ var morderedit2 = (function () {
     			component: this,
     			tagName: "Loading",
     			options,
-    			id: create_fragment$4.name
+    			id: create_fragment$5.name
     		});
     	}
 
@@ -2503,9 +2782,9 @@ var morderedit2 = (function () {
 
     /* node_modules\carbon-components-svelte\src\Form\Form.svelte generated by Svelte v3.44.3 */
 
-    const file$3 = "node_modules\\carbon-components-svelte\\src\\Form\\Form.svelte";
+    const file$4 = "node_modules\\carbon-components-svelte\\src\\Form\\Form.svelte";
 
-    function create_fragment$3(ctx) {
+    function create_fragment$4(ctx) {
     	let form;
     	let current;
     	let mounted;
@@ -2525,7 +2804,7 @@ var morderedit2 = (function () {
     			if (default_slot) default_slot.c();
     			set_attributes(form, form_data);
     			toggle_class(form, "bx--form", true);
-    			add_location(form, file$3, 6, 0, 150);
+    			add_location(form, file$4, 6, 0, 150);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -2592,7 +2871,7 @@ var morderedit2 = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$3.name,
+    		id: create_fragment$4.name,
     		type: "component",
     		source: "",
     		ctx
@@ -2601,7 +2880,7 @@ var morderedit2 = (function () {
     	return block;
     }
 
-    function instance$3($$self, $$props, $$invalidate) {
+    function instance$4($$self, $$props, $$invalidate) {
     	const omit_props_names = ["ref"];
     	let $$restProps = compute_rest_props($$props, omit_props_names);
     	let { $$slots: slots = {}, $$scope } = $$props;
@@ -2674,13 +2953,13 @@ var morderedit2 = (function () {
     class Form extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$3, create_fragment$3, safe_not_equal, { ref: 0 });
+    		init(this, options, instance$4, create_fragment$4, safe_not_equal, { ref: 0 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "Form",
     			options,
-    			id: create_fragment$3.name
+    			id: create_fragment$4.name
     		});
     	}
 
@@ -2694,6 +2973,26 @@ var morderedit2 = (function () {
     }
 
     var Form$1 = Form;
+
+    function cubicOut(t) {
+        const f = t - 1.0;
+        return f * f * f + 1.0;
+    }
+
+    function fly(node, { delay = 0, duration = 400, easing = cubicOut, x = 0, y = 0, opacity = 0 } = {}) {
+        const style = getComputedStyle(node);
+        const target_opacity = +style.opacity;
+        const transform = style.transform === 'none' ? '' : style.transform;
+        const od = target_opacity * (1 - opacity);
+        return {
+            delay,
+            duration,
+            easing,
+            css: (t, u) => `
+			transform: ${transform} translate(${(1 - t) * x}px, ${(1 - t) * y}px);
+			opacity: ${target_opacity - (od * u)}`
+        };
+    }
 
     const CLOUDINARY_BASE_URL = 'https://res.cloudinary.com/ms-global/image/upload/';
 
@@ -2820,43 +3119,43 @@ var morderedit2 = (function () {
 
     /* src\MentriesServerTable.svelte generated by Svelte v3.44.3 */
 
-    const { console: console_1$2 } = globals;
-    const file$2 = "src\\MentriesServerTable.svelte";
+    const { console: console_1$3 } = globals;
+    const file$3 = "src\\MentriesServerTable.svelte";
 
-    function get_each_context$2(ctx, list, i) {
+    function get_each_context$3(ctx, list, i) {
     	const child_ctx = ctx.slice();
     	child_ctx[15] = list[i];
     	child_ctx[17] = i;
     	return child_ctx;
     }
 
-    function get_each_context_1$1(ctx, list, i) {
+    function get_each_context_1$3(ctx, list, i) {
     	const child_ctx = ctx.slice();
     	child_ctx[18] = list[i];
     	return child_ctx;
     }
 
-    function get_each_context_2$1(ctx, list, i) {
+    function get_each_context_2$3(ctx, list, i) {
     	const child_ctx = ctx.slice();
     	child_ctx[21] = list[i];
     	child_ctx[23] = i;
     	return child_ctx;
     }
 
-    function get_each_context_3(ctx, list, i) {
+    function get_each_context_3$1(ctx, list, i) {
     	const child_ctx = ctx.slice();
     	child_ctx[24] = list[i];
     	return child_ctx;
     }
 
-    function get_each_context_4(ctx, list, i) {
+    function get_each_context_4$1(ctx, list, i) {
     	const child_ctx = ctx.slice();
     	child_ctx[27] = list[i];
     	return child_ctx;
     }
 
-    // (190:0) {#if ALL_COLORS_DICT && ALL_SIZES_DICT}
-    function create_if_block$2(ctx) {
+    // (191:0) {#if ALL_COLORS_DICT && ALL_SIZES_DICT}
+    function create_if_block$3(ctx) {
     	let table;
     	let thead;
     	let tr;
@@ -2866,13 +3165,13 @@ var morderedit2 = (function () {
     	let t3;
     	let tbody;
     	let table_id_value;
-    	let if_block = /*product*/ ctx[0].verients.length != 0 && create_if_block_4$2(ctx);
+    	let if_block = /*sorted_verients*/ ctx[3].length != 0 && create_if_block_4$2(ctx);
     	let each_value_4 = /*sorted_sizes*/ ctx[1];
     	validate_each_argument(each_value_4);
     	let each_blocks_1 = [];
 
     	for (let i = 0; i < each_value_4.length; i += 1) {
-    		each_blocks_1[i] = create_each_block_4(get_each_context_4(ctx, each_value_4, i));
+    		each_blocks_1[i] = create_each_block_4$1(get_each_context_4$1(ctx, each_value_4, i));
     	}
 
     	let each_value = /*sorted_colors*/ ctx[2];
@@ -2880,7 +3179,7 @@ var morderedit2 = (function () {
     	let each_blocks = [];
 
     	for (let i = 0; i < each_value.length; i += 1) {
-    		each_blocks[i] = create_each_block$2(get_each_context$2(ctx, each_value, i));
+    		each_blocks[i] = create_each_block$3(get_each_context$3(ctx, each_value, i));
     	}
 
     	const block = {
@@ -2906,16 +3205,16 @@ var morderedit2 = (function () {
     			}
 
     			attr_dev(th, "class", "sticky-col const-size-cell svelte-aa8szk");
-    			add_location(th, file$2, 193, 20, 7551);
+    			add_location(th, file$3, 194, 24, 7605);
     			attr_dev(tr, "class", "svelte-aa8szk");
-    			add_location(tr, file$2, 192, 12, 7525);
+    			add_location(tr, file$3, 193, 16, 7575);
     			attr_dev(thead, "class", "svelte-aa8szk");
-    			add_location(thead, file$2, 191, 8, 7504);
+    			add_location(thead, file$3, 192, 12, 7550);
     			attr_dev(tbody, "class", "svelte-aa8szk");
-    			add_location(tbody, file$2, 205, 8, 7990);
+    			add_location(tbody, file$3, 206, 12, 8091);
     			attr_dev(table, "class", "entries-table svelte-aa8szk");
     			attr_dev(table, "id", table_id_value = "entries-table-" + /*product*/ ctx[0].id);
-    			add_location(table, file$2, 190, 4, 7433);
+    			add_location(table, file$3, 191, 8, 7475);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, table, anchor);
@@ -2938,7 +3237,7 @@ var morderedit2 = (function () {
     			}
     		},
     		p: function update(ctx, dirty) {
-    			if (/*product*/ ctx[0].verients.length != 0) {
+    			if (/*sorted_verients*/ ctx[3].length != 0) {
     				if (if_block) ; else {
     					if_block = create_if_block_4$2(ctx);
     					if_block.c();
@@ -2955,12 +3254,12 @@ var morderedit2 = (function () {
     				let i;
 
     				for (i = 0; i < each_value_4.length; i += 1) {
-    					const child_ctx = get_each_context_4(ctx, each_value_4, i);
+    					const child_ctx = get_each_context_4$1(ctx, each_value_4, i);
 
     					if (each_blocks_1[i]) {
     						each_blocks_1[i].p(child_ctx, dirty);
     					} else {
-    						each_blocks_1[i] = create_each_block_4(child_ctx);
+    						each_blocks_1[i] = create_each_block_4$1(child_ctx);
     						each_blocks_1[i].c();
     						each_blocks_1[i].m(tr, null);
     					}
@@ -2973,18 +3272,18 @@ var morderedit2 = (function () {
     				each_blocks_1.length = each_value_4.length;
     			}
 
-    			if (dirty & /*clear_sizes_entries, sorted_colors, sorted_sizes, find_entry_quantity, ALL_COLORS_DICT, ALL_SIZES_DICT, input_amount_changed, sorted_verients, product*/ 511) {
+    			if (dirty & /*clear_sizes_entries, sorted_colors, sorted_sizes, find_entry_quantity, ALL_COLORS_DICT, ALL_SIZES_DICT, input_amount_changed, sorted_verients*/ 510) {
     				each_value = /*sorted_colors*/ ctx[2];
     				validate_each_argument(each_value);
     				let i;
 
     				for (i = 0; i < each_value.length; i += 1) {
-    					const child_ctx = get_each_context$2(ctx, each_value, i);
+    					const child_ctx = get_each_context$3(ctx, each_value, i);
 
     					if (each_blocks[i]) {
     						each_blocks[i].p(child_ctx, dirty);
     					} else {
-    						each_blocks[i] = create_each_block$2(child_ctx);
+    						each_blocks[i] = create_each_block$3(child_ctx);
     						each_blocks[i].c();
     						each_blocks[i].m(tbody, null);
     					}
@@ -3011,16 +3310,16 @@ var morderedit2 = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block$2.name,
+    		id: create_if_block$3.name,
     		type: "if",
-    		source: "(190:0) {#if ALL_COLORS_DICT && ALL_SIZES_DICT}",
+    		source: "(191:0) {#if ALL_COLORS_DICT && ALL_SIZES_DICT}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (195:20) {#if product.verients.length != 0}
+    // (196:24) {#if sorted_verients.length != 0}
     function create_if_block_4$2(ctx) {
     	let th;
 
@@ -3029,7 +3328,7 @@ var morderedit2 = (function () {
     			th = element("th");
     			th.textContent = "מודל";
     			attr_dev(th, "class", "const-size-cell svelte-aa8szk");
-    			add_location(th, file$2, 195, 24, 7680);
+    			add_location(th, file$3, 196, 28, 7741);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, th, anchor);
@@ -3043,15 +3342,15 @@ var morderedit2 = (function () {
     		block,
     		id: create_if_block_4$2.name,
     		type: "if",
-    		source: "(195:20) {#if product.verients.length != 0}",
+    		source: "(196:24) {#if sorted_verients.length != 0}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (198:20) {#each sorted_sizes as size}
-    function create_each_block_4(ctx) {
+    // (199:24) {#each sorted_sizes as size}
+    function create_each_block_4$1(ctx) {
     	let th;
     	let t0_value = /*size*/ ctx[27].size + "";
     	let t0;
@@ -3063,7 +3362,7 @@ var morderedit2 = (function () {
     			t0 = text(t0_value);
     			t1 = space();
     			attr_dev(th, "class", "svelte-aa8szk");
-    			add_location(th, file$2, 198, 24, 7820);
+    			add_location(th, file$3, 199, 28, 7893);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, th, anchor);
@@ -3080,16 +3379,16 @@ var morderedit2 = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_each_block_4.name,
+    		id: create_each_block_4$1.name,
     		type: "each",
-    		source: "(198:20) {#each sorted_sizes as size}",
+    		source: "(199:24) {#each sorted_sizes as size}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (212:24) {:else}
+    // (213:28) {:else}
     function create_else_block_1$1(ctx) {
     	let div;
 
@@ -3098,7 +3397,7 @@ var morderedit2 = (function () {
     			div = element("div");
     			div.textContent = "-";
     			attr_dev(div, "class", "svelte-aa8szk");
-    			add_location(div, file$2, 212, 28, 8391);
+    			add_location(div, file$3, 213, 32, 8520);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -3113,14 +3412,14 @@ var morderedit2 = (function () {
     		block,
     		id: create_else_block_1$1.name,
     		type: "else",
-    		source: "(212:24) {:else}",
+    		source: "(213:28) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (210:24) {#if color}
+    // (211:28) {#if color}
     function create_if_block_3$2(ctx) {
     	let div1;
     	let div0;
@@ -3134,9 +3433,9 @@ var morderedit2 = (function () {
     			t = text(t_value);
     			attr_dev(div0, "class", "inner svelte-aa8szk");
     			set_style(div0, "background-color", /*ALL_COLORS_DICT*/ ctx[4][/*color*/ ctx[15]].color);
-    			add_location(div0, file$2, 210, 52, 8211);
+    			add_location(div0, file$3, 211, 56, 8332);
     			attr_dev(div1, "class", "color-box svelte-aa8szk");
-    			add_location(div1, file$2, 210, 28, 8187);
+    			add_location(div1, file$3, 211, 32, 8308);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div1, anchor);
@@ -3159,22 +3458,22 @@ var morderedit2 = (function () {
     		block,
     		id: create_if_block_3$2.name,
     		type: "if",
-    		source: "(210:24) {#if color}",
+    		source: "(211:28) {#if color}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (218:20) {#if sorted_verients.length != 0}
-    function create_if_block_2$2(ctx) {
+    // (220:24) {#if sorted_verients.length != 0}
+    function create_if_block_2$3(ctx) {
     	let td;
     	let each_value_3 = /*sorted_verients*/ ctx[3];
     	validate_each_argument(each_value_3);
     	let each_blocks = [];
 
     	for (let i = 0; i < each_value_3.length; i += 1) {
-    		each_blocks[i] = create_each_block_3(get_each_context_3(ctx, each_value_3, i));
+    		each_blocks[i] = create_each_block_3$1(get_each_context_3$1(ctx, each_value_3, i));
     	}
 
     	const block = {
@@ -3186,7 +3485,7 @@ var morderedit2 = (function () {
     			}
 
     			attr_dev(td, "class", "svelte-aa8szk");
-    			add_location(td, file$2, 218, 20, 8602);
+    			add_location(td, file$3, 220, 24, 8781);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, td, anchor);
@@ -3202,12 +3501,12 @@ var morderedit2 = (function () {
     				let i;
 
     				for (i = 0; i < each_value_3.length; i += 1) {
-    					const child_ctx = get_each_context_3(ctx, each_value_3, i);
+    					const child_ctx = get_each_context_3$1(ctx, each_value_3, i);
 
     					if (each_blocks[i]) {
     						each_blocks[i].p(child_ctx, dirty);
     					} else {
-    						each_blocks[i] = create_each_block_3(child_ctx);
+    						each_blocks[i] = create_each_block_3$1(child_ctx);
     						each_blocks[i].c();
     						each_blocks[i].m(td, null);
     					}
@@ -3228,19 +3527,19 @@ var morderedit2 = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_2$2.name,
+    		id: create_if_block_2$3.name,
     		type: "if",
-    		source: "(218:20) {#if sorted_verients.length != 0}",
+    		source: "(220:24) {#if sorted_verients.length != 0}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (220:24) {#each sorted_verients as varient }
-    function create_each_block_3(ctx) {
+    // (222:28) {#each sorted_verients as varient }
+    function create_each_block_3$1(ctx) {
     	let div;
-    	let t0_value = /*varient*/ ctx[24]?.name + "";
+    	let t0_value = (/*varient*/ ctx[24]?.name || '') + "";
     	let t0;
     	let t1;
 
@@ -3250,7 +3549,7 @@ var morderedit2 = (function () {
     			t0 = text(t0_value);
     			t1 = space();
     			attr_dev(div, "class", "varient-box cls-cell svelte-aa8szk");
-    			add_location(div, file$2, 220, 24, 8693);
+    			add_location(div, file$3, 222, 28, 8880);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -3258,7 +3557,7 @@ var morderedit2 = (function () {
     			append_dev(div, t1);
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*sorted_verients*/ 8 && t0_value !== (t0_value = /*varient*/ ctx[24]?.name + "")) set_data_dev(t0, t0_value);
+    			if (dirty & /*sorted_verients*/ 8 && t0_value !== (t0_value = (/*varient*/ ctx[24]?.name || '') + "")) set_data_dev(t0, t0_value);
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(div);
@@ -3267,16 +3566,16 @@ var morderedit2 = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_each_block_3.name,
+    		id: create_each_block_3$1.name,
     		type: "each",
-    		source: "(220:24) {#each sorted_verients as varient }",
+    		source: "(222:28) {#each sorted_verients as varient }",
     		ctx
     	});
 
     	return block;
     }
 
-    // (236:24) {:else}
+    // (238:28) {:else}
     function create_else_block$2(ctx) {
     	let each_1_anchor;
     	let each_value_2 = /*sorted_verients*/ ctx[3];
@@ -3284,7 +3583,7 @@ var morderedit2 = (function () {
     	let each_blocks = [];
 
     	for (let i = 0; i < each_value_2.length; i += 1) {
-    		each_blocks[i] = create_each_block_2$1(get_each_context_2$1(ctx, each_value_2, i));
+    		each_blocks[i] = create_each_block_2$3(get_each_context_2$3(ctx, each_value_2, i));
     	}
 
     	const block = {
@@ -3303,18 +3602,18 @@ var morderedit2 = (function () {
     			insert_dev(target, each_1_anchor, anchor);
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*find_entry_quantity, sorted_sizes, sorted_colors, sorted_verients, ALL_COLORS_DICT, product, ALL_SIZES_DICT, input_amount_changed*/ 255) {
+    			if (dirty & /*find_entry_quantity, sorted_sizes, sorted_colors, sorted_verients, ALL_COLORS_DICT, ALL_SIZES_DICT, input_amount_changed*/ 254) {
     				each_value_2 = /*sorted_verients*/ ctx[3];
     				validate_each_argument(each_value_2);
     				let i;
 
     				for (i = 0; i < each_value_2.length; i += 1) {
-    					const child_ctx = get_each_context_2$1(ctx, each_value_2, i);
+    					const child_ctx = get_each_context_2$3(ctx, each_value_2, i);
 
     					if (each_blocks[i]) {
     						each_blocks[i].p(child_ctx, dirty);
     					} else {
-    						each_blocks[i] = create_each_block_2$1(child_ctx);
+    						each_blocks[i] = create_each_block_2$3(child_ctx);
     						each_blocks[i].c();
     						each_blocks[i].m(each_1_anchor.parentNode, each_1_anchor);
     					}
@@ -3337,15 +3636,15 @@ var morderedit2 = (function () {
     		block,
     		id: create_else_block$2.name,
     		type: "else",
-    		source: "(236:24) {:else}",
+    		source: "(238:28) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (232:24) {#if sorted_verients.length == 0}
-    function create_if_block_1$2(ctx) {
+    // (234:28) {#if sorted_verients.length == 0}
+    function create_if_block_1$3(ctx) {
     	let div;
     	let input;
     	let input_value_value;
@@ -3369,9 +3668,9 @@ var morderedit2 = (function () {
     			attr_dev(input, "placeholder", input_placeholder_value = /*ALL_SIZES_DICT*/ ctx[5][/*size_obj*/ ctx[18].id].size);
     			attr_dev(input, "min", "0");
     			attr_dev(input, "max", "9999");
-    			add_location(input, file$2, 233, 28, 9276);
+    			add_location(input, file$3, 235, 32, 9521);
     			attr_dev(div, "class", "cell-wraper svelte-aa8szk");
-    			add_location(div, file$2, 232, 28, 9221);
+    			add_location(div, file$3, 234, 32, 9462);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -3412,21 +3711,20 @@ var morderedit2 = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_1$2.name,
+    		id: create_if_block_1$3.name,
     		type: "if",
-    		source: "(232:24) {#if sorted_verients.length == 0}",
+    		source: "(234:28) {#if sorted_verients.length == 0}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (238:28) {#each sorted_verients as ver, idx}
-    function create_each_block_2$1(ctx) {
+    // (240:32) {#each sorted_verients as ver, idx}
+    function create_each_block_2$3(ctx) {
     	let div;
     	let input;
     	let input_value_value;
-    	let input_id_value;
     	let input_data_color_value;
     	let input_data_size_value;
     	let input_data_ver_value;
@@ -3438,20 +3736,19 @@ var morderedit2 = (function () {
     		c: function create() {
     			div = element("div");
     			input = element("input");
-    			input.value = input_value_value = /*find_entry_quantity*/ ctx[7](/*size_obj*/ ctx[18].id, /*color*/ ctx[15], /*ver*/ ctx[21]?.id);
+    			input.value = input_value_value = /*find_entry_quantity*/ ctx[7](/*size_obj*/ ctx[18].id, /*color*/ ctx[15], /*ver*/ ctx[21]?.id || null);
     			set_style(input, "border", "2px solid " + /*ALL_COLORS_DICT*/ ctx[4][/*color*/ ctx[15]]?.color);
-    			attr_dev(input, "id", input_id_value = "input_entery_" + /*product*/ ctx[0].id + "_" + /*size_obj*/ ctx[18].id + "_" + /*color*/ ctx[15] + "_" + /*ver*/ ctx[21]?.id);
     			attr_dev(input, "data-color", input_data_color_value = /*color*/ ctx[15]);
     			attr_dev(input, "data-size", input_data_size_value = /*size_obj*/ ctx[18].id);
-    			attr_dev(input, "data-ver", input_data_ver_value = /*ver*/ ctx[21].id);
+    			attr_dev(input, "data-ver", input_data_ver_value = /*ver*/ ctx[21]?.id || null);
     			attr_dev(input, "class", "size-input cls-cell svelte-aa8szk");
     			attr_dev(input, "type", "number");
-    			attr_dev(input, "placeholder", input_placeholder_value = "" + (/*ALL_SIZES_DICT*/ ctx[5][/*size_obj*/ ctx[18].id].size + "(" + /*ver*/ ctx[21]?.name + ")"));
+    			attr_dev(input, "placeholder", input_placeholder_value = "" + (/*ALL_SIZES_DICT*/ ctx[5][/*size_obj*/ ctx[18].id].size + "(" + (/*ver*/ ctx[21]?.name || '') + ")"));
     			attr_dev(input, "min", "0");
     			attr_dev(input, "max", "9999");
-    			add_location(input, file$2, 239, 36, 9863);
+    			add_location(input, file$3, 241, 40, 10132);
     			attr_dev(div, "class", "cell-wraper svelte-aa8szk");
-    			add_location(div, file$2, 238, 32, 9800);
+    			add_location(div, file$3, 240, 36, 10065);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -3463,16 +3760,12 @@ var morderedit2 = (function () {
     			}
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*sorted_sizes, sorted_colors, sorted_verients*/ 14 && input_value_value !== (input_value_value = /*find_entry_quantity*/ ctx[7](/*size_obj*/ ctx[18].id, /*color*/ ctx[15], /*ver*/ ctx[21]?.id)) && input.value !== input_value_value) {
+    			if (dirty & /*sorted_sizes, sorted_colors, sorted_verients*/ 14 && input_value_value !== (input_value_value = /*find_entry_quantity*/ ctx[7](/*size_obj*/ ctx[18].id, /*color*/ ctx[15], /*ver*/ ctx[21]?.id || null)) && input.value !== input_value_value) {
     				prop_dev(input, "value", input_value_value);
     			}
 
     			if (dirty & /*ALL_COLORS_DICT, sorted_colors*/ 20) {
     				set_style(input, "border", "2px solid " + /*ALL_COLORS_DICT*/ ctx[4][/*color*/ ctx[15]]?.color);
-    			}
-
-    			if (dirty & /*product, sorted_sizes, sorted_colors, sorted_verients*/ 15 && input_id_value !== (input_id_value = "input_entery_" + /*product*/ ctx[0].id + "_" + /*size_obj*/ ctx[18].id + "_" + /*color*/ ctx[15] + "_" + /*ver*/ ctx[21]?.id)) {
-    				attr_dev(input, "id", input_id_value);
     			}
 
     			if (dirty & /*sorted_colors*/ 4 && input_data_color_value !== (input_data_color_value = /*color*/ ctx[15])) {
@@ -3483,11 +3776,11 @@ var morderedit2 = (function () {
     				attr_dev(input, "data-size", input_data_size_value);
     			}
 
-    			if (dirty & /*sorted_verients*/ 8 && input_data_ver_value !== (input_data_ver_value = /*ver*/ ctx[21].id)) {
+    			if (dirty & /*sorted_verients*/ 8 && input_data_ver_value !== (input_data_ver_value = /*ver*/ ctx[21]?.id || null)) {
     				attr_dev(input, "data-ver", input_data_ver_value);
     			}
 
-    			if (dirty & /*ALL_SIZES_DICT, sorted_sizes, sorted_verients*/ 42 && input_placeholder_value !== (input_placeholder_value = "" + (/*ALL_SIZES_DICT*/ ctx[5][/*size_obj*/ ctx[18].id].size + "(" + /*ver*/ ctx[21]?.name + ")"))) {
+    			if (dirty & /*ALL_SIZES_DICT, sorted_sizes, sorted_verients*/ 42 && input_placeholder_value !== (input_placeholder_value = "" + (/*ALL_SIZES_DICT*/ ctx[5][/*size_obj*/ ctx[18].id].size + "(" + (/*ver*/ ctx[21]?.name || '') + ")"))) {
     				attr_dev(input, "placeholder", input_placeholder_value);
     			}
     		},
@@ -3500,21 +3793,21 @@ var morderedit2 = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_each_block_2$1.name,
+    		id: create_each_block_2$3.name,
     		type: "each",
-    		source: "(238:28) {#each sorted_verients as ver, idx}",
+    		source: "(240:32) {#each sorted_verients as ver, idx}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (228:20) {#each sorted_sizes as size_obj}
-    function create_each_block_1$1(ctx) {
+    // (230:24) {#each sorted_sizes as size_obj}
+    function create_each_block_1$3(ctx) {
     	let td;
 
     	function select_block_type_1(ctx, dirty) {
-    		if (/*sorted_verients*/ ctx[3].length == 0) return create_if_block_1$2;
+    		if (/*sorted_verients*/ ctx[3].length == 0) return create_if_block_1$3;
     		return create_else_block$2;
     	}
 
@@ -3526,7 +3819,7 @@ var morderedit2 = (function () {
     			td = element("td");
     			if_block.c();
     			attr_dev(td, "class", "size-cell svelte-aa8szk");
-    			add_location(td, file$2, 229, 20, 9015);
+    			add_location(td, file$3, 231, 24, 9244);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, td, anchor);
@@ -3553,17 +3846,17 @@ var morderedit2 = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_each_block_1$1.name,
+    		id: create_each_block_1$3.name,
     		type: "each",
-    		source: "(228:20) {#each sorted_sizes as size_obj}",
+    		source: "(230:24) {#each sorted_sizes as size_obj}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (207:12) {#each sorted_colors as color, color_idx}
-    function create_each_block$2(ctx) {
+    // (208:16) {#each sorted_colors as color, color_idx}
+    function create_each_block$3(ctx) {
     	let tr;
     	let td0;
     	let t0;
@@ -3584,13 +3877,13 @@ var morderedit2 = (function () {
 
     	let current_block_type = select_block_type(ctx);
     	let if_block0 = current_block_type(ctx);
-    	let if_block1 = /*sorted_verients*/ ctx[3].length != 0 && create_if_block_2$2(ctx);
+    	let if_block1 = /*sorted_verients*/ ctx[3].length != 0 && create_if_block_2$3(ctx);
     	let each_value_1 = /*sorted_sizes*/ ctx[1];
     	validate_each_argument(each_value_1);
     	let each_blocks = [];
 
     	for (let i = 0; i < each_value_1.length; i += 1) {
-    		each_blocks[i] = create_each_block_1$1(get_each_context_1$1(ctx, each_value_1, i));
+    		each_blocks[i] = create_each_block_1$3(get_each_context_1$3(ctx, each_value_1, i));
     	}
 
     	const block = {
@@ -3613,23 +3906,23 @@ var morderedit2 = (function () {
     			path = svg_element("path");
     			t3 = space();
     			attr_dev(td0, "class", "sticky-col svelte-aa8szk");
-    			add_location(td0, file$2, 208, 20, 8097);
+    			add_location(td0, file$3, 209, 24, 8210);
     			attr_dev(path, "fill", "currentColor");
     			attr_dev(path, "d", "M30.9 2.3h-8.6L21.6 1c-.3-.6-.9-1-1.5-1h-8.2c-.6 0-1.2.4-1.5.9l-.7 1.4H1.1C.5 2.3 0 2.8 0 3.4v2.2c0 .6.5 1.1 1.1 1.1h29.7c.6 0 1.1-.5 1.1-1.1V3.4c.1-.6-.4-1.1-1-1.1zM3.8 32.8A3.4 3.4 0 0 0 7.2 36h17.6c1.8 0 3.3-1.4 3.4-3.2L29.7 9H2.3l1.5 23.8z");
     			attr_dev(path, "class", "svelte-aa8szk");
-    			add_location(path, file$2, 250, 113, 10767);
+    			add_location(path, file$3, 252, 117, 11042);
     			attr_dev(svg, "xmlns", "http://www.w3.org/2000/svg");
     			attr_dev(svg, "width", "16px");
     			attr_dev(svg, "height", "16px");
     			attr_dev(svg, "viewBox", "0 0 32 36");
     			attr_dev(svg, "class", "svelte-aa8szk");
-    			add_location(svg, file$2, 250, 24, 10678);
+    			add_location(svg, file$3, 252, 28, 10953);
     			attr_dev(button, "class", "remove-button svelte-aa8szk");
-    			add_location(button, file$2, 249, 20, 10584);
+    			add_location(button, file$3, 251, 24, 10855);
     			attr_dev(td1, "class", "delete-cell-style svelte-aa8szk");
-    			add_location(td1, file$2, 248, 20, 10532);
+    			add_location(td1, file$3, 250, 24, 10799);
     			attr_dev(tr, "class", "svelte-aa8szk");
-    			add_location(tr, file$2, 207, 16, 8071);
+    			add_location(tr, file$3, 208, 20, 8180);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, tr, anchor);
@@ -3684,7 +3977,7 @@ var morderedit2 = (function () {
     				if (if_block1) {
     					if_block1.p(ctx, dirty);
     				} else {
-    					if_block1 = create_if_block_2$2(ctx);
+    					if_block1 = create_if_block_2$3(ctx);
     					if_block1.c();
     					if_block1.m(tr, t1);
     				}
@@ -3693,18 +3986,18 @@ var morderedit2 = (function () {
     				if_block1 = null;
     			}
 
-    			if (dirty & /*find_entry_quantity, sorted_sizes, sorted_colors, ALL_COLORS_DICT, ALL_SIZES_DICT, input_amount_changed, sorted_verients, product*/ 255) {
+    			if (dirty & /*find_entry_quantity, sorted_sizes, sorted_colors, ALL_COLORS_DICT, ALL_SIZES_DICT, input_amount_changed, sorted_verients*/ 254) {
     				each_value_1 = /*sorted_sizes*/ ctx[1];
     				validate_each_argument(each_value_1);
     				let i;
 
     				for (i = 0; i < each_value_1.length; i += 1) {
-    					const child_ctx = get_each_context_1$1(ctx, each_value_1, i);
+    					const child_ctx = get_each_context_1$3(ctx, each_value_1, i);
 
     					if (each_blocks[i]) {
     						each_blocks[i].p(child_ctx, dirty);
     					} else {
-    						each_blocks[i] = create_each_block_1$1(child_ctx);
+    						each_blocks[i] = create_each_block_1$3(child_ctx);
     						each_blocks[i].c();
     						each_blocks[i].m(tr, t2);
     					}
@@ -3729,18 +4022,18 @@ var morderedit2 = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_each_block$2.name,
+    		id: create_each_block$3.name,
     		type: "each",
-    		source: "(207:12) {#each sorted_colors as color, color_idx}",
+    		source: "(208:16) {#each sorted_colors as color, color_idx}",
     		ctx
     	});
 
     	return block;
     }
 
-    function create_fragment$2(ctx) {
+    function create_fragment$3(ctx) {
     	let if_block_anchor;
-    	let if_block = /*ALL_COLORS_DICT*/ ctx[4] && /*ALL_SIZES_DICT*/ ctx[5] && create_if_block$2(ctx);
+    	let if_block = /*ALL_COLORS_DICT*/ ctx[4] && /*ALL_SIZES_DICT*/ ctx[5] && create_if_block$3(ctx);
 
     	const block = {
     		c: function create() {
@@ -3759,7 +4052,7 @@ var morderedit2 = (function () {
     				if (if_block) {
     					if_block.p(ctx, dirty);
     				} else {
-    					if_block = create_if_block$2(ctx);
+    					if_block = create_if_block$3(ctx);
     					if_block.c();
     					if_block.m(if_block_anchor.parentNode, if_block_anchor);
     				}
@@ -3778,7 +4071,7 @@ var morderedit2 = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$2.name,
+    		id: create_fragment$3.name,
     		type: "component",
     		source: "",
     		ctx
@@ -3787,7 +4080,7 @@ var morderedit2 = (function () {
     	return block;
     }
 
-    function instance$2($$self, $$props, $$invalidate) {
+    function instance$3($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('MentriesServerTable', slots, []);
     	let { product } = $$props;
@@ -3817,7 +4110,7 @@ var morderedit2 = (function () {
     		let found = false;
 
     		product.entries.forEach(entry => {
-    			if (entry.size == size_id && entry.color == color_id && entry.verient == verient_id) {
+    			if (entry.size == size_id && entry.color == color_id && entry.varient == verient_id) {
     				entry.quantity = quantity;
     				found = true;
     			}
@@ -3838,9 +4131,11 @@ var morderedit2 = (function () {
     	}
 
     	function find_entry_quantity(size, color, verient) {
-    		//console.log(product.id, 'looking for ', size, color, verient, ' in ', product.entries);
+    		console.log(product.id, 'looking for ', size, color, verient, ' in ', product.entries);
+
     		for (let entry of product.entries) {
-    			if (entry.size == size && entry.color == color && entry.verient == verient) {
+    			if (entry.size == size && entry.color == color && entry.varient == verient) {
+    				console.log('FOUND!!!!');
     				return entry.quantity;
     			}
     		}
@@ -3853,7 +4148,7 @@ var morderedit2 = (function () {
 
     		// console.log('removing ', clear_entries, ' out of ', product.entries);
     		clear_entries.forEach(cell => {
-    			let query = `#entries-table-${product.id} .size-input[data-color='${cell.color}'][data-size='${cell.size}']` + (product.verients.length > 0
+    			let query = `#entries-table-${product.id} .size-input[data-color='${cell.color}'][data-size='${cell.size}']` + (sorted_verients.length > 0
     			? `[data-ver='${cell.varient}']`
     			: '');
 
@@ -3872,7 +4167,7 @@ var morderedit2 = (function () {
     	const writable_props = ['product', 'ALL_SIZES', 'ALL_COLORS', 'ALL_VERIENTS'];
 
     	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1$2.warn(`<MentriesServerTable> was created with unknown prop '${key}'`);
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1$3.warn(`<MentriesServerTable> was created with unknown prop '${key}'`);
     	});
 
     	$$self.$$set = $$props => {
@@ -3994,7 +4289,7 @@ var morderedit2 = (function () {
     				for (let entry of product.entries) {
     					sizes_temp_set.add(entry.size);
     					colors_temp_set.add(entry.color);
-    					verients_temp_set.add(entry.verient);
+    					verients_temp_set.add(entry.varient);
     				}
 
     				// order sizes_ids_set by code
@@ -4044,7 +4339,7 @@ var morderedit2 = (function () {
     	constructor(options) {
     		super(options);
 
-    		init(this, options, instance$2, create_fragment$2, safe_not_equal, {
+    		init(this, options, instance$3, create_fragment$3, safe_not_equal, {
     			product: 0,
     			ALL_SIZES: 9,
     			ALL_COLORS: 10,
@@ -4055,26 +4350,26 @@ var morderedit2 = (function () {
     			component: this,
     			tagName: "MentriesServerTable",
     			options,
-    			id: create_fragment$2.name
+    			id: create_fragment$3.name
     		});
 
     		const { ctx } = this.$$;
     		const props = options.props || {};
 
     		if (/*product*/ ctx[0] === undefined && !('product' in props)) {
-    			console_1$2.warn("<MentriesServerTable> was created without expected prop 'product'");
+    			console_1$3.warn("<MentriesServerTable> was created without expected prop 'product'");
     		}
 
     		if (/*ALL_SIZES*/ ctx[9] === undefined && !('ALL_SIZES' in props)) {
-    			console_1$2.warn("<MentriesServerTable> was created without expected prop 'ALL_SIZES'");
+    			console_1$3.warn("<MentriesServerTable> was created without expected prop 'ALL_SIZES'");
     		}
 
     		if (/*ALL_COLORS*/ ctx[10] === undefined && !('ALL_COLORS' in props)) {
-    			console_1$2.warn("<MentriesServerTable> was created without expected prop 'ALL_COLORS'");
+    			console_1$3.warn("<MentriesServerTable> was created without expected prop 'ALL_COLORS'");
     		}
 
     		if (/*ALL_VERIENTS*/ ctx[11] === undefined && !('ALL_VERIENTS' in props)) {
-    			console_1$2.warn("<MentriesServerTable> was created without expected prop 'ALL_VERIENTS'");
+    			console_1$3.warn("<MentriesServerTable> was created without expected prop 'ALL_VERIENTS'");
     		}
     	}
 
@@ -4113,8 +4408,8 @@ var morderedit2 = (function () {
 
     /* node_modules\simple-svelte-autocomplete\src\SimpleAutocomplete.svelte generated by Svelte v3.44.3 */
 
-    const { Object: Object_1, console: console_1$1 } = globals;
-    const file$1 = "node_modules\\simple-svelte-autocomplete\\src\\SimpleAutocomplete.svelte";
+    const { Object: Object_1, console: console_1$2 } = globals;
+    const file$2 = "node_modules\\simple-svelte-autocomplete\\src\\SimpleAutocomplete.svelte";
 
     const get_no_results_slot_changes = dirty => ({
     	noResultsText: dirty[0] & /*noResultsText*/ 2048
@@ -4134,7 +4429,7 @@ var morderedit2 = (function () {
 
     const get_loading_slot_context = ctx => ({ loadingText: /*loadingText*/ ctx[12] });
 
-    function get_each_context$1(ctx, list, i) {
+    function get_each_context$2(ctx, list, i) {
     	const child_ctx = ctx.slice();
     	child_ctx[108] = list[i];
     	child_ctx[110] = i;
@@ -4153,7 +4448,7 @@ var morderedit2 = (function () {
     	: /*listItem*/ ctx[108].label
     });
 
-    function get_each_context_1(ctx, list, i) {
+    function get_each_context_1$2(ctx, list, i) {
     	const child_ctx = ctx.slice();
     	child_ctx[111] = list[i];
     	return child_ctx;
@@ -4170,7 +4465,7 @@ var morderedit2 = (function () {
     	unselectItem: /*unselectItem*/ ctx[41]
     });
 
-    function get_each_context_2(ctx, list, i) {
+    function get_each_context_2$2(ctx, list, i) {
     	const child_ctx = ctx.slice();
     	child_ctx[110] = list[i];
     	return child_ctx;
@@ -4184,7 +4479,7 @@ var morderedit2 = (function () {
     	let each_blocks = [];
 
     	for (let i = 0; i < each_value_2.length; i += 1) {
-    		each_blocks[i] = create_each_block_2(get_each_context_2(ctx, each_value_2, i));
+    		each_blocks[i] = create_each_block_2$2(get_each_context_2$2(ctx, each_value_2, i));
     	}
 
     	const block = {
@@ -4209,12 +4504,12 @@ var morderedit2 = (function () {
     				let i;
 
     				for (i = 0; i < each_value_2.length; i += 1) {
-    					const child_ctx = get_each_context_2(ctx, each_value_2, i);
+    					const child_ctx = get_each_context_2$2(ctx, each_value_2, i);
 
     					if (each_blocks[i]) {
     						each_blocks[i].p(child_ctx, dirty);
     					} else {
-    						each_blocks[i] = create_each_block_2(child_ctx);
+    						each_blocks[i] = create_each_block_2$2(child_ctx);
     						each_blocks[i].c();
     						each_blocks[i].m(each_1_anchor.parentNode, each_1_anchor);
     					}
@@ -4257,7 +4552,7 @@ var morderedit2 = (function () {
     			option.value = option.__value;
     			option.selected = true;
     			attr_dev(option, "class", "svelte-lduj97");
-    			add_location(option, file$1, 1142, 6, 27728);
+    			add_location(option, file$2, 1142, 6, 27728);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, option, anchor);
@@ -4288,7 +4583,7 @@ var morderedit2 = (function () {
     }
 
     // (1145:6) {#each selectedItem as i}
-    function create_each_block_2(ctx) {
+    function create_each_block_2$2(ctx) {
     	let option;
     	let t0_value = /*safeLabelFunction*/ ctx[34](/*i*/ ctx[110]) + "";
     	let t0;
@@ -4304,7 +4599,7 @@ var morderedit2 = (function () {
     			option.value = option.__value;
     			option.selected = true;
     			attr_dev(option, "class", "svelte-lduj97");
-    			add_location(option, file$1, 1145, 8, 27849);
+    			add_location(option, file$2, 1145, 8, 27849);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, option, anchor);
@@ -4326,7 +4621,7 @@ var morderedit2 = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_each_block_2.name,
+    		id: create_each_block_2$2.name,
     		type: "each",
     		source: "(1145:6) {#each selectedItem as i}",
     		ctx
@@ -4344,7 +4639,7 @@ var morderedit2 = (function () {
     	let each_blocks = [];
 
     	for (let i = 0; i < each_value_1.length; i += 1) {
-    		each_blocks[i] = create_each_block_1(get_each_context_1(ctx, each_value_1, i));
+    		each_blocks[i] = create_each_block_1$2(get_each_context_1$2(ctx, each_value_1, i));
     	}
 
     	const out = i => transition_out(each_blocks[i], 1, 1, () => {
@@ -4374,13 +4669,13 @@ var morderedit2 = (function () {
     				let i;
 
     				for (i = 0; i < each_value_1.length; i += 1) {
-    					const child_ctx = get_each_context_1(ctx, each_value_1, i);
+    					const child_ctx = get_each_context_1$2(ctx, each_value_1, i);
 
     					if (each_blocks[i]) {
     						each_blocks[i].p(child_ctx, dirty);
     						transition_in(each_blocks[i], 1);
     					} else {
-    						each_blocks[i] = create_each_block_1(child_ctx);
+    						each_blocks[i] = create_each_block_1$2(child_ctx);
     						each_blocks[i].c();
     						transition_in(each_blocks[i], 1);
     						each_blocks[i].m(each_1_anchor.parentNode, each_1_anchor);
@@ -4452,11 +4747,11 @@ var morderedit2 = (function () {
     			span1 = element("span");
     			t2 = space();
     			attr_dev(span0, "class", "tag svelte-lduj97");
-    			add_location(span0, file$1, 1160, 12, 28273);
+    			add_location(span0, file$2, 1160, 12, 28273);
     			attr_dev(span1, "class", "tag is-delete svelte-lduj97");
-    			add_location(span1, file$1, 1161, 12, 28339);
+    			add_location(span1, file$2, 1161, 12, 28339);
     			attr_dev(div, "class", "tags has-addons svelte-lduj97");
-    			add_location(div, file$1, 1159, 10, 28231);
+    			add_location(div, file$2, 1159, 10, 28231);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -4505,7 +4800,7 @@ var morderedit2 = (function () {
     }
 
     // (1154:6) {#each selectedItem as tagItem}
-    function create_each_block_1(ctx) {
+    function create_each_block_1$2(ctx) {
     	let current;
     	const tag_slot_template = /*#slots*/ ctx[76].tag;
     	const tag_slot = create_slot(tag_slot_template, ctx, /*$$scope*/ ctx[75], get_tag_slot_context);
@@ -4558,7 +4853,7 @@ var morderedit2 = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_each_block_1.name,
+    		id: create_each_block_1$2.name,
     		type: "each",
     		source: "(1154:6) {#each selectedItem as tagItem}",
     		ctx
@@ -4578,7 +4873,7 @@ var morderedit2 = (function () {
     			span = element("span");
     			span.textContent = "✖";
     			attr_dev(span, "class", "autocomplete-clear-button svelte-lduj97");
-    			add_location(span, file$1, 1187, 6, 29082);
+    			add_location(span, file$2, 1187, 6, 29082);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, span, anchor);
@@ -4620,7 +4915,7 @@ var morderedit2 = (function () {
     			div = element("div");
     			if (no_results_slot_or_fallback) no_results_slot_or_fallback.c();
     			attr_dev(div, "class", "autocomplete-list-item-no-results svelte-lduj97");
-    			add_location(div, file$1, 1234, 6, 30903);
+    			add_location(div, file$2, 1234, 6, 30903);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -4692,7 +4987,7 @@ var morderedit2 = (function () {
     			div = element("div");
     			if (create_slot_or_fallback) create_slot_or_fallback.c();
     			attr_dev(div, "class", "autocomplete-list-item-create svelte-lduj97");
-    			add_location(div, file$1, 1230, 6, 30728);
+    			add_location(div, file$2, 1230, 6, 30728);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -4769,7 +5064,7 @@ var morderedit2 = (function () {
     			div = element("div");
     			if (loading_slot_or_fallback) loading_slot_or_fallback.c();
     			attr_dev(div, "class", "autocomplete-list-item-loading svelte-lduj97");
-    			add_location(div, file$1, 1226, 6, 30578);
+    			add_location(div, file$2, 1226, 6, 30578);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -4827,7 +5122,7 @@ var morderedit2 = (function () {
     }
 
     // (1195:4) {#if filteredListItems && filteredListItems.length > 0}
-    function create_if_block$1(ctx) {
+    function create_if_block$2(ctx) {
     	let t;
     	let if_block_anchor;
     	let current;
@@ -4836,14 +5131,14 @@ var morderedit2 = (function () {
     	let each_blocks = [];
 
     	for (let i = 0; i < each_value.length; i += 1) {
-    		each_blocks[i] = create_each_block$1(get_each_context$1(ctx, each_value, i));
+    		each_blocks[i] = create_each_block$2(get_each_context$2(ctx, each_value, i));
     	}
 
     	const out = i => transition_out(each_blocks[i], 1, 1, () => {
     		each_blocks[i] = null;
     	});
 
-    	let if_block = /*maxItemsToShowInList*/ ctx[5] > 0 && /*filteredListItems*/ ctx[27].length > /*maxItemsToShowInList*/ ctx[5] && create_if_block_1$1(ctx);
+    	let if_block = /*maxItemsToShowInList*/ ctx[5] > 0 && /*filteredListItems*/ ctx[27].length > /*maxItemsToShowInList*/ ctx[5] && create_if_block_1$2(ctx);
 
     	const block = {
     		c: function create() {
@@ -4872,13 +5167,13 @@ var morderedit2 = (function () {
     				let i;
 
     				for (i = 0; i < each_value.length; i += 1) {
-    					const child_ctx = get_each_context$1(ctx, each_value, i);
+    					const child_ctx = get_each_context$2(ctx, each_value, i);
 
     					if (each_blocks[i]) {
     						each_blocks[i].p(child_ctx, dirty);
     						transition_in(each_blocks[i], 1);
     					} else {
-    						each_blocks[i] = create_each_block$1(child_ctx);
+    						each_blocks[i] = create_each_block$2(child_ctx);
     						each_blocks[i].c();
     						transition_in(each_blocks[i], 1);
     						each_blocks[i].m(t.parentNode, t);
@@ -4898,7 +5193,7 @@ var morderedit2 = (function () {
     				if (if_block) {
     					if_block.p(ctx, dirty);
     				} else {
-    					if_block = create_if_block_1$1(ctx);
+    					if_block = create_if_block_1$2(ctx);
     					if_block.c();
     					if_block.m(if_block_anchor.parentNode, if_block_anchor);
     				}
@@ -4935,7 +5230,7 @@ var morderedit2 = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block$1.name,
+    		id: create_if_block$2.name,
     		type: "if",
     		source: "(1195:4) {#if filteredListItems && filteredListItems.length > 0}",
     		ctx
@@ -5035,7 +5330,7 @@ var morderedit2 = (function () {
     }
 
     // (1197:8) {#if listItem && (maxItemsToShowInList <= 0 || i < maxItemsToShowInList)}
-    function create_if_block_2$1(ctx) {
+    function create_if_block_2$2(ctx) {
     	let if_block_anchor;
     	let current;
     	let if_block = /*listItem*/ ctx[108] && create_if_block_3$1(ctx);
@@ -5091,7 +5386,7 @@ var morderedit2 = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_2$1.name,
+    		id: create_if_block_2$2.name,
     		type: "if",
     		source: "(1197:8) {#if listItem && (maxItemsToShowInList <= 0 || i < maxItemsToShowInList)}",
     		ctx
@@ -5129,7 +5424,7 @@ var morderedit2 = (function () {
     			: '') + " svelte-lduj97");
 
     			toggle_class(div, "confirmed", /*isConfirmed*/ ctx[46](/*listItem*/ ctx[108].item));
-    			add_location(div, file$1, 1198, 12, 29548);
+    			add_location(div, file$2, 1198, 12, 29548);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -5333,10 +5628,10 @@ var morderedit2 = (function () {
     }
 
     // (1196:6) {#each filteredListItems as listItem, i}
-    function create_each_block$1(ctx) {
+    function create_each_block$2(ctx) {
     	let if_block_anchor;
     	let current;
-    	let if_block = /*listItem*/ ctx[108] && (/*maxItemsToShowInList*/ ctx[5] <= 0 || /*i*/ ctx[110] < /*maxItemsToShowInList*/ ctx[5]) && create_if_block_2$1(ctx);
+    	let if_block = /*listItem*/ ctx[108] && (/*maxItemsToShowInList*/ ctx[5] <= 0 || /*i*/ ctx[110] < /*maxItemsToShowInList*/ ctx[5]) && create_if_block_2$2(ctx);
 
     	const block = {
     		c: function create() {
@@ -5357,7 +5652,7 @@ var morderedit2 = (function () {
     						transition_in(if_block, 1);
     					}
     				} else {
-    					if_block = create_if_block_2$1(ctx);
+    					if_block = create_if_block_2$2(ctx);
     					if_block.c();
     					transition_in(if_block, 1);
     					if_block.m(if_block_anchor.parentNode, if_block_anchor);
@@ -5389,7 +5684,7 @@ var morderedit2 = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_each_block$1.name,
+    		id: create_each_block$2.name,
     		type: "each",
     		source: "(1196:6) {#each filteredListItems as listItem, i}",
     		ctx
@@ -5399,7 +5694,7 @@ var morderedit2 = (function () {
     }
 
     // (1221:6) {#if maxItemsToShowInList > 0 && filteredListItems.length > maxItemsToShowInList}
-    function create_if_block_1$1(ctx) {
+    function create_if_block_1$2(ctx) {
     	let div;
     	let t0;
     	let t1_value = /*filteredListItems*/ ctx[27].length - /*maxItemsToShowInList*/ ctx[5] + "";
@@ -5413,7 +5708,7 @@ var morderedit2 = (function () {
     			t1 = text(t1_value);
     			t2 = text(" results not shown");
     			attr_dev(div, "class", "autocomplete-list-item-no-results svelte-lduj97");
-    			add_location(div, file$1, 1221, 8, 30378);
+    			add_location(div, file$2, 1221, 8, 30378);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -5431,7 +5726,7 @@ var morderedit2 = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_1$1.name,
+    		id: create_if_block_1$2.name,
     		type: "if",
     		source: "(1221:6) {#if maxItemsToShowInList > 0 && filteredListItems.length > maxItemsToShowInList}",
     		ctx
@@ -5440,7 +5735,7 @@ var morderedit2 = (function () {
     	return block;
     }
 
-    function create_fragment$1(ctx) {
+    function create_fragment$2(ctx) {
     	let div2;
     	let select;
     	let t0;
@@ -5471,7 +5766,7 @@ var morderedit2 = (function () {
     	let if_block0 = current_block_type && current_block_type(ctx);
     	let if_block1 = /*multiple*/ ctx[6] && /*selectedItem*/ ctx[1] && create_if_block_9(ctx);
     	let if_block2 = /*clearable*/ ctx[31] && create_if_block_8(ctx);
-    	const if_block_creators = [create_if_block$1, create_if_block_5$1, create_if_block_6$1, create_if_block_7$1];
+    	const if_block_creators = [create_if_block$2, create_if_block_5$1, create_if_block_6$1, create_if_block_7$1];
     	const if_blocks = [];
 
     	function select_block_type_1(ctx, dirty) {
@@ -5505,7 +5800,7 @@ var morderedit2 = (function () {
     			attr_dev(select, "id", /*selectId*/ ctx[20]);
     			select.multiple = /*multiple*/ ctx[6];
     			attr_dev(select, "class", "svelte-lduj97");
-    			add_location(select, file$1, 1140, 2, 27641);
+    			add_location(select, file$2, 1140, 2, 27641);
     			attr_dev(input_1, "type", "text");
 
     			attr_dev(input_1, "class", input_1_class_value = "" + ((/*inputClassName*/ ctx[16]
@@ -5519,15 +5814,15 @@ var morderedit2 = (function () {
     			input_1.disabled = /*disabled*/ ctx[25];
     			attr_dev(input_1, "title", /*title*/ ctx[21]);
     			input_1.readOnly = input_1_readonly_value = /*readonly*/ ctx[23] || /*lock*/ ctx[8] && /*selectedItem*/ ctx[1];
-    			add_location(input_1, file$1, 1168, 4, 28507);
+    			add_location(input_1, file$2, 1168, 4, 28507);
     			attr_dev(div0, "class", "input-container svelte-lduj97");
-    			add_location(div0, file$1, 1151, 2, 27987);
+    			add_location(div0, file$2, 1151, 2, 27987);
 
     			attr_dev(div1, "class", div1_class_value = "" + ((/*dropdownClassName*/ ctx[24]
     			? /*dropdownClassName*/ ctx[24]
     			: '') + " autocomplete-list " + (/*showList*/ ctx[32] ? '' : 'hidden') + " is-fullwidth" + " svelte-lduj97"));
 
-    			add_location(div1, file$1, 1190, 2, 29176);
+    			add_location(div1, file$2, 1190, 2, 29176);
 
     			attr_dev(div2, "class", div2_class_value = "" + ((/*className*/ ctx[15] ? /*className*/ ctx[15] : '') + " " + (/*hideArrow*/ ctx[9] || !/*items*/ ctx[0].length
     			? 'hide-arrow'
@@ -5535,7 +5830,7 @@ var morderedit2 = (function () {
 
     			toggle_class(div2, "show-clear", /*clearable*/ ctx[31]);
     			toggle_class(div2, "is-loading", /*showLoadingIndicator*/ ctx[10] && /*loading*/ ctx[30]);
-    			add_location(div2, file$1, 1134, 0, 27381);
+    			add_location(div2, file$2, 1134, 0, 27381);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -5766,7 +6061,7 @@ var morderedit2 = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$1.name,
+    		id: create_fragment$2.name,
     		type: "component",
     		source: "",
     		ctx
@@ -5826,7 +6121,7 @@ var morderedit2 = (function () {
     	return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
     }
 
-    function instance$1($$self, $$props, $$invalidate) {
+    function instance$2($$self, $$props, $$invalidate) {
     	let showList;
     	let clearable;
     	let { $$slots: slots = {}, $$scope } = $$props;
@@ -6740,7 +7035,7 @@ var morderedit2 = (function () {
     	];
 
     	Object_1.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1$1.warn(`<SimpleAutocomplete> was created with unknown prop '${key}'`);
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1$2.warn(`<SimpleAutocomplete> was created with unknown prop '${key}'`);
     	});
 
     	function input_1_binding($$value) {
@@ -7120,8 +7415,8 @@ var morderedit2 = (function () {
     		init(
     			this,
     			options,
-    			instance$1,
-    			create_fragment$1,
+    			instance$2,
+    			create_fragment$2,
     			safe_not_equal,
     			{
     				items: 0,
@@ -7185,14 +7480,14 @@ var morderedit2 = (function () {
     			component: this,
     			tagName: "SimpleAutocomplete",
     			options,
-    			id: create_fragment$1.name
+    			id: create_fragment$2.name
     		});
 
     		const { ctx } = this.$$;
     		const props = options.props || {};
 
     		if (/*text*/ ctx[3] === undefined && !('text' in props)) {
-    			console_1$1.warn("<SimpleAutocomplete> was created without expected prop 'text'");
+    			console_1$2.warn("<SimpleAutocomplete> was created without expected prop 'text'");
     		}
     	}
 
@@ -7613,20 +7908,1002 @@ var morderedit2 = (function () {
     	}
     }
 
+    let MorderAddProductEntryPopupInitialState = {
+        isOpen: false,
+        product:undefined
+    };
+
+    function createMorderAddProductEntryStore() {
+        const { subscribe, set, update } = writable(MorderAddProductEntryPopupInitialState);
+
+        return {
+            subscribe,
+            open: (product) => {
+                update(state => ({ ...state, isOpen: true, product: product }));
+            },
+            close: () => {
+                update(state => ({ ...state, isOpen: false, product: undefined }));
+            },
+            
+        }
+    }
+
+    const morderAddProductEntryPopupStore = createMorderAddProductEntryStore();
+
+    /* src\components\popups\MorderAddProductEntryPopup.svelte generated by Svelte v3.44.3 */
+
+    const { console: console_1$1 } = globals;
+    const file$1 = "src\\components\\popups\\MorderAddProductEntryPopup.svelte";
+
+    function get_each_context$1(ctx, list, i) {
+    	const child_ctx = ctx.slice();
+    	child_ctx[16] = list[i];
+    	return child_ctx;
+    }
+
+    function get_each_context_1$1(ctx, list, i) {
+    	const child_ctx = ctx.slice();
+    	child_ctx[19] = list[i];
+    	return child_ctx;
+    }
+
+    function get_each_context_2$1(ctx, list, i) {
+    	const child_ctx = ctx.slice();
+    	child_ctx[22] = list[i];
+    	return child_ctx;
+    }
+
+    // (50:0) {#if $morderAddProductEntryPopupStore.isOpen && $morderAddProductEntryPopupStore.product != undefined}
+    function create_if_block$1(ctx) {
+    	let div1;
+    	let div0;
+    	let mounted;
+    	let dispose;
+    	let if_block = /*$morderAddProductEntryPopupStore*/ ctx[8].isOpen && create_if_block_1$1(ctx);
+
+    	const block = {
+    		c: function create() {
+    			div1 = element("div");
+    			div0 = element("div");
+    			if (if_block) if_block.c();
+    			attr_dev(div0, "class", "overlay svelte-nfr7vy");
+    			set_style(div0, "z-index", /*modal_zIndex*/ ctx[9] + 5);
+    			add_location(div0, file$1, 51, 8, 1831);
+    			attr_dev(div1, "id", "singleAmountPopup");
+    			set_style(div1, "z-index", /*modal_zIndex*/ ctx[9]);
+    			attr_dev(div1, "class", "modal active svelte-nfr7vy");
+    			add_location(div1, file$1, 50, 4, 1739);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, div1, anchor);
+    			append_dev(div1, div0);
+    			if (if_block) if_block.m(div0, null);
+
+    			if (!mounted) {
+    				dispose = listen_dev(div0, "click", /*closeModal*/ ctx[10], false, false, false);
+    				mounted = true;
+    			}
+    		},
+    		p: function update(ctx, dirty) {
+    			if (/*$morderAddProductEntryPopupStore*/ ctx[8].isOpen) {
+    				if (if_block) {
+    					if_block.p(ctx, dirty);
+
+    					if (dirty & /*$morderAddProductEntryPopupStore*/ 256) {
+    						transition_in(if_block, 1);
+    					}
+    				} else {
+    					if_block = create_if_block_1$1(ctx);
+    					if_block.c();
+    					transition_in(if_block, 1);
+    					if_block.m(div0, null);
+    				}
+    			} else if (if_block) {
+    				if_block.d(1);
+    				if_block = null;
+    			}
+    		},
+    		i: function intro(local) {
+    			transition_in(if_block);
+    		},
+    		o: noop,
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(div1);
+    			if (if_block) if_block.d();
+    			mounted = false;
+    			dispose();
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block$1.name,
+    		type: "if",
+    		source: "(50:0) {#if $morderAddProductEntryPopupStore.isOpen && $morderAddProductEntryPopupStore.product != undefined}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (53:12) {#if $morderAddProductEntryPopupStore.isOpen}
+    function create_if_block_1$1(ctx) {
+    	let div4;
+    	let div1;
+    	let button0;
+    	let t1;
+    	let div0;
+    	let t2;
+    	let t3_value = /*$morderAddProductEntryPopupStore*/ ctx[8].product.product.title + "";
+    	let t3;
+    	let t4;
+    	let button1;
+    	let t6;
+    	let div3;
+    	let input0;
+    	let input0_value_value;
+    	let t7;
+    	let input1;
+    	let input1_value_value;
+    	let t8;
+    	let div2;
+    	let label0;
+    	let t10;
+    	let select0;
+    	let option0;
+    	let t12;
+    	let label1;
+    	let t14;
+    	let select1;
+    	let option1;
+    	let t16;
+    	let label2;
+    	let t18;
+    	let select2;
+    	let option2;
+    	let t20;
+    	let label3;
+    	let t22;
+    	let input2;
+    	let t23;
+    	let t24;
+    	let button2;
+    	let div4_intro;
+    	let mounted;
+    	let dispose;
+    	let each_value_2 = /*ALL_COLORS*/ ctx[0];
+    	validate_each_argument(each_value_2);
+    	let each_blocks_2 = [];
+
+    	for (let i = 0; i < each_value_2.length; i += 1) {
+    		each_blocks_2[i] = create_each_block_2$1(get_each_context_2$1(ctx, each_value_2, i));
+    	}
+
+    	let each_value_1 = /*ALL_SIZES*/ ctx[1].sort(func$1);
+    	validate_each_argument(each_value_1);
+    	let each_blocks_1 = [];
+
+    	for (let i = 0; i < each_value_1.length; i += 1) {
+    		each_blocks_1[i] = create_each_block_1$1(get_each_context_1$1(ctx, each_value_1, i));
+    	}
+
+    	let each_value = /*ALL_VERIENTS*/ ctx[2];
+    	validate_each_argument(each_value);
+    	let each_blocks = [];
+
+    	for (let i = 0; i < each_value.length; i += 1) {
+    		each_blocks[i] = create_each_block$1(get_each_context$1(ctx, each_value, i));
+    	}
+
+    	let if_block = /*error_message*/ ctx[7] != '' && create_if_block_2$1(ctx);
+
+    	const block = {
+    		c: function create() {
+    			div4 = element("div");
+    			div1 = element("div");
+    			button0 = element("button");
+    			button0.textContent = "x";
+    			t1 = space();
+    			div0 = element("div");
+    			t2 = text("ערוך משתנים ל ");
+    			t3 = text(t3_value);
+    			t4 = space();
+    			button1 = element("button");
+    			button1.textContent = "x";
+    			t6 = space();
+    			div3 = element("div");
+    			input0 = element("input");
+    			t7 = space();
+    			input1 = element("input");
+    			t8 = space();
+    			div2 = element("div");
+    			label0 = element("label");
+    			label0.textContent = "צבע";
+    			t10 = space();
+    			select0 = element("select");
+    			option0 = element("option");
+    			option0.textContent = "בחר צבע";
+
+    			for (let i = 0; i < each_blocks_2.length; i += 1) {
+    				each_blocks_2[i].c();
+    			}
+
+    			t12 = space();
+    			label1 = element("label");
+    			label1.textContent = "מידה";
+    			t14 = space();
+    			select1 = element("select");
+    			option1 = element("option");
+    			option1.textContent = "בחר מידה";
+
+    			for (let i = 0; i < each_blocks_1.length; i += 1) {
+    				each_blocks_1[i].c();
+    			}
+
+    			t16 = space();
+    			label2 = element("label");
+    			label2.textContent = "מודל";
+    			t18 = space();
+    			select2 = element("select");
+    			option2 = element("option");
+    			option2.textContent = "בחר מודל";
+
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].c();
+    			}
+
+    			t20 = space();
+    			label3 = element("label");
+    			label3.textContent = "כמות";
+    			t22 = space();
+    			input2 = element("input");
+    			t23 = space();
+    			if (if_block) if_block.c();
+    			t24 = space();
+    			button2 = element("button");
+    			button2.textContent = "שמור";
+    			attr_dev(button0, "title", "Close");
+    			attr_dev(button0, "class", "close-btn right");
+    			add_location(button0, file$1, 55, 20, 2184);
+    			attr_dev(div0, "class", "modal-title svelte-nfr7vy");
+    			add_location(div0, file$1, 56, 20, 2284);
+    			attr_dev(button1, "title", "Close");
+    			attr_dev(button1, "class", "close-btn left");
+    			add_location(button1, file$1, 57, 20, 2407);
+    			attr_dev(div1, "class", "modal-header svelte-nfr7vy");
+    			add_location(div1, file$1, 54, 16, 2136);
+    			attr_dev(input0, "type", "hidden");
+    			attr_dev(input0, "name", "product_id");
+    			input0.value = input0_value_value = /*$morderAddProductEntryPopupStore*/ ctx[8].product.product.id;
+    			add_location(input0, file$1, 61, 20, 2594);
+    			attr_dev(input1, "type", "hidden");
+    			attr_dev(input1, "name", "entry_id");
+    			input1.value = input1_value_value = /*$morderAddProductEntryPopupStore*/ ctx[8].product.entry_id;
+    			add_location(input1, file$1, 62, 20, 2717);
+    			attr_dev(label0, "for", "color");
+    			add_location(label0, file$1, 64, 24, 2890);
+    			attr_dev(option0, "default", "");
+    			option0.__value = "undefined";
+    			option0.value = option0.__value;
+    			add_location(option0, file$1, 66, 32, 3066);
+    			attr_dev(select0, "class", "form-control");
+    			attr_dev(select0, "name", "color");
+    			attr_dev(select0, "id", "color");
+    			if (/*selected_color*/ ctx[3] === void 0) add_render_callback(() => /*select0_change_handler*/ ctx[12].call(select0));
+    			add_location(select0, file$1, 65, 28, 2950);
+    			attr_dev(label1, "for", "size");
+    			add_location(label1, file$1, 72, 24, 3369);
+    			attr_dev(option1, "default", "");
+    			option1.__value = "undefined";
+    			option1.value = option1.__value;
+    			add_location(option1, file$1, 74, 32, 3542);
+    			attr_dev(select1, "class", "form-control");
+    			attr_dev(select1, "name", "size");
+    			attr_dev(select1, "id", "size");
+    			if (/*selected_size*/ ctx[4] === void 0) add_render_callback(() => /*select1_change_handler*/ ctx[13].call(select1));
+    			add_location(select1, file$1, 73, 28, 3429);
+    			attr_dev(label2, "for", "varient");
+    			add_location(label2, file$1, 82, 24, 3969);
+    			attr_dev(option2, "default", "");
+    			option2.__value = "undefined";
+    			option2.value = option2.__value;
+    			add_location(option2, file$1, 84, 32, 4154);
+    			attr_dev(select2, "class", "form-control");
+    			attr_dev(select2, "name", "varient");
+    			attr_dev(select2, "id", "varient");
+    			if (/*selected_verient*/ ctx[5] === void 0) add_render_callback(() => /*select2_change_handler*/ ctx[14].call(select2));
+    			add_location(select2, file$1, 83, 28, 4032);
+    			attr_dev(label3, "for", "amount");
+    			add_location(label3, file$1, 90, 24, 4490);
+    			attr_dev(input2, "class", "form-control");
+    			attr_dev(input2, "type", "number");
+    			attr_dev(input2, "name", "amount");
+    			attr_dev(input2, "id", "amount");
+    			add_location(input2, file$1, 91, 28, 4552);
+    			attr_dev(div2, "class", "form-group");
+    			add_location(div2, file$1, 63, 24, 2840);
+    			attr_dev(button2, "type", "submit");
+    			attr_dev(button2, "class", "btn btn-primary");
+    			add_location(button2, file$1, 96, 20, 4832);
+    			attr_dev(div3, "class", "modal-body svelte-nfr7vy");
+    			add_location(div3, file$1, 60, 16, 2548);
+    			attr_dev(div4, "class", "modal_content svelte-nfr7vy");
+    			set_style(div4, "z-index", /*modal_zIndex*/ ctx[9] + 10);
+    			add_location(div4, file$1, 53, 12, 1982);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, div4, anchor);
+    			append_dev(div4, div1);
+    			append_dev(div1, button0);
+    			append_dev(div1, t1);
+    			append_dev(div1, div0);
+    			append_dev(div0, t2);
+    			append_dev(div0, t3);
+    			append_dev(div1, t4);
+    			append_dev(div1, button1);
+    			append_dev(div4, t6);
+    			append_dev(div4, div3);
+    			append_dev(div3, input0);
+    			append_dev(div3, t7);
+    			append_dev(div3, input1);
+    			append_dev(div3, t8);
+    			append_dev(div3, div2);
+    			append_dev(div2, label0);
+    			append_dev(div2, t10);
+    			append_dev(div2, select0);
+    			append_dev(select0, option0);
+
+    			for (let i = 0; i < each_blocks_2.length; i += 1) {
+    				each_blocks_2[i].m(select0, null);
+    			}
+
+    			select_option(select0, /*selected_color*/ ctx[3]);
+    			append_dev(div2, t12);
+    			append_dev(div2, label1);
+    			append_dev(div2, t14);
+    			append_dev(div2, select1);
+    			append_dev(select1, option1);
+
+    			for (let i = 0; i < each_blocks_1.length; i += 1) {
+    				each_blocks_1[i].m(select1, null);
+    			}
+
+    			select_option(select1, /*selected_size*/ ctx[4]);
+    			append_dev(div2, t16);
+    			append_dev(div2, label2);
+    			append_dev(div2, t18);
+    			append_dev(div2, select2);
+    			append_dev(select2, option2);
+
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].m(select2, null);
+    			}
+
+    			select_option(select2, /*selected_verient*/ ctx[5]);
+    			append_dev(div2, t20);
+    			append_dev(div2, label3);
+    			append_dev(div2, t22);
+    			append_dev(div2, input2);
+    			set_input_value(input2, /*selected_amount*/ ctx[6]);
+    			append_dev(div3, t23);
+    			if (if_block) if_block.m(div3, null);
+    			append_dev(div3, t24);
+    			append_dev(div3, button2);
+
+    			if (!mounted) {
+    				dispose = [
+    					listen_dev(button0, "click", /*closeModal*/ ctx[10], false, false, false),
+    					listen_dev(button1, "click", /*closeModal*/ ctx[10], false, false, false),
+    					listen_dev(select0, "change", /*select0_change_handler*/ ctx[12]),
+    					listen_dev(select1, "change", /*select1_change_handler*/ ctx[13]),
+    					listen_dev(select2, "change", /*select2_change_handler*/ ctx[14]),
+    					listen_dev(input2, "input", /*input2_input_handler*/ ctx[15]),
+    					listen_dev(button2, "click", /*add_entry_btn_clicked*/ ctx[11], false, false, false),
+    					listen_dev(div4, "click", stop_propagation(click_handler), false, false, true)
+    				];
+
+    				mounted = true;
+    			}
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty & /*$morderAddProductEntryPopupStore*/ 256 && t3_value !== (t3_value = /*$morderAddProductEntryPopupStore*/ ctx[8].product.product.title + "")) set_data_dev(t3, t3_value);
+
+    			if (dirty & /*$morderAddProductEntryPopupStore*/ 256 && input0_value_value !== (input0_value_value = /*$morderAddProductEntryPopupStore*/ ctx[8].product.product.id)) {
+    				prop_dev(input0, "value", input0_value_value);
+    			}
+
+    			if (dirty & /*$morderAddProductEntryPopupStore*/ 256 && input1_value_value !== (input1_value_value = /*$morderAddProductEntryPopupStore*/ ctx[8].product.entry_id)) {
+    				prop_dev(input1, "value", input1_value_value);
+    			}
+
+    			if (dirty & /*ALL_COLORS*/ 1) {
+    				each_value_2 = /*ALL_COLORS*/ ctx[0];
+    				validate_each_argument(each_value_2);
+    				let i;
+
+    				for (i = 0; i < each_value_2.length; i += 1) {
+    					const child_ctx = get_each_context_2$1(ctx, each_value_2, i);
+
+    					if (each_blocks_2[i]) {
+    						each_blocks_2[i].p(child_ctx, dirty);
+    					} else {
+    						each_blocks_2[i] = create_each_block_2$1(child_ctx);
+    						each_blocks_2[i].c();
+    						each_blocks_2[i].m(select0, null);
+    					}
+    				}
+
+    				for (; i < each_blocks_2.length; i += 1) {
+    					each_blocks_2[i].d(1);
+    				}
+
+    				each_blocks_2.length = each_value_2.length;
+    			}
+
+    			if (dirty & /*selected_color, ALL_COLORS*/ 9) {
+    				select_option(select0, /*selected_color*/ ctx[3]);
+    			}
+
+    			if (dirty & /*ALL_SIZES*/ 2) {
+    				each_value_1 = /*ALL_SIZES*/ ctx[1].sort(func$1);
+    				validate_each_argument(each_value_1);
+    				let i;
+
+    				for (i = 0; i < each_value_1.length; i += 1) {
+    					const child_ctx = get_each_context_1$1(ctx, each_value_1, i);
+
+    					if (each_blocks_1[i]) {
+    						each_blocks_1[i].p(child_ctx, dirty);
+    					} else {
+    						each_blocks_1[i] = create_each_block_1$1(child_ctx);
+    						each_blocks_1[i].c();
+    						each_blocks_1[i].m(select1, null);
+    					}
+    				}
+
+    				for (; i < each_blocks_1.length; i += 1) {
+    					each_blocks_1[i].d(1);
+    				}
+
+    				each_blocks_1.length = each_value_1.length;
+    			}
+
+    			if (dirty & /*selected_size, ALL_SIZES*/ 18) {
+    				select_option(select1, /*selected_size*/ ctx[4]);
+    			}
+
+    			if (dirty & /*ALL_VERIENTS*/ 4) {
+    				each_value = /*ALL_VERIENTS*/ ctx[2];
+    				validate_each_argument(each_value);
+    				let i;
+
+    				for (i = 0; i < each_value.length; i += 1) {
+    					const child_ctx = get_each_context$1(ctx, each_value, i);
+
+    					if (each_blocks[i]) {
+    						each_blocks[i].p(child_ctx, dirty);
+    					} else {
+    						each_blocks[i] = create_each_block$1(child_ctx);
+    						each_blocks[i].c();
+    						each_blocks[i].m(select2, null);
+    					}
+    				}
+
+    				for (; i < each_blocks.length; i += 1) {
+    					each_blocks[i].d(1);
+    				}
+
+    				each_blocks.length = each_value.length;
+    			}
+
+    			if (dirty & /*selected_verient, ALL_VERIENTS*/ 36) {
+    				select_option(select2, /*selected_verient*/ ctx[5]);
+    			}
+
+    			if (dirty & /*selected_amount*/ 64 && to_number(input2.value) !== /*selected_amount*/ ctx[6]) {
+    				set_input_value(input2, /*selected_amount*/ ctx[6]);
+    			}
+
+    			if (/*error_message*/ ctx[7] != '') {
+    				if (if_block) {
+    					if_block.p(ctx, dirty);
+    				} else {
+    					if_block = create_if_block_2$1(ctx);
+    					if_block.c();
+    					if_block.m(div3, t24);
+    				}
+    			} else if (if_block) {
+    				if_block.d(1);
+    				if_block = null;
+    			}
+    		},
+    		i: function intro(local) {
+    			if (!div4_intro) {
+    				add_render_callback(() => {
+    					div4_intro = create_in_transition(div4, fly, { y: 200, duration: 200 });
+    					div4_intro.start();
+    				});
+    			}
+    		},
+    		o: noop,
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(div4);
+    			destroy_each(each_blocks_2, detaching);
+    			destroy_each(each_blocks_1, detaching);
+    			destroy_each(each_blocks, detaching);
+    			if (if_block) if_block.d();
+    			mounted = false;
+    			run_all(dispose);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_1$1.name,
+    		type: "if",
+    		source: "(53:12) {#if $morderAddProductEntryPopupStore.isOpen}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (68:32) {#each ALL_COLORS as color}
+    function create_each_block_2$1(ctx) {
+    	let option;
+    	let t_value = /*color*/ ctx[22]['name'] + "";
+    	let t;
+    	let option_value_value;
+
+    	const block = {
+    		c: function create() {
+    			option = element("option");
+    			t = text(t_value);
+    			option.__value = option_value_value = /*color*/ ctx[22]['id'];
+    			option.value = option.__value;
+    			add_location(option, file$1, 68, 32, 3209);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, option, anchor);
+    			append_dev(option, t);
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty & /*ALL_COLORS*/ 1 && t_value !== (t_value = /*color*/ ctx[22]['name'] + "")) set_data_dev(t, t_value);
+
+    			if (dirty & /*ALL_COLORS*/ 1 && option_value_value !== (option_value_value = /*color*/ ctx[22]['id'])) {
+    				prop_dev(option, "__value", option_value_value);
+    				option.value = option.__value;
+    			}
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(option);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_each_block_2$1.name,
+    		type: "each",
+    		source: "(68:32) {#each ALL_COLORS as color}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (76:32) {#each ALL_SIZES.sort((a, b) => {                                      return a.code.localeCompare(b.code);                                  }) as size}
+    function create_each_block_1$1(ctx) {
+    	let option;
+    	let t_value = /*size*/ ctx[19]['size'] + "";
+    	let t;
+    	let option_value_value;
+
+    	const block = {
+    		c: function create() {
+    			option = element("option");
+    			t = text(t_value);
+    			option.__value = option_value_value = /*size*/ ctx[19]['id'];
+    			option.value = option.__value;
+    			add_location(option, file$1, 78, 32, 3811);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, option, anchor);
+    			append_dev(option, t);
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty & /*ALL_SIZES*/ 2 && t_value !== (t_value = /*size*/ ctx[19]['size'] + "")) set_data_dev(t, t_value);
+
+    			if (dirty & /*ALL_SIZES*/ 2 && option_value_value !== (option_value_value = /*size*/ ctx[19]['id'])) {
+    				prop_dev(option, "__value", option_value_value);
+    				option.value = option.__value;
+    			}
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(option);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_each_block_1$1.name,
+    		type: "each",
+    		source: "(76:32) {#each ALL_SIZES.sort((a, b) => {                                      return a.code.localeCompare(b.code);                                  }) as size}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (86:32) {#each ALL_VERIENTS as varient}
+    function create_each_block$1(ctx) {
+    	let option;
+    	let t_value = /*varient*/ ctx[16]['name'] + "";
+    	let t;
+    	let option_value_value;
+
+    	const block = {
+    		c: function create() {
+    			option = element("option");
+    			t = text(t_value);
+    			option.__value = option_value_value = /*varient*/ ctx[16]['id'];
+    			option.value = option.__value;
+    			add_location(option, file$1, 86, 32, 4302);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, option, anchor);
+    			append_dev(option, t);
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty & /*ALL_VERIENTS*/ 4 && t_value !== (t_value = /*varient*/ ctx[16]['name'] + "")) set_data_dev(t, t_value);
+
+    			if (dirty & /*ALL_VERIENTS*/ 4 && option_value_value !== (option_value_value = /*varient*/ ctx[16]['id'])) {
+    				prop_dev(option, "__value", option_value_value);
+    				option.value = option.__value;
+    			}
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(option);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_each_block$1.name,
+    		type: "each",
+    		source: "(86:32) {#each ALL_VERIENTS as varient}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (94:24) {#if error_message != ''}
+    function create_if_block_2$1(ctx) {
+    	let t;
+
+    	const block = {
+    		c: function create() {
+    			t = text(/*error_message*/ ctx[7]);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, t, anchor);
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty & /*error_message*/ 128) set_data_dev(t, /*error_message*/ ctx[7]);
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(t);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_2$1.name,
+    		type: "if",
+    		source: "(94:24) {#if error_message != ''}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    function create_fragment$1(ctx) {
+    	let if_block_anchor;
+    	let if_block = /*$morderAddProductEntryPopupStore*/ ctx[8].isOpen && /*$morderAddProductEntryPopupStore*/ ctx[8].product != undefined && create_if_block$1(ctx);
+
+    	const block = {
+    		c: function create() {
+    			if (if_block) if_block.c();
+    			if_block_anchor = empty();
+    		},
+    		l: function claim(nodes) {
+    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
+    		},
+    		m: function mount(target, anchor) {
+    			if (if_block) if_block.m(target, anchor);
+    			insert_dev(target, if_block_anchor, anchor);
+    		},
+    		p: function update(ctx, [dirty]) {
+    			if (/*$morderAddProductEntryPopupStore*/ ctx[8].isOpen && /*$morderAddProductEntryPopupStore*/ ctx[8].product != undefined) {
+    				if (if_block) {
+    					if_block.p(ctx, dirty);
+
+    					if (dirty & /*$morderAddProductEntryPopupStore*/ 256) {
+    						transition_in(if_block, 1);
+    					}
+    				} else {
+    					if_block = create_if_block$1(ctx);
+    					if_block.c();
+    					transition_in(if_block, 1);
+    					if_block.m(if_block_anchor.parentNode, if_block_anchor);
+    				}
+    			} else if (if_block) {
+    				if_block.d(1);
+    				if_block = null;
+    			}
+    		},
+    		i: function intro(local) {
+    			transition_in(if_block);
+    		},
+    		o: noop,
+    		d: function destroy(detaching) {
+    			if (if_block) if_block.d(detaching);
+    			if (detaching) detach_dev(if_block_anchor);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_fragment$1.name,
+    		type: "component",
+    		source: "",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    const func$1 = (a, b) => {
+    	return a.code.localeCompare(b.code);
+    };
+
+    const click_handler = () => {
+    	
+    };
+
+    function instance$1($$self, $$props, $$invalidate) {
+    	let $morderAddProductEntryPopupStore;
+    	validate_store(morderAddProductEntryPopupStore, 'morderAddProductEntryPopupStore');
+    	component_subscribe($$self, morderAddProductEntryPopupStore, $$value => $$invalidate(8, $morderAddProductEntryPopupStore = $$value));
+    	let { $$slots: slots = {}, $$scope } = $$props;
+    	validate_slots('MorderAddProductEntryPopup', slots, []);
+    	let { ALL_COLORS } = $$props;
+    	let { ALL_SIZES } = $$props;
+    	let { ALL_VERIENTS } = $$props;
+    	let modal_zIndex = 10;
+    	let selected_color = undefined;
+    	let selected_size = undefined;
+    	let selected_verient = undefined;
+    	let selected_amount = 1;
+    	let error_message = '';
+
+    	function closeModal() {
+    		morderAddProductEntryPopupStore.close();
+    	}
+
+    	function add_entry_btn_clicked(e) {
+    		e.preventDefault();
+
+    		if (selected_color == undefined) {
+    			$$invalidate(7, error_message = 'חייב לבחור צבע');
+    			return;
+    		} else if (selected_size == undefined) {
+    			$$invalidate(7, error_message = 'חייב לבחור מידה');
+    			return;
+    		}
+
+    		console.log('looking for ', selected_size, selected_color, selected_verient, selected_amount, ' in ', $morderAddProductEntryPopupStore.product.entries);
+    		let entry = $morderAddProductEntryPopupStore.product.entries.find(entry => entry.size == selected_size && entry.color == selected_color && entry.varient == selected_verient);
+
+    		if (entry) {
+    			entry.quantity = selected_amount;
+    		} else {
+    			$morderAddProductEntryPopupStore.product.entries.push({
+    				size: selected_size,
+    				color: selected_color,
+    				varient: selected_verient,
+    				quantity: selected_amount
+    			});
+    		}
+
+    		morderAddProductEntryPopupStore.close();
+    	}
+
+    	const writable_props = ['ALL_COLORS', 'ALL_SIZES', 'ALL_VERIENTS'];
+
+    	Object.keys($$props).forEach(key => {
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1$1.warn(`<MorderAddProductEntryPopup> was created with unknown prop '${key}'`);
+    	});
+
+    	function select0_change_handler() {
+    		selected_color = select_value(this);
+    		$$invalidate(3, selected_color);
+    		$$invalidate(0, ALL_COLORS);
+    	}
+
+    	function select1_change_handler() {
+    		selected_size = select_value(this);
+    		$$invalidate(4, selected_size);
+    		$$invalidate(1, ALL_SIZES);
+    	}
+
+    	function select2_change_handler() {
+    		selected_verient = select_value(this);
+    		$$invalidate(5, selected_verient);
+    		$$invalidate(2, ALL_VERIENTS);
+    	}
+
+    	function input2_input_handler() {
+    		selected_amount = to_number(this.value);
+    		$$invalidate(6, selected_amount);
+    	}
+
+    	$$self.$$set = $$props => {
+    		if ('ALL_COLORS' in $$props) $$invalidate(0, ALL_COLORS = $$props.ALL_COLORS);
+    		if ('ALL_SIZES' in $$props) $$invalidate(1, ALL_SIZES = $$props.ALL_SIZES);
+    		if ('ALL_VERIENTS' in $$props) $$invalidate(2, ALL_VERIENTS = $$props.ALL_VERIENTS);
+    	};
+
+    	$$self.$capture_state = () => ({
+    		morderAddProductEntryPopupStore,
+    		fly,
+    		ALL_COLORS,
+    		ALL_SIZES,
+    		ALL_VERIENTS,
+    		modal_zIndex,
+    		selected_color,
+    		selected_size,
+    		selected_verient,
+    		selected_amount,
+    		error_message,
+    		closeModal,
+    		add_entry_btn_clicked,
+    		$morderAddProductEntryPopupStore
+    	});
+
+    	$$self.$inject_state = $$props => {
+    		if ('ALL_COLORS' in $$props) $$invalidate(0, ALL_COLORS = $$props.ALL_COLORS);
+    		if ('ALL_SIZES' in $$props) $$invalidate(1, ALL_SIZES = $$props.ALL_SIZES);
+    		if ('ALL_VERIENTS' in $$props) $$invalidate(2, ALL_VERIENTS = $$props.ALL_VERIENTS);
+    		if ('modal_zIndex' in $$props) $$invalidate(9, modal_zIndex = $$props.modal_zIndex);
+    		if ('selected_color' in $$props) $$invalidate(3, selected_color = $$props.selected_color);
+    		if ('selected_size' in $$props) $$invalidate(4, selected_size = $$props.selected_size);
+    		if ('selected_verient' in $$props) $$invalidate(5, selected_verient = $$props.selected_verient);
+    		if ('selected_amount' in $$props) $$invalidate(6, selected_amount = $$props.selected_amount);
+    		if ('error_message' in $$props) $$invalidate(7, error_message = $$props.error_message);
+    	};
+
+    	if ($$props && "$$inject" in $$props) {
+    		$$self.$inject_state($$props.$$inject);
+    	}
+
+    	return [
+    		ALL_COLORS,
+    		ALL_SIZES,
+    		ALL_VERIENTS,
+    		selected_color,
+    		selected_size,
+    		selected_verient,
+    		selected_amount,
+    		error_message,
+    		$morderAddProductEntryPopupStore,
+    		modal_zIndex,
+    		closeModal,
+    		add_entry_btn_clicked,
+    		select0_change_handler,
+    		select1_change_handler,
+    		select2_change_handler,
+    		input2_input_handler
+    	];
+    }
+
+    class MorderAddProductEntryPopup extends SvelteComponentDev {
+    	constructor(options) {
+    		super(options);
+
+    		init(this, options, instance$1, create_fragment$1, safe_not_equal, {
+    			ALL_COLORS: 0,
+    			ALL_SIZES: 1,
+    			ALL_VERIENTS: 2
+    		});
+
+    		dispatch_dev("SvelteRegisterComponent", {
+    			component: this,
+    			tagName: "MorderAddProductEntryPopup",
+    			options,
+    			id: create_fragment$1.name
+    		});
+
+    		const { ctx } = this.$$;
+    		const props = options.props || {};
+
+    		if (/*ALL_COLORS*/ ctx[0] === undefined && !('ALL_COLORS' in props)) {
+    			console_1$1.warn("<MorderAddProductEntryPopup> was created without expected prop 'ALL_COLORS'");
+    		}
+
+    		if (/*ALL_SIZES*/ ctx[1] === undefined && !('ALL_SIZES' in props)) {
+    			console_1$1.warn("<MorderAddProductEntryPopup> was created without expected prop 'ALL_SIZES'");
+    		}
+
+    		if (/*ALL_VERIENTS*/ ctx[2] === undefined && !('ALL_VERIENTS' in props)) {
+    			console_1$1.warn("<MorderAddProductEntryPopup> was created without expected prop 'ALL_VERIENTS'");
+    		}
+    	}
+
+    	get ALL_COLORS() {
+    		throw new Error("<MorderAddProductEntryPopup>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set ALL_COLORS(value) {
+    		throw new Error("<MorderAddProductEntryPopup>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get ALL_SIZES() {
+    		throw new Error("<MorderAddProductEntryPopup>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set ALL_SIZES(value) {
+    		throw new Error("<MorderAddProductEntryPopup>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get ALL_VERIENTS() {
+    		throw new Error("<MorderAddProductEntryPopup>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set ALL_VERIENTS(value) {
+    		throw new Error("<MorderAddProductEntryPopup>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+    }
+
     /* src\MorderEdit2.svelte generated by Svelte v3.44.3 */
 
     const { console: console_1 } = globals;
+
     const file = "src\\MorderEdit2.svelte";
 
     function get_each_context(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[31] = list[i];
-    	child_ctx[32] = list;
-    	child_ctx[33] = i;
+    	child_ctx[35] = list[i];
+    	child_ctx[36] = list;
+    	child_ctx[37] = i;
     	return child_ctx;
     }
 
-    // (138:4) {#if headerData}
+    function get_each_context_1(ctx, list, i) {
+    	const child_ctx = ctx.slice();
+    	child_ctx[38] = list[i];
+    	return child_ctx;
+    }
+
+    function get_each_context_2(ctx, list, i) {
+    	const child_ctx = ctx.slice();
+    	child_ctx[41] = list[i];
+    	return child_ctx;
+    }
+
+    function get_each_context_3(ctx, list, i) {
+    	const child_ctx = ctx.slice();
+    	child_ctx[44] = list[i];
+    	return child_ctx;
+    }
+
+    function get_each_context_4(ctx, list, i) {
+    	const child_ctx = ctx.slice();
+    	child_ctx[47] = list[i];
+    	return child_ctx;
+    }
+
+    // (224:4) {#if headerData}
     function create_if_block_7(ctx) {
     	let div0;
     	let t0;
@@ -7641,56 +8918,62 @@ var morderedit2 = (function () {
     	let table;
     	let thead;
     	let tr0;
-    	let td0;
+    	let th0;
     	let t7;
-    	let td1;
+    	let th1;
     	let t9;
-    	let td2;
+    	let th2;
     	let t11;
-    	let td3;
+    	let th3;
     	let t13;
-    	let td4;
+    	let th4;
     	let t15;
-    	let td5;
+    	let th5;
     	let t17;
-    	let td6;
+    	let th6;
     	let t19;
-    	let td7;
+    	let th7;
     	let t21;
     	let tbody;
     	let tr1;
-    	let td8;
+    	let td0;
     	let t22_value = /*headerData*/ ctx[0][0].id + "";
     	let t22;
     	let t23;
-    	let td9;
+    	let td1;
     	let t24_value = /*headerData*/ ctx[0][0].name + "";
     	let t24;
     	let t25;
-    	let td10;
+    	let td2;
     	let t26_value = /*headerData*/ ctx[0][0].email + "";
     	let t26;
     	let t27;
-    	let td11;
+    	let td3;
     	let textarea;
     	let t28;
-    	let td12;
+    	let td4;
     	let t29_value = /*headerData*/ ctx[0][0].phone + "";
     	let t29;
     	let t30;
-    	let td13;
-    	let t31_value = /*headerData*/ ctx[0][0].status + "";
+    	let td5;
+    	let select;
     	let t31;
+    	let td6;
+    	let t32_value = /*headerData*/ ctx[0][0].client_name + "";
     	let t32;
-    	let td14;
-    	let t33_value = /*headerData*/ ctx[0][0].client_name + "";
     	let t33;
+    	let td7;
+    	let t34_value = /*headerData*/ ctx[0][0].agent + "";
     	let t34;
-    	let td15;
-    	let t35_value = /*headerData*/ ctx[0][0].agent + "";
-    	let t35;
     	let mounted;
     	let dispose;
+    	let each_value_4 = /*STATUS_OPTIONS*/ ctx[14];
+    	validate_each_argument(each_value_4);
+    	let each_blocks = [];
+
+    	for (let i = 0; i < each_value_4.length; i += 1) {
+    		each_blocks[i] = create_each_block_4(get_each_context_4(ctx, each_value_4, i));
+    	}
 
     	const block = {
     		c: function create() {
@@ -7705,101 +8988,107 @@ var morderedit2 = (function () {
     			table = element("table");
     			thead = element("thead");
     			tr0 = element("tr");
-    			td0 = element("td");
-    			td0.textContent = "מזהה";
+    			th0 = element("th");
+    			th0.textContent = "מזהה";
     			t7 = space();
-    			td1 = element("td");
-    			td1.textContent = "שם";
+    			th1 = element("th");
+    			th1.textContent = "שם";
     			t9 = space();
-    			td2 = element("td");
-    			td2.textContent = "דואר אלקטרוני";
+    			th2 = element("th");
+    			th2.textContent = "דואר אלקטרוני";
     			t11 = space();
-    			td3 = element("td");
-    			td3.textContent = "הודעה";
+    			th3 = element("th");
+    			th3.textContent = "הודעה";
     			t13 = space();
-    			td4 = element("td");
-    			td4.textContent = "טלפון";
+    			th4 = element("th");
+    			th4.textContent = "טלפון";
     			t15 = space();
-    			td5 = element("td");
-    			td5.textContent = "סטטוס";
+    			th5 = element("th");
+    			th5.textContent = "סטטוס";
     			t17 = space();
-    			td6 = element("td");
-    			td6.textContent = "שם לקוח";
+    			th6 = element("th");
+    			th6.textContent = "שם לקוח";
     			t19 = space();
-    			td7 = element("td");
-    			td7.textContent = "סוכן";
+    			th7 = element("th");
+    			th7.textContent = "סוכן";
     			t21 = space();
     			tbody = element("tbody");
     			tr1 = element("tr");
-    			td8 = element("td");
+    			td0 = element("td");
     			t22 = text(t22_value);
     			t23 = space();
-    			td9 = element("td");
+    			td1 = element("td");
     			t24 = text(t24_value);
     			t25 = space();
-    			td10 = element("td");
+    			td2 = element("td");
     			t26 = text(t26_value);
     			t27 = space();
-    			td11 = element("td");
+    			td3 = element("td");
     			textarea = element("textarea");
     			t28 = space();
-    			td12 = element("td");
+    			td4 = element("td");
     			t29 = text(t29_value);
     			t30 = space();
-    			td13 = element("td");
-    			t31 = text(t31_value);
-    			t32 = space();
-    			td14 = element("td");
-    			t33 = text(t33_value);
-    			t34 = space();
-    			td15 = element("td");
-    			t35 = text(t35_value);
-    			attr_dev(div0, "class", "created svelte-p9zetx");
-    			add_location(div0, file, 138, 4, 4721);
-    			attr_dev(div1, "class", "updated svelte-p9zetx");
-    			add_location(div1, file, 141, 4, 4834);
-    			attr_dev(td0, "class", "svelte-p9zetx");
-    			add_location(td0, file, 147, 20, 5046);
-    			attr_dev(td1, "class", "svelte-p9zetx");
-    			add_location(td1, file, 148, 20, 5081);
-    			attr_dev(td2, "class", "svelte-p9zetx");
-    			add_location(td2, file, 149, 20, 5114);
-    			attr_dev(td3, "class", "svelte-p9zetx");
-    			add_location(td3, file, 150, 20, 5158);
-    			attr_dev(td4, "class", "svelte-p9zetx");
-    			add_location(td4, file, 151, 20, 5194);
-    			attr_dev(td5, "class", "svelte-p9zetx");
-    			add_location(td5, file, 152, 20, 5230);
-    			attr_dev(td6, "class", "svelte-p9zetx");
-    			add_location(td6, file, 153, 20, 5266);
-    			attr_dev(td7, "class", "svelte-p9zetx");
-    			add_location(td7, file, 154, 20, 5304);
-    			attr_dev(tr0, "class", "svelte-p9zetx");
-    			add_location(tr0, file, 146, 16, 5020);
-    			attr_dev(thead, "class", "svelte-p9zetx");
-    			add_location(thead, file, 145, 12, 4995);
-    			attr_dev(td8, "class", "svelte-p9zetx");
-    			add_location(td8, file, 159, 20, 5427);
-    			attr_dev(td9, "class", "svelte-p9zetx");
-    			add_location(td9, file, 160, 20, 5476);
-    			attr_dev(td10, "class", "svelte-p9zetx");
-    			add_location(td10, file, 161, 20, 5527);
-    			add_location(textarea, file, 162, 24, 5583);
-    			attr_dev(td11, "class", "svelte-p9zetx");
-    			add_location(td11, file, 162, 20, 5579);
-    			attr_dev(td12, "class", "svelte-p9zetx");
-    			add_location(td12, file, 163, 20, 5659);
-    			attr_dev(td13, "class", "svelte-p9zetx");
-    			add_location(td13, file, 164, 20, 5711);
-    			attr_dev(td14, "class", "svelte-p9zetx");
-    			add_location(td14, file, 165, 20, 5764);
-    			attr_dev(td15, "class", "svelte-p9zetx");
-    			add_location(td15, file, 166, 20, 5822);
-    			add_location(tr1, file, 158, 16, 5401);
-    			attr_dev(tbody, "class", "svelte-p9zetx");
-    			add_location(tbody, file, 157, 12, 5376);
-    			attr_dev(table, "class", "headers-table svelte-p9zetx");
-    			add_location(table, file, 144, 8, 4952);
+    			td5 = element("td");
+    			select = element("select");
+
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].c();
+    			}
+
+    			t31 = space();
+    			td6 = element("td");
+    			t32 = text(t32_value);
+    			t33 = space();
+    			td7 = element("td");
+    			t34 = text(t34_value);
+    			attr_dev(div0, "class", "created svelte-1p2nkav");
+    			add_location(div0, file, 224, 4, 8580);
+    			attr_dev(div1, "class", "updated svelte-1p2nkav");
+    			add_location(div1, file, 227, 4, 8693);
+    			attr_dev(th0, "class", "svelte-1p2nkav");
+    			add_location(th0, file, 233, 20, 8905);
+    			attr_dev(th1, "class", "svelte-1p2nkav");
+    			add_location(th1, file, 234, 20, 8940);
+    			attr_dev(th2, "class", "svelte-1p2nkav");
+    			add_location(th2, file, 235, 20, 8973);
+    			attr_dev(th3, "class", "svelte-1p2nkav");
+    			add_location(th3, file, 236, 20, 9017);
+    			attr_dev(th4, "class", "svelte-1p2nkav");
+    			add_location(th4, file, 237, 20, 9053);
+    			attr_dev(th5, "class", "svelte-1p2nkav");
+    			add_location(th5, file, 238, 20, 9089);
+    			attr_dev(th6, "class", "svelte-1p2nkav");
+    			add_location(th6, file, 239, 20, 9125);
+    			attr_dev(th7, "class", "svelte-1p2nkav");
+    			add_location(th7, file, 240, 20, 9163);
+    			add_location(tr0, file, 232, 16, 8879);
+    			attr_dev(thead, "class", "svelte-1p2nkav");
+    			add_location(thead, file, 231, 12, 8854);
+    			attr_dev(td0, "class", "header-cell svelte-1p2nkav");
+    			add_location(td0, file, 245, 20, 9286);
+    			attr_dev(td1, "class", "header-cell svelte-1p2nkav");
+    			add_location(td1, file, 246, 20, 9355);
+    			attr_dev(td2, "class", "header-cell svelte-1p2nkav");
+    			add_location(td2, file, 247, 20, 9426);
+    			attr_dev(textarea, "placeholder", "הודעה");
+    			add_location(textarea, file, 248, 44, 9522);
+    			attr_dev(td3, "class", "header-cell svelte-1p2nkav");
+    			add_location(td3, file, 248, 20, 9498);
+    			attr_dev(td4, "class", "header-cell svelte-1p2nkav");
+    			add_location(td4, file, 249, 20, 9618);
+    			if (/*headerData*/ ctx[0][0].status === void 0) add_render_callback(() => /*select_change_handler*/ ctx[17].call(select));
+    			add_location(select, file, 251, 24, 9740);
+    			attr_dev(td5, "class", "header-cell svelte-1p2nkav");
+    			add_location(td5, file, 250, 20, 9690);
+    			attr_dev(td6, "class", "header-cell svelte-1p2nkav");
+    			add_location(td6, file, 257, 20, 10083);
+    			attr_dev(td7, "class", "header-cell svelte-1p2nkav");
+    			add_location(td7, file, 258, 20, 10161);
+    			add_location(tr1, file, 244, 16, 9260);
+    			add_location(tbody, file, 243, 12, 9235);
+    			attr_dev(table, "class", "headers-table svelte-1p2nkav");
+    			add_location(table, file, 230, 8, 8811);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div0, anchor);
@@ -7813,51 +9102,61 @@ var morderedit2 = (function () {
     			insert_dev(target, table, anchor);
     			append_dev(table, thead);
     			append_dev(thead, tr0);
-    			append_dev(tr0, td0);
+    			append_dev(tr0, th0);
     			append_dev(tr0, t7);
-    			append_dev(tr0, td1);
+    			append_dev(tr0, th1);
     			append_dev(tr0, t9);
-    			append_dev(tr0, td2);
+    			append_dev(tr0, th2);
     			append_dev(tr0, t11);
-    			append_dev(tr0, td3);
+    			append_dev(tr0, th3);
     			append_dev(tr0, t13);
-    			append_dev(tr0, td4);
+    			append_dev(tr0, th4);
     			append_dev(tr0, t15);
-    			append_dev(tr0, td5);
+    			append_dev(tr0, th5);
     			append_dev(tr0, t17);
-    			append_dev(tr0, td6);
+    			append_dev(tr0, th6);
     			append_dev(tr0, t19);
-    			append_dev(tr0, td7);
+    			append_dev(tr0, th7);
     			append_dev(table, t21);
     			append_dev(table, tbody);
     			append_dev(tbody, tr1);
-    			append_dev(tr1, td8);
-    			append_dev(td8, t22);
+    			append_dev(tr1, td0);
+    			append_dev(td0, t22);
     			append_dev(tr1, t23);
-    			append_dev(tr1, td9);
-    			append_dev(td9, t24);
+    			append_dev(tr1, td1);
+    			append_dev(td1, t24);
     			append_dev(tr1, t25);
-    			append_dev(tr1, td10);
-    			append_dev(td10, t26);
+    			append_dev(tr1, td2);
+    			append_dev(td2, t26);
     			append_dev(tr1, t27);
-    			append_dev(tr1, td11);
-    			append_dev(td11, textarea);
+    			append_dev(tr1, td3);
+    			append_dev(td3, textarea);
     			set_input_value(textarea, /*headerData*/ ctx[0][0].message);
     			append_dev(tr1, t28);
-    			append_dev(tr1, td12);
-    			append_dev(td12, t29);
+    			append_dev(tr1, td4);
+    			append_dev(td4, t29);
     			append_dev(tr1, t30);
-    			append_dev(tr1, td13);
-    			append_dev(td13, t31);
-    			append_dev(tr1, t32);
-    			append_dev(tr1, td14);
-    			append_dev(td14, t33);
-    			append_dev(tr1, t34);
-    			append_dev(tr1, td15);
-    			append_dev(td15, t35);
+    			append_dev(tr1, td5);
+    			append_dev(td5, select);
+
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].m(select, null);
+    			}
+
+    			select_option(select, /*headerData*/ ctx[0][0].status);
+    			append_dev(tr1, t31);
+    			append_dev(tr1, td6);
+    			append_dev(td6, t32);
+    			append_dev(tr1, t33);
+    			append_dev(tr1, td7);
+    			append_dev(td7, t34);
 
     			if (!mounted) {
-    				dispose = listen_dev(textarea, "input", /*textarea_input_handler*/ ctx[14]);
+    				dispose = [
+    					listen_dev(textarea, "input", /*textarea_input_handler*/ ctx[16]),
+    					listen_dev(select, "change", /*select_change_handler*/ ctx[17])
+    				];
+
     				mounted = true;
     			}
     		},
@@ -7868,14 +9167,42 @@ var morderedit2 = (function () {
     			if (dirty[0] & /*headerData*/ 1 && t24_value !== (t24_value = /*headerData*/ ctx[0][0].name + "")) set_data_dev(t24, t24_value);
     			if (dirty[0] & /*headerData*/ 1 && t26_value !== (t26_value = /*headerData*/ ctx[0][0].email + "")) set_data_dev(t26, t26_value);
 
-    			if (dirty[0] & /*headerData*/ 1) {
+    			if (dirty[0] & /*headerData, STATUS_OPTIONS*/ 16385) {
     				set_input_value(textarea, /*headerData*/ ctx[0][0].message);
     			}
 
     			if (dirty[0] & /*headerData*/ 1 && t29_value !== (t29_value = /*headerData*/ ctx[0][0].phone + "")) set_data_dev(t29, t29_value);
-    			if (dirty[0] & /*headerData*/ 1 && t31_value !== (t31_value = /*headerData*/ ctx[0][0].status + "")) set_data_dev(t31, t31_value);
-    			if (dirty[0] & /*headerData*/ 1 && t33_value !== (t33_value = /*headerData*/ ctx[0][0].client_name + "")) set_data_dev(t33, t33_value);
-    			if (dirty[0] & /*headerData*/ 1 && t35_value !== (t35_value = /*headerData*/ ctx[0][0].agent + "")) set_data_dev(t35, t35_value);
+
+    			if (dirty[0] & /*STATUS_OPTIONS, headerData*/ 16385) {
+    				each_value_4 = /*STATUS_OPTIONS*/ ctx[14];
+    				validate_each_argument(each_value_4);
+    				let i;
+
+    				for (i = 0; i < each_value_4.length; i += 1) {
+    					const child_ctx = get_each_context_4(ctx, each_value_4, i);
+
+    					if (each_blocks[i]) {
+    						each_blocks[i].p(child_ctx, dirty);
+    					} else {
+    						each_blocks[i] = create_each_block_4(child_ctx);
+    						each_blocks[i].c();
+    						each_blocks[i].m(select, null);
+    					}
+    				}
+
+    				for (; i < each_blocks.length; i += 1) {
+    					each_blocks[i].d(1);
+    				}
+
+    				each_blocks.length = each_value_4.length;
+    			}
+
+    			if (dirty[0] & /*headerData, STATUS_OPTIONS*/ 16385) {
+    				select_option(select, /*headerData*/ ctx[0][0].status);
+    			}
+
+    			if (dirty[0] & /*headerData*/ 1 && t32_value !== (t32_value = /*headerData*/ ctx[0][0].client_name + "")) set_data_dev(t32, t32_value);
+    			if (dirty[0] & /*headerData*/ 1 && t34_value !== (t34_value = /*headerData*/ ctx[0][0].agent + "")) set_data_dev(t34, t34_value);
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(div0);
@@ -7883,8 +9210,9 @@ var morderedit2 = (function () {
     			if (detaching) detach_dev(div1);
     			if (detaching) detach_dev(t5);
     			if (detaching) detach_dev(table);
+    			destroy_each(each_blocks, detaching);
     			mounted = false;
-    			dispose();
+    			run_all(dispose);
     		}
     	};
 
@@ -7892,34 +9220,77 @@ var morderedit2 = (function () {
     		block,
     		id: create_if_block_7.name,
     		type: "if",
-    		source: "(138:4) {#if headerData}",
+    		source: "(224:4) {#if headerData}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (174:4) {#if data?.products}
+    // (253:28) {#each STATUS_OPTIONS as opt}
+    function create_each_block_4(ctx) {
+    	let option;
+    	let t_value = /*opt*/ ctx[47][1] + "";
+    	let t;
+    	let option_selected_value;
+
+    	const block = {
+    		c: function create() {
+    			option = element("option");
+    			t = text(t_value);
+    			option.__value = /*opt*/ ctx[47][0];
+    			option.value = option.__value;
+    			option.selected = option_selected_value = /*opt*/ ctx[47][0] == /*headerData*/ ctx[0][0].status;
+    			add_location(option, file, 253, 32, 9877);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, option, anchor);
+    			append_dev(option, t);
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty[0] & /*headerData, STATUS_OPTIONS*/ 16385 && option_selected_value !== (option_selected_value = /*opt*/ ctx[47][0] == /*headerData*/ ctx[0][0].status)) {
+    				prop_dev(option, "selected", option_selected_value);
+    			}
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(option);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_each_block_4.name,
+    		type: "each",
+    		source: "(253:28) {#each STATUS_OPTIONS as opt}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (266:4) {#if data?.products}
     function create_if_block_3(ctx) {
     	let table;
     	let thead;
     	let tr;
-    	let td0;
+    	let th0;
     	let t1;
-    	let td1;
+    	let th1;
     	let t3;
-    	let td2;
+    	let th2;
     	let t5;
-    	let td3;
+    	let th3;
     	let t7;
-    	let td4;
+    	let th4;
     	let t9;
-    	let td5;
+    	let th5;
     	let t11;
-    	let td6;
+    	let th6;
     	let t13;
-    	let td7;
+    	let th7;
     	let t15;
+    	let th8;
+    	let t17;
     	let tbody;
     	let current;
     	let each_value = /*data*/ ctx[1].products;
@@ -7939,79 +9310,87 @@ var morderedit2 = (function () {
     			table = element("table");
     			thead = element("thead");
     			tr = element("tr");
-    			td0 = element("td");
-    			td0.textContent = "מזהה";
+    			th0 = element("th");
+    			th0.textContent = "מזהה";
     			t1 = space();
-    			td1 = element("td");
-    			td1.textContent = "שם מוצר";
+    			th1 = element("th");
+    			th1.textContent = "שם מוצר";
     			t3 = space();
-    			td2 = element("td");
-    			td2.textContent = "מחיר";
+    			th2 = element("th");
+    			th2.textContent = "מחיר";
     			t5 = space();
-    			td3 = element("td");
-    			td3.textContent = "רקמה?";
+    			th3 = element("th");
+    			th3.textContent = "רקמה?";
     			t7 = space();
-    			td4 = element("td");
-    			td4.textContent = "הדפסה?";
+    			th4 = element("th");
+    			th4.textContent = "הדפסה?";
     			t9 = space();
-    			td5 = element("td");
-    			td5.textContent = "חשוב להזמנה";
+    			th5 = element("th");
+    			th5.textContent = "חשוב להזמנה";
     			t11 = space();
-    			td6 = element("td");
-    			td6.textContent = "הערות";
+    			th6 = element("th");
+    			th6.textContent = "הערות";
     			t13 = space();
-    			td7 = element("td");
-    			td7.textContent = "ברקוד";
+    			th7 = element("th");
+    			th7.textContent = "ברקוד";
     			t15 = space();
+    			th8 = element("th");
+    			th8.textContent = "פעולות";
+    			t17 = space();
     			tbody = element("tbody");
 
     			for (let i = 0; i < each_blocks.length; i += 1) {
     				each_blocks[i].c();
     			}
 
-    			attr_dev(td0, "class", "svelte-p9zetx");
-    			add_location(td0, file, 185, 20, 6226);
-    			attr_dev(td1, "class", "svelte-p9zetx");
-    			add_location(td1, file, 186, 20, 6261);
-    			attr_dev(td2, "class", "svelte-p9zetx");
-    			add_location(td2, file, 187, 20, 6299);
-    			attr_dev(td3, "class", "svelte-p9zetx");
-    			add_location(td3, file, 188, 20, 6334);
-    			attr_dev(td4, "class", "svelte-p9zetx");
-    			add_location(td4, file, 189, 20, 6370);
-    			attr_dev(td5, "class", "svelte-p9zetx");
-    			add_location(td5, file, 190, 20, 6407);
-    			attr_dev(td6, "class", "svelte-p9zetx");
-    			add_location(td6, file, 191, 20, 6449);
-    			attr_dev(td7, "class", "svelte-p9zetx");
-    			add_location(td7, file, 192, 20, 6485);
-    			add_location(tr, file, 184, 16, 6200);
-    			attr_dev(thead, "class", "svelte-p9zetx");
-    			add_location(thead, file, 183, 12, 6175);
-    			add_location(tbody, file, 195, 12, 6558);
-    			attr_dev(table, "class", "product-table svelte-p9zetx");
-    			add_location(table, file, 182, 8, 6132);
+    			attr_dev(th0, "class", "svelte-1p2nkav");
+    			add_location(th0, file, 277, 20, 10585);
+    			attr_dev(th1, "class", "svelte-1p2nkav");
+    			add_location(th1, file, 278, 20, 10620);
+    			attr_dev(th2, "class", "svelte-1p2nkav");
+    			add_location(th2, file, 279, 20, 10658);
+    			attr_dev(th3, "class", "svelte-1p2nkav");
+    			add_location(th3, file, 280, 20, 10693);
+    			attr_dev(th4, "class", "svelte-1p2nkav");
+    			add_location(th4, file, 281, 20, 10729);
+    			attr_dev(th5, "class", "svelte-1p2nkav");
+    			add_location(th5, file, 282, 20, 10766);
+    			attr_dev(th6, "class", "svelte-1p2nkav");
+    			add_location(th6, file, 283, 20, 10808);
+    			attr_dev(th7, "class", "svelte-1p2nkav");
+    			add_location(th7, file, 284, 20, 10844);
+    			attr_dev(th8, "colspan", "2");
+    			attr_dev(th8, "class", "svelte-1p2nkav");
+    			add_location(th8, file, 285, 20, 10880);
+    			add_location(tr, file, 276, 16, 10559);
+    			attr_dev(thead, "class", "svelte-1p2nkav");
+    			add_location(thead, file, 275, 12, 10534);
+    			add_location(tbody, file, 288, 12, 10966);
+    			attr_dev(table, "class", "product-table svelte-1p2nkav");
+    			add_location(table, file, 274, 8, 10491);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, table, anchor);
     			append_dev(table, thead);
     			append_dev(thead, tr);
-    			append_dev(tr, td0);
+    			append_dev(tr, th0);
     			append_dev(tr, t1);
-    			append_dev(tr, td1);
+    			append_dev(tr, th1);
     			append_dev(tr, t3);
-    			append_dev(tr, td2);
+    			append_dev(tr, th2);
     			append_dev(tr, t5);
-    			append_dev(tr, td3);
+    			append_dev(tr, th3);
     			append_dev(tr, t7);
-    			append_dev(tr, td4);
+    			append_dev(tr, th4);
     			append_dev(tr, t9);
-    			append_dev(tr, td5);
+    			append_dev(tr, th5);
     			append_dev(tr, t11);
-    			append_dev(tr, td6);
+    			append_dev(tr, th6);
     			append_dev(tr, t13);
-    			append_dev(tr, td7);
-    			append_dev(table, t15);
+    			append_dev(tr, th7);
+    			append_dev(tr, t15);
+    			append_dev(tr, th8);
+    			append_dev(table, t17);
     			append_dev(table, tbody);
 
     			for (let i = 0; i < each_blocks.length; i += 1) {
@@ -8021,7 +9400,7 @@ var morderedit2 = (function () {
     			current = true;
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty[0] & /*ALL_SIZES, ALL_COLORS, ALL_VERIENTS, data*/ 58) {
+    			if (dirty[0] & /*add_entry_btn_clicked, ALL_VERIENTS, data, ALL_SIZES, ALL_COLORS*/ 8250) {
     				each_value = /*data*/ ctx[1].products;
     				validate_each_argument(each_value);
     				let i;
@@ -8077,31 +9456,32 @@ var morderedit2 = (function () {
     		block,
     		id: create_if_block_3.name,
     		type: "if",
-    		source: "(174:4) {#if data?.products}",
+    		source: "(266:4) {#if data?.products}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (209:24) {#if product.embroidery}
+    // (306:28) {#if product.embroidery}
     function create_if_block_6(ctx) {
     	let textarea;
     	let mounted;
     	let dispose;
 
     	function textarea_input_handler_1() {
-    		/*textarea_input_handler_1*/ ctx[16].call(textarea, /*each_value*/ ctx[32], /*product_index*/ ctx[33]);
+    		/*textarea_input_handler_1*/ ctx[20].call(textarea, /*each_value*/ ctx[36], /*product_index*/ ctx[37]);
     	}
 
     	const block = {
     		c: function create() {
     			textarea = element("textarea");
-    			add_location(textarea, file, 209, 28, 7188);
+    			attr_dev(textarea, "placeholder", "תיאור רקמה");
+    			add_location(textarea, file, 306, 32, 11943);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, textarea, anchor);
-    			set_input_value(textarea, /*product*/ ctx[31].embroideryComment);
+    			set_input_value(textarea, /*product*/ ctx[35].embroideryComment);
 
     			if (!mounted) {
     				dispose = listen_dev(textarea, "input", textarea_input_handler_1);
@@ -8112,7 +9492,7 @@ var morderedit2 = (function () {
     			ctx = new_ctx;
 
     			if (dirty[0] & /*data*/ 2) {
-    				set_input_value(textarea, /*product*/ ctx[31].embroideryComment);
+    				set_input_value(textarea, /*product*/ ctx[35].embroideryComment);
     			}
     		},
     		d: function destroy(detaching) {
@@ -8126,31 +9506,32 @@ var morderedit2 = (function () {
     		block,
     		id: create_if_block_6.name,
     		type: "if",
-    		source: "(209:24) {#if product.embroidery}",
+    		source: "(306:28) {#if product.embroidery}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (215:24) {#if product.printing}
+    // (314:28) {#if product.prining}
     function create_if_block_5(ctx) {
     	let textarea;
     	let mounted;
     	let dispose;
 
     	function textarea_input_handler_2() {
-    		/*textarea_input_handler_2*/ ctx[18].call(textarea, /*each_value*/ ctx[32], /*product_index*/ ctx[33]);
+    		/*textarea_input_handler_2*/ ctx[22].call(textarea, /*each_value*/ ctx[36], /*product_index*/ ctx[37]);
     	}
 
     	const block = {
     		c: function create() {
     			textarea = element("textarea");
-    			add_location(textarea, file, 215, 28, 7483);
+    			attr_dev(textarea, "placeholder", "תיאור הדפסה");
+    			add_location(textarea, file, 314, 32, 12385);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, textarea, anchor);
-    			set_input_value(textarea, /*product*/ ctx[31].priningComment);
+    			set_input_value(textarea, /*product*/ ctx[35].priningComment);
 
     			if (!mounted) {
     				dispose = listen_dev(textarea, "input", textarea_input_handler_2);
@@ -8161,7 +9542,7 @@ var morderedit2 = (function () {
     			ctx = new_ctx;
 
     			if (dirty[0] & /*data*/ 2) {
-    				set_input_value(textarea, /*product*/ ctx[31].priningComment);
+    				set_input_value(textarea, /*product*/ ctx[35].priningComment);
     			}
     		},
     		d: function destroy(detaching) {
@@ -8175,50 +9556,21 @@ var morderedit2 = (function () {
     		block,
     		id: create_if_block_5.name,
     		type: "if",
-    		source: "(215:24) {#if product.printing}",
+    		source: "(314:28) {#if product.prining}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (233:24) {#if product.product.show_sizes_popup}
-    function create_if_block_4(ctx) {
-    	let button;
-
-    	const block = {
-    		c: function create() {
-    			button = element("button");
-    			button.textContent = "הוסף צבע/מידה/מודל";
-    			add_location(button, file, 233, 28, 8492);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, button, anchor);
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(button);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_if_block_4.name,
-    		type: "if",
-    		source: "(233:24) {#if product.product.show_sizes_popup}",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (241:24) {#key product.id}
+    // (342:24) {#key product.id}
     function create_key_block(ctx) {
     	let mentriesservertable;
     	let updating_product;
     	let current;
 
     	function mentriesservertable_product_binding(value) {
-    		/*mentriesservertable_product_binding*/ ctx[22](value, /*product*/ ctx[31], /*each_value*/ ctx[32], /*product_index*/ ctx[33]);
+    		/*mentriesservertable_product_binding*/ ctx[26](value, /*product*/ ctx[35], /*each_value*/ ctx[36], /*product_index*/ ctx[37]);
     	}
 
     	let mentriesservertable_props = {
@@ -8227,8 +9579,8 @@ var morderedit2 = (function () {
     		ALL_VERIENTS: /*ALL_VERIENTS*/ ctx[5]
     	};
 
-    	if (/*product*/ ctx[31] !== void 0) {
-    		mentriesservertable_props.product = /*product*/ ctx[31];
+    	if (/*product*/ ctx[35] !== void 0) {
+    		mentriesservertable_props.product = /*product*/ ctx[35];
     	}
 
     	mentriesservertable = new MentriesServerTable({
@@ -8255,7 +9607,7 @@ var morderedit2 = (function () {
 
     			if (!updating_product && dirty[0] & /*data*/ 2) {
     				updating_product = true;
-    				mentriesservertable_changes.product = /*product*/ ctx[31];
+    				mentriesservertable_changes.product = /*product*/ ctx[35];
     				add_flush_callback(() => updating_product = false);
     			}
 
@@ -8279,94 +9631,348 @@ var morderedit2 = (function () {
     		block,
     		id: create_key_block.name,
     		type: "key",
-    		source: "(241:24) {#key product.id}",
+    		source: "(342:24) {#key product.id}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (197:16) {#each data.products as product}
+    // (358:32) {#each ALL_COLORS as color}
+    function create_each_block_3(ctx) {
+    	let option;
+    	let t_value = /*color*/ ctx[44]['name'] + "";
+    	let t;
+    	let option_value_value;
+
+    	const block = {
+    		c: function create() {
+    			option = element("option");
+    			t = text(t_value);
+    			option.__value = option_value_value = /*color*/ ctx[44]['id'];
+    			option.value = option.__value;
+    			add_location(option, file, 358, 32, 14832);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, option, anchor);
+    			append_dev(option, t);
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty[0] & /*ALL_COLORS*/ 16 && t_value !== (t_value = /*color*/ ctx[44]['name'] + "")) set_data_dev(t, t_value);
+
+    			if (dirty[0] & /*ALL_COLORS*/ 16 && option_value_value !== (option_value_value = /*color*/ ctx[44]['id'])) {
+    				prop_dev(option, "__value", option_value_value);
+    				option.value = option.__value;
+    			}
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(option);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_each_block_3.name,
+    		type: "each",
+    		source: "(358:32) {#each ALL_COLORS as color}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (366:36) {#each ALL_SIZES.sort((a, b) => {                                          return a.code.localeCompare(b.code);                                      }) as size}
+    function create_each_block_2(ctx) {
+    	let option;
+    	let t_value = /*size*/ ctx[41]['size'] + "";
+    	let t;
+    	let option_value_value;
+
+    	const block = {
+    		c: function create() {
+    			option = element("option");
+    			t = text(t_value);
+    			option.__value = option_value_value = /*size*/ ctx[41]['id'];
+    			option.value = option.__value;
+    			add_location(option, file, 368, 36, 15444);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, option, anchor);
+    			append_dev(option, t);
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty[0] & /*ALL_SIZES*/ 8 && t_value !== (t_value = /*size*/ ctx[41]['size'] + "")) set_data_dev(t, t_value);
+
+    			if (dirty[0] & /*ALL_SIZES*/ 8 && option_value_value !== (option_value_value = /*size*/ ctx[41]['id'])) {
+    				prop_dev(option, "__value", option_value_value);
+    				option.value = option.__value;
+    			}
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(option);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_each_block_2.name,
+    		type: "each",
+    		source: "(366:36) {#each ALL_SIZES.sort((a, b) => {                                          return a.code.localeCompare(b.code);                                      }) as size}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (373:28) {#if product.verients.length != 0}
+    function create_if_block_4(ctx) {
+    	let select;
+    	let option;
+    	let each_value_1 = /*ALL_VERIENTS*/ ctx[5];
+    	validate_each_argument(each_value_1);
+    	let each_blocks = [];
+
+    	for (let i = 0; i < each_value_1.length; i += 1) {
+    		each_blocks[i] = create_each_block_1(get_each_context_1(ctx, each_value_1, i));
+    	}
+
+    	const block = {
+    		c: function create() {
+    			select = element("select");
+    			option = element("option");
+    			option.textContent = "בחר מודל";
+
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].c();
+    			}
+
+    			attr_dev(option, "default", "");
+    			option.__value = "undefined";
+    			option.value = option.__value;
+    			add_location(option, file, 374, 36, 15848);
+    			attr_dev(select, "class", "form-control");
+    			attr_dev(select, "name", "varient");
+    			attr_dev(select, "id", "varient");
+    			add_location(select, file, 373, 32, 15752);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, select, anchor);
+    			append_dev(select, option);
+
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].m(select, null);
+    			}
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty[0] & /*ALL_VERIENTS*/ 32) {
+    				each_value_1 = /*ALL_VERIENTS*/ ctx[5];
+    				validate_each_argument(each_value_1);
+    				let i;
+
+    				for (i = 0; i < each_value_1.length; i += 1) {
+    					const child_ctx = get_each_context_1(ctx, each_value_1, i);
+
+    					if (each_blocks[i]) {
+    						each_blocks[i].p(child_ctx, dirty);
+    					} else {
+    						each_blocks[i] = create_each_block_1(child_ctx);
+    						each_blocks[i].c();
+    						each_blocks[i].m(select, null);
+    					}
+    				}
+
+    				for (; i < each_blocks.length; i += 1) {
+    					each_blocks[i].d(1);
+    				}
+
+    				each_blocks.length = each_value_1.length;
+    			}
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(select);
+    			destroy_each(each_blocks, detaching);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_4.name,
+    		type: "if",
+    		source: "(373:28) {#if product.verients.length != 0}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (376:36) {#each ALL_VERIENTS as varient}
+    function create_each_block_1(ctx) {
+    	let option;
+    	let t_value = /*varient*/ ctx[38]['name'] + "";
+    	let t;
+    	let option_value_value;
+
+    	const block = {
+    		c: function create() {
+    			option = element("option");
+    			t = text(t_value);
+    			option.__value = option_value_value = /*varient*/ ctx[38]['id'];
+    			option.value = option.__value;
+    			add_location(option, file, 376, 36, 16004);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, option, anchor);
+    			append_dev(option, t);
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty[0] & /*ALL_VERIENTS*/ 32 && t_value !== (t_value = /*varient*/ ctx[38]['name'] + "")) set_data_dev(t, t_value);
+
+    			if (dirty[0] & /*ALL_VERIENTS*/ 32 && option_value_value !== (option_value_value = /*varient*/ ctx[38]['id'])) {
+    				prop_dev(option, "__value", option_value_value);
+    				option.value = option.__value;
+    			}
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(option);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_each_block_1.name,
+    		type: "each",
+    		source: "(376:36) {#each ALL_VERIENTS as varient}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (290:16) {#each data.products as product}
     function create_each_block(ctx) {
     	let tr0;
     	let td0;
-    	let pre;
-    	let t0_value = /*product*/ ctx[31].id + "";
+    	let t0_value = /*product*/ ctx[35].product.id + "";
     	let t0;
     	let t1;
     	let td1;
     	let img;
     	let img_src_value;
+    	let img_alt_value;
     	let t2;
-    	let t3_value = /*product*/ ctx[31].product.title + "";
+    	let t3_value = /*product*/ ctx[35].product.title + "";
     	let t3;
     	let t4;
     	let td2;
-    	let t5_value = /*product*/ ctx[31].price + "";
+    	let t5_value = /*product*/ ctx[35].price + "";
     	let t5;
     	let t6;
-    	let td3;
-    	let input0;
     	let t7;
+    	let td3;
+    	let div0;
+    	let input0;
     	let t8;
-    	let td4;
-    	let input1;
     	let t9;
+    	let td4;
+    	let div1;
+    	let input1;
     	let t10;
-    	let td5;
-    	let input2;
     	let t11;
+    	let td5;
+    	let div2;
+    	let input2;
+    	let t12;
     	let td6;
     	let textarea;
-    	let t12;
-    	let td7;
-    	let t13_value = (/*product*/ ctx[31].pbarcode || '') + "";
     	let t13;
+    	let td7;
+    	let t14_value = (/*product*/ ctx[35].pbarcode || '') + "";
     	let t14;
+    	let t15;
     	let td8;
-    	let button;
-    	let t16;
+    	let button0;
     	let t17;
     	let tr1;
     	let td9;
-    	let previous_key = /*product*/ ctx[31].id;
+    	let previous_key = /*product*/ ctx[35].id;
     	let t18;
+    	let td10;
+    	let form;
+    	let input3;
+    	let input3_value_value;
+    	let t19;
+    	let input4;
+    	let input4_value_value;
+    	let t20;
+    	let div3;
+    	let select0;
+    	let option0;
+    	let t22;
+    	let select1;
+    	let option1;
+    	let t24;
+    	let t25;
+    	let input5;
+    	let t26;
+    	let div4;
+    	let t27;
+    	let button1;
+    	let t29;
     	let current;
     	let mounted;
     	let dispose;
 
-    	function input0_change_handler() {
-    		/*input0_change_handler*/ ctx[15].call(input0, /*each_value*/ ctx[32], /*product_index*/ ctx[33]);
+    	function click_handler() {
+    		return /*click_handler*/ ctx[18](/*product*/ ctx[35], /*each_value*/ ctx[36], /*product_index*/ ctx[37]);
     	}
 
-    	let if_block0 = /*product*/ ctx[31].embroidery && create_if_block_6(ctx);
+    	function input0_change_handler() {
+    		/*input0_change_handler*/ ctx[19].call(input0, /*each_value*/ ctx[36], /*product_index*/ ctx[37]);
+    	}
+
+    	let if_block0 = /*product*/ ctx[35].embroidery && create_if_block_6(ctx);
 
     	function input1_change_handler() {
-    		/*input1_change_handler*/ ctx[17].call(input1, /*each_value*/ ctx[32], /*product_index*/ ctx[33]);
+    		/*input1_change_handler*/ ctx[21].call(input1, /*each_value*/ ctx[36], /*product_index*/ ctx[37]);
     	}
 
-    	let if_block1 = /*product*/ ctx[31].printing && create_if_block_5(ctx);
+    	let if_block1 = /*product*/ ctx[35].prining && create_if_block_5(ctx);
 
     	function input2_change_handler() {
-    		/*input2_change_handler*/ ctx[19].call(input2, /*each_value*/ ctx[32], /*product_index*/ ctx[33]);
+    		/*input2_change_handler*/ ctx[23].call(input2, /*each_value*/ ctx[36], /*product_index*/ ctx[37]);
     	}
 
     	function textarea_input_handler_3() {
-    		/*textarea_input_handler_3*/ ctx[20].call(textarea, /*each_value*/ ctx[32], /*product_index*/ ctx[33]);
+    		/*textarea_input_handler_3*/ ctx[24].call(textarea, /*each_value*/ ctx[36], /*product_index*/ ctx[37]);
     	}
 
-    	function click_handler() {
-    		return /*click_handler*/ ctx[21](/*product*/ ctx[31]);
+    	function click_handler_1() {
+    		return /*click_handler_1*/ ctx[25](/*product*/ ctx[35]);
     	}
 
-    	let if_block2 = /*product*/ ctx[31].product.show_sizes_popup && create_if_block_4(ctx);
     	let key_block = create_key_block(ctx);
+    	let each_value_3 = /*ALL_COLORS*/ ctx[4];
+    	validate_each_argument(each_value_3);
+    	let each_blocks_1 = [];
+
+    	for (let i = 0; i < each_value_3.length; i += 1) {
+    		each_blocks_1[i] = create_each_block_3(get_each_context_3(ctx, each_value_3, i));
+    	}
+
+    	let each_value_2 = /*ALL_SIZES*/ ctx[3].sort(func);
+    	validate_each_argument(each_value_2);
+    	let each_blocks = [];
+
+    	for (let i = 0; i < each_value_2.length; i += 1) {
+    		each_blocks[i] = create_each_block_2(get_each_context_2(ctx, each_value_2, i));
+    	}
+
+    	let if_block2 = /*product*/ ctx[35].verients.length != 0 && create_if_block_4(ctx);
 
     	const block = {
     		c: function create() {
     			tr0 = element("tr");
     			td0 = element("td");
-    			pre = element("pre");
     			t0 = text(t0_value);
     			t1 = space();
     			td1 = element("td");
@@ -8376,81 +9982,168 @@ var morderedit2 = (function () {
     			t4 = space();
     			td2 = element("td");
     			t5 = text(t5_value);
-    			t6 = space();
-    			td3 = element("td");
-    			input0 = element("input");
+    			t6 = text("₪");
     			t7 = space();
-    			if (if_block0) if_block0.c();
+    			td3 = element("td");
+    			div0 = element("div");
+    			input0 = element("input");
     			t8 = space();
-    			td4 = element("td");
-    			input1 = element("input");
+    			if (if_block0) if_block0.c();
     			t9 = space();
-    			if (if_block1) if_block1.c();
+    			td4 = element("td");
+    			div1 = element("div");
+    			input1 = element("input");
     			t10 = space();
-    			td5 = element("td");
-    			input2 = element("input");
+    			if (if_block1) if_block1.c();
     			t11 = space();
+    			td5 = element("td");
+    			div2 = element("div");
+    			input2 = element("input");
+    			t12 = space();
     			td6 = element("td");
     			textarea = element("textarea");
-    			t12 = space();
+    			t13 = space();
     			td7 = element("td");
-    			t13 = text(t13_value);
-    			t14 = space();
+    			t14 = text(t14_value);
+    			t15 = space();
     			td8 = element("td");
-    			button = element("button");
-    			button.textContent = "מחק";
-    			t16 = space();
-    			if (if_block2) if_block2.c();
+    			button0 = element("button");
+    			button0.textContent = "מחק";
     			t17 = space();
     			tr1 = element("tr");
     			td9 = element("td");
     			key_block.c();
     			t18 = space();
-    			add_location(pre, file, 199, 24, 6681);
-    			attr_dev(td0, "class", "svelte-p9zetx");
-    			add_location(td0, file, 199, 20, 6677);
-    			if (!src_url_equal(img.src, img_src_value = "" + (CLOUDINARY_BASE_URL + "f_auto,w_auto/" + /*product*/ ctx[31].product.cimage))) attr_dev(img, "src", img_src_value);
+    			td10 = element("td");
+    			form = element("form");
+    			input3 = element("input");
+    			t19 = space();
+    			input4 = element("input");
+    			t20 = space();
+    			div3 = element("div");
+    			select0 = element("select");
+    			option0 = element("option");
+    			option0.textContent = "בחר צבע";
+
+    			for (let i = 0; i < each_blocks_1.length; i += 1) {
+    				each_blocks_1[i].c();
+    			}
+
+    			t22 = space();
+    			select1 = element("select");
+    			option1 = element("option");
+    			option1.textContent = "בחר מידה";
+
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].c();
+    			}
+
+    			t24 = space();
+    			if (if_block2) if_block2.c();
+    			t25 = space();
+    			input5 = element("input");
+    			t26 = space();
+    			div4 = element("div");
+    			t27 = space();
+    			button1 = element("button");
+    			button1.textContent = "הוסף";
+    			t29 = space();
+    			attr_dev(td0, "class", "cell-border svelte-1p2nkav");
+    			add_location(td0, file, 292, 20, 11085);
+    			if (!src_url_equal(img.src, img_src_value = "" + (CLOUDINARY_BASE_URL + "f_auto,w_auto/" + /*product*/ ctx[35].product.cimage))) attr_dev(img, "src", img_src_value);
+    			attr_dev(img, "alt", img_alt_value = /*product*/ ctx[35].product.title);
     			attr_dev(img, "width", "25px");
     			attr_dev(img, "height", "25px");
     			attr_dev(img, "loading", "lazy");
-    			add_location(img, file, 201, 24, 6761);
-    			attr_dev(td1, "class", "svelte-p9zetx");
-    			add_location(td1, file, 200, 20, 6731);
-    			attr_dev(td2, "class", "svelte-p9zetx");
-    			add_location(td2, file, 205, 20, 6975);
+    			add_location(img, file, 294, 24, 11206);
+    			attr_dev(td1, "class", "cell-border svelte-1p2nkav");
+    			add_location(td1, file, 293, 20, 11156);
+    			attr_dev(td2, "class", "cell-border svelte-1p2nkav");
+    			add_location(td2, file, 298, 20, 11450);
     			attr_dev(input0, "type", "checkbox");
-    			add_location(input0, file, 207, 24, 7051);
-    			attr_dev(td3, "class", "svelte-p9zetx");
-    			add_location(td3, file, 206, 20, 7021);
+    			add_location(input0, file, 304, 28, 11796);
+    			attr_dev(div0, "class", "d-flex-wraper svelte-1p2nkav");
+    			add_location(div0, file, 303, 24, 11739);
+    			attr_dev(td3, "class", "cell-border svelte-1p2nkav");
+    			add_location(td3, file, 302, 20, 11689);
     			attr_dev(input1, "type", "checkbox");
-    			add_location(input1, file, 213, 24, 7351);
-    			attr_dev(td4, "class", "svelte-p9zetx");
-    			add_location(td4, file, 212, 20, 7321);
+    			add_location(input1, file, 312, 28, 12244);
+    			attr_dev(div1, "class", "d-flex-wraper svelte-1p2nkav");
+    			add_location(div1, file, 311, 24, 12187);
+    			attr_dev(td4, "class", "cell-border svelte-1p2nkav");
+    			add_location(td4, file, 310, 20, 12137);
     			attr_dev(input2, "type", "checkbox");
-    			add_location(input2, file, 218, 24, 7617);
-    			attr_dev(td5, "class", "svelte-p9zetx");
-    			add_location(td5, file, 218, 20, 7613);
-    			add_location(textarea, file, 219, 24, 7701);
-    			attr_dev(td6, "class", "svelte-p9zetx");
-    			add_location(td6, file, 219, 20, 7697);
-    			attr_dev(td7, "class", "svelte-p9zetx");
-    			add_location(td7, file, 220, 20, 7768);
-    			attr_dev(button, "class", "btn btn-danger");
-    			add_location(button, file, 222, 24, 7853);
-    			attr_dev(td8, "class", "svelte-p9zetx");
-    			add_location(td8, file, 221, 20, 7823);
-    			add_location(tr0, file, 198, 16, 6651);
-    			attr_dev(td9, "colspan", "10");
-    			attr_dev(td9, "class", "svelte-p9zetx");
-    			add_location(td9, file, 239, 20, 8699);
-    			attr_dev(tr1, "class", "details svelte-p9zetx");
-    			add_location(tr1, file, 238, 16, 8657);
+    			add_location(input2, file, 320, 28, 12684);
+    			attr_dev(div2, "class", "d-flex-wraper svelte-1p2nkav");
+    			add_location(div2, file, 319, 24, 12627);
+    			attr_dev(td5, "class", "cell-border svelte-1p2nkav");
+    			add_location(td5, file, 318, 20, 12577);
+    			attr_dev(textarea, "placeholder", "הערות");
+    			add_location(textarea, file, 324, 44, 12844);
+    			attr_dev(td6, "class", "cell-border svelte-1p2nkav");
+    			add_location(td6, file, 324, 20, 12820);
+    			attr_dev(td7, "class", "cell-border svelte-1p2nkav");
+    			add_location(td7, file, 325, 20, 12932);
+    			attr_dev(button0, "class", "btn btn-danger");
+    			add_location(button0, file, 327, 24, 13069);
+    			attr_dev(td8, "class", "cell-border svelte-1p2nkav");
+    			attr_dev(td8, "colspan", "2");
+    			add_location(td8, file, 326, 20, 13007);
+    			add_location(tr0, file, 291, 16, 11059);
+    			attr_dev(td9, "colspan", "9");
+    			attr_dev(td9, "class", "svelte-1p2nkav");
+    			add_location(td9, file, 340, 20, 13724);
+    			attr_dev(input3, "type", "hidden");
+    			attr_dev(input3, "name", "product_id");
+    			input3.value = input3_value_value = /*product*/ ctx[35].product.id;
+    			add_location(input3, file, 351, 28, 14292);
+    			attr_dev(input4, "type", "hidden");
+    			attr_dev(input4, "name", "entry_id");
+    			input4.value = input4_value_value = /*product*/ ctx[35].id;
+    			add_location(input4, file, 352, 28, 14390);
+    			attr_dev(option0, "default", "");
+    			option0.__value = "undefined";
+    			option0.value = option0.__value;
+    			add_location(option0, file, 356, 32, 14689);
+    			attr_dev(select0, "class", "form-control");
+    			attr_dev(select0, "name", "color");
+    			attr_dev(select0, "id", "color");
+    			add_location(select0, file, 355, 28, 14601);
+    			attr_dev(option1, "default", "");
+    			option1.__value = "undefined";
+    			option1.value = option1.__value;
+    			add_location(option1, file, 364, 36, 15159);
+    			attr_dev(select1, "class", "form-control");
+    			attr_dev(select1, "name", "size");
+    			attr_dev(select1, "id", "size");
+    			add_location(select1, file, 363, 32, 15069);
+    			attr_dev(input5, "class", "form-control");
+    			attr_dev(input5, "type", "number");
+    			attr_dev(input5, "placeholder", "כמות");
+    			attr_dev(input5, "name", "amount");
+    			attr_dev(input5, "id", "amount");
+    			add_location(input5, file, 382, 28, 16314);
+    			attr_dev(div3, "class", "form-group svelte-1p2nkav");
+    			add_location(div3, file, 353, 28, 14478);
+    			attr_dev(div4, "class", "error-msg");
+    			add_location(div4, file, 384, 20, 16457);
+    			attr_dev(button1, "type", "submit");
+    			attr_dev(button1, "class", "btn btn-primary");
+    			add_location(button1, file, 385, 20, 16508);
+    			attr_dev(form, "class", "add-entry-form svelte-1p2nkav");
+    			attr_dev(form, "action", "");
+    			attr_dev(form, "method", "post");
+    			add_location(form, file, 350, 24, 14173);
+    			attr_dev(td10, "colspan", "1");
+    			attr_dev(td10, "class", "svelte-1p2nkav");
+    			add_location(td10, file, 349, 20, 14131);
+    			attr_dev(tr1, "class", "details svelte-1p2nkav");
+    			add_location(tr1, file, 339, 16, 13682);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, tr0, anchor);
     			append_dev(tr0, td0);
-    			append_dev(td0, pre);
-    			append_dev(pre, t0);
+    			append_dev(td0, t0);
     			append_dev(tr0, t1);
     			append_dev(tr0, td1);
     			append_dev(td1, img);
@@ -8459,48 +10152,83 @@ var morderedit2 = (function () {
     			append_dev(tr0, t4);
     			append_dev(tr0, td2);
     			append_dev(td2, t5);
-    			append_dev(tr0, t6);
+    			append_dev(td2, t6);
+    			append_dev(tr0, t7);
     			append_dev(tr0, td3);
-    			append_dev(td3, input0);
-    			set_input_value(input0, /*product*/ ctx[31].embroidery);
-    			append_dev(td3, t7);
-    			if (if_block0) if_block0.m(td3, null);
-    			append_dev(tr0, t8);
+    			append_dev(td3, div0);
+    			append_dev(div0, input0);
+    			input0.checked = /*product*/ ctx[35].embroidery;
+    			append_dev(div0, t8);
+    			if (if_block0) if_block0.m(div0, null);
+    			append_dev(tr0, t9);
     			append_dev(tr0, td4);
-    			append_dev(td4, input1);
-    			set_input_value(input1, /*product*/ ctx[31].prining);
-    			append_dev(td4, t9);
-    			if (if_block1) if_block1.m(td4, null);
-    			append_dev(tr0, t10);
-    			append_dev(tr0, td5);
-    			append_dev(td5, input2);
-    			set_input_value(input2, /*product*/ ctx[31].ergent);
+    			append_dev(td4, div1);
+    			append_dev(div1, input1);
+    			input1.checked = /*product*/ ctx[35].prining;
+    			append_dev(div1, t10);
+    			if (if_block1) if_block1.m(div1, null);
     			append_dev(tr0, t11);
+    			append_dev(tr0, td5);
+    			append_dev(td5, div2);
+    			append_dev(div2, input2);
+    			set_input_value(input2, /*product*/ ctx[35].ergent);
+    			append_dev(tr0, t12);
     			append_dev(tr0, td6);
     			append_dev(td6, textarea);
-    			set_input_value(textarea, /*product*/ ctx[31].comment);
-    			append_dev(tr0, t12);
+    			set_input_value(textarea, /*product*/ ctx[35].comment);
+    			append_dev(tr0, t13);
     			append_dev(tr0, td7);
-    			append_dev(td7, t13);
-    			append_dev(tr0, t14);
+    			append_dev(td7, t14);
+    			append_dev(tr0, t15);
     			append_dev(tr0, td8);
-    			append_dev(td8, button);
-    			append_dev(td8, t16);
-    			if (if_block2) if_block2.m(td8, null);
+    			append_dev(td8, button0);
     			insert_dev(target, t17, anchor);
     			insert_dev(target, tr1, anchor);
     			append_dev(tr1, td9);
     			key_block.m(td9, null);
     			append_dev(tr1, t18);
+    			append_dev(tr1, td10);
+    			append_dev(td10, form);
+    			append_dev(form, input3);
+    			append_dev(form, t19);
+    			append_dev(form, input4);
+    			append_dev(form, t20);
+    			append_dev(form, div3);
+    			append_dev(div3, select0);
+    			append_dev(select0, option0);
+
+    			for (let i = 0; i < each_blocks_1.length; i += 1) {
+    				each_blocks_1[i].m(select0, null);
+    			}
+
+    			append_dev(div3, t22);
+    			append_dev(div3, select1);
+    			append_dev(select1, option1);
+
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].m(select1, null);
+    			}
+
+    			append_dev(div3, t24);
+    			if (if_block2) if_block2.m(div3, null);
+    			append_dev(div3, t25);
+    			append_dev(div3, input5);
+    			append_dev(form, t26);
+    			append_dev(form, div4);
+    			append_dev(form, t27);
+    			append_dev(form, button1);
+    			append_dev(tr1, t29);
     			current = true;
 
     			if (!mounted) {
     				dispose = [
+    					listen_dev(td2, "click", click_handler, false, false, false),
     					listen_dev(input0, "change", input0_change_handler),
     					listen_dev(input1, "change", input1_change_handler),
     					listen_dev(input2, "change", input2_change_handler),
     					listen_dev(textarea, "input", textarea_input_handler_3),
-    					listen_dev(button, "click", click_handler, false, false, false)
+    					listen_dev(button0, "click", click_handler_1, false, false, false),
+    					listen_dev(form, "submit", /*add_entry_btn_clicked*/ ctx[13], false, false, false)
     				];
 
     				mounted = true;
@@ -8508,26 +10236,30 @@ var morderedit2 = (function () {
     		},
     		p: function update(new_ctx, dirty) {
     			ctx = new_ctx;
-    			if ((!current || dirty[0] & /*data*/ 2) && t0_value !== (t0_value = /*product*/ ctx[31].id + "")) set_data_dev(t0, t0_value);
+    			if ((!current || dirty[0] & /*data*/ 2) && t0_value !== (t0_value = /*product*/ ctx[35].product.id + "")) set_data_dev(t0, t0_value);
 
-    			if (!current || dirty[0] & /*data*/ 2 && !src_url_equal(img.src, img_src_value = "" + (CLOUDINARY_BASE_URL + "f_auto,w_auto/" + /*product*/ ctx[31].product.cimage))) {
+    			if (!current || dirty[0] & /*data*/ 2 && !src_url_equal(img.src, img_src_value = "" + (CLOUDINARY_BASE_URL + "f_auto,w_auto/" + /*product*/ ctx[35].product.cimage))) {
     				attr_dev(img, "src", img_src_value);
     			}
 
-    			if ((!current || dirty[0] & /*data*/ 2) && t3_value !== (t3_value = /*product*/ ctx[31].product.title + "")) set_data_dev(t3, t3_value);
-    			if ((!current || dirty[0] & /*data*/ 2) && t5_value !== (t5_value = /*product*/ ctx[31].price + "")) set_data_dev(t5, t5_value);
-
-    			if (dirty[0] & /*data*/ 2) {
-    				set_input_value(input0, /*product*/ ctx[31].embroidery);
+    			if (!current || dirty[0] & /*data*/ 2 && img_alt_value !== (img_alt_value = /*product*/ ctx[35].product.title)) {
+    				attr_dev(img, "alt", img_alt_value);
     			}
 
-    			if (/*product*/ ctx[31].embroidery) {
+    			if ((!current || dirty[0] & /*data*/ 2) && t3_value !== (t3_value = /*product*/ ctx[35].product.title + "")) set_data_dev(t3, t3_value);
+    			if ((!current || dirty[0] & /*data*/ 2) && t5_value !== (t5_value = /*product*/ ctx[35].price + "")) set_data_dev(t5, t5_value);
+
+    			if (dirty[0] & /*data*/ 2) {
+    				input0.checked = /*product*/ ctx[35].embroidery;
+    			}
+
+    			if (/*product*/ ctx[35].embroidery) {
     				if (if_block0) {
     					if_block0.p(ctx, dirty);
     				} else {
     					if_block0 = create_if_block_6(ctx);
     					if_block0.c();
-    					if_block0.m(td3, null);
+    					if_block0.m(div0, null);
     				}
     			} else if (if_block0) {
     				if_block0.d(1);
@@ -8535,16 +10267,16 @@ var morderedit2 = (function () {
     			}
 
     			if (dirty[0] & /*data*/ 2) {
-    				set_input_value(input1, /*product*/ ctx[31].prining);
+    				input1.checked = /*product*/ ctx[35].prining;
     			}
 
-    			if (/*product*/ ctx[31].printing) {
+    			if (/*product*/ ctx[35].prining) {
     				if (if_block1) {
     					if_block1.p(ctx, dirty);
     				} else {
     					if_block1 = create_if_block_5(ctx);
     					if_block1.c();
-    					if_block1.m(td4, null);
+    					if_block1.m(div1, null);
     				}
     			} else if (if_block1) {
     				if_block1.d(1);
@@ -8552,27 +10284,16 @@ var morderedit2 = (function () {
     			}
 
     			if (dirty[0] & /*data*/ 2) {
-    				set_input_value(input2, /*product*/ ctx[31].ergent);
+    				set_input_value(input2, /*product*/ ctx[35].ergent);
     			}
 
     			if (dirty[0] & /*data*/ 2) {
-    				set_input_value(textarea, /*product*/ ctx[31].comment);
+    				set_input_value(textarea, /*product*/ ctx[35].comment);
     			}
 
-    			if ((!current || dirty[0] & /*data*/ 2) && t13_value !== (t13_value = (/*product*/ ctx[31].pbarcode || '') + "")) set_data_dev(t13, t13_value);
+    			if ((!current || dirty[0] & /*data*/ 2) && t14_value !== (t14_value = (/*product*/ ctx[35].pbarcode || '') + "")) set_data_dev(t14, t14_value);
 
-    			if (/*product*/ ctx[31].product.show_sizes_popup) {
-    				if (if_block2) ; else {
-    					if_block2 = create_if_block_4(ctx);
-    					if_block2.c();
-    					if_block2.m(td8, null);
-    				}
-    			} else if (if_block2) {
-    				if_block2.d(1);
-    				if_block2 = null;
-    			}
-
-    			if (dirty[0] & /*data*/ 2 && safe_not_equal(previous_key, previous_key = /*product*/ ctx[31].id)) {
+    			if (dirty[0] & /*data*/ 2 && safe_not_equal(previous_key, previous_key = /*product*/ ctx[35].id)) {
     				group_outros();
     				transition_out(key_block, 1, 1, noop);
     				check_outros();
@@ -8582,6 +10303,75 @@ var morderedit2 = (function () {
     				key_block.m(td9, null);
     			} else {
     				key_block.p(ctx, dirty);
+    			}
+
+    			if (!current || dirty[0] & /*data*/ 2 && input3_value_value !== (input3_value_value = /*product*/ ctx[35].product.id)) {
+    				prop_dev(input3, "value", input3_value_value);
+    			}
+
+    			if (!current || dirty[0] & /*data*/ 2 && input4_value_value !== (input4_value_value = /*product*/ ctx[35].id)) {
+    				prop_dev(input4, "value", input4_value_value);
+    			}
+
+    			if (dirty[0] & /*ALL_COLORS*/ 16) {
+    				each_value_3 = /*ALL_COLORS*/ ctx[4];
+    				validate_each_argument(each_value_3);
+    				let i;
+
+    				for (i = 0; i < each_value_3.length; i += 1) {
+    					const child_ctx = get_each_context_3(ctx, each_value_3, i);
+
+    					if (each_blocks_1[i]) {
+    						each_blocks_1[i].p(child_ctx, dirty);
+    					} else {
+    						each_blocks_1[i] = create_each_block_3(child_ctx);
+    						each_blocks_1[i].c();
+    						each_blocks_1[i].m(select0, null);
+    					}
+    				}
+
+    				for (; i < each_blocks_1.length; i += 1) {
+    					each_blocks_1[i].d(1);
+    				}
+
+    				each_blocks_1.length = each_value_3.length;
+    			}
+
+    			if (dirty[0] & /*ALL_SIZES*/ 8) {
+    				each_value_2 = /*ALL_SIZES*/ ctx[3].sort(func);
+    				validate_each_argument(each_value_2);
+    				let i;
+
+    				for (i = 0; i < each_value_2.length; i += 1) {
+    					const child_ctx = get_each_context_2(ctx, each_value_2, i);
+
+    					if (each_blocks[i]) {
+    						each_blocks[i].p(child_ctx, dirty);
+    					} else {
+    						each_blocks[i] = create_each_block_2(child_ctx);
+    						each_blocks[i].c();
+    						each_blocks[i].m(select1, null);
+    					}
+    				}
+
+    				for (; i < each_blocks.length; i += 1) {
+    					each_blocks[i].d(1);
+    				}
+
+    				each_blocks.length = each_value_2.length;
+    			}
+
+    			if (/*product*/ ctx[35].verients.length != 0) {
+    				if (if_block2) {
+    					if_block2.p(ctx, dirty);
+    				} else {
+    					if_block2 = create_if_block_4(ctx);
+    					if_block2.c();
+    					if_block2.m(div3, t25);
+    				}
+    			} else if (if_block2) {
+    				if_block2.d(1);
+    				if_block2 = null;
     			}
     		},
     		i: function intro(local) {
@@ -8597,10 +10387,12 @@ var morderedit2 = (function () {
     			if (detaching) detach_dev(tr0);
     			if (if_block0) if_block0.d();
     			if (if_block1) if_block1.d();
-    			if (if_block2) if_block2.d();
     			if (detaching) detach_dev(t17);
     			if (detaching) detach_dev(tr1);
     			key_block.d(detaching);
+    			destroy_each(each_blocks_1, detaching);
+    			destroy_each(each_blocks, detaching);
+    			if (if_block2) if_block2.d();
     			mounted = false;
     			run_all(dispose);
     		}
@@ -8610,14 +10402,14 @@ var morderedit2 = (function () {
     		block,
     		id: create_each_block.name,
     		type: "each",
-    		source: "(197:16) {#each data.products as product}",
+    		source: "(290:16) {#each data.products as product}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (260:24) 
+    // (400:24) 
     function create_item_slot(ctx) {
     	let div2;
     	let div1;
@@ -8627,7 +10419,7 @@ var morderedit2 = (function () {
     	let img_src_value;
     	let t;
     	let html_tag;
-    	let raw_value = /*label*/ ctx[29] + "";
+    	let raw_value = /*label*/ ctx[33] + "";
 
     	const block = {
     		c: function create() {
@@ -8637,17 +10429,17 @@ var morderedit2 = (function () {
     			img = element("img");
     			t = space();
     			html_tag = new HtmlTag();
-    			attr_dev(img, "alt", img_alt_value = /*item*/ ctx[30].title);
+    			attr_dev(img, "alt", img_alt_value = /*item*/ ctx[34].title);
     			set_style(img, "height", "25px");
-    			if (!src_url_equal(img.src, img_src_value = "" + (CLOUDINARY_BASE_URL + "f_auto,w_auto/" + /*item*/ ctx[30].cimage))) attr_dev(img, "src", img_src_value);
-    			add_location(img, file, 262, 36, 10048);
+    			if (!src_url_equal(img.src, img_src_value = "" + (CLOUDINARY_BASE_URL + "f_auto,w_auto/" + /*item*/ ctx[34].cimage))) attr_dev(img, "src", img_src_value);
+    			add_location(img, file, 402, 36, 17582);
     			html_tag.a = null;
     			attr_dev(div0, "class", "inner");
-    			add_location(div0, file, 261, 32, 9991);
+    			add_location(div0, file, 401, 32, 17525);
     			attr_dev(div1, "class", "search-item");
-    			add_location(div1, file, 260, 28, 9932);
+    			add_location(div1, file, 400, 28, 17466);
     			attr_dev(div2, "slot", "item");
-    			add_location(div2, file, 259, 24, 9851);
+    			add_location(div2, file, 399, 24, 17385);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div2, anchor);
@@ -8658,15 +10450,15 @@ var morderedit2 = (function () {
     			html_tag.m(raw_value, div0);
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty[0] & /*item*/ 1073741824 && img_alt_value !== (img_alt_value = /*item*/ ctx[30].title)) {
+    			if (dirty[1] & /*item*/ 8 && img_alt_value !== (img_alt_value = /*item*/ ctx[34].title)) {
     				attr_dev(img, "alt", img_alt_value);
     			}
 
-    			if (dirty[0] & /*item*/ 1073741824 && !src_url_equal(img.src, img_src_value = "" + (CLOUDINARY_BASE_URL + "f_auto,w_auto/" + /*item*/ ctx[30].cimage))) {
+    			if (dirty[1] & /*item*/ 8 && !src_url_equal(img.src, img_src_value = "" + (CLOUDINARY_BASE_URL + "f_auto,w_auto/" + /*item*/ ctx[34].cimage))) {
     				attr_dev(img, "src", img_src_value);
     			}
 
-    			if (dirty[0] & /*label*/ 536870912 && raw_value !== (raw_value = /*label*/ ctx[29] + "")) html_tag.p(raw_value);
+    			if (dirty[1] & /*label*/ 4 && raw_value !== (raw_value = /*label*/ ctx[33] + "")) html_tag.p(raw_value);
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(div2);
@@ -8677,14 +10469,14 @@ var morderedit2 = (function () {
     		block,
     		id: create_item_slot.name,
     		type: "slot",
-    		source: "(260:24) ",
+    		source: "(400:24) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (287:16) {:else}
+    // (427:16) {:else}
     function create_else_block_2(ctx) {
     	let button;
 
@@ -8693,7 +10485,7 @@ var morderedit2 = (function () {
     			button = element("button");
     			button.textContent = "הוסף";
     			button.disabled = true;
-    			add_location(button, file, 287, 20, 11430);
+    			add_location(button, file, 427, 20, 18964);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, button, anchor);
@@ -8708,14 +10500,14 @@ var morderedit2 = (function () {
     		block,
     		id: create_else_block_2.name,
     		type: "else",
-    		source: "(287:16) {:else}",
+    		source: "(427:16) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (269:16) {#if selectedProduct}
+    // (409:16) {#if selectedProduct}
     function create_if_block_1(ctx) {
     	let div1;
     	let div0;
@@ -8760,18 +10552,18 @@ var morderedit2 = (function () {
     			attr_dev(img, "alt", img_alt_value = /*selectedProduct*/ ctx[2]?.title);
     			set_style(img, "height", "25px");
     			if (!src_url_equal(img.src, img_src_value = "" + (CLOUDINARY_BASE_URL + "f_auto,w_auto/" + /*selectedProduct*/ ctx[2]?.cimage))) attr_dev(img, "src", img_src_value);
-    			add_location(img, file, 271, 28, 10512);
+    			add_location(img, file, 411, 28, 18046);
     			html_tag.a = null;
     			attr_dev(div0, "class", "inner");
-    			add_location(div0, file, 270, 24, 10463);
+    			add_location(div0, file, 410, 24, 17997);
     			attr_dev(div1, "class", "selected-product");
-    			add_location(div1, file, 269, 20, 10407);
+    			add_location(div1, file, 409, 20, 17941);
     			button.disabled = button_disabled_value = /*add_product_status*/ ctx[8] == 'sending';
     			attr_dev(button, "class", "btn btn-secondary");
-    			add_location(button, file, 276, 20, 10798);
-    			add_location(pre, file, 285, 67, 11345);
+    			add_location(button, file, 416, 20, 18332);
+    			add_location(pre, file, 425, 67, 18879);
     			set_style(div2, "color", /*add_product_status_color*/ ctx[9]);
-    			add_location(div2, file, 285, 20, 11298);
+    			add_location(div2, file, 425, 20, 18832);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div1, anchor);
@@ -8839,14 +10631,14 @@ var morderedit2 = (function () {
     		block,
     		id: create_if_block_1.name,
     		type: "if",
-    		source: "(269:16) {#if selectedProduct}",
+    		source: "(409:16) {#if selectedProduct}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (282:24) {:else}
+    // (422:24) {:else}
     function create_else_block_1(ctx) {
     	let t;
 
@@ -8866,14 +10658,14 @@ var morderedit2 = (function () {
     		block,
     		id: create_else_block_1.name,
     		type: "else",
-    		source: "(282:24) {:else}",
+    		source: "(422:24) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (278:24) {#if add_product_status == 'sending'}
+    // (418:24) {#if add_product_status == 'sending'}
     function create_if_block_2(ctx) {
     	let div;
     	let span;
@@ -8883,10 +10675,10 @@ var morderedit2 = (function () {
     			div = element("div");
     			span = element("span");
     			attr_dev(span, "class", "sr-only");
-    			add_location(span, file, 279, 32, 11082);
+    			add_location(span, file, 419, 32, 18616);
     			attr_dev(div, "class", "spinner-border");
     			attr_dev(div, "role", "status");
-    			add_location(div, file, 278, 28, 11006);
+    			add_location(div, file, 418, 28, 18540);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -8901,14 +10693,14 @@ var morderedit2 = (function () {
     		block,
     		id: create_if_block_2.name,
     		type: "if",
-    		source: "(278:24) {#if add_product_status == 'sending'}",
+    		source: "(418:24) {#if add_product_status == 'sending'}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (298:8) {:else}
+    // (438:8) {:else}
     function create_else_block(ctx) {
     	let t;
 
@@ -8930,14 +10722,14 @@ var morderedit2 = (function () {
     		block,
     		id: create_else_block.name,
     		type: "else",
-    		source: "(298:8) {:else}",
+    		source: "(438:8) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (296:8) {#if updateing_to_server}
+    // (436:8) {#if updateing_to_server}
     function create_if_block(ctx) {
     	let loading;
     	let current;
@@ -8973,14 +10765,14 @@ var morderedit2 = (function () {
     		block,
     		id: create_if_block.name,
     		type: "if",
-    		source: "(296:8) {#if updateing_to_server}",
+    		source: "(436:8) {#if updateing_to_server}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (295:4) <Button class="update-btn" disabled={updateing_to_server} on:click={()=>{save_data()}}>
+    // (435:4) <Button class="update-btn" disabled={updateing_to_server} on:click={()=>{save_data()}}>
     function create_default_slot(ctx) {
     	let current_block_type_index;
     	let if_block;
@@ -9049,7 +10841,7 @@ var morderedit2 = (function () {
     		block,
     		id: create_default_slot.name,
     		type: "slot",
-    		source: "(295:4) <Button class=\\\"update-btn\\\" disabled={updateing_to_server} on:click={()=>{save_data()}}>",
+    		source: "(435:4) <Button class=\\\"update-btn\\\" disabled={updateing_to_server} on:click={()=>{save_data()}}>",
     		ctx
     	});
 
@@ -9059,27 +10851,39 @@ var morderedit2 = (function () {
     function create_fragment(ctx) {
     	let link;
     	let t0;
-    	let main;
+    	let morderaddproductentrypopup;
     	let t1;
+    	let main;
     	let t2;
+    	let t3;
     	let div2;
     	let h3;
-    	let t4;
+    	let t5;
     	let div1;
     	let label;
-    	let t6;
+    	let t7;
     	let div0;
     	let autocomplete;
     	let updating_selectedItem;
-    	let t7;
     	let t8;
+    	let t9;
     	let button;
     	let current;
+
+    	morderaddproductentrypopup = new MorderAddProductEntryPopup({
+    			props: {
+    				ALL_COLORS: /*ALL_COLORS*/ ctx[4],
+    				ALL_SIZES: /*ALL_SIZES*/ ctx[3],
+    				ALL_VERIENTS: /*ALL_VERIENTS*/ ctx[5]
+    			},
+    			$$inline: true
+    		});
+
     	let if_block0 = /*headerData*/ ctx[0] && create_if_block_7(ctx);
     	let if_block1 = /*data*/ ctx[1]?.products && create_if_block_3(ctx);
 
     	function autocomplete_selectedItem_binding(value) {
-    		/*autocomplete_selectedItem_binding*/ ctx[23](value);
+    		/*autocomplete_selectedItem_binding*/ ctx[27](value);
     	}
 
     	let autocomplete_props = {
@@ -9099,8 +10903,8 @@ var morderedit2 = (function () {
     		$$slots: {
     			item: [
     				create_item_slot,
-    				({ label, item }) => ({ 29: label, 30: item }),
-    				({ label, item }) => [(label ? 536870912 : 0) | (item ? 1073741824 : 0)]
+    				({ label, item }) => ({ 33: label, 34: item }),
+    				({ label, item }) => [0, (label ? 4 : 0) | (item ? 8 : 0)]
     			]
     		},
     		$$scope: { ctx }
@@ -9116,7 +10920,7 @@ var morderedit2 = (function () {
     		});
 
     	binding_callbacks.push(() => bind(autocomplete, 'selectedItem', autocomplete_selectedItem_binding));
-    	autocomplete.$on("focus", /*focus_handler*/ ctx[24]);
+    	autocomplete.$on("focus", /*focus_handler*/ ctx[28]);
 
     	function select_block_type(ctx, dirty) {
     		if (/*selectedProduct*/ ctx[2]) return create_if_block_1;
@@ -9136,45 +10940,47 @@ var morderedit2 = (function () {
     			$$inline: true
     		});
 
-    	button.$on("click", /*click_handler_1*/ ctx[25]);
+    	button.$on("click", /*click_handler_2*/ ctx[29]);
 
     	const block = {
     		c: function create() {
     			link = element("link");
     			t0 = space();
+    			create_component(morderaddproductentrypopup.$$.fragment);
+    			t1 = space();
     			main = element("main");
     			if (if_block0) if_block0.c();
-    			t1 = space();
-    			if (if_block1) if_block1.c();
     			t2 = space();
+    			if (if_block1) if_block1.c();
+    			t3 = space();
     			div2 = element("div");
     			h3 = element("h3");
     			h3.textContent = "הוסף מוצר";
-    			t4 = space();
+    			t5 = space();
     			div1 = element("div");
     			label = element("label");
     			label.textContent = "שם מוצר";
-    			t6 = space();
+    			t7 = space();
     			div0 = element("div");
     			create_component(autocomplete.$$.fragment);
-    			t7 = space();
-    			if_block2.c();
     			t8 = space();
+    			if_block2.c();
+    			t9 = space();
     			create_component(button.$$.fragment);
     			attr_dev(link, "rel", "stylesheet");
     			attr_dev(link, "href", "https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css");
-    			add_location(link, file, 133, 2, 4540);
-    			add_location(h3, file, 253, 8, 9205);
+    			add_location(link, file, 214, 2, 8276);
+    			add_location(h3, file, 393, 8, 16739);
     			attr_dev(label, "for", "product_name");
-    			add_location(label, file, 256, 16, 9356);
+    			add_location(label, file, 396, 16, 16890);
     			attr_dev(div0, "class", "search-wraper");
-    			add_location(div0, file, 257, 16, 9415);
+    			add_location(div0, file, 397, 16, 16949);
     			attr_dev(div1, "class", "form-group");
-    			add_location(div1, file, 255, 12, 9314);
+    			add_location(div1, file, 395, 12, 16848);
     			attr_dev(div2, "id", "new-product-form");
-    			add_location(div2, file, 252, 4, 9168);
-    			attr_dev(main, "class", "svelte-p9zetx");
-    			add_location(main, file, 136, 0, 4687);
+    			add_location(div2, file, 392, 4, 16702);
+    			attr_dev(main, "class", "svelte-1p2nkav");
+    			add_location(main, file, 222, 0, 8546);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -9182,33 +10988,41 @@ var morderedit2 = (function () {
     		m: function mount(target, anchor) {
     			append_dev(document.head, link);
     			insert_dev(target, t0, anchor);
+    			mount_component(morderaddproductentrypopup, target, anchor);
+    			insert_dev(target, t1, anchor);
     			insert_dev(target, main, anchor);
     			if (if_block0) if_block0.m(main, null);
-    			append_dev(main, t1);
-    			if (if_block1) if_block1.m(main, null);
     			append_dev(main, t2);
+    			if (if_block1) if_block1.m(main, null);
+    			append_dev(main, t3);
     			append_dev(main, div2);
     			append_dev(div2, h3);
-    			append_dev(div2, t4);
+    			append_dev(div2, t5);
     			append_dev(div2, div1);
     			append_dev(div1, label);
-    			append_dev(div1, t6);
+    			append_dev(div1, t7);
     			append_dev(div1, div0);
     			mount_component(autocomplete, div0, null);
-    			append_dev(div0, t7);
+    			append_dev(div0, t8);
     			if_block2.m(div0, null);
-    			append_dev(main, t8);
+    			append_dev(main, t9);
     			mount_component(button, main, null);
     			current = true;
     		},
     		p: function update(ctx, dirty) {
+    			const morderaddproductentrypopup_changes = {};
+    			if (dirty[0] & /*ALL_COLORS*/ 16) morderaddproductentrypopup_changes.ALL_COLORS = /*ALL_COLORS*/ ctx[4];
+    			if (dirty[0] & /*ALL_SIZES*/ 8) morderaddproductentrypopup_changes.ALL_SIZES = /*ALL_SIZES*/ ctx[3];
+    			if (dirty[0] & /*ALL_VERIENTS*/ 32) morderaddproductentrypopup_changes.ALL_VERIENTS = /*ALL_VERIENTS*/ ctx[5];
+    			morderaddproductentrypopup.$set(morderaddproductentrypopup_changes);
+
     			if (/*headerData*/ ctx[0]) {
     				if (if_block0) {
     					if_block0.p(ctx, dirty);
     				} else {
     					if_block0 = create_if_block_7(ctx);
     					if_block0.c();
-    					if_block0.m(main, t1);
+    					if_block0.m(main, t2);
     				}
     			} else if (if_block0) {
     				if_block0.d(1);
@@ -9226,7 +11040,7 @@ var morderedit2 = (function () {
     					if_block1 = create_if_block_3(ctx);
     					if_block1.c();
     					transition_in(if_block1, 1);
-    					if_block1.m(main, t2);
+    					if_block1.m(main, t3);
     				}
     			} else if (if_block1) {
     				group_outros();
@@ -9240,7 +11054,7 @@ var morderedit2 = (function () {
 
     			const autocomplete_changes = {};
 
-    			if (dirty[0] & /*label, item*/ 1610612736 | dirty[1] & /*$$scope*/ 8) {
+    			if (dirty[1] & /*$$scope, label, item*/ 524300) {
     				autocomplete_changes.$$scope = { dirty, ctx };
     			}
 
@@ -9267,7 +11081,7 @@ var morderedit2 = (function () {
     			const button_changes = {};
     			if (dirty[0] & /*updateing_to_server*/ 64) button_changes.disabled = /*updateing_to_server*/ ctx[6];
 
-    			if (dirty[0] & /*updateing_to_server*/ 64 | dirty[1] & /*$$scope*/ 8) {
+    			if (dirty[0] & /*updateing_to_server*/ 64 | dirty[1] & /*$$scope*/ 524288) {
     				button_changes.$$scope = { dirty, ctx };
     			}
 
@@ -9275,12 +11089,14 @@ var morderedit2 = (function () {
     		},
     		i: function intro(local) {
     			if (current) return;
+    			transition_in(morderaddproductentrypopup.$$.fragment, local);
     			transition_in(if_block1);
     			transition_in(autocomplete.$$.fragment, local);
     			transition_in(button.$$.fragment, local);
     			current = true;
     		},
     		o: function outro(local) {
+    			transition_out(morderaddproductentrypopup.$$.fragment, local);
     			transition_out(if_block1);
     			transition_out(autocomplete.$$.fragment, local);
     			transition_out(button.$$.fragment, local);
@@ -9289,6 +11105,8 @@ var morderedit2 = (function () {
     		d: function destroy(detaching) {
     			detach_dev(link);
     			if (detaching) detach_dev(t0);
+    			destroy_component(morderaddproductentrypopup, detaching);
+    			if (detaching) detach_dev(t1);
     			if (detaching) detach_dev(main);
     			if (if_block0) if_block0.d();
     			if (if_block1) if_block1.d();
@@ -9308,6 +11126,10 @@ var morderedit2 = (function () {
 
     	return block;
     }
+
+    const func = (a, b) => {
+    	return a.code.localeCompare(b.code);
+    };
 
     function instance($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
@@ -9430,6 +11252,97 @@ var morderedit2 = (function () {
     		});
     	} //productAmountEditModel.hide();
 
+    	function add_entry_btn_clicked(e) {
+    		e.preventDefault();
+    		let form = e.target;
+    		let formData = new FormData(form);
+    		let formDictData = {};
+
+    		formData.forEach((value, key) => {
+    			formDictData[key] = value;
+    		});
+
+    		// let product = data.products.find(product=> product.id == formDictData['entry_id']);
+    		// if(product) {
+    		if (formDictData['color'] == 'undefined') {
+    			alert('יש לבחור צבע');
+    			return;
+    		} else if (formDictData['size'] == 'undefined') {
+    			alert('יש לבחור מידה');
+    			return;
+    		}
+
+    		let selected_color = parseInt(formDictData['color']);
+    		let selected_size = parseInt(formDictData['size']);
+
+    		let selected_verient = formDictData['varient'] == 'undefined' || formDictData['varient'] == ''
+    		? null
+    		: parseInt(formDictData['varient']);
+
+    		let amount = parseInt(formDictData['amount'] == 'undefined' || formDictData['amount'] == ''
+    		? '0'
+    		: formDictData['amount']);
+
+    		for (let i = 0; i < data.products.length; i++) {
+    			if (data.products[i].id == formDictData['entry_id']) {
+    				if (selected_verient == null && product.verients.length != 0) {
+    					alert('יש לבחור מודל');
+    					return;
+    				}
+
+    				let found = false;
+
+    				for (let j = 0; j < data.products[i].entries.length; j++) {
+    					if (data.products[i].entries[j].color == selected_color && data.products[i].entries[j].size == selected_size && data.products[i].entries[j].varient == selected_verient) {
+    						found = true;
+    						$$invalidate(1, data.products[i].entries[j].quantity = amount, data);
+    					}
+    				}
+
+    				if (!found) {
+    					data.products[i].entries.push({
+    						id: null,
+    						size: selected_size,
+    						color: selected_color,
+    						varient: selected_verient,
+    						quantity: amount
+    					});
+    				}
+
+    				$$invalidate(1, data.products[i].entries = [...data.products[i].entries], data);
+    				break;
+    			}
+    		}
+    	}
+
+    	//         let entry = product.entries.find(entry=> entry.color == selected_color && entry.size == selected_size && entry.varient == selected_verient);
+    	//         if(entry) {
+    	//             entry.quantity = amount;
+    	//             console.log('entry found, update quantity');
+    	//         }else {
+    	//             product.entries.push({
+    	//                 id:null,
+    	//                 size: selected_size,
+    	//                 color: selected_color,
+    	//                 varient: selected_verient,
+    	//                 quantity: amount
+    	//             });
+    	//             console.log('entry not found, creating new');
+    	//         }
+    	//         console.log(product.entries);
+    	//     }else {
+    	//         alert('מוצר לא נמצא');
+    	//     }
+    	// }
+    	const STATUS_OPTIONS = [
+    		['new', 'חדש'],
+    		['in_progress', 'סחורה הוזמנה'],
+    		['in_progress2', 'מוכן לליקוט'],
+    		['in_progress3', 'ארוז מוכן למשלוח'],
+    		['in_progress4', 'בהדפסה'],
+    		['done', 'סופק']
+    	];
+
     	const writable_props = ['id'];
 
     	Object.keys($$props).forEach(key => {
@@ -9439,10 +11352,22 @@ var morderedit2 = (function () {
     	function textarea_input_handler() {
     		headerData[0].message = this.value;
     		$$invalidate(0, headerData);
+    		$$invalidate(14, STATUS_OPTIONS);
     	}
 
+    	function select_change_handler() {
+    		headerData[0].status = select_value(this);
+    		$$invalidate(0, headerData);
+    		$$invalidate(14, STATUS_OPTIONS);
+    	}
+
+    	const click_handler = (product, each_value, product_index) => {
+    		let new_price = prompt('מחיר חדש:', product.price);
+    		$$invalidate(1, each_value[product_index].price = new_price, data);
+    	};
+
     	function input0_change_handler(each_value, product_index) {
-    		each_value[product_index].embroidery = this.value;
+    		each_value[product_index].embroidery = this.checked;
     		$$invalidate(1, data);
     	}
 
@@ -9452,7 +11377,7 @@ var morderedit2 = (function () {
     	}
 
     	function input1_change_handler(each_value, product_index) {
-    		each_value[product_index].prining = this.value;
+    		each_value[product_index].prining = this.checked;
     		$$invalidate(1, data);
     	}
 
@@ -9471,7 +11396,7 @@ var morderedit2 = (function () {
     		$$invalidate(1, data);
     	}
 
-    	const click_handler = product => {
+    	const click_handler_1 = product => {
     		if (confirm('בטוח שברצונך למחוק את המוצר?')) {
     			// Save it!
     			apiDeleteMOrderItem(product.id);
@@ -9494,12 +11419,12 @@ var morderedit2 = (function () {
     		bubble.call(this, $$self, event);
     	}
 
-    	const click_handler_1 = () => {
+    	const click_handler_2 = () => {
     		save_data();
     	};
 
     	$$self.$$set = $$props => {
-    		if ('id' in $$props) $$invalidate(13, id = $$props.id);
+    		if ('id' in $$props) $$invalidate(15, id = $$props.id);
     	};
 
     	$$self.$capture_state = () => ({
@@ -9517,6 +11442,8 @@ var morderedit2 = (function () {
     		CLOUDINARY_BASE_URL,
     		MentriesServerTable,
     		AutoComplete: SimpleAutocomplete,
+    		MorderAddProductEntryPopup,
+    		morderAddProductEntryPopupStore,
     		id,
     		updateing,
     		headerData,
@@ -9533,11 +11460,13 @@ var morderedit2 = (function () {
     		add_product_message,
     		add_product_status,
     		add_product_status_color,
-    		addNewProductButtonClick
+    		addNewProductButtonClick,
+    		add_entry_btn_clicked,
+    		STATUS_OPTIONS
     	});
 
     	$$self.$inject_state = $$props => {
-    		if ('id' in $$props) $$invalidate(13, id = $$props.id);
+    		if ('id' in $$props) $$invalidate(15, id = $$props.id);
     		if ('updateing' in $$props) updateing = $$props.updateing;
     		if ('headerData' in $$props) $$invalidate(0, headerData = $$props.headerData);
     		if ('serverData' in $$props) serverData = $$props.serverData;
@@ -9570,26 +11499,30 @@ var morderedit2 = (function () {
     		save_data,
     		searchProducts,
     		addNewProductButtonClick,
+    		add_entry_btn_clicked,
+    		STATUS_OPTIONS,
     		id,
     		textarea_input_handler,
+    		select_change_handler,
+    		click_handler,
     		input0_change_handler,
     		textarea_input_handler_1,
     		input1_change_handler,
     		textarea_input_handler_2,
     		input2_change_handler,
     		textarea_input_handler_3,
-    		click_handler,
+    		click_handler_1,
     		mentriesservertable_product_binding,
     		autocomplete_selectedItem_binding,
     		focus_handler,
-    		click_handler_1
+    		click_handler_2
     	];
     }
 
     class MorderEdit2 extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance, create_fragment, safe_not_equal, { id: 13 }, null, [-1, -1]);
+    		init(this, options, instance, create_fragment, safe_not_equal, { id: 15 }, null, [-1, -1]);
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
@@ -9601,7 +11534,7 @@ var morderedit2 = (function () {
     		const { ctx } = this.$$;
     		const props = options.props || {};
 
-    		if (/*id*/ ctx[13] === undefined && !('id' in props)) {
+    		if (/*id*/ ctx[15] === undefined && !('id' in props)) {
     			console_1.warn("<MorderEdit2> was created without expected prop 'id'");
     		}
     	}

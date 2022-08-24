@@ -94,10 +94,10 @@ class MOrder(models.Model):
     cart = models.ForeignKey(to=SvelteCartModal, on_delete=models.SET_NULL, null=True)
     client = models.ForeignKey(to=Client, on_delete=models.SET_NULL, null=True)
     agent = models.ForeignKey(to=User, on_delete=models.SET_NULL, null=True)
-    name = models.CharField(max_length=100, blank=True, null=True)
-    phone = models.CharField(max_length=100, blank=True, null=True)
-    email = models.CharField(max_length=100, blank=True, null=True)
-    status = models.CharField(max_length=100, choices=[('new', 'חדש'), ('in_progress', 'בתהליך'), ('done', 'גמור')])
+    name = models.CharField(max_length=100, blank=True, null=True,default='')
+    phone = models.CharField(max_length=100, blank=True, null=True,default='')
+    email = models.CharField(max_length=100, blank=True, null=True,default='')
+    status = models.CharField(max_length=100, choices=[('new','חדש'), ('in_progress','סחורה הוזמנה'), ('in_progress2','מוכן לליקוט',), ('in_progress3','ארוז מוכן למשלוח'),('in_progress4','בהדפסה',),('done','סופק'),], default='new')
     products = models.ManyToManyField(to=MOrderItem, blank=True, related_name='morder')
     message = models.TextField(null=True, blank=True)
     freezeTakenInventory = models.BooleanField(default=False)
@@ -210,6 +210,10 @@ class MOrder(models.Model):
                         'providers': ','.join([provider.name for provider in item.providers.all()]), 
                         'comment': item.comment if item.comment != None else '',
                         'barcode': item.product.barcode if item.product.barcode != None else '',
+                        'prining': item.prining,
+                        'priningComment': item.priningComment,
+                        'embroidery': item.embroidery,
+                        'embroideryComment': item.embroideryComment,
                         'entries': entries}
             products.append(item_data)
         data = {

@@ -82,7 +82,7 @@ import { apiGetAllSizes } from "./api/api";
         for (let entry of product.entries) {
             sizes_temp_set.add(entry.size);
             colors_temp_set.add(entry.color);
-            verients_temp_set.add(entry.verient);
+            verients_temp_set.add(entry.varient);
         }
         // order sizes_ids_set by code
         // sizes_ids_set: [1,2,7,3]
@@ -103,7 +103,7 @@ import { apiGetAllSizes } from "./api/api";
 
         sorted_colors = [...colors_temp_set];
         
-        sorted_verients = [...verients_temp_set].filter(v=>v!=null).map(ver_id=>ALL_VERIENTS.find(ver=>ver.id==ver_id));
+        sorted_verients = [...verients_temp_set].filter(v=>v!=null).map(ver_id=>ALL_VERIENTS.find(ver=>ver.id==ver_id))
     }
     function input_amount_changed(e) {
         let el = e.target;
@@ -117,7 +117,7 @@ import { apiGetAllSizes } from "./api/api";
         //console.log('input_amount_changed:', size_id, color_id, verient_id, quantity);
         let found = false;
         product.entries.forEach(entry => {
-            if (entry.size == size_id && entry.color == color_id && entry.verient == verient_id) {
+            if (entry.size == size_id && entry.color == color_id && entry.varient == verient_id) {
                 entry.quantity = quantity;
                 found = true;
             }
@@ -136,9 +136,10 @@ import { apiGetAllSizes } from "./api/api";
     }
 
     function find_entry_quantity(size, color, verient) {
-        //console.log(product.id, 'looking for ', size, color, verient, ' in ', product.entries);
+        console.log(product.id, 'looking for ', size, color, verient, ' in ', product.entries);
         for (let entry of product.entries) {
-            if (entry.size == size && entry.color == color && entry.verient == verient) {
+            if (entry.size == size && entry.color == color && entry.varient == verient) {
+                console.log('FOUND!!!!')
                 return entry.quantity;
             }
         }
@@ -148,7 +149,7 @@ import { apiGetAllSizes } from "./api/api";
         let clear_entries = product.entries.filter(v=> v.color == color_key);
         // console.log('removing ', clear_entries, ' out of ', product.entries);
         clear_entries.forEach(cell=> {
-            let query = `#entries-table-${product.id} .size-input[data-color='${cell.color}'][data-size='${cell.size}']` + (product.verients.length>0? `[data-ver='${cell.varient}']`: '');
+            let query = `#entries-table-${product.id} .size-input[data-color='${cell.color}'][data-size='${cell.size}']` + (sorted_verients.length>0? `[data-ver='${cell.varient}']`: '');
             
             
             let el = document.querySelector(query);
@@ -188,74 +189,75 @@ import { apiGetAllSizes } from "./api/api";
     }
 </script>
 {#if ALL_COLORS_DICT && ALL_SIZES_DICT}
-    <table class="entries-table" id="entries-table-{product.id}">
-        <thead>
-            <tr>
-                    <th class="sticky-col const-size-cell">צבע</th>
-                    {#if product.verients.length != 0}
-                        <th class="const-size-cell">מודל</th>
-                    {/if}
-                    {#each sorted_sizes as size}
-                        <th>
-                            {size.size}
-                        </th>
-                    {/each}
-                
-            </tr>
-        </thead>
-        <tbody> 
-            {#each sorted_colors as color, color_idx}
+        <table class="entries-table" id="entries-table-{product.id}">
+            <thead>
                 <tr>
-                    <td class="sticky-col">
-                        {#if color}
-                            <div class="color-box" ><div class="inner" style="background-color: {ALL_COLORS_DICT[color].color}"></div>{ALL_COLORS_DICT[color].name}</div>
-                        {:else}
-                            <div>
-                                -
-                            </div>
+                        <th class="sticky-col const-size-cell">צבע</th>
+                        {#if sorted_verients.length != 0}
+                            <th class="const-size-cell">מודל</th>
                         {/if}
-                    </td>
-                    {#if sorted_verients.length != 0}
-                    <td>
-                        {#each sorted_verients as varient }
-                        <div class="varient-box cls-cell">
-                            {varient?.name}
-                        </div>
+                        {#each sorted_sizes as size}
+                            <th>
+                                {size.size}
+                            </th>
                         {/each}
-                        
-                    </td>
-                    {/if}
-                    {#each sorted_sizes as size_obj}
                     
-                    <td class="size-cell">
-                        <!-- sorted_verients <pre>{JSON.stringify(sorted_verients)}</pre> -->
-                        {#if sorted_verients.length == 0}
-                            <div class="cell-wraper">
-                            <input on:change="{input_amount_changed}" value={find_entry_quantity(size_obj.id, color, null)} class="size-input cls-cell" style="border: 2px solid {ALL_COLORS_DICT[color]?.color};" data-color="{color}" data-size="{size_obj.id}" data-ver={null} type="number" placeholder="{ALL_SIZES_DICT[size_obj.id].size}"  min="0" max="9999" >
-                            </div>
-                        {:else}
-                        
-                            {#each sorted_verients as ver, idx}
-                                <div class="cell-wraper">
-                                    <input on:change="{input_amount_changed}" value={find_entry_quantity(size_obj.id, color, ver?.id)} style="border: 2px solid {ALL_COLORS_DICT[color]?.color}" id="input_entery_{product.id}_{size_obj.id}_{color}_{ver?.id}" data-color="{color}" data-size="{size_obj.id}" data-ver={ver.id} class="size-input cls-cell" type="number" placeholder="{ALL_SIZES_DICT[size_obj.id].size}({ver?.name})" min="0" max="9999" >
-                                </div>
-                            {/each}
-                        
-                        {/if}
-                        
-                    </td>
-                    
-                    {/each}
-                    <td class="delete-cell-style">
-                    <button class="remove-button" on:click={clear_sizes_entries(color)}>
-                        <svg xmlns="http://www.w3.org/2000/svg"   width="16px" height="16px" viewBox="0 0 32 36"><path fill="currentColor" d="M30.9 2.3h-8.6L21.6 1c-.3-.6-.9-1-1.5-1h-8.2c-.6 0-1.2.4-1.5.9l-.7 1.4H1.1C.5 2.3 0 2.8 0 3.4v2.2c0 .6.5 1.1 1.1 1.1h29.7c.6 0 1.1-.5 1.1-1.1V3.4c.1-.6-.4-1.1-1-1.1zM3.8 32.8A3.4 3.4 0 0 0 7.2 36h17.6c1.8 0 3.3-1.4 3.4-3.2L29.7 9H2.3l1.5 23.8z"/></svg>
-                    </button>
-                    </td>
                 </tr>
-                
-            {/each}
-        </tbody>
-    </table>
+            </thead>
+            <tbody> 
+                {#each sorted_colors as color, color_idx}
+                    <tr>
+                        <td class="sticky-col">
+                            {#if color}
+                                <div class="color-box" ><div class="inner" style="background-color: {ALL_COLORS_DICT[color].color}"></div>{ALL_COLORS_DICT[color].name}</div>
+                            {:else}
+                                <div>
+                                    -
+                                </div>
+                            {/if}
+                        </td>
+                        
+                        {#if sorted_verients.length != 0}
+                        <td>
+                            {#each sorted_verients as varient }
+                            <div class="varient-box cls-cell">
+                                {varient?.name || ''}
+                            </div>
+                            {/each}
+                            
+                        </td>
+                        {/if}
+                        {#each sorted_sizes as size_obj}
+                        
+                        <td class="size-cell">
+                            <!-- sorted_verients <pre>{JSON.stringify(sorted_verients)}</pre> -->
+                            {#if sorted_verients.length == 0}
+                                <div class="cell-wraper">
+                                <input on:change="{input_amount_changed}" value={find_entry_quantity(size_obj.id, color, null)} class="size-input cls-cell" style="border: 2px solid {ALL_COLORS_DICT[color]?.color};" data-color="{color}" data-size="{size_obj.id}" data-ver={null} type="number" placeholder="{ALL_SIZES_DICT[size_obj.id].size}"  min="0" max="9999" >
+                                </div>
+                            {:else}
+                            
+                                {#each sorted_verients as ver, idx}
+                                    <div class="cell-wraper">
+                                        <input on:change="{input_amount_changed}" value={find_entry_quantity(size_obj.id, color, (ver?.id || null))} style="border: 2px solid {ALL_COLORS_DICT[color]?.color}" data-color="{color}" data-size="{size_obj.id}" data-ver={ver?.id || null} class="size-input cls-cell" type="number" placeholder="{ALL_SIZES_DICT[size_obj.id].size}({ver?.name || ''})" min="0" max="9999" >
+                                    </div>
+                                {/each}
+                            
+                            {/if}
+                            
+                        </td>
+                        
+                        {/each}
+                        <td class="delete-cell-style">
+                        <button class="remove-button" on:click={clear_sizes_entries(color)}>
+                            <svg xmlns="http://www.w3.org/2000/svg"   width="16px" height="16px" viewBox="0 0 32 36"><path fill="currentColor" d="M30.9 2.3h-8.6L21.6 1c-.3-.6-.9-1-1.5-1h-8.2c-.6 0-1.2.4-1.5.9l-.7 1.4H1.1C.5 2.3 0 2.8 0 3.4v2.2c0 .6.5 1.1 1.1 1.1h29.7c.6 0 1.1-.5 1.1-1.1V3.4c.1-.6-.4-1.1-1-1.1zM3.8 32.8A3.4 3.4 0 0 0 7.2 36h17.6c1.8 0 3.3-1.4 3.4-3.2L29.7 9H2.3l1.5 23.8z"/></svg>
+                        </button>
+                        </td>
+                    </tr>
+                    
+                {/each}
+            </tbody>
+        </table>
 <!-- {:else}
         <div class="single-input-wraper">
             <label for="single-amount-input">כמות: </label>

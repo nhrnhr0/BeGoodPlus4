@@ -7,6 +7,8 @@ import { apiAddNewProductToMorder, apiDeleteMOrderItem, apiGetAllColors, apiGetA
 import { CLOUDINARY_BASE_URL } from "./consts/consts";
 import MentriesServerTable from "./MentriesServerTable.svelte";
 import AutoComplete from "simple-svelte-autocomplete";
+import MorderAddProductEntryPopup from "./components/popups/MorderAddProductEntryPopup.svelte";
+import { morderAddProductEntryPopupStore } from "./components/popups/MorderAddProductEntryPopupStore";
 
     export let id;
     let updateing = false;
@@ -129,11 +131,95 @@ import AutoComplete from "simple-svelte-autocomplete";
         
         //productAmountEditModel.hide();
     }
+
+
+    function add_entry_btn_clicked(e) {
+        e.preventDefault();
+        let form = e.target;
+        let formData = new FormData(form);
+        let formDictData = {};
+        formData.forEach((value, key) => {
+            formDictData[key] = value;
+        });
+
+        
+        // let product = data.products.find(product=> product.id == formDictData['entry_id']);
+        // if(product) {
+            if(formDictData['color'] == 'undefined') {
+                alert('יש לבחור צבע');
+                return;
+            }else if(formDictData['size'] == 'undefined') {
+                alert('יש לבחור מידה');
+                return;
+            }
+            let selected_color = parseInt(formDictData['color']);
+            let selected_size = parseInt(formDictData['size']);
+            let selected_verient = (formDictData['varient'] == 'undefined' || formDictData['varient'] == '')? null: parseInt(formDictData['varient']);
+            let amount = parseInt(formDictData['amount'] == 'undefined' || formDictData['amount'] == ''?'0': formDictData['amount'])
+
+
+            for(let i = 0; i < data.products.length; i++) {
+                if(data.products[i].id == formDictData['entry_id']){ 
+                    if(selected_verient == null && product.verients.length != 0) {
+                        alert('יש לבחור מודל');
+                        return;
+                    }
+                    let found = false;
+                    for(let j = 0; j < data.products[i].entries.length; j++) {
+                        if(data.products[i].entries[j].color == selected_color &&
+                            data.products[i].entries[j].size == selected_size &&
+                            data.products[i].entries[j].varient == selected_verient) {
+                                found = true;
+                                data.products[i].entries[j].quantity = amount;
+                        }
+                    }
+                    if(!found) {
+                        data.products[i].entries.push({
+                            id:null,
+                            size: selected_size,
+                            color: selected_color,
+                            varient: selected_verient,
+                            quantity: amount
+                        });
+                    }
+                    data.products[i].entries = [...data.products[i].entries];
+                    break;
+                }
+            }
+        }
+
+    //         let entry = product.entries.find(entry=> entry.color == selected_color && entry.size == selected_size && entry.varient == selected_verient);
+    //         if(entry) {
+    //             entry.quantity = amount;
+    //             console.log('entry found, update quantity');
+    //         }else {
+    //             product.entries.push({
+    //                 id:null,
+    //                 size: selected_size,
+    //                 color: selected_color,
+    //                 varient: selected_verient,
+    //                 quantity: amount
+    //             });
+    //             console.log('entry not found, creating new');
+    //         }
+            
+    //         console.log(product.entries);
+    //     }else {
+    //         alert('מוצר לא נמצא');
+    //     }
+    // }
+    const STATUS_OPTIONS = [
+        ['new','חדש'], ['in_progress','סחורה הוזמנה'], ['in_progress2','מוכן לליקוט',], ['in_progress3','ארוז מוכן למשלוח'],['in_progress4','בהדפסה',],['done','סופק']]
 </script>
 <svelte:head>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css">
 </svelte:head>
 <!-- headerData table -->
+<MorderAddProductEntryPopup 
+    ALL_COLORS={ALL_COLORS}
+    ALL_SIZES={ALL_SIZES}
+    ALL_VERIENTS={ALL_VERIENTS}
+/>
 <main>
     {#if headerData}
     <div class="created">
@@ -145,26 +231,32 @@ import AutoComplete from "simple-svelte-autocomplete";
         <table class="headers-table">
             <thead>
                 <tr>
-                    <td>מזהה</td>
-                    <td>שם</td>
-                    <td>דואר אלקטרוני</td>
-                    <td>הודעה</td>
-                    <td>טלפון</td>
-                    <td>סטטוס</td>
-                    <td>שם לקוח</td>
-                    <td>סוכן</td>
+                    <th>מזהה</th>
+                    <th>שם</th>
+                    <th>דואר אלקטרוני</th>
+                    <th>הודעה</th>
+                    <th>טלפון</th>
+                    <th>סטטוס</th>
+                    <th>שם לקוח</th>
+                    <th>סוכן</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
-                    <td>{headerData[0].id}</td>
-                    <td>{headerData[0].name}</td>
-                    <td>{headerData[0].email}</td>
-                    <td><textarea bind:value="{headerData[0].message}"/> </td>
-                    <td>{headerData[0].phone}</td>
-                    <td>{headerData[0].status}</td>
-                    <td>{headerData[0].client_name}</td>
-                    <td>{headerData[0].agent}</td>
+                    <td class="header-cell">{headerData[0].id}</td>
+                    <td class="header-cell">{headerData[0].name}</td>
+                    <td class="header-cell">{headerData[0].email}</td>
+                    <td class="header-cell"><textarea bind:value="{headerData[0].message}" placeholder="הודעה"/> </td>
+                    <td class="header-cell">{headerData[0].phone}</td>
+                    <td class="header-cell">
+                        <select bind:value="{headerData[0].status}">
+                            {#each STATUS_OPTIONS as opt}
+                                <option value="{opt[0]}" selected={opt[0] == headerData[0].status} >{opt[1]}</option>
+                            {/each}
+                        </select>
+                    </td>
+                    <td class="header-cell">{headerData[0].client_name}</td>
+                    <td class="header-cell">{headerData[0].agent}</td>
                 </tr>
             </tbody>
         </table>
@@ -183,43 +275,56 @@ import AutoComplete from "simple-svelte-autocomplete";
         <table class="product-table">
             <thead>
                 <tr>
-                    <td>מזהה</td>
-                    <td>שם מוצר</td>
-                    <td>מחיר</td>
-                    <td>רקמה?</td>
-                    <td>הדפסה?</td>
-                    <td>חשוב להזמנה</td>
-                    <td>הערות</td>
-                    <td>ברקוד</td>
+                    <th>מזהה</th>
+                    <th>שם מוצר</th>
+                    <th>מחיר</th>
+                    <th>רקמה?</th>
+                    <th>הדפסה?</th>
+                    <th>חשוב להזמנה</th>
+                    <th>הערות</th>
+                    <th>ברקוד</th>
+                    <th colspan="2">פעולות</th>
                 </tr>
             </thead>
             <tbody>
                 {#each data.products as product}
                 
                 <tr>
-                    <td><pre>{product.id}</pre></td>
-                    <td>
-                        <img src="{CLOUDINARY_BASE_URL}f_auto,w_auto/{product.product.cimage}" width="25px" height="25px" loading="lazy"/>
+                    <td class="cell-border">{product.product.id}</td>
+                    <td class="cell-border">
+                        <img src="{CLOUDINARY_BASE_URL}f_auto,w_auto/{product.product.cimage}" alt="{product.product.title}" width="25px" height="25px" loading="lazy"/>
                         {product.product.title}
                     </td>
 
-                    <td>{product.price}</td>
-                    <td>
-                        <input type="checkbox" bind:value={product.embroidery} />
-                        {#if product.embroidery}
-                            <textarea bind:value="{product.embroideryComment}" />
-                        {/if}
+                    <td class="cell-border" on:click="{()=>{
+                        let new_price = prompt('מחיר חדש:' , product.price);
+                        product.price = new_price;
+                    }}">{product.price}₪</td>
+                    <td class="cell-border">
+                        <div class="d-flex-wraper">
+                            <input type="checkbox" bind:checked={product.embroidery} />
+                            {#if product.embroidery}
+                                <textarea bind:value="{product.embroideryComment}" placeholder="תיאור רקמה" />
+                            {/if}
+                        </div>
                     </td>
-                    <td>
-                        <input type="checkbox" bind:value={product.prining} />
-                        {#if product.printing}
-                            <textarea bind:value="{product.priningComment}" />
-                        {/if}
+                    <td class="cell-border">
+                        <div class="d-flex-wraper">
+                            <input type="checkbox" bind:checked={product.prining} />
+                            {#if product.prining}
+                                <textarea bind:value="{product.priningComment}" placeholder="תיאור הדפסה" />
+                            {/if}
+                        </div>
                     </td>
-                    <td><input type="checkbox" bind:value={product.ergent} /></td>
-                    <td><textarea bind:value={product.comment}/></td>
-                    <td>{product.pbarcode || ''}</td>
-                    <td>
+                    <td class="cell-border">
+                        <div class="d-flex-wraper">
+                            <input type="checkbox" bind:value={product.ergent} />
+                        </div>
+                    </td>
+
+                    <td class="cell-border"><textarea bind:value={product.comment} placeholder="הערות" /></td>
+                    <td class="cell-border">{product.pbarcode || ''}</td>
+                    <td class="cell-border" colspan="2">
                         <button class="btn btn-danger" on:click="{()=> {
                                 if (confirm('בטוח שברצונך למחוק את המוצר?')) {
                                     // Save it!
@@ -230,14 +335,10 @@ import AutoComplete from "simple-svelte-autocomplete";
                                 }
                                 
                         }}">מחק</button>
-                        {#if product.product.show_sizes_popup}
-                            <button 
-                            >הוסף צבע/מידה/מודל</button>
-                        {/if}
                     </td>
                 </tr>
                 <tr class="details">
-                    <td colspan="10" >
+                    <td colspan="9" >
                         {#key product.id}
                             <MentriesServerTable bind:product={product}
                             ALL_SIZES={ALL_SIZES}
@@ -245,6 +346,45 @@ import AutoComplete from "simple-svelte-autocomplete";
                             ALL_VERIENTS={ALL_VERIENTS}
                             />
                         {/key}
+                    </td>
+                    <td colspan="1">
+                        <form class="add-entry-form" action="" method="post" on:submit="{add_entry_btn_clicked}">
+                            <input type="hidden" name="product_id" value={product.product.id} />
+                            <input type="hidden" name="entry_id" value={product.id} />
+                            <div class="form-group">
+                            <!-- <label for="color">צבע</label> -->
+                            <select class="form-control" name="color" id="color" >
+                                <option default value=undefined>בחר צבע</option>
+                                {#each ALL_COLORS as color}
+                                <option value={color['id']}>{color['name']}</option>
+                                {/each}
+                            </select>
+
+                            <!-- <label for="size">מידה</label> -->
+                                <select class="form-control" name="size" id="size" >
+                                    <option default value=undefined>בחר מידה</option>
+                                    {#each ALL_SIZES.sort((a, b) => {
+                                        return a.code.localeCompare(b.code);
+                                    }) as size}
+                                    <option value={size['id']}>{size['size']}</option>
+                                    {/each}
+                                </select>
+                            <!-- <label for="varient">מודל</label> -->
+                            {#if product.verients.length != 0}
+                                <select class="form-control" name="varient" id="varient" >
+                                    <option default value=undefined>בחר מודל</option>
+                                    {#each ALL_VERIENTS as varient}
+                                    <option value={varient['id']}>{varient['name']}</option>
+                                    {/each}
+                                </select>
+                            {/if}
+                            
+                            <!-- <label for="amount">כמות</label> -->
+                            <input class="form-control" type="number" placeholder="כמות" name="amount" id="amount" />
+                        </div>
+                    <div class="error-msg"></div>
+                    <button type="submit" class="btn btn-primary">הוסף</button>
+                </form>
                     </td>
                 </tr>
                 {/each}
@@ -301,6 +441,11 @@ import AutoComplete from "simple-svelte-autocomplete";
     </Button>
 </main>
 <style lang="scss">
+    form.add-entry-form {
+        .form-group {
+            padding:5px
+        }
+    }
     main {
         width: 90%;
         
@@ -330,7 +475,19 @@ import AutoComplete from "simple-svelte-autocomplete";
         border: 1px solid #ddd;
         thead {
             background-color: #f1f1f1;
-            
+            tr{
+                th {
+                    border:1px solid black;
+                }
+            }
+        }
+        tbody {
+            tr {
+                td.header-cell {
+                    border:1px solid black!important;;
+                    padding:2px;
+                }
+            }
         }
     }
 
@@ -339,25 +496,30 @@ import AutoComplete from "simple-svelte-autocomplete";
         font-size: 18px;
         margin: 20px auto;
         border-collapse: collapse;
-        border: 1px solid #ddd;
         thead {
             background-color: #f1f1f1;
-            
+            tr{
+                th {
+                    border:1px solid rgb(128, 124, 124);
+                    padding:10px;
+                }
+            }
         }
-        tbody{
-            tr {
-                td {
-                    border: 1px solid #ddd;
-                    padding: 8px;
-                }
+        .cell-border {
+            border:1px solid black;
+            padding-left: 2px;
+            padding-right: 2px;
+            .d-flex-wraper {
+                display: flex;
+                justify-content: start;
+                align-items: center;
             }
-            tr.details {
-                td {
-                    margin:20px;
-                }
-                background-color: #6b656586;
+        }
+        tr.details {
+            td {
+                margin:20px;
             }
-            
+            background-color: #a7a7a786;
         }
     }
 </style>

@@ -61,10 +61,15 @@ admin.site.register(ProviderRequest, ProviderRequestAdmin)
 
 class MOrderAdmin(admin.ModelAdmin):
     model = MOrder
-    fields = ('cart', 'client', 'name', 'phone', 'email', 'status', 'message', 'products_display',) # what is this for?
-    readonly_fields = ('created', 'updated', 'products_display','get_edit_url','view_morder_pdf_link','view_morder_stock_document_link',)
+    fields = ('cart', 'client', 'name', 'phone', 'email', 'status', 'message',) # what is this for?
+    readonly_fields = ('created', 'updated','get_edit_url','view_morder_pdf_link','view_morder_stock_document_link',)
     list_display = ('id', 'client', 'name','status', 'created', 'updated','get_edit_url', 'view_morder_pdf_link','view_morder_stock_document_link',)
+    list_editable = ('status',)
     #filter_horizontal = ('products',)
+    list_filter = ('status', 'created', 'updated',)
+    search_fields = ('id', 'name', 'phone', 'email', 'status', 'message', 'products__product__title', 
+                    'client__businessName', 'client__email', 'client__extraName', 'client__contactMan', 'client__user__username')
+    list_select_related = ('client', 'client__user',)
     actions = ('export_to_excel',)
     def export_to_excel(self, request, queryset):
         filesbuffers = []
@@ -74,7 +79,7 @@ class MOrderAdmin(admin.ModelAdmin):
         light_blue = "00FFCCFF"
         header_font = Font(size=10, bold=True,)
         center_align = Alignment(horizontal='center', vertical='center')
-        align_rtl = Alignment(horizontal='right', vertical='center')
+        align_rtl = Alignment(horizontal='right', vertical='center', wrap_text=True)
         header_fill = PatternFill(start_color=light_blue, end_color=light_blue, fill_type='solid')
         
         bottom_border = Border( bottom=Side(style='thin'))
@@ -116,7 +121,7 @@ class MOrderAdmin(admin.ModelAdmin):
         # headers:
         # פריט, הערות, ברקוד, כמות כוללת
         # פירוט מידות צבעים
-        headers = ['ברקוד','פריט', 'כמות כוללת','הערות']
+        headers = ['ברקוד','פריט', 'כמות כוללת','הערות','כמות נלקחת', 'הדפסה?','', 'רקמה?', '', 'מחיר מכירה']
         
 
         wb = Workbook()
@@ -128,6 +133,12 @@ class MOrderAdmin(admin.ModelAdmin):
         main_ws.column_dimensions['B'].width = 20
         main_ws.column_dimensions['C'].width = 20
         main_ws.column_dimensions['D'].width = 20
+        main_ws.column_dimensions['E'].width = 15
+        main_ws.column_dimensions['F'].width = 15
+        main_ws.column_dimensions['G'].width = 15
+        main_ws.column_dimensions['H'].width = 15
+        main_ws.column_dimensions['I'].width = 15
+        main_ws.column_dimensions['J'].width = 15
         # set the header
         ws_rows_counter = 1
         
@@ -135,6 +146,10 @@ class MOrderAdmin(admin.ModelAdmin):
         for order in orders:
             name = order['name']
             order_ws = wb.create_sheet(order['name'] + ' ' + str(order['id']))
+            # set the height of the row 
+            
+            
+            
             order_ws.sheet_view.rightToLeft = True
             # text align all the document to center
             # set the width of the columns
@@ -142,6 +157,12 @@ class MOrderAdmin(admin.ModelAdmin):
             order_ws.column_dimensions['B'].width = 20
             order_ws.column_dimensions['C'].width = 20
             order_ws.column_dimensions['D'].width = 20
+            order_ws.column_dimensions['E'].width = 15
+            order_ws.column_dimensions['F'].width = 15
+            order_ws.column_dimensions['G'].width = 15
+            order_ws.column_dimensions['H'].width = 15
+            order_ws.column_dimensions['I'].width = 15
+            order_ws.column_dimensions['J'].width = 15
             order_products = order['products']
             order_ws_rows_counter = 1
             order_ws.cell(row=order_ws_rows_counter, column=1).value = 'מספר הזמנה'
@@ -198,6 +219,43 @@ class MOrderAdmin(admin.ModelAdmin):
                 order_ws.cell(row=order_ws_rows_counter, column=4).font =  header_font
                 order_ws.cell(row=order_ws_rows_counter, column=4).border = bottom_border
 
+                order_ws.cell(row=order_ws_rows_counter, column=5).value = ''
+                order_ws.cell(row=order_ws_rows_counter, column=5).fill = header_fill
+                order_ws.cell(row=order_ws_rows_counter, column=5).alignment = align_rtl
+                order_ws.cell(row=order_ws_rows_counter, column=5).font =  header_font
+                order_ws.cell(row=order_ws_rows_counter, column=5).border = bottom_border
+
+                order_ws.cell(row=order_ws_rows_counter, column=6).value = 'כן' if product['prining'] else 'לא'
+                order_ws.cell(row=order_ws_rows_counter, column=6).fill = header_fill
+                order_ws.cell(row=order_ws_rows_counter, column=6).alignment = align_rtl
+                order_ws.cell(row=order_ws_rows_counter, column=6).font =  header_font
+                order_ws.cell(row=order_ws_rows_counter, column=6).border = bottom_border
+                
+                order_ws.cell(row=order_ws_rows_counter, column=7).value = product['priningComment'] if product['prining'] else ''
+                order_ws.cell(row=order_ws_rows_counter, column=7).fill = header_fill
+                order_ws.cell(row=order_ws_rows_counter, column=7).alignment = align_rtl
+                order_ws.cell(row=order_ws_rows_counter, column=7).font =  header_font
+                order_ws.cell(row=order_ws_rows_counter, column=7).border = bottom_border
+                
+                
+                order_ws.cell(row=order_ws_rows_counter, column=8).value = 'כן' if product['embroidery'] else 'לא'
+                order_ws.cell(row=order_ws_rows_counter, column=8).fill = header_fill
+                order_ws.cell(row=order_ws_rows_counter, column=8).alignment = align_rtl
+                order_ws.cell(row=order_ws_rows_counter, column=8).font =  header_font
+                order_ws.cell(row=order_ws_rows_counter, column=8).border = bottom_border
+                
+                order_ws.cell(row=order_ws_rows_counter, column=9).value = product['embroideryComment'] if product['embroidery'] else ''
+                order_ws.cell(row=order_ws_rows_counter, column=9).fill = header_fill
+                order_ws.cell(row=order_ws_rows_counter, column=9).alignment = align_rtl
+                order_ws.cell(row=order_ws_rows_counter, column=9).font =  header_font
+                order_ws.cell(row=order_ws_rows_counter, column=9).border = bottom_border
+                
+                
+                order_ws.cell(row=order_ws_rows_counter, column=10).value = str(product['price']) + '₪'
+                order_ws.cell(row=order_ws_rows_counter, column=10).fill = header_fill
+                order_ws.cell(row=order_ws_rows_counter, column=10).alignment = align_rtl
+                order_ws.cell(row=order_ws_rows_counter, column=10).font =  header_font
+                order_ws.cell(row=order_ws_rows_counter, column=10).border = bottom_border
                 order_ws_rows_counter += 1
 
                 
@@ -234,7 +292,8 @@ class MOrderAdmin(admin.ModelAdmin):
             # for order_product in order_products:
             #     product_name = order_product['title']
 
-# Add headers in bold
+        headers = ['ברקוד','פריט', 'כמות כוללת','הערות',]
+        # Add headers in bold
         for i in range(len(headers)):
             main_ws.cell(row=ws_rows_counter, column=i+1).value = headers[i]
             main_ws.cell(row=ws_rows_counter, column=i+1).font = main_ws.cell(row=ws_rows_counter, column=i+1).font.copy(bold=True)
@@ -314,8 +373,9 @@ class MOrderAdmin(admin.ModelAdmin):
         
         # save file
         
-        date = datetime.datetime.now().strftime('%Y-%m-%d')
-        filename = f'orders_{date}.xlsx'
+        #date = datetime.datetime.now().strftime('%Y-%m-%d')
+        ids = '_'.join([str(o['id']) for o in orders])
+        filename = f'orders_{ids}.xlsx'
         response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
         response['Content-Disposition'] = 'attachment; filename="{}"'.format(filename)
         wb.save(response)

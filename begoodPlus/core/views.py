@@ -36,6 +36,21 @@ from .models import ActiveCartTracker, SvelteCartModal, SvelteCartProductEntery,
 from django.urls import reverse
 from core.models import UserProductPhoto
 # Create your views here.
+from django.contrib import messages
+
+def submit_exel_to_smartbee(request):
+    if(request.method == "POST"):
+        print(request.FILES)
+        file = request.FILES.get('file', None)
+        if file:
+            print(file)
+            df = pd.read_excel(file)
+            df = df.fillna('')
+            print(df)
+        else:
+            messages.add_message(request, messages.ERROR, 'נא להוסיף קובץ')
+    
+    return redirect('/admin/morders/morder/')
 '''
 def json_user_tasks(customer):
     contacts_qs = customer.contact.filter(sumbited=False)
