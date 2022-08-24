@@ -38335,22 +38335,22 @@ var morderedit = (function () {
     			t9 = space();
     			create_component(button.$$.fragment);
     			attr_dev(div0, "id", "headers-table");
-    			add_location(div0, file, 423, 8, 17513);
-    			add_location(hr0, file, 424, 8, 17552);
+    			add_location(div0, file, 423, 8, 17936);
+    			add_location(hr0, file, 424, 8, 17976);
     			attr_dev(div1, "id", "products-table");
-    			add_location(div1, file, 425, 8, 17565);
-    			add_location(hr1, file, 426, 8, 17605);
-    			add_location(h3, file, 429, 12, 17659);
+    			add_location(div1, file, 425, 8, 17990);
+    			add_location(hr1, file, 426, 8, 18031);
+    			add_location(h3, file, 429, 12, 18088);
     			attr_dev(label, "for", "product_name");
-    			add_location(label, file, 432, 20, 17810);
+    			add_location(label, file, 432, 20, 18242);
     			attr_dev(div2, "class", "search-wraper");
-    			add_location(div2, file, 433, 20, 17872);
+    			add_location(div2, file, 433, 20, 18305);
     			attr_dev(div3, "class", "form-group");
-    			add_location(div3, file, 431, 16, 17765);
+    			add_location(div3, file, 431, 16, 18196);
     			attr_dev(form, "method", "post");
-    			add_location(form, file, 430, 12, 17690);
+    			add_location(form, file, 430, 12, 18120);
     			attr_dev(div4, "id", "new-product-form");
-    			add_location(div4, file, 428, 8, 17619);
+    			add_location(div4, file, 428, 8, 18047);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div0, anchor);
@@ -38519,14 +38519,14 @@ var morderedit = (function () {
     			attr_dev(img, "alt", img_alt_value = /*item*/ ctx[26].title);
     			set_style(img, "height", "25px");
     			if (!src_url_equal(img.src, img_src_value = "" + (CLOUDINARY_BASE_URL + "f_auto,w_auto/" + /*item*/ ctx[26].cimage))) attr_dev(img, "src", img_src_value);
-    			add_location(img, file, 439, 40, 18545);
+    			add_location(img, file, 439, 40, 18984);
     			html_tag.a = null;
     			attr_dev(div0, "class", "inner");
-    			add_location(div0, file, 438, 36, 18485);
+    			add_location(div0, file, 438, 36, 18923);
     			attr_dev(div1, "class", "search-item");
-    			add_location(div1, file, 437, 32, 18423);
+    			add_location(div1, file, 437, 32, 18860);
     			attr_dev(div2, "slot", "item");
-    			add_location(div2, file, 436, 28, 18339);
+    			add_location(div2, file, 436, 28, 18775);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div2, anchor);
@@ -38572,7 +38572,7 @@ var morderedit = (function () {
     			button = element("button");
     			button.textContent = "הוסף";
     			button.disabled = true;
-    			add_location(button, file, 455, 24, 19411);
+    			add_location(button, file, 455, 24, 19866);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, button, anchor);
@@ -38620,13 +38620,13 @@ var morderedit = (function () {
     			attr_dev(img, "alt", img_alt_value = /*selectedProduct*/ ctx[2]?.title);
     			set_style(img, "height", "25px");
     			if (!src_url_equal(img.src, img_src_value = "" + (CLOUDINARY_BASE_URL + "f_auto,w_auto/" + /*selectedProduct*/ ctx[2]?.cimage))) attr_dev(img, "src", img_src_value);
-    			add_location(img, file, 448, 32, 19036);
+    			add_location(img, file, 448, 32, 19484);
     			html_tag.a = null;
     			attr_dev(div0, "class", "inner");
-    			add_location(div0, file, 447, 28, 18984);
+    			add_location(div0, file, 447, 28, 19431);
     			attr_dev(div1, "class", "selected-product");
-    			add_location(div1, file, 446, 24, 18925);
-    			add_location(button, file, 453, 24, 19337);
+    			add_location(div1, file, 446, 24, 19371);
+    			add_location(button, file, 453, 24, 19790);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div1, anchor);
@@ -38851,7 +38851,7 @@ var morderedit = (function () {
     			t = space();
     			if_block.c();
     			attr_dev(main, "class", "svelte-1qn055f");
-    			add_location(main, file, 417, 0, 17283);
+    			add_location(main, file, 417, 0, 17700);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
