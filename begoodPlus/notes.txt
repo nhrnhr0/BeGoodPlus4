@@ -21,6 +21,10 @@ docker cp msdb_04-01-2022-21_01_01.sql postgres:/tmp/db.sql
         \q
 PGPASSWORD=password psql -h localhost -U postgres -d testdb5 < /tmp/db.sql 
 
+
+# dump database:
+PGPASSWORD=password pg_dump -h localhost -U postgres -d testdb5 > /tmp/db.sql
+
 CELERY:
 run windows:
 celery -A begoodPlus beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler
