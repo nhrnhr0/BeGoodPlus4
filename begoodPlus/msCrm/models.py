@@ -65,7 +65,7 @@ class MsCrmUser(models.Model):
     name = models.CharField(max_length=100, verbose_name=_('name'))
 
     phone = models.CharField(max_length=100, null=True,
-                             blank=True, verbose_name=_('phone'))
+                             blank=True, verbose_name=_('phone'), unique=True)
     email = models.EmailField(
         max_length=100, null=True, blank=True, verbose_name=_('email'))
     address = models.CharField(
@@ -78,8 +78,8 @@ class MsCrmUser(models.Model):
         max_length=256, null=True, blank=True, verbose_name=_('flashy contact id'))
     intrests = models.ManyToManyField(
         CatalogAlbum, blank=True, verbose_name=_('intrested'))
-    clients = models.ManyToManyField(
-        to=Client, blank=True, verbose_name=_('clients'))
+    # clients = models.ManyToManyField(
+    #     to=Client, blank=True, verbose_name=_('clients'))
 
 
     clients = models.ManyToManyField(to=Client, blank=True, verbose_name=_('clients'), related_name='ms_crm_users')

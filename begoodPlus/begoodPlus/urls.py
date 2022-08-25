@@ -26,7 +26,7 @@ from inventory.views import DocStockEnterViewSet, doc_stock_enter
 
 from msCrm.views import api_save_lead, fix_ms_crm, get_all_business_types_groups, get_all_mscrm_phone_contacts, get_crm_users_for_whatsapp, get_crm_users_numbers_in_excel, mcrm_lead_register, get_all_business_types, get_all_interests, import_mscrm_from_exel, upload_mscrm_business_select_to_intrests_exel
 from core.views import api_logout, autocompleteClick, autocompleteModel, client_product_question, handler404, send_product_photo, set_csrf_token, success_view, svelte_cart_form, svelte_cart_history, svelte_contact_form, test_celery_view, track_cart, verify_unique_field_by_field_excel
-from catalogImages.views import AlbumImagesApiView, admin_api_get_product_cost_price, all_images_ids, catalogimage_upload_warehouse_excel, get_main_albums_for_main_page, get_main_info, get_product_sizes_colors_martix, admin_remove_product_from_cart, admin_add_to_existing_cart, get_products_slim, get_products_viewset, get_similar_products
+from catalogImages.views import AlbumImagesApiView, admin_api_get_product_cost_price, all_images_ids, catalogimage_upload_warehouse_excel, create_image_from_exel, get_main_albums_for_main_page, get_main_info, get_product_sizes_colors_martix, admin_remove_product_from_cart, admin_add_to_existing_cart, get_products_slim, get_products_viewset, get_similar_products
 from clientApi.views import ColorsClientViewSet, ImageClientViewSet, SizesClientViewSet, LogoClientViewSet, get_album_images
 from clientApi.views import AlbumClientViewSet
 from catalogImageDetail.views import SvelteCatalogImageDetailViewSet
