@@ -1,8 +1,17 @@
+from email.policy import default
 from rest_framework import serializers
 
-from .models import CatalogAlbum
+from .models import CatalogAlbum, TopLevelCategory
 from catalogImages.serializers import CatalogImageSerializer
 from color.serializers import ColorSerializer
+
+class TopLevelCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TopLevelCategory
+        fields = ('id', 'name', 'get_image','albums','slug','my_order',)
+        ordering = ('my_order',)
+
+
 
 class CatalogAlbumSerializer(serializers.ModelSerializer):
     images_list = serializers.SerializerMethodField('_get_images')
@@ -14,4 +23,9 @@ class CatalogAlbumSerializer(serializers.ModelSerializer):
         model = CatalogAlbum
         #fields = '__all__'
         exclude = ('images',)
-        
+    
+class CatalogAlbumSlimSerializer(serializers.ModelSerializer):
+    topLevelCategory__slug = serializers.CharField(source='topLevelCategory.slug',default='')
+    class Meta:
+        model = CatalogAlbum
+        fields = ('id','topLevelCategory','topLevelCategory__slug', 'title','slug','is_public','is_campain','cimage','album_order',)

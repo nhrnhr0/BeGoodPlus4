@@ -1,8 +1,18 @@
+from email.policy import default
+from django.http import HttpRequest
 from django.http.response import JsonResponse
 from django.shortcuts import redirect, render
-from catalogAlbum.models import CatalogAlbum
+import pytz
+from catalogAlbum.models import TopLevelCategory
+from campains.models import CampainProduct, MonthCampain
+from campains.views import get_user_active_campaigns, get_user_campains_serializer_data
+import catalogAlbum
+from catalogAlbum.models import CatalogAlbum, ThroughImage
+from client.models import Client
+from clientApi.serializers import ImageClientApi
 
 from core.models import SvelteCartProductEntery
+from core.pagination import CurserResultsSetPagination, StandardResultsSetPagination
 from inventory.models import PPN
 from productColor.models import ProductColor
 from productSize.models import ProductSize
@@ -10,15 +20,17 @@ from .models import CatalogImage
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework import status
-from .serializers import CatalogImageSerializer, CatalogImageApiSerializer
+from .serializers import CatalogImageIdSerializer, CatalogImageSerializer, CatalogImageApiSerializer
 from rest_framework.request import Request
 from catalogImageDetail.models import CatalogImageDetail
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view
 import json
 from django.contrib import messages
-
+from django.urls import reverse
+import decimal
 import pandas as pd
+from django.db.models import Q
 from provider.models import Provider
 def create_image_from_exel(request):
     context= {}
@@ -39,6 +51,404 @@ def create_image_from_exel(request):
         context['products'] = products
         return render(request, 'catalogImages/create_image_from_exel_result.html', context=context)
     return render(request, 'catalogImages/create_image_from_exel.html', context=context)
+
+from rest_framework.pagination import PageNumberPagination
+from django.db.models import Q
+from rest_framework import serializers
+from datetime import datetime
+from rest_framework.views import APIView
+import time
+from django.db.models.query import QuerySet
+class SearchProductSerializer(serializers.ModelSerializer):
+    public_album_slug = serializers.SerializerMethodField()
+    public_album_id = serializers.SerializerMethodField()
+    public_album_top_slug = serializers.SerializerMethodField()
+    
+    def get_public_album_slug(self, obj):
+        return obj.albums.filter(is_public=True).first().slug
+    def get_public_album_id(self, obj):
+        return obj.albums.filter(is_public=True).first().id
+    def get_public_album_top_slug(self, obj):
+        return obj.albums.filter(is_public=True).first().topLevelCategory.slug
+    class Meta:
+        model = CatalogImage
+        fields = ('id', 'title', 'cimage', 'public_album_slug', 'public_album_id','albums', 'public_album_top_slug')
+
+class SlimCatalogImageSerializer(serializers.ModelSerializer):
+    main_public_album_top__slug = serializers.CharField(source='main_public_album.topLevelCategory.slug', default=None)
+    main_public_album__slug = serializers.CharField(source='main_public_album.slug', default=None)
+    class Meta:
+        model = CatalogImage
+        fields = ('id', 'title', 'cimage', 'price', 'new_price', 'main_public_album__slug','main_public_album_top__slug','link')
+    #main_album = serializers.SerializerMethodField('_get_main_album')
+    new_price = serializers.SerializerMethodField('_get_new_price')
+    price = serializers.SerializerMethodField('_get_price')
+    link =  serializers.SerializerMethodField('_get_link')
+    
+    def _get_link(self, obj):
+        return '/main?' + 'top=' + obj.main_public_album.topLevelCategory.slug + '&album=' + obj.main_public_album.slug  + '&product_id=' + str(obj.id)
+    def get_user_id(self):
+        request = self.context.get('request', None)
+        ret_user_id = None
+        if request:
+            if request.user.is_authenticated and request.user.client:
+                if request.user.client:
+                    if request.user.is_superuser and request.COOKIES.get('actAs'):
+                        ret_user_id = request.COOKIES.get('actAs')
+                    else:
+                        ret_user_id = request.user.id
+        return ret_user_id
+    def __init__(self, instance=None, data=None, **kwargs):
+        super().__init__(instance, data, **kwargs)
+        self.user_id = self.get_user_id()
+        if self.user_id:
+            self.client = Client.objects.get(user_id=self.user_id)
+            self.tariff = self.client.tariff
+        else:
+            self.tariff = 0
+            self.client = None
+        #print('====> self.user_id', self.client, 'tariff', self.tariff)
+        # find user active campains with the products
+        tz = pytz.timezone('Israel')
+        try:
+            catalogImage_ids = [i.id for i in instance] if instance else []
+        except:
+            if instance:
+                catalogImage_ids = [instance.id]
+            else:
+                catalogImage_ids = []
+        # campainProduct = CampainProduct.objects.filter(monthCampain__users__user_id=user_id, catalogImage_id=catalogImage_id,monthCampain__is_shown=True,monthCampain__startTime__lte=datetime.now(tz),monthCampain__endTime__gte=datetime.now(tz)).first()
+        campainProducts = CampainProduct.objects.filter(monthCampain__users__user_id=self.user_id, catalogImage_id__in=catalogImage_ids,monthCampain__is_shown=True,monthCampain__startTime__lte=datetime.now(tz),monthCampain__endTime__gte=datetime.now(tz))
+        
+        # create dict if catalogImage_id as key and newPrice as value
+        self.campainProducts_dict = {}
+        for campainProduct in campainProducts:
+            self.campainProducts_dict[campainProduct.catalogImage_id] = campainProduct.newPrice
+        #print('done serializer init')
+    def _get_new_price(self, obj):
+        if obj.id in self.campainProducts_dict:
+            return self.campainProducts_dict[obj.id]
+        else:
+            return None
+        
+    # def _get_main_album(self, obj):
+    #     alb = obj.albums.filter(is_public=True).first()
+    #     if alb:
+    #         return alb.id
+    #     return None
+    def _get_price(self, obj):
+        if self.client:
+            price = obj.client_price + (obj.client_price * (self.tariff/100))
+            price = round(price * 2) / 2 if price > 50 else "{:.2f}".format(price)
+            return float(decimal.Decimal(price).normalize())
+        else:
+            return 0
+
+
+class SlimThroughImageSerializer(serializers.ModelSerializer):
+
+    def __init__(self, instance=None, data=..., **kwargs):
+        super().__init__(instance, data, **kwargs)
+        
+    
+    catalogImage = serializers.SerializerMethodField('getSlimCatalogImageSerializer')
+    
+    def getSlimCatalogImageSerializer(self, obj):
+        ob = CatalogImage.objects.get(id=obj.catalogImage_id)
+        ret = SlimCatalogImageSerializer(instance=obj.catalogImage, context=self.context)
+        data = ret.data
+        return data
+    catalogAlbum__title = serializers.SerializerMethodField('_get_catalogAlbum_title')
+    def _get_catalogAlbum_title(self, obj):
+        return obj.catalogAlbum.title
+    class Meta:
+        model = ThroughImage
+        fields = ('catalogImage','catalogAlbum','image_order','catalogAlbum__title')
+
+
+class FakeTop:
+    def __init__(self, id, name, slug, is_public):
+        self.id = id
+        self.name = name
+        self.slug = slug
+        self.is_public = is_public
+
+def get_main_info(request):
+    album_slug = request.GET.get('album')
+    top_album_slug = request.GET.get('top', None)
+    top_album = None
+    product_id = request.GET.get('product_id', None)
+    if top_album_slug:
+        if(top_album_slug == 'new'):
+            top_album = FakeTop(0, 'חדשים', 'new', True)
+            top_albums = list(CatalogAlbum.objects.filter(is_public=True).order_by('album_order').values('id','title', 'cimage', 'is_public', 'slug',))
+        elif(top_album_slug == 'campaigns'):
+            #top_album = class with id, title, slug, cimage, is_public
+            top_album = FakeTop(0,'מבצעים', 'campaigns', True)
+            
+            campains = get_user_active_campaigns(request.user)
+            top_albums = [{
+                'id': c.album.id,
+                'title': c.album.title,
+                'slug': c.album.slug,
+                'cimage': c.album.cimage,
+                'is_public': c.album.is_public,
+                } for c in campains]
+            #top_albums = list(top_albums.values('id','title', 'cimage', 'is_public', 'slug',))
+        else:
+            top_album = TopLevelCategory.objects.get(slug=top_album_slug)
+            top_albums = list(CatalogAlbum.objects.filter(topLevelCategory=top_album).order_by('album_order').values('id','title', 'cimage', 'is_public', 'slug',))  
+    else:
+        top_albums = []#list(CatalogAlbum.objects.filter(is_public=True).order_by('album_order').values('id','title', 'cimage', 'is_public', 'slug',))
+    
+    productInfo = None
+    if product_id:
+        product = CatalogImage.objects.get(id=product_id)
+        #productObj = product.select_related('packingTypeClient')
+        productSer = ImageClientApi(product, many=False,context={
+            'request': request
+        })
+        productInfo = productSer.data
+    ret = {
+            'album_id': top_album_slug,
+            'top': top_album.slug if top_album else '',
+            'query_string': request.GET.urlencode(),
+            'top_albums': top_albums
+        }
+    # create og meta to retrun, can be product_id or album_id or top_album by this priority order
+    if product_id:
+        ret['og_meta'] = get_product_og_meta(product_id)
+        ret['productInfo'] = productInfo
+    elif album_slug:
+        album = CatalogAlbum.objects.get(slug=album_slug)
+        ret['og_meta'] = get_album_og_meta(album)
+    elif top_album:
+        icon = None
+        if(top_album_slug == 'campaigns'):
+            icon= 'https://res.cloudinary.com/ms-global/image/upload/v1660132407/msAssets/Group_10_copy_10_3_-removebg-preview_1_uq2t66.png'
+        elif (top_album_slug == 'new'):
+            icon = 'https://res.cloudinary.com/ms-global/image/upload/v1660122508/msAssets/icons8-new-product-64_gikxga.png'
+        ret['og_meta'] = get_top_album_og_meta(top_album, icon)
+    else:
+        ret['og_meta'] = {}
+    
+    return JsonResponse(ret)
+
+def get_product_og_meta(product_id):
+    product = CatalogImage.objects.get(id=product_id)
+    # 
+    return {
+        'icon': 'https://res.cloudinary.com/ms-global/image/upload/c_scale,w_365/c_scale,u_v1649744644:msAssets:image_5_qo7yhx.jpg,w_500/' +product.cimage,
+        'title': product.title,
+        'description': product.description[:175] + '...',
+    }
+def get_album_og_meta(album):
+    return {
+        'icon': 'https://res.cloudinary.com/ms-global/image/upload/c_scale,w_365/c_scale,u_v1649744644:msAssets:image_5_qo7yhx.jpg,w_500/' + album.cimage,
+        'title': album.title,
+        'description': album.description[:175] + '...',
+        'keywords': album.keywords,
+    }
+def get_top_album_og_meta(top_album, icon=None):
+    if not icon:
+        if not top_album.image:
+            first_album= CatalogAlbum.objects.filter(Q(topLevelCategory__id=top_album.id) & ~Q(cimage='')).first()
+            if first_album:
+                icon = 'https://res.cloudinary.com/ms-global/image/upload/c_scale,w_365/c_scale,u_v1649744644:msAssets:image_5_qo7yhx.jpg,w_500/' + first_album.cimage
+            else:
+                icon = ''
+        else:
+            icon = 'https://res.cloudinary.com/ms-global/image/upload/c_scale,w_365/c_scale,u_v1649744644:msAssets:image_5_qo7yhx.jpg,w_500/' + top_album.image.public_id
+    return {
+        'icon': icon,
+        'title': top_album.name,
+    }
+    
+def get_products_slim(request):
+    product_ids = request.GET.getlist('pid[]')
+    if product_ids:
+        catalogImage = CatalogImage.objects.filter(id__in=product_ids)
+        catalogImage_serializer = SlimCatalogImageSerializer(catalogImage, many=True, context={'request': request})
+        #print('catalogImage_serializer.is_valid', catalogImage_serializer.is_valid())
+        #print(catalogImage_serializer.errors)
+        data = catalogImage_serializer.data
+        return JsonResponse(data, safe=False)
+    else:
+        return JsonResponse({'error': 'no product_ids provided'})
+
+@api_view(['GET'])
+def get_similar_products(request, product_id):
+    product = CatalogImage.objects.get(id=product_id)
+    similar_products = CatalogImage.objects.filter(Q(albums__id__in=product.albums.all()) & ~Q(id=product.id) & Q(is_active=True)).order_by('?')[:25]
+    similar_products = similar_products.select_related('main_public_album', 'main_public_album__topLevelCategory')
+    catalogImage_serializer = SlimCatalogImageSerializer(similar_products, many=True, context={'request': request})
+    data = catalogImage_serializer.data
+    return JsonResponse(data, safe=False)
+    
+class AlbumImagesApiView(APIView, CurserResultsSetPagination):
+    ordering = ('image_order','id',)
+    
+    def get_ordering(self, request, queryset, view):
+        ret = super().get_ordering(request, queryset, view)
+        if self.top_album == 'new' or (self.top_album == 'campaigns' and not self.album):
+            if (queryset.model == CatalogImage):
+                return ('-date_created','id',)
+            elif (queryset.model == ThroughImage):
+                return ('-catalogImage__date_created','catalogImage__id',)
+                
+        else:
+            return ret
+    
+    def get_queryset(self):
+        # get the album id from the url
+        # album_id = self.request.GET.get('album_id')
+        # get the album object
+        # get the images for the album
+        ##images = self.album.images.order_by('throughimage__image_order')
+        if self.top_album:
+            if self.top_album == 'new':
+                qs = CatalogImage.objects.filter(is_active=True)#.order_by('catalogImage')#.distinct('catalogImage__id')
+                #qs = qs.order_by('catalogImage_id').distinct('catalogImage_id')
+            elif self.top_album == 'campaigns':
+                all_user_campaigns = get_user_active_campaigns(self.request.user)
+                all_albums = CatalogAlbum.objects.filter(campain__in=all_user_campaigns)
+                qs = CatalogImage.objects.filter(albums__in=all_albums).distinct()
+            else:
+                qs = ThroughImage.objects.filter(catalogAlbum__topLevelCategory__slug=self.top_album).order_by('image_order')
+                qs = qs.select_related('catalogImage','catalogAlbum')
+            #qs = CatalogImage.objects.filter(albums__topLevelCategory__id=self.top_album).order_by('throughimage__image_order')
+        # return paginated images
+        if self.album:
+            qs = ThroughImage.objects.filter(catalogAlbum=self.album).order_by('image_order')
+            #qs = CatalogImage.objects.filter(albums__id=self.album_id).order_by('throughimage__image_order')
+            qs = qs.select_related('catalogImage','catalogAlbum')
+            
+        # filter only is_active images for both instances ThroughImage and CatalogImage
+        if qs.model is CatalogImage:
+            qs = qs.prefetch_related('albums',).select_related('main_public_album','main_public_album__topLevelCategory')
+            qs = qs.filter(Q(is_active=True) and ~Q(main_public_album=None) and ~Q(main_public_album__topLevelCategory=None))
+            qs = qs.distinct()
+        else:
+            qs = qs.prefetch_related('catalogImage', 'catalogImage__albums').select_related('catalogImage__main_public_album','catalogImage__main_public_album__topLevelCategory')
+            qs = qs.filter(Q(catalogImage__is_active=True) and ~Q(catalogImage__main_public_album=None) and ~Q(catalogImage__main_public_album__topLevelCategory=None))
+            qs = qs.distinct()
+    
+
+        qs= self.paginate_queryset(qs, self.request)
+        # return all the catalogImages of the qs
+        return qs
+        
+        # get all the catalogImage from the qs as images    
+        #images = [i.catalogImage for i in qs]
+        return self.paginate_queryset(images, self.request)
+    
+    def get(self, request):
+        self.request = request
+        album_slug = request.GET.get('album')
+        self.top_album = request.GET.get('top')
+        if album_slug:
+            self.album = CatalogAlbum.objects.get(slug=album_slug)
+        else:
+            self.album = None
+            
+            cmp_slug = request.GET.get('cmp', None)
+            
+            if cmp_slug:
+                self.album = CatalogAlbum.objects.get(slug=cmp_slug)
+        #self.album = CatalogAlbum.objects.get(id=self.album_id)
+        products = self.get_queryset()
+        # if the products is of type QuerySet<ThroughImage>
+        # convert to QuerySet<CatalogImage>
+        if len(products) > 0 and isinstance(products[0], ThroughImage):
+            products = [i.catalogImage for i in products]
+        #products = [o.catalogImage for o in products]
+        #serializer = SlimCatalogImageSerializer(products, many=True, context={'request': request})
+        serializer = SlimCatalogImageSerializer(products, many=True, context={'request': request})
+        response = self.get_paginated_response(serializer.data)
+        # top_albums = CatalogAlbum.objects.filter(topLevelCategory__id=self.top_album).order_by('album_order').values('id','title', 'cimage')
+        # print('top_albums = ', top_albums)
+        # response.data['info'] ={
+        #     'album_id': self.album_id,
+        #     'top': self.top_album,
+        #     'query_string': request.GET.urlencode(),
+        #     'top_albums': top_albums
+        # }
+        # # sleep 1 sec
+        # time.sleep(1)
+        return response
+@api_view(['GET'])
+def get_main_albums_for_main_page(request):
+    # main = first public non campain catalogAlbum with topLevelCategory = null
+    mains = CatalogAlbum.objects.filter(is_public=True, show_on_main_page=True).order_by('album_order')
+    # get AlbumImagesApiView for each main
+    mains_ret = []
+    for main in mains:
+        my_request = request._request
+        
+        # my_request.GET = request.GET.copy()
+        # my_request.GET['album_id'] = main.id
+        
+        # change request to AlbumImagesApiView
+        path = '/my-api/get-album-images?album='+ str(main.slug)
+        my_request.path = path
+        my_request.GET = request.GET.copy()
+        my_request.GET['album'] = main.slug
+        # my_request.GET = request.GET.copy()
+        # my_request.GET['album_id'] = main.id
+        main_ret = {
+            'id': main.id,
+            'title': main.title,
+            'cimage': main.cimage,
+            'slug': main.slug,
+            'top_slug': main.topLevelCategory.slug,
+            'images': AlbumImagesApiView.as_view()(my_request).data
+        }
+        mains_ret.append(main_ret)
+    # if main:
+    #     print('main:' ,main)
+    #     images = main.images.filter(is_active=True).order_by('throughimage__image_order')
+    #     images = images.prefetch_related('colors','sizes','albums','varients').select_related('packingTypeClient')
+    #     ser = ImageClientApi(images, many=True,context={
+    #         'request': request
+    #     })
+    #     main_response['images'] = ser.data
+    #     main_response['album_id'] = main.id
+    #     main_response['album_title'] = main.title
+    #     main_response['cimage'] = main.cimage
+        
+    # campains_response = {}
+    # if request.user and request.user.is_authenticated:
+    #     campains_response = get_user_campains_serializer_data(request.user)
+    
+    # return JsonResponse({
+    #     #'main': main_response,
+    #     'campains': campains_response
+    # })
+    return JsonResponse(mains_ret, safe=False)
+
+
+class get_products_viewset(viewsets.ModelViewSet):
+    queryset = CatalogImage.objects.all()
+    serializer_class = ImageClientApi
+    pagination_class = StandardResultsSetPagination
+    def get_queryset(self):
+        top_level_category = self.request.GET.get('top_level_id')
+        albums = self.request.GET.get('album_ids', '')
+        if albums == 'all':
+            albums = None
+        else:
+            albums = albums.split('-')#.remove('')
+            try:
+                albums.remove('')
+            except:
+                pass
+        if albums:
+            queryset = CatalogImage.objects.filter(Q(albums__id__in=albums) & Q(albums__topLevelCategory=top_level_category))# 
+        else:
+            queryset = CatalogImage.objects.filter(Q(albums__topLevelCategory=top_level_category))# 
+        #queryset = CatalogImage.objects.all()
+        return queryset
+
 def catalogimage_upload_warehouse_excel(request):
     if request.method == "GET":
         return render(request, 'catalogImages/catalogimage_upload_full_excel.html')

@@ -1,14 +1,37 @@
 from django.shortcuts import redirect, render
 from django.urls.base import reverse
+from clientApi.serializers import AlbumClientApi
 
 # Create your views here.
-from catalogAlbum.models import CatalogAlbum
-from .serializers import CatalogAlbumSerializer
+from catalogAlbum.models import CatalogAlbum, TopLevelCategory
+from .serializers import CatalogAlbumSerializer, CatalogAlbumSlimSerializer, TopLevelCategorySerializer
 from django.http import JsonResponse
 
 from rest_framework import viewsets
+from rest_framework.decorators import api_view
 from rest_framework.renderers import JSONRenderer
-
+@api_view(['GET'])
+def get_catalog_albums(request, id=None):
+    if not id:
+        albums = CatalogAlbum.objects.filter(is_public=True,is_campain=False,).order_by('topLevelCategory','album_order').select_related('topLevelCategory')
+        serializer = CatalogAlbumSlimSerializer(albums, many=True)
+    else: 
+        album = CatalogAlbum.objects.get(id=id)
+        serializer = CatalogAlbumSlimSerializer(album)
+        
+    return JsonResponse(serializer.data, safe=False)
+@api_view(['GET'])
+def get_main_categories(request):
+    qs = TopLevelCategory.objects.all()
+    ser = TopLevelCategorySerializer(qs, many=True)
+    data = ser.data
+    return JsonResponse(data, safe=False)
+@api_view(['GET'])
+def get_albums(request):
+    ids = request.GET.get('ids').split(',')
+    albums = CatalogAlbum.objects.filter(id__in=ids)
+    data = AlbumClientApi(albums, many=True).data
+    return JsonResponse(data, safe=False)
 
 class CatalogAlbumViewSet(viewsets.ModelViewSet):
     queryset = CatalogAlbum.objects.all()

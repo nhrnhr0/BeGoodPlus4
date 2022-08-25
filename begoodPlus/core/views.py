@@ -2,6 +2,7 @@ from cmath import isnan
 from begoodPlus.secrects import SMARTBEE_DOMAIN, SMARTBEE_providerUserToken
 
 from smartbee.models import SmartbeeResults, SmartbeeTokens
+from catalogImages.views import SearchProductSerializer
 from .models import UserSearchData
 from django.db.models import Value, CharField
 from itertools import chain
@@ -455,7 +456,7 @@ def svelte_cart_form(request):
             user_uuid = uuid.uuid4()
         db_cart = SvelteCartModal.objects.create(user=user_id, device=device, uid=user_uuid, businessName=business_name,
                                                  name=name, phone=phone, email=email, message=message, agent=agent, order_type=order_type)
-        # data.products.set(products)
+        # data.products.set(products)   
         db_cart.productsRaw = raw_cart
         # products = [{'id': 5, 'amount': 145, 'mentries': {...}}, {'id': 18, 'amount': 0, 'mentries': {...}}, {'id': 138, 'amount': 0}]
         data = []
@@ -622,9 +623,9 @@ def autocompleteModel(request):
     # is_hidden=False
     ser_context = {'request': request}
     products_qs_short = products_qs[0:20]
-    products_qs_short = products_qs_short.prefetch_related(
-        'colors', 'sizes', 'albums')
-    products = ImageClientApi(products_qs_short, many=True, context={
+    # products_qs_short = products_qs_short.prefetch_related(
+    #     'colors', 'sizes', 'albums')
+    products = SearchProductSerializer(products_qs_short, many=True, context={
         'request': request
     })
     #products = SearchCatalogImageSerializer(products_qs,context=ser_context, many=True)

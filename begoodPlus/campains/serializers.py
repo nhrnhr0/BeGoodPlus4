@@ -17,32 +17,40 @@ class priceTableSerializer(ModelSerializer):
 
 
 class ClientProductCampainSerilizer(ModelSerializer):
-    catalogImage = ImageClientApi('catalogImage')
     #priceTable = priceTableSerializer(many=True)
-    
+    id = serializers.CharField(source='catalogImage.id')
+    title = serializers.CharField(source='catalogImage.title')
+    cimage = serializers.CharField(source='catalogImage.cimage')
     #cimg = serializers.CharField(source='catalogImage.cimage')
     #title = serializers.CharField(source='catalogImage.title')
 
     class Meta:
         model = CampainProduct
-        fields = ('id', 'catalogImage', 'newPrice', 'order',)
+        fields = ('id', 'title', 'cimage', 'newPrice', )
 
 
 class ClientMonthCampainSerializer(ModelSerializer):
     #priceTable = ClientProductCampainSerilizer(many=True)
-    products = ClientProductCampainSerilizer(
-        many=True, source='campainproduct_set')
-    album = AlbumClientApi()
-
+    # products = ClientProductCampainSerilizer(
+    #     many=True, source='campainproduct_set')
+    #album = AlbumClientApi()
+    id = serializers.CharField(source='album.id')
+    slug = serializers.CharField(source='album.slug')
+    get_image = serializers.CharField(source='album.cimage')
+    is_campain =  serializers.CharField(source='album.is_campain')
+    is_public =  serializers.CharField(source='album.is_public')
+    album_order = serializers.CharField(source='album.album_order')
     class Meta:
         model = MonthCampain
-        fields = ('id', 'name', 'is_shown', 'products', 'album', 'endTime')
+        fields = ('id', 'name','slug', 'get_image', 'is_shown','endTime', 'is_campain', 'is_public','album_order',)
 
 
 class AdminMonthCampainSerializer(ModelSerializer):
+    slug = serializers.CharField(source='album.slug')
+    get_image = serializers.CharField(source='album.cimage')
     class Meta:
         model = MonthCampain
-        fields = ('id', 'is_shown', 'name', 'users', 'products',)
+        fields = ('id', 'is_shown', 'name', 'users', 'products','slug', 'get_image')
 
 
 class AdminProductCampainSerilizer(ModelSerializer):
