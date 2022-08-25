@@ -88,6 +88,7 @@ let exportable = [];
 // Add your component names here!
 [
 	"MorderEdit",
+	"MorderEdit2",
 	"ShowInventory",
 	"DocumentStockEnter",
 	"DocumentStockList",

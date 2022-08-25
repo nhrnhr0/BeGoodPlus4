@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image/2.6.0/dom-to-image.min.js" integrity="sha512-01CJ9/g7e8cUmY0DFTMcUw/ikS799FHiOA0eyHsUWfOetgbx/t6oV4otQ5zXKQyIrQGTHSmRVPIgrgLcZi/WMA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <title>Document</title>
+</head>
+<!-- create a printable page at the size of a4 with the products names, prices, and image -->
+
+<script >
+    function select_changed(e) {
+        debugger;
+        let el = document.getElementById('grid_colls_num');
+        var grid_colls_num = el.value;
+        console.log(grid_colls_num);
+        var r = document.querySelector(':root');
+
+        r.style.setProperty('--grid-colls-num', grid_colls_num);
+    }
+    
+    function download_image() {
+        var node = document.getElementById('to_image');
+        domtoimage.toPng(node, {
+            quality: 1,
+        })
+        .then(function (dataUrl) {
+            var img = new Image();
+            img.src = dataUrl;
+            var a = document.createElement("a");
+            a.href = dataUrl;
+            a.download = "my_image.png";
+            document.body.appendChild(a);
+            a.click();
+        })
+        .catch(function (error) {
+            console.error('oops, something went wrong!', error);
+        });
+    }
+</script>
+<body>
+    <main>
+        <div class="download-btn-wraper">
+            <button class="download-btn" onclick="download_image()">הורד תמונה</button>
+        </div>
+        <!-- select with option of 1-4 to use as --grid-colls-num-->
+        <select id="grid_colls_num" onchange="select_changed()">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+        </select>
+        <div id="to_image">
+            <div class="products">
+            {% for product in products %}
+            <div class="product">
+                <div class="product-info">
+                <div class="product-title">
+                    {{product.title}}
+                </div>
+            </div>
+                    <img class="product_image" width="51mm" height="51mm" src="https://res.cloudinary.com/ms-global/image/upload/{{product.cimage}}" alt="">
+                    
+                        
+                        <div class="product-price">
+                            {{product.price}} ש"ח
+                        </div>
+                </div>
+            {% endfor %}
+        </div>
+        </div>
+    </main>
+    {% for row in ret %}
+        <!-- row:
+            {'title': 'תותח מים איכותי 42 ס"מ חדש', 'price': 11.5, 'id': 795, 'cimage': 'v1650280799/site/products/7299990222902-removebg-preview'}
+        -->
+        
+    {% endfor %}
+</body>
+</html>
+
+
+<style>
+    :root {
+        --my-font-size: 1.5rem;
+        --grid-colls-num: 2;
+    }
+    .download-btn-wraper{ 
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 20px;
+    }
+    .download-btn {
+        background-color: #00bcd4;
+        color: #fff;
+        border-radius: 5px;
+        padding: 10px;
+        margin: 10px;
+        cursor: pointer;
+    }
+    html, body {
+      background-color: #ccc;
+  }
+          main {
+              /*width: 210mm;*/
+              margin: auto;
+              background-color: white;
+          }
+          main #to_image {
+              direction: rtl;
+              width: 100%;
+              border-collapse: collapse;
+              text-align: center;
+              background-color: white;
+              border:1px solid black;
+          }
+          main #to_image .products {
+            display: grid;
+                grid-template-columns: repeat(var(--grid-colls-num), 1fr);
+          }
+          main #to_image .products .product {
+                display: flex;
+                position: relative;
+                justify-content: center;
+                flex-direction: column;
+                align-items: center;
+                margin: 10px;
+                background-color: rgb(230, 224, 224);
+                border:1px solid black;
+                box-shadow: 0px 0px 5px #000;
+          }
+          main #to_image .products .product .product-info {
+                display: flex;
+                flex-direction: row;
+                justify-content: space-around;
+                align-items: center;
+          }
+          main #to_image .products .product .product-price {
+              font-size: var(--my-font-size);
+              font-weight: bold;
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                background-color: #fff;
+                padding: 10px;
+                border-radius: 25px;
+                
+          }
+          main #to_image .products .product .product-info .product-title {
+              font-size: var(--my-font-size);
+              font-weight: bold;
+              text-align: start;
+              padding-right: 10px;
+          }
+            main #to_image .products .product .product_image {
+                width: 51mm;
+                height: 51mm;
+                margin-bottom: 20px;
+            }
+          /*main table th {
+              border:1px solid black;
+              padding: 5px;
+          }
+          main table tr:nth-child(even) {
+              background-color: #ccc;
+
+          }
+          main table tr td .product-title {
+              font-size: var(--my-font-size);
+              font-weight: bold;
+              text-align: start;
+              padding-right: 10px;
+          }
+  
+          main table tr td .product-price {
+              font-size: var(--my-font-size);
+              font-weight: bold;
+              
+              border-radius:50%;
+                width:100px;
+                height: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+          }
+          main table tr:nth-child(even) td .product-price {
+                background-color: white;
+          }
+          main table tr:nth-child(odd) td .product-price {
+                background-color: #ccc;
+          }
+            main table tr td .num {
+                font-size: var(--my-font-size);
+                font-weight: bold;
+            }*/
+      </style>

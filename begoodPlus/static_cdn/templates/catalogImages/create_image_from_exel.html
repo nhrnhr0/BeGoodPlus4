@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>צור תמונת מוצרים מאקסל</title>
+</head>
+<body>
+    <main>
+        <form method="post"  enctype="multipart/form-data">
+            {% csrf_token %}
+            <label for="file">קובץ</label>
+            <input type="file" name="file" id="file" />
+            <br>
+            <label for="product_name">שם המוצר באדמין</label>
+            <input type="text" name="product_name" value="כותרת" />
+            <br>
+            <label for="product_price">המחיר להצגה</label>
+            <input type="text" name="product_price" value='מחיר מכירה מע"מ' />
+            <button type="submit">שלח</button>
+            {{ret|safe}}
+        </form>
+    </main>
+    
+</body>
+<style>
+    main {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: center;
+        height: 100vh;
+        width: 100vw;
+    }
+    main form {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+    }
+</style>
+</html>

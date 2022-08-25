@@ -92,7 +92,8 @@ def upload_mscrm_business_select_to_intrests_exel(request):
                 contact_man = str(row['איש קשר'])
                 if contact_man == 'nan':
                     contact_man = b_name.split(' ')[0]
-                phone = row['טלפון']
+                phone = str(row['טלפון'])
+                phone = phone.strip()
                 if phone.startswith('05'):
                     phone = '972' + phone[1:]
                 #print(index,b_select_name, contact_man)

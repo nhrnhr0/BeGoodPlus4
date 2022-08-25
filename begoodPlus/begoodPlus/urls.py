@@ -23,6 +23,7 @@ from clientApi.views import get_all_colors_api, get_all_sizes_api, main_page_api
 from campains.views import admin_get_all_campains, admin_get_campain_products, get_user_campains
 from inventory.views import DocStockEnterViewSet, doc_stock_enter
 # from mcrm.views import , admin_upload_bulk_crm_exel, upload_crm_execl, upload_crm_execl2
+
 from msCrm.views import api_save_lead, fix_ms_crm, get_all_business_types_groups, get_all_mscrm_phone_contacts, get_crm_users_for_whatsapp, get_crm_users_numbers_in_excel, mcrm_lead_register, get_all_business_types, get_all_interests, import_mscrm_from_exel, upload_mscrm_business_select_to_intrests_exel
 from core.views import api_logout, autocompleteClick, autocompleteModel, client_product_question, handler404, send_product_photo, set_csrf_token, success_view, svelte_cart_form, svelte_cart_history, svelte_contact_form, test_celery_view, track_cart, verify_unique_field_by_field_excel
 from catalogImages.views import AlbumImagesApiView, admin_api_get_product_cost_price, all_images_ids, catalogimage_upload_warehouse_excel, get_main_albums_for_main_page, get_main_info, get_product_sizes_colors_martix, admin_remove_product_from_cart, admin_add_to_existing_cart, get_products_slim, get_products_viewset, get_similar_products
@@ -46,7 +47,7 @@ from django.urls import path, include, re_path
 from provider.views import SvelteApiProviderViewSet, search_providers
 from rest_framework import routers
 from django.contrib.auth.models import User
-
+from core.views import submit_exel_to_smartbee
 from catalogImages.views import CatalogImageViewSet
 from catalogAlbum.views import CatalogAlbumViewSet, catalogView_api, get_main_categories
 from client.views import create_client_user, get_all_users_by_admin, whoAmI, userLogEntryView
@@ -81,6 +82,7 @@ clientRouter.register(r'logos', LogoClientViewSet)
 #from rest_framework.authtoken.views import obtain_auth_token
 #from rest_framework_simplejwt.views import (TokenObtainPairView,TokenRefreshView,)
 urlpatterns = [
+     path('create-image-from-exel', create_image_from_exel, name='create-image-from-exel'),
      #path('my-api/main/main', MainAlbumsViewSet.as_view({'get': 'list'})),
      path('get-main-page-albums/', get_main_albums_for_main_page),
      path('my-api/get-similar-products/<int:product_id>', get_similar_products, name='get_similar_products'),
@@ -179,38 +181,23 @@ urlpatterns = [
          inventory_manual_update_entry, name='admin_inventory_manual_update_entry'),
     # orders
     path('morders/edit-order/<int:id>', edit_morder, name='admin_edit_order'),
-    path('morders/api-get-order-data/<int:id>',
-         api_get_order_data, name='admin_api_get_order_data'),
-    path('morders/api-get-order-data2/<int:id>',
-         api_get_order_data2, name='admin_api_get_order_data2'),
-
-    path('morders/api-edit-order/add-new-product',
-         api_edit_order_add_product, name="admin_api_edit_order_add_product"),
-    path('morders/api-edit-order/delete-product-from-morder',
-         api_edit_order_delete_product, name="admin_api_edit_order_delete_product"),
-    path('morders/delete-product/<int:row_id>', api_delete_order_data_item,
-         name='admin_api_delete_order_data_item'),
-    path('morders/edit-order-add-product-entries', morder_edit_order_add_product_entries,
-         name="morder_edit_order_add_product_entries"),
-    path('morders/edit-order-add-product-entries/v2',
-         morder_edit_order_add_product_entries_2, name="morder_edit_order_add_product_entries"),
-    path('morders/edit-order-add-provider-entries/<int:entry_id>',
-         morder_edit_order_add_provider_entries, name="morder_edit_order_add_provider_entries"),
-    path('morders/view-order-pdf/<int:id>',
-         view_morder_pdf, name='view_morder_pdf'),
-    path('morders/view_morder_stock_document/<int:id>',
-         view_morder_stock_document, name='view_morder_stock_document'),
-
-    path('morders/list-orders-to-collect', list_orders_to_collect,
-         name='admin_list_orders_to_collect'),
-    path('morders/get-order-detail-to-collect', get_order_detail_to_collect,
-         name='admin_get_order_detail_to_collect'),
-    path('dashboard/orders-collection/collect/save', dashboard_orders_collection_collect_save,
-         name='admin_dashboard_orders_collection_collect_save'),
-    path('dashboard/orders-collection/smartbee/<int:id>',
-         dashboard_orders_collection_smartbee, name='admin_dashboard_orders_collection_smartbee'),
-    path('get-smartbee-doc/<str:doc_id>',
-         get_smartbee_doc, name='admin_get_smartbee_doc'),
+    path('morders/api-get-order-data/<int:id>', api_get_order_data, name='admin_api_get_order_data'),
+    path('morders/api-get-order-data2/<int:id>', api_get_order_data2, name='admin_api_get_order_data2'),
+    
+    path('morders/api-edit-order/add-new-product', api_edit_order_add_product, name="admin_api_edit_order_add_product"),
+    path('morders/api-edit-order/delete-product-from-morder', api_edit_order_delete_product, name="admin_api_edit_order_delete_product"),
+    path('morders/delete-product/<int:row_id>', api_delete_order_data_item, name='admin_api_delete_order_data_item'),
+    path('morders/edit-order-add-product-entries', morder_edit_order_add_product_entries,name="morder_edit_order_add_product_entries"),
+    path('morders/edit-order-add-product-entries/v2', morder_edit_order_add_product_entries_2,name="morder_edit_order_add_product_entries"),
+    path('morders/edit-order-add-provider-entries/<int:entry_id>', morder_edit_order_add_provider_entries,name="morder_edit_order_add_provider_entries"),
+    path('morders/view-order-pdf/<int:id>', view_morder_pdf, name='view_morder_pdf'),
+    path('morders/view_morder_stock_document/<int:id>', view_morder_stock_document, name='view_morder_stock_document'),
+    path('exel-to-smartbee/', submit_exel_to_smartbee),
+    path('morders/list-orders-to-collect', list_orders_to_collect, name='admin_list_orders_to_collect'),
+    path('morders/get-order-detail-to-collect', get_order_detail_to_collect, name='admin_get_order_detail_to_collect'),
+    path('dashboard/orders-collection/collect/save', dashboard_orders_collection_collect_save, name='admin_dashboard_orders_collection_collect_save'),
+    path('dashboard/orders-collection/smartbee/<int:id>', dashboard_orders_collection_smartbee, name='admin_dashboard_orders_collection_smartbee'),
+    path('get-smartbee-doc/<str:doc_id>',get_smartbee_doc, name='admin_get_smartbee_doc'),
     path('api/get-all-orders', get_all_orders, name='admin_get_all_orders'),
     path('search-ppn/', search_ppn, name='search_ppn'),
     #path('api/', include(router.urls)),

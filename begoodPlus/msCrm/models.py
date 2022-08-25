@@ -63,6 +63,7 @@ class MsCrmUser(models.Model):
     businessTypeCustom = models.CharField(
         max_length=100, null=True, blank=True, verbose_name=_('business type custom'))
     name = models.CharField(max_length=100, verbose_name=_('name'))
+
     phone = models.CharField(max_length=100, null=True,
                              blank=True, verbose_name=_('phone'))
     email = models.EmailField(

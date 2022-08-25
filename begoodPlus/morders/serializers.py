@@ -97,13 +97,12 @@ class AdminMOrderItemSerializer(serializers.ModelSerializer):
     entries = AdminMOrderItemEntrySerializer(many=True, read_only=True)
     providers = serializers.SerializerMethodField('get_providers')
     pbarcode = serializers.CharField(source='product.barcode')
-    # colors = serializers.SerializerMethodField('get_colors')
-    # sizes = serializers.SerializerMethodField('get_sizes')
-    # verients = serializers.SerializerMethodField('get_verients')
-    available_inventory = serializers.SerializerMethodField('get_available_inventory')
+    colors = serializers.SerializerMethodField('get_colors')
+    sizes = serializers.SerializerMethodField('get_sizes')
+    verients = serializers.SerializerMethodField('get_verients')
+    #available_inventory = serializers.SerializerMethodField('get_available_inventory')
     product = serializers.SerializerMethodField('get_product_serializer')
     toProviders = AdminProviderRequestrSerializer(many=True, read_only=True)
-    
     def get_product_serializer(self, obj):
         # serializer_context = {'request': self.context.get('request') }
         # product = CatalogImage.objects.get(id=obj.product.id)
@@ -115,6 +114,7 @@ class AdminMOrderItemSerializer(serializers.ModelSerializer):
             'title': product.title,
             'cimage': product.cimage,
             'barcode': product.barcode,
+            'show_sizes_popup': product.show_sizes_popup,
         }
     
     def get_serializer(self, *args, **kwargs):
@@ -178,7 +178,7 @@ class AdminMOrderItemSerializer(serializers.ModelSerializer):
         return list(ids)
     class Meta:
         model = MOrderItem
-        fields = ('id', 'product',  'price','providers', 'ergent', 'prining', 'embroidery', 'comment','product_name', 'entries','pbarcode','product_cimage','available_inventory','product','priningComment','embroideryComment','toProviders',)
+        fields = ('id', 'product',  'price','providers', 'ergent', 'prining', 'embroidery', 'comment','product_name', 'entries','pbarcode','product_cimage','product','priningComment','embroideryComment','toProviders','colors','sizes','verients',)# 'available_inventory',
     
 
 class AdminMOrderListSerializer(serializers.ModelSerializer):
