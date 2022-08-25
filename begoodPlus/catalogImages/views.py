@@ -59,10 +59,14 @@ class SlimCatalogImageSerializer(serializers.ModelSerializer):
     main_public_album__slug = serializers.CharField(source='main_public_album.slug', default=None)
     class Meta:
         model = CatalogImage
-        fields = ('id', 'title', 'cimage', 'price', 'new_price', 'main_public_album__slug','main_public_album_top__slug')
+        fields = ('id', 'title', 'cimage', 'price', 'new_price', 'main_public_album__slug','main_public_album_top__slug','link')
     #main_album = serializers.SerializerMethodField('_get_main_album')
     new_price = serializers.SerializerMethodField('_get_new_price')
     price = serializers.SerializerMethodField('_get_price')
+    link =  serializers.SerializerMethodField('_get_link')
+    
+    def _get_link(self, obj):
+        return '/main?' + 'top=' + obj.main_public_album.topLevelCategory.slug + '&album=' + obj.main_public_album.slug  + '&product_id=' + str(obj.id)
     def get_user_id(self):
         request = self.context.get('request', None)
         ret_user_id = None
@@ -302,11 +306,11 @@ class AlbumImagesApiView(APIView, CurserResultsSetPagination):
         # filter only is_active images for both instances ThroughImage and CatalogImage
         if qs.model is CatalogImage:
             qs = qs.prefetch_related('albums',).select_related('main_public_album','main_public_album__topLevelCategory')
-            qs = qs.filter(is_active=True)
+            qs = qs.filter(Q(is_active=True) and ~Q(main_public_album=None) and ~Q(main_public_album__topLevelCategory=None))
             qs = qs.distinct()
         else:
             qs = qs.prefetch_related('catalogImage', 'catalogImage__albums').select_related('catalogImage__main_public_album','catalogImage__main_public_album__topLevelCategory')
-            qs = qs.filter(catalogImage__is_active=True)
+            qs = qs.filter(Q(catalogImage__is_active=True) and ~Q(catalogImage__main_public_album=None) and ~Q(catalogImage__main_public_album__topLevelCategory=None))
             qs = qs.distinct()
     
 

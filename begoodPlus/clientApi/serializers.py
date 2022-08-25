@@ -50,9 +50,11 @@ class ImageClientApi(serializers.ModelSerializer):
     #current_user = serializers.SerializerMethodField('_user')
     price = serializers.SerializerMethodField('_get_price')
     newPrice = serializers.SerializerMethodField('_get_new_price')
+    link = serializers.SerializerMethodField('_get_link')
+    
     class Meta:
         model = CatalogImage
-        fields = ('id','title','description','cimage','colors','sizes','varients','can_tag','discount', 'albums','amountSinglePack','amountCarton', 'show_sizes_popup', 'client_price', 'out_of_stock', 'barcode', 'has_physical_barcode','price', 'newPrice')
+        fields = ('id','title','description','cimage','colors','sizes','varients','can_tag','discount', 'albums','amountSinglePack','amountCarton', 'show_sizes_popup', 'out_of_stock', 'barcode', 'has_physical_barcode','price', 'newPrice', 'link')
         filter_backends = [DjangoFilterBackend]
         filterset_fields = ['albums']
     # Use this method for the custom field
@@ -63,6 +65,8 @@ class ImageClientApi(serializers.ModelSerializer):
     #             return request.user.client.businessName if request.user.client else ''
     #         else:
     #             return ''
+    def _get_link(self, obj):
+        return '/main?' + 'top=' + obj.main_public_album.topLevelCategory.slug + '&album=' + obj.main_public_album.slug  + '&product_id=' + str(obj.id)
     def _get_new_price(self, obj):
         request = self.context.get('request', None)
         if request:
