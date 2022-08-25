@@ -1,3 +1,7 @@
+from cmath import isnan
+from begoodPlus.secrects import SMARTBEE_DOMAIN, SMARTBEE_providerUserToken
+
+from smartbee.models import SmartbeeResults, SmartbeeTokens
 from .models import UserSearchData
 from django.db.models import Value, CharField
 from itertools import chain
@@ -22,6 +26,7 @@ from django.db.models import Q
 from django.contrib.auth import logout
 from decimal import Decimal
 import celery
+import datetime
 from django.shortcuts import render, redirect, HttpResponse
 from django.http import JsonResponse
 from django.db.models.functions import Greatest
@@ -37,6 +42,148 @@ from django.urls import reverse
 from core.models import UserProductPhoto
 # Create your views here.
 from django.contrib import messages
+'''
+info = {
+            "providerUserToken": SMARTBEE_providerUserToken,
+            "providerMsgId": datetime.datetime.now().strftime("%Y%m%d%H%M%S"),
+            "providerMsgReferenceId": "something 123456",
+            "customer":{
+                'providerCustomerId': self.client.user.id if self.client else None,
+                'name': self.name,
+                #'email': self.email,
+                #'mainPhone': self.phone,
+                'dealerNumber': self.client.privateCompany if self.client else None,
+                'netEOM': 30,
+            },
+            "docType": "Invoice",
+            "createDraftOnFailure": True,
+            "dueDate": self.updated.strftime("%Y-%m-%d"),
+            "title": 'הזמנה מספר ' + str(self.id),
+            "extraCommentsForEmail": "",
+            "currency": {
+                "currencyType": "ILS",
+                "rate": 0
+            },
+            "documentItems": {
+                "paymentItems": list(vals),
+                "discount": {
+                    "discountValueType": "Percentage",
+                    "value": 0
+                },
+                "roundTotalSum": True
+            },
+            "isSendOrigEng": False,
+            "docDate": datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S+03:00"),
+        }
+'''
+from morders.models import MOrder
+def get_smartbee_info_from_dfs(client_info, items_table, sheet_name):
+    morder_id = client_info['מספר הזמנה'][0]
+    db_morder = MOrder.objects.get(id=morder_id)
+    db_client = db_morder.client
+    dealerNumber = db_client.privateCompany if db_client else '0'
+    providerCustomerId = client_info['שם הלקוח'][0]
+    name = client_info['שם הלקוח'][0]
+    if(len(name) < 2):
+        name= 'name'
+    
+    
+    continue_add_amounts = False
+    product_name = ''
+    res_products = []
+    price = ''
+    for idx,row in items_table.iterrows():
+        #print(row)
+        if not pd.isna(row['רקמה?']):
+            if(product_name != ''):
+                print('product_name: ', product_name)
+                product_obj = CatalogImage.objects.filter(title=product_name).first()
+                res_products.append({
+                    'product_obj': product_obj,
+                    'product_name': product_name,
+                    'amount_taken': amount_taken,
+                    'price': price,
+                })
+                continue_add_amounts = False
+            product_name = row['פריט']
+            amount_taken = row['כמות נלקחת']
+            if pd.isna(amount_taken):
+                amount_taken = 0
+                continue_add_amounts = True
+            else:
+                if str(amount_taken).lower() == 'v':
+                    amount_taken = row['כמות כוללת']
+            
+            price =  row['מחיר מכירה']
+        else:
+            if continue_add_amounts:
+                amount_taken_temp = row['כמות נלקחת']
+                if str(amount_taken_temp).lower() == 'v':
+                    amount_taken_temp = row['הערות']
+                if not pd.isna(amount_taken_temp):
+                    amount_taken += amount_taken_temp
+            
+    product_obj = CatalogImage.objects.filter(title=product_name).first()
+    res_products.append({
+                    'product_obj': product_obj,
+                    'product_name': product_name,
+                    'amount_taken': amount_taken,
+                    'price': price,
+                })
+    
+    paymentItems = []
+    for prod in res_products:
+        description = prod['product_name']
+        if prod['product_obj'].barcode != None and prod['product_obj'].barcode != '':
+            description += ' (' + prod['product_obj'].barcode + ')'
+        paymentItems.append(
+        {
+            "providerItemId": prod['product_obj'].id,
+            "catNum": prod['product_obj'].id,
+            "quantity": prod['amount_taken'],
+            "pricePerUnit": prod['price'].replace('₪', ''),
+            "vatOption": "NotInclude",
+            "description":  description,
+        })
+    
+    
+    
+    
+    customer_details = {
+        "providerUserToken": SMARTBEE_providerUserToken,
+        "providerMsgId": datetime.datetime.now().strftime("%Y%m%d%H%M%S"),
+        "providerMsgReferenceId": "something 123456",
+        "customer":{
+                'providerCustomerId': providerCustomerId,
+                'name': name,
+                #'email': self.email,
+                #'mainPhone': self.phone,
+                'dealerNumber': dealerNumber,
+                'netEOM': 30,
+            },
+            "docType": "Invoice",
+            "createDraftOnFailure": True,
+            "dueDate": db_morder.updated.strftime("%Y-%m-%d"),
+            "title": 'הזמנה מספר ' + str(db_morder.id),
+            "extraCommentsForEmail": "",
+            "currency": {
+                "currencyType": "ILS",
+                "rate": 0
+            },
+            
+            "documentItems": {
+                "paymentItems": paymentItems,
+                "discount": {
+                    "discountValueType": "Percentage",
+                    "value": 0
+                },
+                "roundTotalSum": True
+            },
+            "isSendOrigEng": False,
+            "docDate": datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S+03:00"),
+    }
+    
+    return customer_details
 
 def submit_exel_to_smartbee(request):
     if(request.method == "POST"):
@@ -44,13 +191,43 @@ def submit_exel_to_smartbee(request):
         file = request.FILES.get('file', None)
         if file:
             print(file)
-            df = pd.read_excel(file)
-            df = df.fillna('')
-            print(df)
+            all_sheets = pd.ExcelFile(file)
+            for sheets_name in all_sheets.sheet_names:
+                if sheets_name == 'Sheet':
+                    continue
+                #sheet = all_sheets[sheets_name]
+                order_id = sheets_name.split(' ')[-1]
+                df = all_sheets.parse(sheet_name=sheets_name)
+                df2 = all_sheets.parse(sheet_name=sheets_name, skiprows=2, )
+                info = get_smartbee_info_from_dfs(df, df2, sheets_name)
+                send_smartbe_info(info=info, morder_id=int(order_id))
+                
+            
+
         else:
             messages.add_message(request, messages.ERROR, 'נא להוסיף קובץ')
-    
+
     return redirect('/admin/morders/morder/')
+
+
+import requests
+def send_smartbe_info(info, morder_id):
+    smartbee_auth = SmartbeeTokens.get_or_create_token()
+    headers = {"Authorization": "Bearer " + smartbee_auth.token}
+    smartbee_response = requests.post(SMARTBEE_DOMAIN + '/api/v1/documents/create' , json=info,headers=headers)
+    if smartbee_response.status_code == 200:
+        # self.isOrder = True
+        # self.save()
+        data = smartbee_response.json()
+        SmartbeeResults.objects.create(morder_id=morder_id, 
+                                resultCodeId= data['resultCodeId'],
+                                result= data['result'],
+                                validationErrors= data['validationErrors'],)
+        print(data)
+        return data
+    else:
+        print(smartbee_response)
+        print(smartbee_response.json())
 '''
 def json_user_tasks(customer):
     contacts_qs = customer.contact.filter(sumbited=False)

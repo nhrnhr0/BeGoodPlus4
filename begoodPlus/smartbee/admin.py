@@ -3,15 +3,19 @@ from django.contrib import admin
 
 from smartbee.models import SmartbeeResults, SmartbeeTokens
 from datetime import datetime
+from django.utils.safestring import mark_safe
 
 import pytz
 # Register your models here.
 class SmartbeeResultsAdmin(admin.ModelAdmin):
-    list_display = ('morder', 'resultCodeId', 'result', 'validationErrors')
+    list_display = ('morder', 'resultCodeId', 'result', 'validationErrors', 'display_link')
     list_filter = ('morder', 'resultCodeId')
     search_fields = ('morder', 'resultCodeId')
     ordering = ('morder', 'resultCodeId')
-    readonly_fields = ('morder', 'resultCodeId', 'result', 'validationErrors')
+    readonly_fields = ('morder', 'resultCodeId', 'result', 'validationErrors', 'display_link',)
+    
+    def display_link(self, obj):
+        return mark_safe('<a href="/get-smartbee-doc/' + obj.result + '" >למידע</a>')
 admin.site.register(SmartbeeResults, SmartbeeResultsAdmin)
 
 class SmartbeeTokensAdmin(admin.ModelAdmin):
