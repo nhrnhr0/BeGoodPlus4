@@ -259,7 +259,7 @@ def get_products_slim(request):
 @api_view(['GET'])
 def get_similar_products(request, product_id):
     product = CatalogImage.objects.get(id=product_id)
-    similar_products = CatalogImage.objects.filter(Q(albums__id__in=product.albums.all()) & ~Q(id=product.id) & Q(is_active=True)).order_by('?')[:6]
+    similar_products = CatalogImage.objects.filter(Q(albums__id__in=product.albums.all()) & ~Q(id=product.id) & Q(is_active=True)).order_by('?')[:25]
     similar_products = similar_products.select_related('main_public_album', 'main_public_album__topLevelCategory')
     catalogImage_serializer = SlimCatalogImageSerializer(similar_products, many=True, context={'request': request})
     data = catalogImage_serializer.data
