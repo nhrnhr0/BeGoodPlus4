@@ -86,9 +86,10 @@ function componentExportDetails(componentName) {
 let exportable = [];
 
 // Add your component names here!
+//"MorderEdit",
 [
-	"MorderEdit",
-	"MorderEdit2",
+	
+	"MyMorderEdit",
 	"ShowInventory",
 	"DocumentStockEnter",
 	"DocumentStockList",
