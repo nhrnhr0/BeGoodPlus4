@@ -187,13 +187,16 @@ def get_main_info(request):
             top_album = FakeTop(0,'מבצעים', 'campaigns', True)
             
             campains = get_user_active_campaigns(request.user)
-            top_albums = [{
-                'id': c.album.id,
-                'title': c.album.title,
-                'slug': c.album.slug,
-                'cimage': c.album.cimage,
-                'is_public': c.album.is_public,
-                } for c in campains]
+            if campains:
+                top_albums = [{
+                    'id': c.album.id,
+                    'title': c.album.title,
+                    'slug': c.album.slug,
+                    'cimage': c.album.cimage,
+                    'is_public': c.album.is_public,
+                    } for c in campains]
+            else:
+                top_albums = []
             #top_albums = list(top_albums.values('id','title', 'cimage', 'is_public', 'slug',))
         else:
             top_album = TopLevelCategory.objects.get(slug=top_album_slug)
@@ -313,8 +316,11 @@ class AlbumImagesApiView(APIView, CurserResultsSetPagination):
                 #qs = qs.order_by('catalogImage_id').distinct('catalogImage_id')
             elif self.top_album == 'campaigns':
                 all_user_campaigns = get_user_active_campaigns(self.request.user)
-                all_albums = CatalogAlbum.objects.filter(campain__in=all_user_campaigns)
-                qs = CatalogImage.objects.filter(albums__in=all_albums).distinct()
+                if all_user_campaigns:
+                    all_albums = CatalogAlbum.objects.filter(campain__in=all_user_campaigns)
+                    qs = CatalogImage.objects.filter(albums__in=all_albums).distinct()
+                else:
+                    qs = CatalogImage.objects.none()
             else:
                 qs = ThroughImage.objects.filter(catalogAlbum__topLevelCategory__slug=self.top_album).order_by('image_order')
                 qs = qs.select_related('catalogImage','catalogAlbum')
