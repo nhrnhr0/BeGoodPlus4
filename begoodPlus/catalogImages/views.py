@@ -297,6 +297,8 @@ class AlbumImagesApiView(APIView, CurserResultsSetPagination):
                 return ('-catalogImage__date_created','catalogImage__id',)
                 
         else:
+            if (queryset.model == ThroughImage):
+                return ('catalogAlbum__album_order', 'image_order',)
             return ret
     
     def get_queryset(self):
