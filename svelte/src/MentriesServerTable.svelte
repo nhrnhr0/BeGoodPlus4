@@ -233,7 +233,7 @@ import { apiGetAllSizes } from "./api/api";
                             <!-- sorted_verients <pre>{JSON.stringify(sorted_verients)}</pre> -->
                             {#if sorted_verients.length == 0}
                                 <div class="cell-wraper">
-                                <input on:change="{input_amount_changed}" value={find_entry_quantity(size_obj.id, color, null)} class="size-input cls-cell" style="border: 2px solid {ALL_COLORS_DICT[color]?.color};" data-color="{color}" data-size="{size_obj.id}" data-ver={null} type="number" placeholder="{ALL_SIZES_DICT[size_obj.id].size}"  min="0" max="9999" >
+                                    <input on:change="{input_amount_changed}" value={find_entry_quantity(size_obj.id, color, null)} class="size-input cls-cell" style="border: 2px solid {ALL_COLORS_DICT[color]?.color};" data-color="{color}" data-size="{size_obj.id}" data-ver={null} type="number" placeholder="{ALL_SIZES_DICT[size_obj.id].size}"  min="0" max="9999" >
                                 </div>
                             {:else}
                             
@@ -248,15 +248,49 @@ import { apiGetAllSizes } from "./api/api";
                         </td>
                         
                         {/each}
-                        <td class="delete-cell-style">
-                        <button class="remove-button" on:click={clear_sizes_entries(color)}>
-                            <svg xmlns="http://www.w3.org/2000/svg"   width="16px" height="16px" viewBox="0 0 32 36"><path fill="currentColor" d="M30.9 2.3h-8.6L21.6 1c-.3-.6-.9-1-1.5-1h-8.2c-.6 0-1.2.4-1.5.9l-.7 1.4H1.1C.5 2.3 0 2.8 0 3.4v2.2c0 .6.5 1.1 1.1 1.1h29.7c.6 0 1.1-.5 1.1-1.1V3.4c.1-.6-.4-1.1-1-1.1zM3.8 32.8A3.4 3.4 0 0 0 7.2 36h17.6c1.8 0 3.3-1.4 3.4-3.2L29.7 9H2.3l1.5 23.8z"/></svg>
-                        </button>
+                        
+                        <td class="total-cell">
+                            {#if sorted_verients.length == 0}    
+                                <div class="center-text">
+                                    {product.entries.filter(v=> v.color == color).reduce((acc, curr) => {
+                                        return acc + parseInt(curr.quantity || '0');
+                                    }, 0)}
+                                </div>
+                            {:else}
+                                {#each sorted_verients as ver, idx}
+                                <div class="center-text">
+                                        ({product.entries.filter(v=> v.color == color && v.varient == ver.id).reduce((acc, curr) => {
+                                            return acc + parseInt(curr.quantity || '0');
+                                        }, 0)})
+                                    </div>
+                                {/each}
+                            {/if}
                         </td>
+                        
+                        <td class="delete-cell-style">
+                            <button class="remove-button" on:click={clear_sizes_entries(color)}>
+                                <svg xmlns="http://www.w3.org/2000/svg"   width="16px" height="16px" viewBox="0 0 32 36"><path fill="currentColor" d="M30.9 2.3h-8.6L21.6 1c-.3-.6-.9-1-1.5-1h-8.2c-.6 0-1.2.4-1.5.9l-.7 1.4H1.1C.5 2.3 0 2.8 0 3.4v2.2c0 .6.5 1.1 1.1 1.1h29.7c.6 0 1.1-.5 1.1-1.1V3.4c.1-.6-.4-1.1-1-1.1zM3.8 32.8A3.4 3.4 0 0 0 7.2 36h17.6c1.8 0 3.3-1.4 3.4-3.2L29.7 9H2.3l1.5 23.8z"/></svg>
+                            </button>
+                        </td>
+                        
                     </tr>
                     
                 {/each}
             </tbody>
+            <tfoot>
+                <td></td> <!--colors filler -->
+                <!--verient filler -->
+                {#if product.verients.length > 0}
+                    <td></td>
+                {/if}
+                {#each sorted_sizes as size}
+                    <td class="total-cell">
+                        {product.entries.filter(v=> v.size == size.id).reduce((acc,curr)=> {
+                            return acc + parseInt(curr.quantity || '0');
+                        },0)}
+                    </td>
+                {/each}
+            </tfoot>
         </table>
 <!-- {:else}
         <div class="single-input-wraper">
@@ -267,6 +301,22 @@ import { apiGetAllSizes } from "./api/api";
 {/if}
 
 <style lang="scss">
+    .center-text {
+
+        padding:4px;
+        font-weight: bold;
+        text-align: center;
+        
+    }
+    .total-cell {
+        font-weight: 700;
+        background-color: #5f5f5fe0;
+        outline:1px solid black;
+        padding: 3px;
+        margin:2px;
+        text-align: center;
+        color:white;
+    }
     .single-input-wraper {
         width: 100%;
         margin-top: 50px;

@@ -65,11 +65,23 @@ class SearchProductSerializer(serializers.ModelSerializer):
     public_album_top_slug = serializers.SerializerMethodField()
     
     def get_public_album_slug(self, obj):
-        return obj.albums.filter(is_public=True).first().slug
+        obj = obj.albums.filter(is_public=True).first()
+        if obj:
+            return obj.slug
+        else:
+            return ''
     def get_public_album_id(self, obj):
-        return obj.albums.filter(is_public=True).first().id
+        obj = obj.albums.filter(is_public=True).first()
+        if obj:
+            return obj.id
+        else:
+            return ''
     def get_public_album_top_slug(self, obj):
-        return obj.albums.filter(is_public=True).first().topLevelCategory.slug
+        obj = obj.albums.filter(is_public=True).first()
+        if obj:
+            return obj.topLevelCategory.slug
+        else:
+            return ''
     class Meta:
         model = CatalogImage
         fields = ('id', 'title', 'cimage', 'public_album_slug', 'public_album_id','albums', 'public_album_top_slug')

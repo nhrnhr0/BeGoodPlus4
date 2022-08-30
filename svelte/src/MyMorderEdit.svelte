@@ -210,6 +210,18 @@ import { morderAddProductEntryPopupStore } from "./components/popups/MorderAddPr
     // }
     const STATUS_OPTIONS = [
         ['new','חדש'], ['in_progress','סחורה הוזמנה'], ['in_progress2','מוכן לליקוט',], ['in_progress3','ארוז מוכן למשלוח'],['in_progress4','בהדפסה',],['done','סופק']]
+
+        function new_product_btn_click() {
+        var href = '/admin/catalogImages/catalogimage/add/';
+        if (href.indexOf('?') === -1) {
+            href += '?_popup=1';
+        } else {
+            href += '&_popup=1';
+        }
+        var win = window.open(href,'_blank', 'height=500,width=800,resizable=yes,scrollbars=yes');
+        win.focus();
+        return false;
+        }
 </script>
 <svelte:head>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css">
@@ -302,23 +314,27 @@ import { morderAddProductEntryPopupStore } from "./components/popups/MorderAddPr
                     }}">{product.price}₪</td>
                     <td class="cell-border">
                         <div class="d-flex-wraper">
-                            <input type="checkbox" bind:checked={product.embroidery} />
+                            
+                            <input name="embro" type="checkbox" bind:checked={product.embroidery} />
                             {#if product.embroidery}
                                 <textarea bind:value="{product.embroideryComment}" placeholder="תיאור רקמה" />
                             {/if}
+                            <label for="embro">רקמה</label>
                         </div>
                     </td>
                     <td class="cell-border">
                         <div class="d-flex-wraper">
-                            <input type="checkbox" bind:checked={product.prining} />
+                            <input name="prining" type="checkbox" bind:checked={product.prining} />
                             {#if product.prining}
                                 <textarea bind:value="{product.priningComment}" placeholder="תיאור הדפסה" />
                             {/if}
+                            <label for="prining">הדפסה</label>
                         </div>
                     </td>
                     <td class="cell-border">
                         <div class="d-flex-wraper">
-                            <input type="checkbox" bind:value={product.ergent} />
+                            <input name="ergent" type="checkbox" bind:value={product.ergent} />
+                            <label for="ergent">חשוב להזמנה</label>
                         </div>
                     </td>
 
@@ -383,7 +399,7 @@ import { morderAddProductEntryPopupStore } from "./components/popups/MorderAddPr
                             <input class="form-control" type="number" placeholder="כמות" name="amount" id="amount" />
                         </div>
                     <div class="error-msg"></div>
-                    <button type="submit" class="btn btn-primary">הוסף</button>
+                    <button type="submit" class="btn btn-secondary">הוסף</button>
                 </form>
                     </td>
                 </tr>
@@ -430,17 +446,41 @@ import { morderAddProductEntryPopupStore } from "./components/popups/MorderAddPr
                 </div>
             </div>
         <!-- </form> -->
+        <div class="new-product-btn-wraper">
+            <button class="btn btn-secondary" on:click={new_product_btn_click}>
+                צור מוצר חדש
+            </button>
+        </div>
     </div>
-
-    <Button class="update-btn" disabled={updateing_to_server} on:click={()=>{save_data()}}>
-        {#if updateing_to_server}
-            <Loading withOverlay={false} />
-        {:else}
-            עדכן עכשיו
-        {/if}
-    </Button>
+    
+    <div class="update-btn-wraper">
+        <Button class="update-btn" disabled={updateing_to_server} on:click={()=>{save_data()}}>
+            {#if updateing_to_server}
+                <Loading withOverlay={false} />
+            {:else}
+                עדכן עכשיו
+            {/if}
+        </Button>
+    </div>
 </main>
 <style lang="scss">
+    .new-product-btn-wraper{
+        margin-top: 25px;
+        width:100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .update-btn-wraper {
+        position:sticky;
+        bottom: 20px;
+        width:100%;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        :global(.update-btn) {
+        }
+    }
     form.add-entry-form {
         .form-group {
             padding:5px
@@ -451,9 +491,10 @@ import { morderAddProductEntryPopupStore } from "./components/popups/MorderAddPr
         
         margin: auto;
         margin-top: 50px;
+        margin-bottom: 250px;
         //border:1px solid red;
         .created {
-        margin-right: 50px;
+            margin-right: 50px;
             font-size: 12px;
             color: #999;
             margin-bottom: 10px;
@@ -500,8 +541,12 @@ import { morderAddProductEntryPopupStore } from "./components/popups/MorderAddPr
             background-color: #f1f1f1;
             tr{
                 th {
-                    border:1px solid rgb(128, 124, 124);
                     padding:10px;
+                    background: rgba(255, 255, 255, 0.788);
+                    position: sticky;
+                    top: 0; /* Don't forget this, required for the stickiness */
+                    //box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4);
+                    outline:1px solid black;
                 }
             }
         }
@@ -513,6 +558,9 @@ import { morderAddProductEntryPopupStore } from "./components/popups/MorderAddPr
                 display: flex;
                 justify-content: start;
                 align-items: center;
+                label {
+                    color: rgba(5, 5, 5, 0.466);
+                }
             }
         }
         tr.details {

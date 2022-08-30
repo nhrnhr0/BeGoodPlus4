@@ -71,7 +71,7 @@ class CatalogImage(models.Model):
     show_sizes_popup = models.BooleanField(verbose_name=_('show sizes popup'), default=True)
     out_of_stock = models.BooleanField(verbose_name=_('out of stock'), default=False)
     
-    is_active = models.BooleanField(default=True, verbose_name=_('is active'))
+    is_active = models.BooleanField(default=False, verbose_name=_('is active'))
     detailTabel = models.ManyToManyField(related_name='parent',to=CatalogImageDetail, verbose_name=_('mini-tabel'), blank=True)
 
     can_tag = models.BooleanField(default=False, verbose_name=_('can tag'))
@@ -247,8 +247,6 @@ class CatalogImage(models.Model):
                 else:
                     self.slug = self.slug + '-' + str(uuid.uuid4()).split('-')[1]
         
-        if not self.main_public_album:
-            self.recalculate_main_public_album()
         super(CatalogImage, self).save(*args,**kwargs)
     
     
@@ -268,3 +266,8 @@ class CatalogImage(models.Model):
     
     def __str__(self):
         return self.title
+    
+@receiver(post_save, sender=CatalogImage, dispatch_uid="recalculate_main_public_album")
+def recalculate_main_public_album_post_save(sender, instance, **kwargs):
+    if not instance.main_public_album:
+        instance.recalculate_main_public_album()
