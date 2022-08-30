@@ -121,7 +121,7 @@ class MOrderAdmin(admin.ModelAdmin):
         # headers:
         # פריט, הערות, ברקוד, כמות כוללת
         # פירוט מידות צבעים
-        headers = ['ברקוד','פריט', 'כמות כוללת','הערות','כמות נלקחת', 'הדפסה?','', 'רקמה?', '', 'מחיר מכירה']
+        headers = ['ברקוד','פריט', 'כמות כוללת','הערות','כמות נלקחת', 'מחיר מכירה','הדפסה?','', 'רקמה?', '',]
         
 
         wb = Workbook()
@@ -219,43 +219,45 @@ class MOrderAdmin(admin.ModelAdmin):
                 order_ws.cell(row=order_ws_rows_counter, column=4).font =  header_font
                 order_ws.cell(row=order_ws_rows_counter, column=4).border = bottom_border
 
-                order_ws.cell(row=order_ws_rows_counter, column=5).value = ''
+                order_ws.cell(row=order_ws_rows_counter, column=5).value = '' # taken
                 order_ws.cell(row=order_ws_rows_counter, column=5).fill = header_fill
                 order_ws.cell(row=order_ws_rows_counter, column=5).alignment = align_rtl
                 order_ws.cell(row=order_ws_rows_counter, column=5).font =  header_font
                 order_ws.cell(row=order_ws_rows_counter, column=5).border = bottom_border
-
-                order_ws.cell(row=order_ws_rows_counter, column=6).value = 'כן' if product['prining'] else 'לא'
+                
+                order_ws.cell(row=order_ws_rows_counter, column=6).value = str(product['price']) + '₪'
                 order_ws.cell(row=order_ws_rows_counter, column=6).fill = header_fill
                 order_ws.cell(row=order_ws_rows_counter, column=6).alignment = align_rtl
                 order_ws.cell(row=order_ws_rows_counter, column=6).font =  header_font
                 order_ws.cell(row=order_ws_rows_counter, column=6).border = bottom_border
-                
-                order_ws.cell(row=order_ws_rows_counter, column=7).value = product['priningComment'] if product['prining'] else ''
+
+                order_ws.cell(row=order_ws_rows_counter, column=7).value = 'כן' if product['prining'] else 'לא'
                 order_ws.cell(row=order_ws_rows_counter, column=7).fill = header_fill
                 order_ws.cell(row=order_ws_rows_counter, column=7).alignment = align_rtl
                 order_ws.cell(row=order_ws_rows_counter, column=7).font =  header_font
                 order_ws.cell(row=order_ws_rows_counter, column=7).border = bottom_border
                 
-                
-                order_ws.cell(row=order_ws_rows_counter, column=8).value = 'כן' if product['embroidery'] else 'לא'
+                order_ws.cell(row=order_ws_rows_counter, column=8).value = product['priningComment'] if product['prining'] else ''
                 order_ws.cell(row=order_ws_rows_counter, column=8).fill = header_fill
                 order_ws.cell(row=order_ws_rows_counter, column=8).alignment = align_rtl
                 order_ws.cell(row=order_ws_rows_counter, column=8).font =  header_font
                 order_ws.cell(row=order_ws_rows_counter, column=8).border = bottom_border
                 
-                order_ws.cell(row=order_ws_rows_counter, column=9).value = product['embroideryComment'] if product['embroidery'] else ''
+                
+                order_ws.cell(row=order_ws_rows_counter, column=9).value = 'כן' if product['embroidery'] else 'לא'
                 order_ws.cell(row=order_ws_rows_counter, column=9).fill = header_fill
                 order_ws.cell(row=order_ws_rows_counter, column=9).alignment = align_rtl
                 order_ws.cell(row=order_ws_rows_counter, column=9).font =  header_font
                 order_ws.cell(row=order_ws_rows_counter, column=9).border = bottom_border
                 
-                
-                order_ws.cell(row=order_ws_rows_counter, column=10).value = str(product['price']) + '₪'
+                order_ws.cell(row=order_ws_rows_counter, column=10).value = product['embroideryComment'] if product['embroidery'] else ''
                 order_ws.cell(row=order_ws_rows_counter, column=10).fill = header_fill
                 order_ws.cell(row=order_ws_rows_counter, column=10).alignment = align_rtl
                 order_ws.cell(row=order_ws_rows_counter, column=10).font =  header_font
                 order_ws.cell(row=order_ws_rows_counter, column=10).border = bottom_border
+                
+                
+                
                 order_ws_rows_counter += 1
 
                 
@@ -264,7 +266,7 @@ class MOrderAdmin(admin.ModelAdmin):
                 # entry = ('color_name', 'size_name', 'varient_name', color_order, size_order): quantity
                 # sort the entries by color name, size name, varient name based on the order of the colors and sizes
                 sorted_entries = sorted(entries.items(), key=lambda x: (x[0][3], x[0][4]))
-                if len(sorted_entries) == 1 and sorted_entries[0][0][0] == 'no color' and sorted_entries[0][0][1] == 'ONE SIZE':
+                if len(sorted_entries) == 1 and sorted_entries[0][0][0].lower() == 'no color' and sorted_entries[0][0][1].lower() == 'one size':
                     continue
                 sorted_entries = dict(sorted_entries)
                 
@@ -346,7 +348,7 @@ class MOrderAdmin(admin.ModelAdmin):
             # entry = ('color_name', 'size_name', 'varient_name', color_order, size_order): quantity
             # sort the entries by color name, size name, varient name based on the order of the colors and sizes
             sorted_entries = sorted(entries.items(), key=lambda x: (x[0][3], x[0][4]))
-            if len(sorted_entries) == 1 and sorted_entries[0][0][0] == 'no color' and sorted_entries[0][0][1] == 'ONE SIZE':
+            if len(sorted_entries) == 1 and sorted_entries[0][0][0].lower() == 'no color' and sorted_entries[0][0][1].lower() == 'one size':
                 continue
             sorted_entries = dict(sorted_entries)
             

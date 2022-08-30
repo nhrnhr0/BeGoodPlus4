@@ -201,8 +201,8 @@ def submit_exel_to_smartbee(request):
                 df = all_sheets.parse(sheet_name=sheets_name)
                 df2 = all_sheets.parse(sheet_name=sheets_name, skiprows=2, )
                 info = get_smartbee_info_from_dfs(df, df2, sheets_name)
-                send_smartbe_info(info=info, morder_id=int(order_id))
-                
+                #send_smartbe_info(info=info, morder_id=int(order_id)) # TODO: rmeove this
+                return JsonResponse(info, safe=False)
             
 
         else:
@@ -621,6 +621,7 @@ def autocompleteModel(request):
     #  & (~Q(albums=None) & Q(is_active = True)
 #
     # is_hidden=False
+    products_qs = products_qs.prefetch_related('albums')
     ser_context = {'request': request}
     products_qs_short = products_qs[0:20]
     # products_qs_short = products_qs_short.prefetch_related(
@@ -634,13 +635,13 @@ def autocompleteModel(request):
     search_history = UserSearchData.objects.create(
         session=session, term=q, resultCount=products_qs.count())  # + len(mylogos.data)
     search_history.save()
-    all = products.data  # + mylogos.data
+    all_data = products.data  # + mylogos.data
     #all = all[0:20]
-    context = {'all': all,
+    context = {'all': all_data,
                'q': q,
                'id': search_history.id}
     print('autocompleteModel', time.time() - start)
-    print('autocompleteModel', len(all))
+    print('autocompleteModel', len(all_data))
 
     end = time.time() - start
     print('autocompleteModel: ', start-end)
