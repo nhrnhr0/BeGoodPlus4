@@ -6,9 +6,14 @@ from catalogImages.serializers import CatalogImageSerializer
 from color.serializers import ColorSerializer
 
 class TopLevelCategorySerializer(serializers.ModelSerializer):
+    sub_albums = serializers.SerializerMethodField('_get_sub_albuns')
+    
+    def _get_sub_albuns(self, obj):
+        albums = obj.albums.all().order_by('album_order').values('id','title','slug','cimage','album_order',)
+        return list(albums)
     class Meta:
         model = TopLevelCategory
-        fields = ('id', 'name', 'get_image','albums','slug','my_order',)
+        fields = ('id', 'name', 'get_image','albums','slug','my_order','sub_albums')
         ordering = ('my_order',)
 
 

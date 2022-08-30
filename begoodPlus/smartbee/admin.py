@@ -8,14 +8,14 @@ from django.utils.safestring import mark_safe
 import pytz
 # Register your models here.
 class SmartbeeResultsAdmin(admin.ModelAdmin):
-    list_display = ('morder', 'resultCodeId', 'result', 'validationErrors', 'display_link')
+    list_display = ('morder', 'resultCodeId', 'result', 'validationErrors', 'display_link', 'created_at')
     list_filter = ('morder', 'resultCodeId')
     search_fields = ('morder', 'resultCodeId')
     ordering = ('morder', 'resultCodeId')
     readonly_fields = ('morder', 'resultCodeId', 'result', 'validationErrors', 'display_link',)
     
     def display_link(self, obj):
-        return mark_safe('<a href="/get-smartbee-doc/' + obj.result + '" >למידע</a>')
+        return mark_safe('<a href="/get-smartbee-doc/' + str(obj.resultId) + '" >למידע</a>')
 admin.site.register(SmartbeeResults, SmartbeeResultsAdmin)
 
 class SmartbeeTokensAdmin(admin.ModelAdmin):

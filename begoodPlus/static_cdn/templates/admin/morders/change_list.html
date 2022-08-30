@@ -42,6 +42,14 @@
     <form method="post" action="/exel-to-smartbee/"  enctype="multipart/form-data">
         {% csrf_token %}
         <input type="file" name="file" id="file" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"/>
+
+        <select name="docType">
+          <option value="Invoice">חשבונית מס</option>
+          <option value="RefundInvoice">חשבונית זיכוי</option>
+          <option value="PriceProposal">הצעת מחיר</option>
+          <option value="ShippingCertificate">תעודת משלוח</option>
+          <option value="ReturnCertificate">תעודת החזרה</option>
+        </select>
         <button type="submit">העלה טופס אקסל לסמארט-בי</button>
     </form>
     {% block object-tools %}

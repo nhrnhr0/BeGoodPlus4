@@ -22,7 +22,7 @@ def get_catalog_albums(request, id=None):
     return JsonResponse(serializer.data, safe=False)
 @api_view(['GET'])
 def get_main_categories(request):
-    qs = TopLevelCategory.objects.all()
+    qs = TopLevelCategory.objects.all().prefetch_related('albums')
     ser = TopLevelCategorySerializer(qs, many=True)
     data = ser.data
     return JsonResponse(data, safe=False)

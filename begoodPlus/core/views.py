@@ -78,13 +78,14 @@ info = {
         }
 '''
 from morders.models import MOrder
-def get_smartbee_info_from_dfs(client_info, items_table, sheet_name):
+def get_smartbee_info_from_dfs(client_info, items_table, sheet_name, docType):
     morder_id = client_info['מספר הזמנה'][0]
     db_morder = MOrder.objects.get(id=morder_id)
     db_client = db_morder.client
     dealerNumber = db_client.privateCompany if db_client else '0'
-    providerCustomerId = client_info['שם הלקוח'][0]
-    name = client_info['שם הלקוח'][0]
+    #providerCustomerId = client_info['שם הלקוח'][0]
+    providerCustomerId = str(uuid.uuid4()).replace('-','')
+    name = 'morder (' + str(db_morder.id) + ')'
     if(len(name) < 2):
         name= 'name'
     
@@ -152,7 +153,7 @@ def get_smartbee_info_from_dfs(client_info, items_table, sheet_name):
     
     customer_details = {
         "providerUserToken": SMARTBEE_providerUserToken,
-        "providerMsgId": datetime.datetime.now().strftime("%Y%m%d%H%M%S"),
+        "providerMsgId": str(datetime.datetime.now().strftime("%Y%m%d%H%M%S")),
         "providerMsgReferenceId": "something 123456",
         "customer":{
                 'providerCustomerId': providerCustomerId,
@@ -162,7 +163,7 @@ def get_smartbee_info_from_dfs(client_info, items_table, sheet_name):
                 'dealerNumber': dealerNumber,
                 'netEOM': 30,
             },
-            "docType": "Invoice",
+            "docType": docType,
             "createDraftOnFailure": True,
             "dueDate": db_morder.updated.strftime("%Y-%m-%d"),
             "title": 'הזמנה מספר ' + str(db_morder.id),
@@ -187,28 +188,30 @@ def get_smartbee_info_from_dfs(client_info, items_table, sheet_name):
     return customer_details
 
 def submit_exel_to_smartbee(request):
-    if(request.method == "POST"):
-        print(request.FILES)
-        file = request.FILES.get('file', None)
-        if file:
-            print(file)
-            all_sheets = pd.ExcelFile(file)
-            for sheets_name in all_sheets.sheet_names:
-                if sheets_name == 'Sheet':
-                    continue
-                #sheet = all_sheets[sheets_name]
-                order_id = sheets_name.split(' ')[-1]
-                df = all_sheets.parse(sheet_name=sheets_name)
-                df2 = all_sheets.parse(sheet_name=sheets_name, skiprows=2, )
-                info = get_smartbee_info_from_dfs(df, df2, sheets_name)
-                #send_smartbe_info(info=info, morder_id=int(order_id)) # TODO: rmeove this
-                return JsonResponse(info, safe=False)
-            
+    if request.user.is_authenticated and request.user.is_superuser:
+        if(request.method == "POST"):
+            #print(request.FILES)
+            file = request.FILES.get('file', None)
+            if file:
+                #print(file)
+                all_sheets = pd.ExcelFile(file)
+                docType = request.POST.get('docType')
+                for sheets_name in all_sheets.sheet_names:
+                    if sheets_name == 'Sheet':
+                        continue
+                    #sheet = all_sheets[sheets_name]
+                    order_id = sheets_name.split(' ')[-1]
+                    df = all_sheets.parse(sheet_name=sheets_name)
+                    df2 = all_sheets.parse(sheet_name=sheets_name, skiprows=2, )
+                    info = get_smartbee_info_from_dfs(df, df2, sheets_name,docType)
+                    send_smartbe_info(info=info, morder_id=int(order_id)) # TODO: rmeove this
+                    # return JsonResponse(info, safe=False)
 
-        else:
-            messages.add_message(request, messages.ERROR, 'נא להוסיף קובץ')
 
-    return redirect('/admin/morders/morder/')
+            else:
+                messages.add_message(request, messages.ERROR, 'נא להוסיף קובץ')
+
+        return redirect('/admin/morders/morder/')
 
 
 import requests
@@ -220,12 +223,14 @@ def send_smartbe_info(info, morder_id):
         # self.isOrder = True
         # self.save()
         data = smartbee_response.json()
-        SmartbeeResults.objects.create(morder_id=morder_id, 
+        resultId = info['providerMsgId']
+        obj = SmartbeeResults.objects.create(morder_id=morder_id, 
                                 resultCodeId= data['resultCodeId'],
                                 result= data['result'],
-                                validationErrors= data['validationErrors'],)
+                                validationErrors= data['validationErrors'],
+                                resultId=resultId)
         print(data)
-        return data
+        return obj
     else:
         print(smartbee_response)
         print(smartbee_response.json())

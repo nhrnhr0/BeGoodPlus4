@@ -11,4 +11,7 @@ def get_smartbee_doc(request, doc_id):
     else:
         res = SmartbeeResults.request_smartbee_doc(doc_id)
         print(res)
-        return JsonResponse(res)
+        if res:
+            return JsonResponse(res)
+        else:
+            return JsonResponse({'error': 'error getting the document'})
