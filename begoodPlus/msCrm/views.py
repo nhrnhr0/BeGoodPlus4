@@ -14,9 +14,10 @@ from django.http import HttpResponse
 from django.db.models import Prefetch
 from catalogAlbum.models import CatalogAlbum
 
+
 def fix_ms_crm(request):
     if request.user and request.user.is_superuser:
-        
+
         if request.method == "GET":
             return render(request, 'msCrm/fix_ms_crm.html')
         elif request.method == "POST":
@@ -25,8 +26,6 @@ def fix_ms_crm(request):
             for msCrmUser in msCrmUsers:
                 msCrmUser.save()
 
-            
-            
             file = request.FILES['file']
             df = pd.read_excel(file, header=0, dtype=str)
             for index, row in df.iterrows():
@@ -42,14 +41,14 @@ def fix_ms_crm(request):
                     phone = '972' + phone[1:]
                 if phone.startswith('+'):
                     phone = phone[1:]
-                
-                
+
                 # find the user with the phone number
                 user = MsCrmUser.objects.filter(phone=phone)
                 if user.exists():
                     user = user.first()
                     businessSelectStr = row['select']
-                    businessSelectObj = MsCrmBusinessTypeSelect.objects.filter(name=businessSelectStr)
+                    businessSelectObj = MsCrmBusinessTypeSelect.objects.filter(
+                        name=businessSelectStr)
                     if businessSelectObj.exists():
                         businessSelectObj = businessSelectObj.first()
                         user.businessSelect = businessSelectObj
@@ -64,39 +63,41 @@ def get_all_mscrm_phone_contacts(request):
         data = MsCrmPhoneContactsSerializer(phoneContacts, many=True).data
         return JsonResponse(data, safe=False)
     else:
-        return JsonResponse({"error":"not authorized"}, safe=False)
+        return JsonResponse({"error": "not authorized"}, safe=False)
 # Create your views here.
+
+
 def upload_mscrm_business_select_to_intrests_exel(request):
     if request.user and request.user.is_superuser:
-        
+
         if request.method == "GET":
             return render(request, 'msCrm/upload_mscrm_business_select_to_intrests_exel.html')
         elif request.method == "POST":
-            
+
             b_select_to_intrests = MsCrmBusinessSelectToIntrests.objects.all()
-            
+
             file = request.FILES['file']
             sheetName = request.POST.get('sheetName')
             xls = pd.ExcelFile(file)
-            df1 =  pd.read_excel(xls, sheetName,header=0,dtype=str)
+            df1 = pd.read_excel(xls, sheetName, header=0, dtype=str)
             existing_phone_count = 0
             new_phone_count = 0
             print(df1.head())
             for index, row in df1.iterrows():
-                b_name = row['שם העסק']#str(row['שם העסק'])
+                b_name = row['שם העסק']  # str(row['שם העסק'])
                 b_select_name = str(row['תחום עיסוק לפי אדמין'])
                 if b_select_name == 'nan' or b_select_name == '' or b_select_name == 'None':
                     continue
-                
-                businessSelectObj=MsCrmBusinessTypeSelect.objects.get(name=b_select_name)
+
+                businessSelectObj = MsCrmBusinessTypeSelect.objects.get(
+                    name=b_select_name)
                 contact_man = str(row['איש קשר'])
                 if contact_man == 'nan':
                     contact_man = b_name.split(' ')[0]
                 phone = str(row['טלפון'])
                 string_encode = phone.encode("ascii", "ignore")
                 string_decode = string_encode.decode()
-                
-                
+
                 phone = string_decode.strip()
                 if phone.startswith('05'):
                     phone = '972' + phone[1:]
@@ -106,23 +107,26 @@ def upload_mscrm_business_select_to_intrests_exel(request):
                     continue
                 else:
                     new_phone_count += 1
-                
+
                 user = MsCrmUser.objects.create(
                     businessName=b_name,
                     businessSelect=businessSelectObj,
                     name=contact_man,
                     phone=phone
                 )
-                entrys = b_select_to_intrests.filter(businessSelect=businessSelectObj)
+                entrys = b_select_to_intrests.filter(
+                    businessSelect=businessSelectObj)
                 if entrys.exists():
                     entry = entrys.first()
                     user.intrests.set(entry.intrests.all())
                 user.save()
-            messages.add_message(request, messages.INFO, '{} מספר מספרי טלפון חדשים ו{} מספר מספרי טלפון קיימים'.format(new_phone_count, existing_phone_count))
+            messages.add_message(request, messages.INFO, '{} מספר מספרי טלפון חדשים ו{} מספר מספרי טלפון קיימים'.format(
+                new_phone_count, existing_phone_count))
             return redirect('/admin/msCrm/mscrmuser/')
-        #return render(request, 'msCrm/upload_mscrm_business_select_to_intrests_exel.html')
+        # return render(request, 'msCrm/upload_mscrm_business_select_to_intrests_exel.html')
     else:
         return redirect('admin/login/?next=' + request.path)
+
 
 def import_mscrm_from_exel(request):
     if request.user and request.user.is_superuser:
@@ -249,7 +253,7 @@ def get_crm_users_for_whatsapp(request):
                 'businessTypes').split(',')
         else:
             businessTypes = None
-        if request.query_params.get('catalogImages') is not None:
+        if request.query_params.get('catalogImages') is not None and request.query_params.get('catalogImages') != '':
             catalogImages = request.query_params.get(
                 'catalogImages').split(',')
         else:
@@ -258,7 +262,7 @@ def get_crm_users_for_whatsapp(request):
             return JsonResponse([], safe=False)
 
         CatalogAlbumsQuerySet = CatalogAlbum.objects.filter(
-            images__id__in=catalogImages)
+            images__id__in=catalogImages, is_public=True)
         CatalogAlbums = CatalogAlbumOnlyNameSerializer(
             CatalogAlbumsQuerySet, many=True).data
 
@@ -266,7 +270,7 @@ def get_crm_users_for_whatsapp(request):
             '-created_at').select_related('whatsapp_message')
 
         users = MsCrmUser.objects.filter(
-            businessSelect__id__in=businessTypes).select_related('businessSelect').prefetch_related(Prefetch('intrests', queryset=CatalogAlbumsQuerySet, to_attr='cached_intrests'), Prefetch('whatsappMessagesSent', queryset=WhatsappMessagesQuerySet, to_attr='cached_whatsappMessagesSent'))
+            businessSelect__id__in=businessTypes, want_whatsapp=True).select_related('businessSelect').prefetch_related(Prefetch('intrests', queryset=CatalogAlbumsQuerySet, to_attr='cached_intrests'), Prefetch('whatsappMessagesSent', queryset=WhatsappMessagesQuerySet, to_attr='cached_whatsappMessagesSent'))
 
         data = MsCrmUserWhatsappCampaignSerializer(
             users, many=True, context={'catalogImages': catalogImages, 'catalogAlbums': CatalogAlbums}).data
@@ -342,6 +346,8 @@ def mcrm_lead_register(request):
         'id': crmObj.id,
         'is_created': is_created,
     })
+
+
 @api_view(['POST'])
 def api_save_lead(request):
     form_data = request.data
