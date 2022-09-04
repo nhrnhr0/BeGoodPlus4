@@ -470,7 +470,7 @@ function new_product_btn_click() {
                 <div class="form-group">
                   <!-- <label for="color">צבע</label> -->
                   <select class="form-control" name="color" id="color">
-                    <option default value="undefined">בחר צבע</option>
+                    <option default value="undefined">צבע</option>
                     {#each ALL_COLORS as color}
                       <option value={color["id"]}>{color["name"]}</option>
                     {/each}
@@ -478,7 +478,7 @@ function new_product_btn_click() {
 
                   <!-- <label for="size">מידה</label> -->
                   <select class="form-control" name="size" id="size">
-                    <option default value="undefined">בחר מידה</option>
+                    <option default value="undefined">מידה</option>
                     {#each ALL_SIZES.sort((a, b) => {
                       return a.code.localeCompare(b.code);
                     }) as size}
@@ -488,7 +488,7 @@ function new_product_btn_click() {
                   <!-- <label for="varient">מודל</label> -->
                   {#if product.verients.length != 0}
                     <select class="form-control" name="varient" id="varient">
-                      <option default value="undefined">בחר מודל</option>
+                      <option default value="undefined">מודל</option>
                       {#each ALL_VERIENTS as varient}
                         <option value={varient["id"]}>{varient["name"]}</option>
                       {/each}
@@ -502,6 +502,7 @@ function new_product_btn_click() {
                     placeholder="כמות"
                     name="amount"
                     id="amount"
+                    min="0"
                   />
                 </div>
                 <div class="error-msg" />
@@ -713,6 +714,21 @@ table.product-table {
   tr.details {
     td {
       margin: 20px;
+      .add-entry-form {
+        width: min-content;
+        display: flex;
+        flex-wrap: wrap;
+        .form-group {
+          display: flex;
+          flex-wrap: wrap;
+          select,
+          input {
+            width: fit-content;
+            flex: 1;
+            min-width: 65px;
+          }
+        }
+      }
     }
     background-color: #a7a7a786;
   }

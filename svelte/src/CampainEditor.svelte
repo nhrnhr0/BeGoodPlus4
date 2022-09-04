@@ -82,13 +82,14 @@ function update_data_to_server() {
 function autocompleteItemSelected(item) {
   if (data) {
     let found = data.find((v) => v.catalogImage == item.id);
-    alert(found);
     if (found !== undefined) {
+      alert("מוצר כבר קיים בקמפיין");
       return;
     }
     admin_api_get_cost_price(item.id).then((resp) => {
       console.log("const_price:", resp);
       item.cost_price = resp["cost_price"];
+      item.client_price = resp["client_price"];
       let newProduct = {
         order: data.length,
         cimg: item.cimage,
