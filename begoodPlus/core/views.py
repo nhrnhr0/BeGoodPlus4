@@ -53,8 +53,8 @@ info = {
             "customer":{
                 'providerCustomerId': self.client.user.id if self.client else None,
                 'name': self.name,
-                #'email': self.email,
-                #'mainPhone': self.phone,
+                # 'email': self.email,
+                # 'mainPhone': self.phone,
                 'dealerNumber': self.client.privateCompany if self.client else None,
                 'netEOM': 30,
             },
@@ -87,7 +87,6 @@ def get_smartbee_info_from_dfs(client_info, items_table, sheet_name, docType):
     db_morder = MOrder.objects.get(id=morder_id)
     db_client = db_morder.client
     dealerNumber = db_client.privateCompany if db_client else '0'
-    #providerCustomerId = client_info['שם הלקוח'][0]
     providerCustomerId = str(uuid.uuid4()).replace('-', '')
     name = 'morder (' + str(db_morder.id) + ')'
     if(len(name) < 2):
@@ -97,8 +96,10 @@ def get_smartbee_info_from_dfs(client_info, items_table, sheet_name, docType):
     product_name = ''
     res_products = []
     price = ''
+    last_row_was_a_header = False
     for idx, row in items_table.iterrows():
         # print(row)
+        # are we on a main row?
         if not pd.isna(row['רקמה?']):
             if(product_name != ''):
                 print('product_name: ', product_name)
@@ -108,6 +109,7 @@ def get_smartbee_info_from_dfs(client_info, items_table, sheet_name, docType):
                     'product_obj': product_obj,
                     'product_name': product_name,
                     'amount_taken': amount_taken,
+                    'include_tax': includeTaxBool,
                     'price': price,
                 })
                 continue_add_amounts = False
@@ -120,20 +122,33 @@ def get_smartbee_info_from_dfs(client_info, items_table, sheet_name, docType):
                 if str(amount_taken).lower() == 'v':
                     amount_taken = row['כמות כוללת']
 
+            includeTax = row['מע"מ']
+            if includeTax == 'כולל':
+                includeTaxBool = True
+            else:
+                includeTaxBool = False
+            last_row_was_a_header = True
+
             price = row['מחיר מכירה']
+        # are we on a sizes colors table
         else:
+            if last_row_was_a_header:
+                amount_taken = 0
+                continue_add_amounts = True
             if continue_add_amounts:
                 amount_taken_temp = row['כמות נלקחת']
                 if str(amount_taken_temp).lower() == 'v':
                     amount_taken_temp = row['הערות']
                 if not pd.isna(amount_taken_temp):
                     amount_taken += amount_taken_temp
+            last_row_was_a_header = False
 
     product_obj = CatalogImage.objects.filter(title=product_name).first()
     res_products.append({
         'product_obj': product_obj,
         'product_name': product_name,
         'amount_taken': amount_taken,
+        'include_tax': includeTaxBool,
         'price': price,
     })
 
@@ -148,7 +163,7 @@ def get_smartbee_info_from_dfs(client_info, items_table, sheet_name, docType):
                 "catNum": prod['product_obj'].id,
                 "quantity": prod['amount_taken'],
                 "pricePerUnit": prod['price'].replace('₪', ''),
-                "vatOption": "NotInclude",
+                "vatOption": "Include" if prod['include_tax'] else "NotInclude",
                 "description":  description,
             })
 
@@ -201,7 +216,7 @@ def submit_exel_to_smartbee(request):
                 for sheets_name in all_sheets.sheet_names:
                     if sheets_name == 'Sheet':
                         continue
-                    #sheet = all_sheets[sheets_name]
+                    # sheet = all_sheets[sheets_name]
                     order_id = sheets_name.split(' ')[-1]
                     df = all_sheets.parse(sheet_name=sheets_name)
                     df2 = all_sheets.parse(
@@ -244,11 +259,12 @@ def send_smartbe_info(info, morder_id):
 def json_user_tasks(customer):
     contacts_qs = customer.contact.filter(sumbited=False)
     contacts_task = UserTasksSerializer(contacts_qs, many=True)
-    #print(contacts_task.data)
-    
+    # print(contacts_task.data)
+
     return {'status':'ok','data':contacts_task.data}
 def user_tasks(request):
-    customer,customer_created  = Customer.objects.get_or_create(device=request.COOKIES['device'])
+    customer,customer_created  = Customer.objects.get_or_create(
+        device=request.COOKIES['device'])
     return JsonResponse(json_user_tasks(customer))
 
 
@@ -257,7 +273,7 @@ def admin_subscribe_view(request):
     webpush = {"group": 'admin' }
     return render(request, 'adminSubscribe.html',{"webpush":webpush})
 
- 
+
 def mainView(request, *args, **kwargs):
     return render(request, 'newMain.html', {})
 '''
@@ -273,8 +289,8 @@ def saveBaseContactFormView(request,next, *args, **kwargs):
 '''
 
 
-@api_view(['POST', 'GET'])
-@ensure_csrf_cookie
+@ api_view(['POST', 'GET'])
+@ ensure_csrf_cookie
 def set_csrf_token(request, factory_id=None):
     print('factory_id: ', factory_id)
     print('device: ', request.COOKIES.get('device'))
@@ -294,8 +310,8 @@ def set_csrf_token(request, factory_id=None):
     # 'campains': get_user_campains_serializer_data(request.user),}, safe=False)
 
 
-@api_view(['POST'])
-@permission_classes((AllowAny,))
+@ api_view(['POST'])
+@ permission_classes((AllowAny,))
 def svelte_contact_form(request):
     if request.method == "POST":
         try:
@@ -330,8 +346,8 @@ def svelte_contact_form(request):
             })
 
 
-@api_view(['POST'])
-@permission_classes((AllowAny,))
+@ api_view(['POST'])
+@ permission_classes((AllowAny,))
 def track_cart(request):
     body_unicode = request.data
     device = request.COOKIES.get('device')
@@ -346,12 +362,12 @@ def track_cart(request):
     obj.save()
     response = HttpResponse(json.dumps(
         {'status': 'ok', 'active_cart_id': active_cart_id}), content_type='application/json')
-    #response.set_cookie('active_cart', active_cart_id, max_age=60*60*24*365*10, httponly=True)
+    # response.set_cookie('active_cart', active_cart_id, max_age=60*60*24*365*10, httponly=True)
     return response
 
 
-@api_view(['POST'])
-@permission_classes((AllowAny,))
+@ api_view(['POST'])
+@ permission_classes((AllowAny,))
 def send_product_photo(request):
     data = request.data
     print(data)
@@ -382,8 +398,8 @@ def send_product_photo(request):
     })
 
 
-@api_view(['POST'])
-@permission_classes((AllowAny,))
+@ api_view(['POST'])
+@ permission_classes((AllowAny,))
 def client_product_question(request):
     print('client_product_question start')
     body = request.data
@@ -425,8 +441,8 @@ def client_product_question(request):
     })
 
 
-@api_view(['POST'])
-@permission_classes((AllowAny,))
+@ api_view(['POST'])
+@ permission_classes((AllowAny,))
 def svelte_cart_form(request):
     if request.method == "POST":
         body_unicode = request.data  # body.decode('utf-8')
@@ -454,7 +470,7 @@ def svelte_cart_form(request):
                         user_id = None
                 else:
                     user_id = request.user
-                #user_id = int(body.get('asUser') or request.user.id)
+                # user_id = int(body.get('asUser') or request.user.id)
                 agent = request.user
             else:
                 user_id = request.user
@@ -493,8 +509,8 @@ def svelte_cart_form(request):
                 data.append(obj)
             except:
                 pass
-        #data = [SvelteCartProductEntery(product_id=p['id'],amount=p['amount'] or 1, details = p['mentries'] or {}) for p in products]
-        #products_objs = SvelteCartProductEntery.objects.bulk_create(data)
+        # data = [SvelteCartProductEntery(product_id=p['id'],amount=p['amount'] or 1, details = p['mentries'] or {}) for p in products]
+        # products_objs = SvelteCartProductEntery.objects.bulk_create(data)
         db_cart.productEntries.set(data)
         db_cart.save()
         if (settings.DEBUG):
@@ -510,8 +526,8 @@ def svelte_cart_form(request):
         })
 
 
-@api_view(['GET'])
-@permission_classes((IsAuthenticated,))
+@ api_view(['GET'])
+@ permission_classes((IsAuthenticated,))
 def svelte_cart_history(request):
     if request.user.is_anonymous:
         return JsonResponse({
@@ -523,7 +539,7 @@ def svelte_cart_history(request):
     return JsonResponse(previous_carts, safe=False)
 
 
-@api_view(['GET'])
+@ api_view(['GET'])
 def api_logout(request):
     if request.user.is_anonymous:
         return JsonResponse({
@@ -567,7 +583,7 @@ def verify_unique_field_by_field_excel(request):
             filter(lambda x: (x[0] not in to_remove_numbers), df_data))
         # for i,val  in enumerate(df_data):
         # if val[0] in to_remove_numbers:
-        #del df_data[i]
+        # del df_data[i]
         # convert to excel to send
         print('len data after: ', len(df_data))
         output = io.BytesIO()
@@ -601,7 +617,7 @@ def get_session_key(request):
     return request.session.session_key
 
 
-#from .tasks import save_user_search
+# from .tasks import save_user_search
 def convert_to_heb(txt):
     fix_txt_list = []
     heb_case = {'a': 'ש', 'b': 'נ', 'c': 'ב', 'd': 'ג', 'e': 'ק', 'f': 'כ', 'g': 'ע', 'h': 'י', 'i': 'ן', 'j': 'ח', 'k': 'ל', 'l': 'ך', 'm': 'צ', 'n': 'מ', 'o': 'ם', 'p': 'פ', 'q': '/', 'r': 'ר', 's': 'ד', 't': 'א', 'u': 'ו', 'v': 'ה', 'w': '\'', 'x': 'ס', 'y': 'ט', 'z': 'ז', ';': 'ף',
@@ -642,14 +658,14 @@ def autocompleteModel(request):
     products = SearchProductSerializer(products_qs_short, many=True, context={
         'request': request
     })
-    #products = SearchCatalogImageSerializer(products_qs,context=ser_context, many=True)
+    # products = SearchCatalogImageSerializer(products_qs,context=ser_context, many=True)
     session = get_session_key(request)
 
     search_history = UserSearchData.objects.create(
         session=session, term=q, resultCount=products_qs.count())  # + len(mylogos.data)
     search_history.save()
     all_data = products.data  # + mylogos.data
-    #all = all[0:20]
+    # all = all[0:20]
     context = {'all': all_data,
                'q': q,
                'id': search_history.id}
@@ -702,7 +718,7 @@ def form_changed(request):
         sumbited = False if form_data_dict['sumbited'] == '' else True
         obj, created = BeseContactInformation.objects.get_or_create(
             formUUID=formUUID)
-        #print('BeseContactInformation ', created, obj)
+        # print('BeseContactInformation ', created, obj)
         obj.name = name
         obj.email = email
         obj.phone = phone
