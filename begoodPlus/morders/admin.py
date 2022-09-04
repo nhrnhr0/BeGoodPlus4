@@ -171,12 +171,12 @@ class MOrderAdmin(admin.ModelAdmin):
         main_ws.column_dimensions['H'].width = 15
         main_ws.column_dimensions['I'].width = 15
         main_ws.column_dimensions['J'].width = 15
-        main_ws.cell(row=1, column=6).value = 'לא כולל'
-        main_ws.cell(row=2, column=6).value = 'כולל'
+        # main_ws.cell(row=1, column=6).value = 'לא כולל'
+        # main_ws.cell(row=2, column=6).value = 'כולל'
 
-        data_val = DataValidation(
-            type="list", formula1='=Sheet!$F$1:Sheet!$F$2')
-        main_ws.add_data_validation(data_val)
+        # data_val = DataValidation(
+        #     type="list", formula1='=Sheet!$F$1:Sheet!$F$2')
+        # main_ws.add_data_validation(data_val)
         # data_val.add(main_ws['B1'])
         # set the header
         ws_rows_counter = 1
@@ -186,7 +186,7 @@ class MOrderAdmin(admin.ModelAdmin):
             name = order['name']
             order_ws = wb.create_sheet(order['name'] + ' ' + str(order['id']))
             # set the height of the row
-            order_ws.add_data_validation(data_val)
+            # order_ws.add_data_validation(data_val)
 
             order_ws.sheet_view.rightToLeft = True
             # text align all the document to center
@@ -330,8 +330,8 @@ class MOrderAdmin(admin.ModelAdmin):
                               column=7).font = header_font
                 order_ws.cell(row=order_ws_rows_counter,
                               column=7).border = bottom_border
-                data_val.add(order_ws.cell(
-                    row=order_ws_rows_counter, column=7))
+                # data_val.add(order_ws.cell(
+                #     row=order_ws_rows_counter, column=7))
 
                 order_ws.cell(row=order_ws_rows_counter,
                               column=8).value = 'כן' if product['prining'] else 'לא'
