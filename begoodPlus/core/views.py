@@ -552,7 +552,7 @@ def api_logout(request):
         'detail': 'logout successfuly'
     })
     response.delete_cookie('auth_token')
-
+    logout(request)
     request.session.flush()
     return response
 
