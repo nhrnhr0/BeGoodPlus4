@@ -83,7 +83,7 @@ class SearchProductSerializer(serializers.ModelSerializer):
 
     def get_public_album_top_slug(self, obj):
         obj = obj.albums.filter(is_public=True).first()
-        if obj:
+        if obj and obj.topLevelCategory:
             return obj.topLevelCategory.slug
         else:
             return ''

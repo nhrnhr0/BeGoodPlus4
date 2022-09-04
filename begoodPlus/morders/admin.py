@@ -2,6 +2,8 @@ import datetime
 from django.contrib import admin
 from openpyxl import Workbook
 from productColor.models import ProductColor
+from django.db import models
+from django.forms import Textarea
 
 from productSize.models import ProductSize
 from .models import MOrderItem, MOrder, MOrderItemEntry, ProviderRequest, TakenInventory
@@ -83,15 +85,20 @@ class MOrderAdmin(admin.ModelAdmin):
               'status', 'message',)  # what is this for?
     readonly_fields = ('created', 'updated', 'get_edit_url',
                        'view_morder_pdf_link', 'view_morder_stock_document_link',)
-    list_display = ('id', 'client', 'name', 'status', 'created', 'updated',
+    list_display = ('id', 'client', 'name', 'status', 'status_msg', 'created', 'updated',
                     'get_edit_url', 'view_morder_pdf_link', 'view_morder_stock_document_link',)
-    list_editable = ('status',)
-    #filter_horizontal = ('products',)
+    list_editable = ('status', 'status_msg',)
+    # filter_horizontal = ('products',)
     list_filter = ('status', 'created', 'updated',)
     search_fields = ('id', 'name', 'phone', 'email', 'status', 'message', 'products__product__title',
                      'client__businessName', 'client__email', 'client__extraName', 'client__contactMan', 'client__user__username')
     list_select_related = ('client', 'client__user',)
     actions = ('export_to_excel',)
+    formfield_overrides = {
+        models.TextField: {'widget': Textarea(
+            attrs={'rows': 2,
+                   'cols': 20, })},  # 'style': 'height: 1em;'
+    }
 
     def export_to_excel(self, request, queryset):
         filesbuffers = []
@@ -126,7 +133,7 @@ class MOrderAdmin(admin.ModelAdmin):
                         'total_quantity': 0,
                     }
                 else:
-                    #all_products[product_name] += product['entries']
+                    # all_products[product_name] += product['entries']
                     entries = all_products[product_name]['entries']
                     for entry in order_product['entries'].keys():
                         if entry in entries:
@@ -245,8 +252,8 @@ class MOrderAdmin(admin.ModelAdmin):
             order_ws_rows_counter += 1
             for product in order_products:
                 product_name = product['title']
-                #order_ws.cell(row=order_ws_rows_counter, column=1).value = product['barcode']
-                #order_ws.cell(row=order_ws_rows_counter, column=1).value = product['p']
+                # order_ws.cell(row=order_ws_rows_counter, column=1).value = product['barcode']
+                # order_ws.cell(row=order_ws_rows_counter, column=1).value = product['p']
                 order_ws.cell(row=order_ws_rows_counter,
                               column=1).value = product['barcode']
                 order_ws.cell(row=order_ws_rows_counter,
@@ -391,22 +398,22 @@ class MOrderAdmin(admin.ModelAdmin):
                                   column=1).value = color
                     order_ws.cell(row=order_ws_rows_counter,
                                   column=1).alignment = align_rtl
-                    #order_ws.cell(row=order_ws_rows_counter, column=1).font = order_ws.cell(row=order_ws_rows_counter, column=1).font.copy(bold=True)
+                    # order_ws.cell(row=order_ws_rows_counter, column=1).font = order_ws.cell(row=order_ws_rows_counter, column=1).font.copy(bold=True)
                     order_ws.cell(row=order_ws_rows_counter,
                                   column=2).value = size
                     order_ws.cell(row=order_ws_rows_counter,
                                   column=2).alignment = align_rtl
-                    #order_ws.cell(row=order_ws_rows_counter, column=2).font = order_ws.cell(row=order_ws_rows_counter, column=2).font.copy(bold=True)
+                    # order_ws.cell(row=order_ws_rows_counter, column=2).font = order_ws.cell(row=order_ws_rows_counter, column=2).font.copy(bold=True)
                     order_ws.cell(row=order_ws_rows_counter,
                                   column=3).value = varient
                     order_ws.cell(row=order_ws_rows_counter,
                                   column=3).alignment = align_rtl
-                    #order_ws.cell(row=order_ws_rows_counter, column=3).font = order_ws.cell(row=order_ws_rows_counter, column=3).font.copy(bold=True)
+                    # order_ws.cell(row=order_ws_rows_counter, column=3).font = order_ws.cell(row=order_ws_rows_counter, column=3).font.copy(bold=True)
                     order_ws.cell(row=order_ws_rows_counter,
                                   column=4).value = quantity
                     order_ws.cell(row=order_ws_rows_counter,
                                   column=4).alignment = align_rtl
-                    #order_ws.cell(row=order_ws_rows_counter, column=4).font = order_ws.cell(row=order_ws_rows_counter, column=4).font.copy(bold=True)
+                    # order_ws.cell(row=order_ws_rows_counter, column=4).font = order_ws.cell(row=order_ws_rows_counter, column=4).font.copy(bold=True)
                     order_ws_rows_counter += 1
 
             # for order_product in order_products:
@@ -425,7 +432,7 @@ class MOrderAdmin(admin.ModelAdmin):
             main_ws.cell(row=ws_rows_counter,
                          column=1).value = product['barcode']
 
-            #main_ws.cell(row=ws_rows_counter, column=1).font = main_ws.cell(row=ws_rows_counter, column=1).font.copy(bold=True)
+            # main_ws.cell(row=ws_rows_counter, column=1).font = main_ws.cell(row=ws_rows_counter, column=1).font.copy(bold=True)
             main_ws.cell(row=ws_rows_counter, column=1).fill = header_fill
             main_ws.cell(row=ws_rows_counter, column=1).alignment = align_rtl
             main_ws.cell(row=ws_rows_counter, column=1).font = header_font
@@ -483,24 +490,24 @@ class MOrderAdmin(admin.ModelAdmin):
                 main_ws.cell(row=ws_rows_counter, column=1).value = color
                 main_ws.cell(row=ws_rows_counter,
                              column=1).alignment = align_rtl
-                #main_ws.cell(row=ws_rows_counter, column=1).font = main_ws.cell(row=ws_rows_counter, column=1).font.copy(bold=True)
+                # main_ws.cell(row=ws_rows_counter, column=1).font = main_ws.cell(row=ws_rows_counter, column=1).font.copy(bold=True)
                 main_ws.cell(row=ws_rows_counter, column=2).value = size
                 main_ws.cell(row=ws_rows_counter,
                              column=2).alignment = align_rtl
-                #main_ws.cell(row=ws_rows_counter, column=2).font = main_ws.cell(row=ws_rows_counter, column=2).font.copy(bold=True)
+                # main_ws.cell(row=ws_rows_counter, column=2).font = main_ws.cell(row=ws_rows_counter, column=2).font.copy(bold=True)
                 main_ws.cell(row=ws_rows_counter, column=3).value = varient
                 main_ws.cell(row=ws_rows_counter,
                              column=3).alignment = align_rtl
-                #main_ws.cell(row=ws_rows_counter, column=3).font = main_ws.cell(row=ws_rows_counter, column=3).font.copy(bold=True)
+                # main_ws.cell(row=ws_rows_counter, column=3).font = main_ws.cell(row=ws_rows_counter, column=3).font.copy(bold=True)
                 main_ws.cell(row=ws_rows_counter, column=4).value = quantity
                 main_ws.cell(row=ws_rows_counter,
                              column=4).alignment = align_rtl
-                #main_ws.cell(row=ws_rows_counter, column=4).font = main_ws.cell(row=ws_rows_counter, column=4).font.copy(bold=True)
+                # main_ws.cell(row=ws_rows_counter, column=4).font = main_ws.cell(row=ws_rows_counter, column=4).font.copy(bold=True)
                 ws_rows_counter += 1
 
         # save file
 
-        #date = datetime.datetime.now().strftime('%Y-%m-%d')
+        # date = datetime.datetime.now().strftime('%Y-%m-%d')
         ids = '_'.join([str(o['id']) for o in orders])
         filename = f'orders_{ids}.xlsx'
         response = HttpResponse(
@@ -521,7 +528,8 @@ class MOrderAdmin(admin.ModelAdmin):
                 data = d['data']
                 zip_file.writestr(file_name , data.getvalue())
         zip_buffer.seek(0)
-        response = HttpResponse(zip_buffer.read(), content_type="application/zip")
+        response = HttpResponse(
+            zip_buffer.read(), content_type="application/zip")
         response['Content-Disposition'] = 'attachment; filename="products.zip"'
         return response
     '''
