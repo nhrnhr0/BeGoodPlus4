@@ -1,3 +1,4 @@
+from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 from .forms import FormBeseContactInformation
 import requests
 from cmath import isnan
@@ -37,7 +38,7 @@ from django.contrib.postgres.search import TrigramSimilarity
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from campains.views import get_user_campains_serializer_data
 from client.models import UserQuestion
-
+from rest_framework.decorators import authentication_classes
 from client.views import get_user_info
 from clientApi.serializers import ImageClientApi
 from .models import ActiveCartTracker, SvelteCartModal, SvelteCartProductEntery, SvelteContactFormModal, UserSearchData
@@ -539,6 +540,7 @@ def svelte_cart_history(request):
     return JsonResponse(previous_carts, safe=False)
 
 
+@authentication_classes((SessionAuthentication, TokenAuthentication,))
 @ api_view(['GET'])
 def api_logout(request):
     if request.user.is_anonymous:
