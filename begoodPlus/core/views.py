@@ -1,3 +1,5 @@
+from .forms import FormBeseContactInformation
+import requests
 from cmath import isnan
 from begoodPlus.secrects import SMARTBEE_DOMAIN, SMARTBEE_providerUserToken
 
@@ -78,28 +80,30 @@ info = {
         }
 '''
 from morders.models import MOrder
+
+
 def get_smartbee_info_from_dfs(client_info, items_table, sheet_name, docType):
     morder_id = client_info['מספר הזמנה'][0]
     db_morder = MOrder.objects.get(id=morder_id)
     db_client = db_morder.client
     dealerNumber = db_client.privateCompany if db_client else '0'
     #providerCustomerId = client_info['שם הלקוח'][0]
-    providerCustomerId = str(uuid.uuid4()).replace('-','')
+    providerCustomerId = str(uuid.uuid4()).replace('-', '')
     name = 'morder (' + str(db_morder.id) + ')'
     if(len(name) < 2):
-        name= 'name'
-    
-    
+        name = 'name'
+
     continue_add_amounts = False
     product_name = ''
     res_products = []
     price = ''
-    for idx,row in items_table.iterrows():
-        #print(row)
+    for idx, row in items_table.iterrows():
+        # print(row)
         if not pd.isna(row['רקמה?']):
             if(product_name != ''):
                 print('product_name: ', product_name)
-                product_obj = CatalogImage.objects.filter(title=product_name).first()
+                product_obj = CatalogImage.objects.filter(
+                    title=product_name).first()
                 res_products.append({
                     'product_obj': product_obj,
                     'product_name': product_name,
@@ -115,8 +119,8 @@ def get_smartbee_info_from_dfs(client_info, items_table, sheet_name, docType):
             else:
                 if str(amount_taken).lower() == 'v':
                     amount_taken = row['כמות כוללת']
-            
-            price =  row['מחיר מכירה']
+
+            price = row['מחיר מכירה']
         else:
             if continue_add_amounts:
                 amount_taken_temp = row['כמות נלקחת']
@@ -124,76 +128,74 @@ def get_smartbee_info_from_dfs(client_info, items_table, sheet_name, docType):
                     amount_taken_temp = row['הערות']
                 if not pd.isna(amount_taken_temp):
                     amount_taken += amount_taken_temp
-            
+
     product_obj = CatalogImage.objects.filter(title=product_name).first()
     res_products.append({
-                    'product_obj': product_obj,
-                    'product_name': product_name,
-                    'amount_taken': amount_taken,
-                    'price': price,
-                })
-    
+        'product_obj': product_obj,
+        'product_name': product_name,
+        'amount_taken': amount_taken,
+        'price': price,
+    })
+
     paymentItems = []
     for prod in res_products:
         description = prod['product_name']
         if prod['product_obj'].barcode != None and prod['product_obj'].barcode != '':
             description += ' (' + prod['product_obj'].barcode + ')'
         paymentItems.append(
-        {
-            "providerItemId": prod['product_obj'].id,
-            "catNum": prod['product_obj'].id,
-            "quantity": prod['amount_taken'],
-            "pricePerUnit": prod['price'].replace('₪', ''),
-            "vatOption": "NotInclude",
-            "description":  description,
-        })
-    
-    
-    
-    
+            {
+                "providerItemId": prod['product_obj'].id,
+                "catNum": prod['product_obj'].id,
+                "quantity": prod['amount_taken'],
+                "pricePerUnit": prod['price'].replace('₪', ''),
+                "vatOption": "NotInclude",
+                "description":  description,
+            })
+
     customer_details = {
         "providerUserToken": SMARTBEE_providerUserToken,
         "providerMsgId": str(datetime.datetime.now().strftime("%Y%m%d%H%M%S")),
         "providerMsgReferenceId": "something 123456",
-        "customer":{
-                'providerCustomerId': providerCustomerId,
-                'name': name,
-                #'email': self.email,
-                #'mainPhone': self.phone,
-                'dealerNumber': dealerNumber,
-                'netEOM': 30,
+        "customer": {
+            'providerCustomerId': providerCustomerId,
+            'name': name,
+            # 'email': self.email,
+            # 'mainPhone': self.phone,
+            'dealerNumber': dealerNumber,
+            'netEOM': 30,
+        },
+        "docType": docType,
+        "createDraftOnFailure": True,
+        "dueDate": db_morder.updated.strftime("%Y-%m-%d"),
+        "title": 'הזמנה מספר ' + str(db_morder.id),
+        "extraCommentsForEmail": "",
+        "currency": {
+            "currencyType": "ILS",
+            "rate": 0
+        },
+
+        "documentItems": {
+            "paymentItems": paymentItems,
+            "discount": {
+                "discountValueType": "Percentage",
+                "value": 0
             },
-            "docType": docType,
-            "createDraftOnFailure": True,
-            "dueDate": db_morder.updated.strftime("%Y-%m-%d"),
-            "title": 'הזמנה מספר ' + str(db_morder.id),
-            "extraCommentsForEmail": "",
-            "currency": {
-                "currencyType": "ILS",
-                "rate": 0
-            },
-            
-            "documentItems": {
-                "paymentItems": paymentItems,
-                "discount": {
-                    "discountValueType": "Percentage",
-                    "value": 0
-                },
-                "roundTotalSum": True
-            },
-            "isSendOrigEng": False,
-            "docDate": datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S+03:00"),
+            "roundTotalSum": True
+        },
+        "isSendOrigEng": False,
+        "docDate": datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S+03:00"),
     }
-    
+
     return customer_details
+
 
 def submit_exel_to_smartbee(request):
     if request.user.is_authenticated and request.user.is_superuser:
         if(request.method == "POST"):
-            #print(request.FILES)
+            # print(request.FILES)
             file = request.FILES.get('file', None)
             if file:
-                #print(file)
+                # print(file)
                 all_sheets = pd.ExcelFile(file)
                 docType = request.POST.get('docType')
                 for sheets_name in all_sheets.sheet_names:
@@ -202,11 +204,13 @@ def submit_exel_to_smartbee(request):
                     #sheet = all_sheets[sheets_name]
                     order_id = sheets_name.split(' ')[-1]
                     df = all_sheets.parse(sheet_name=sheets_name)
-                    df2 = all_sheets.parse(sheet_name=sheets_name, skiprows=2, )
-                    info = get_smartbee_info_from_dfs(df, df2, sheets_name,docType)
-                    send_smartbe_info(info=info, morder_id=int(order_id)) # TODO: rmeove this
+                    df2 = all_sheets.parse(
+                        sheet_name=sheets_name, skiprows=2, )
+                    info = get_smartbee_info_from_dfs(
+                        df, df2, sheets_name, docType)
+                    send_smartbe_info(info=info, morder_id=int(
+                        order_id))  # TODO: rmeove this
                     # return JsonResponse(info, safe=False)
-
 
             else:
                 messages.add_message(request, messages.ERROR, 'נא להוסיף קובץ')
@@ -214,26 +218,28 @@ def submit_exel_to_smartbee(request):
         return redirect('/admin/morders/morder/')
 
 
-import requests
 def send_smartbe_info(info, morder_id):
     smartbee_auth = SmartbeeTokens.get_or_create_token()
     headers = {"Authorization": "Bearer " + smartbee_auth.token}
-    smartbee_response = requests.post(SMARTBEE_DOMAIN + '/api/v1/documents/create' , json=info,headers=headers)
+    smartbee_response = requests.post(
+        SMARTBEE_DOMAIN + '/api/v1/documents/create', json=info, headers=headers)
     if smartbee_response.status_code == 200:
         # self.isOrder = True
         # self.save()
         data = smartbee_response.json()
         resultId = info['providerMsgId']
-        obj = SmartbeeResults.objects.create(morder_id=morder_id, 
-                                resultCodeId= data['resultCodeId'],
-                                result= data['result'],
-                                validationErrors= data['validationErrors'],
-                                resultId=resultId)
+        obj = SmartbeeResults.objects.create(morder_id=morder_id,
+                                             resultCodeId=data['resultCodeId'],
+                                             result=data['result'],
+                                             validationErrors=data['validationErrors'],
+                                             resultId=resultId)
         print(data)
         return obj
     else:
         print(smartbee_response)
         print(smartbee_response.json())
+
+
 '''
 def json_user_tasks(customer):
     contacts_qs = customer.contact.filter(sumbited=False)
@@ -255,7 +261,6 @@ def admin_subscribe_view(request):
 def mainView(request, *args, **kwargs):
     return render(request, 'newMain.html', {})
 '''
-from .forms import FormBeseContactInformation
 '''
 def saveBaseContactFormView(request,next, *args, **kwargs):
     if request.method == "POST":
@@ -454,14 +459,14 @@ def svelte_cart_form(request):
             else:
                 user_id = request.user
         # check if uuid is valid
-        
+
         try:
             user_uuid = uuid.UUID(my_uuid)
         except ValueError:
             user_uuid = uuid.uuid4()
         db_cart = SvelteCartModal.objects.create(user=user_id, device=device, uid=user_uuid, businessName=business_name,
                                                  name=name, phone=phone, email=email, message=message, agent=agent, order_type=order_type)
-        # data.products.set(products)   
+        # data.products.set(products)
         db_cart.productsRaw = raw_cart
         # products = [{'id': 5, 'amount': 145, 'mentries': {...}}, {'id': 18, 'amount': 0, 'mentries': {...}}, {'id': 138, 'amount': 0}]
         data = []
@@ -477,7 +482,7 @@ def svelte_cart_form(request):
                     user_id = request.user.id
                     cimage = CatalogImage.objects.get(id=pid)
                     price = cimage.get_user_price(user_id)
-                    unitPrice = price#cimage.client_price
+                    unitPrice = price  # cimage.client_price
                 except CatalogImage.DoesNotExist:
                     unitPrice = 0
             print_desition = p.get('print', False)
@@ -514,12 +519,11 @@ def svelte_cart_history(request):
             'detail': 'User is not authenticated',
         })
     previous_carts = list(
-        SvelteCartModal.objects.all().filter(user_id=request.user).order_by('-created_date').values('user','user__username', 'name','businessName','productsRaw','message','created_date','agent','agent__client__businessName'))
+        SvelteCartModal.objects.all().filter(user_id=request.user).order_by('-created_date').values('user', 'user__username', 'name', 'businessName', 'productsRaw', 'message', 'created_date', 'agent', 'agent__client__businessName'))
     return JsonResponse(previous_carts, safe=False)
 
 
 @api_view(['GET'])
-@permission_classes((IsAuthenticated,))
 def api_logout(request):
     if request.user.is_anonymous:
         return JsonResponse({
@@ -600,29 +604,33 @@ def get_session_key(request):
 #from .tasks import save_user_search
 def convert_to_heb(txt):
     fix_txt_list = []
-    heb_case = { 'a': 'ש', 'b': 'נ', 'c': 'ב', 'd': 'ג', 'e': 'ק', 'f': 'כ', 'g': 'ע', 'h': 'י', 'i': 'ן', 'j': 'ח', 'k': 'ל', 'l': 'ך', 'm': 'צ', 'n': 'מ', 'o': 'ם', 'p': 'פ', 'q': '/', 'r': 'ר', 's': 'ד', 't': 'א', 'u': 'ו', 'v': 'ה', 'w': '\'', 'x': 'ס', 'y': 'ט', 'z': 'ז', ';': 'ף', '.': 'ץ', ',': 'ת', 'A': 'ש', 'B': 'נ', 'C': 'ב', 'D': 'ג', 'E': 'ק', 'F': 'כ', 'G': 'ע', 'H': 'י', 'I': 'ן', 'J': 'ח', 'K': 'ל', 'L': 'ך', 'M': 'צ', 'N': 'מ', 'O': 'ם', 'P': 'פ', 'Q': '/', 'R': 'ר', 'S': 'ד', 'T': 'א', 'U': 'ו', 'V': 'ה', 'W': "'", 'X': 'ס', 'Y': 'ט', 'Z': 'ז', }
+    heb_case = {'a': 'ש', 'b': 'נ', 'c': 'ב', 'd': 'ג', 'e': 'ק', 'f': 'כ', 'g': 'ע', 'h': 'י', 'i': 'ן', 'j': 'ח', 'k': 'ל', 'l': 'ך', 'm': 'צ', 'n': 'מ', 'o': 'ם', 'p': 'פ', 'q': '/', 'r': 'ר', 's': 'ד', 't': 'א', 'u': 'ו', 'v': 'ה', 'w': '\'', 'x': 'ס', 'y': 'ט', 'z': 'ז', ';': 'ף',
+                '.': 'ץ', ',': 'ת', 'A': 'ש', 'B': 'נ', 'C': 'ב', 'D': 'ג', 'E': 'ק', 'F': 'כ', 'G': 'ע', 'H': 'י', 'I': 'ן', 'J': 'ח', 'K': 'ל', 'L': 'ך', 'M': 'צ', 'N': 'מ', 'O': 'ם', 'P': 'פ', 'Q': '/', 'R': 'ר', 'S': 'ד', 'T': 'א', 'U': 'ו', 'V': 'ה', 'W': "'", 'X': 'ס', 'Y': 'ט', 'Z': 'ז', }
     for char in txt:
         if char in heb_case:
             fix_txt_list.append(heb_case[char])
         else:
             fix_txt_list.append(char)
     return ''.join(fix_txt_list)
+
+
 def autocompleteModel(request):
     start = time.time()
     # if request.is_ajax():
     q = request.GET.get('q', '')
     q2 = convert_to_heb(q)
     show_hidden = request.GET.get('show_hidden', False)
-    
-    products_qs = CatalogImage.objects.filter(\
-        Q(title__icontains=q) | Q(title__icontains=q2) | \
-        Q(albums__title__icontains=q) | Q(albums__title__icontains=q2) | \
-        Q(albums__keywords__icontains=q) | Q(albums__keywords__icontains=q2) | \
-        Q(barcode__icontains=q) | Q(barcode__icontains=q2) \
-        ).distinct()
-        
+
+    products_qs = CatalogImage.objects.filter(
+        Q(title__icontains=q) | Q(title__icontains=q2) |
+        Q(albums__title__icontains=q) | Q(albums__title__icontains=q2) |
+        Q(albums__keywords__icontains=q) | Q(albums__keywords__icontains=q2) |
+        Q(barcode__icontains=q) | Q(barcode__icontains=q2)
+    ).distinct()
+
     if not show_hidden:
-        products_qs = products_qs.filter(Q(is_active=True) & ~Q(albums=None) & Q(albums__is_public=True))
+        products_qs = products_qs.filter(Q(is_active=True) & ~Q(
+            albums=None) & Q(albums__is_public=True))
     #  & (~Q(albums=None) & Q(is_active = True)
 #
     # is_hidden=False
