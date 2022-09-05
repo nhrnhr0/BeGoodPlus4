@@ -25,7 +25,8 @@ from mptt.admin import DraggableMPTTAdmin
 from django.db.models import Count, fields
 
 class TopLevelCategoryAdmin(admin.ModelAdmin):
-    list_display = ('name', 'my_order')
+    list_display = ('image_display', 'name', 'my_order')
+    readonly_fields= ('image_display',)
     list_editable = ('my_order',)
     list_display_links = ('name',)
     ordering = ('my_order',)

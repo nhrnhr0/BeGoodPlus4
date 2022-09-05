@@ -1,3 +1,11 @@
+from rest_framework.authentication import SessionAuthentication, TokenAuthentication
+from .forms import FormBeseContactInformation
+import requests
+from cmath import isnan
+from begoodPlus.secrects import SMARTBEE_DOMAIN, SMARTBEE_providerUserToken
+
+from smartbee.models import SmartbeeResults, SmartbeeTokens
+from catalogImages.views import SearchProductSerializer
 from .models import UserSearchData
 from django.db.models import Value, CharField
 from itertools import chain
@@ -22,6 +30,7 @@ from django.db.models import Q
 from django.contrib.auth import logout
 from decimal import Decimal
 import celery
+import datetime
 from django.shortcuts import render, redirect, HttpResponse
 from django.http import JsonResponse
 from django.db.models.functions import Greatest
@@ -29,22 +38,234 @@ from django.contrib.postgres.search import TrigramSimilarity
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from campains.views import get_user_campains_serializer_data
 from client.models import UserQuestion
-
+from rest_framework.decorators import authentication_classes
 from client.views import get_user_info
 from clientApi.serializers import ImageClientApi
 from .models import ActiveCartTracker, SvelteCartModal, SvelteCartProductEntery, SvelteContactFormModal, UserSearchData
 from django.urls import reverse
 from core.models import UserProductPhoto
 # Create your views here.
+from django.contrib import messages
+'''
+info = {
+            "providerUserToken": SMARTBEE_providerUserToken,
+            "providerMsgId": datetime.datetime.now().strftime("%Y%m%d%H%M%S"),
+            "providerMsgReferenceId": "something 123456",
+            "customer":{
+                'providerCustomerId': self.client.user.id if self.client else None,
+                'name': self.name,
+                # 'email': self.email,
+                # 'mainPhone': self.phone,
+                'dealerNumber': self.client.privateCompany if self.client else None,
+                'netEOM': 30,
+            },
+            "docType": "Invoice",
+            "createDraftOnFailure": True,
+            "dueDate": self.updated.strftime("%Y-%m-%d"),
+            "title": 'הזמנה מספר ' + str(self.id),
+            "extraCommentsForEmail": "",
+            "currency": {
+                "currencyType": "ILS",
+                "rate": 0
+            },
+            "documentItems": {
+                "paymentItems": list(vals),
+                "discount": {
+                    "discountValueType": "Percentage",
+                    "value": 0
+                },
+                "roundTotalSum": True
+            },
+            "isSendOrigEng": False,
+            "docDate": datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S+03:00"),
+        }
+'''
+from morders.models import MOrder
+
+
+def get_smartbee_info_from_dfs(client_info, items_table, sheet_name, docType):
+    morder_id = client_info['מספר הזמנה'][0]
+    db_morder = MOrder.objects.get(id=morder_id)
+    db_client = db_morder.client
+    dealerNumber = db_client.privateCompany if db_client else '0'
+    providerCustomerId = str(uuid.uuid4()).replace('-', '')
+    name = 'morder (' + str(db_morder.id) + ')'
+    if(len(name) < 2):
+        name = 'name'
+
+    continue_add_amounts = False
+    product_name = ''
+    res_products = []
+    price = ''
+    last_row_was_a_header = False
+    for idx, row in items_table.iterrows():
+        # print(row)
+        # are we on a main row?
+        if not pd.isna(row['רקמה?']):
+            if(product_name != ''):
+                print('product_name: ', product_name)
+                product_obj = CatalogImage.objects.filter(
+                    title=product_name).first()
+                res_products.append({
+                    'product_obj': product_obj,
+                    'product_name': product_name,
+                    'amount_taken': amount_taken,
+                    'include_tax': includeTaxBool,
+                    'price': price,
+                })
+                continue_add_amounts = False
+            product_name = row['פריט']
+            amount_taken = row['כמות נלקחת']
+            if pd.isna(amount_taken):
+                amount_taken = 0
+                continue_add_amounts = True
+            else:
+                if str(amount_taken).lower() == 'v':
+                    amount_taken = row['כמות כוללת']
+
+            includeTax = row['מע"מ']
+            if includeTax == 'כולל':
+                includeTaxBool = True
+            else:
+                includeTaxBool = False
+            last_row_was_a_header = True
+
+            price = row['מחיר מכירה']
+        # are we on a sizes colors table
+        else:
+            if last_row_was_a_header:
+                amount_taken = 0
+                continue_add_amounts = True
+            if continue_add_amounts:
+                amount_taken_temp = row['כמות נלקחת']
+                if str(amount_taken_temp).lower() == 'v':
+                    amount_taken_temp = row['הערות']
+                if not pd.isna(amount_taken_temp):
+                    amount_taken += amount_taken_temp
+            last_row_was_a_header = False
+
+    product_obj = CatalogImage.objects.filter(title=product_name).first()
+    res_products.append({
+        'product_obj': product_obj,
+        'product_name': product_name,
+        'amount_taken': amount_taken,
+        'include_tax': includeTaxBool,
+        'price': price,
+    })
+
+    paymentItems = []
+    for prod in res_products:
+        description = prod['product_name']
+        if prod['product_obj'].barcode != None and prod['product_obj'].barcode != '':
+            description += ' (' + prod['product_obj'].barcode + ')'
+        paymentItems.append(
+            {
+                "providerItemId": prod['product_obj'].id,
+                "catNum": prod['product_obj'].id,
+                "quantity": prod['amount_taken'],
+                "pricePerUnit": prod['price'].replace('₪', ''),
+                "vatOption": "Include" if prod['include_tax'] else "NotInclude",
+                "description":  description,
+            })
+
+    customer_details = {
+        "providerUserToken": SMARTBEE_providerUserToken,
+        "providerMsgId": str(datetime.datetime.now().strftime("%Y%m%d%H%M%S")),
+        "providerMsgReferenceId": "something 123456",
+        "customer": {
+            'providerCustomerId': providerCustomerId,
+            'name': name,
+            # 'email': self.email,
+            # 'mainPhone': self.phone,
+            'dealerNumber': dealerNumber,
+            'netEOM': 30,
+        },
+        "docType": docType,
+        "createDraftOnFailure": True,
+        "dueDate": db_morder.updated.strftime("%Y-%m-%d"),
+        "title": 'הזמנה מספר ' + str(db_morder.id),
+        "extraCommentsForEmail": "",
+        "currency": {
+            "currencyType": "ILS",
+            "rate": 0
+        },
+
+        "documentItems": {
+            "paymentItems": paymentItems,
+            "discount": {
+                "discountValueType": "Percentage",
+                "value": 0
+            },
+            "roundTotalSum": True
+        },
+        "isSendOrigEng": False,
+        "docDate": datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S+03:00"),
+    }
+
+    return customer_details
+
+
+def submit_exel_to_smartbee(request):
+    if request.user.is_authenticated and request.user.is_superuser:
+        if(request.method == "POST"):
+            # print(request.FILES)
+            file = request.FILES.get('file', None)
+            if file:
+                # print(file)
+                all_sheets = pd.ExcelFile(file)
+                docType = request.POST.get('docType')
+                for sheets_name in all_sheets.sheet_names:
+                    if sheets_name == 'Sheet':
+                        continue
+                    # sheet = all_sheets[sheets_name]
+                    order_id = sheets_name.split(' ')[-1]
+                    df = all_sheets.parse(sheet_name=sheets_name)
+                    df2 = all_sheets.parse(
+                        sheet_name=sheets_name, skiprows=2, )
+                    info = get_smartbee_info_from_dfs(
+                        df, df2, sheets_name, docType)
+                    send_smartbe_info(info=info, morder_id=int(
+                        order_id))  # TODO: rmeove this
+                    # return JsonResponse(info, safe=False)
+
+            else:
+                messages.add_message(request, messages.ERROR, 'נא להוסיף קובץ')
+
+        return redirect('/admin/morders/morder/')
+
+
+def send_smartbe_info(info, morder_id):
+    smartbee_auth = SmartbeeTokens.get_or_create_token()
+    headers = {"Authorization": "Bearer " + smartbee_auth.token}
+    smartbee_response = requests.post(
+        SMARTBEE_DOMAIN + '/api/v1/documents/create', json=info, headers=headers)
+    if smartbee_response.status_code == 200:
+        # self.isOrder = True
+        # self.save()
+        data = smartbee_response.json()
+        resultId = info['providerMsgId']
+        obj = SmartbeeResults.objects.create(morder_id=morder_id,
+                                             resultCodeId=data['resultCodeId'],
+                                             result=data['result'],
+                                             validationErrors=data['validationErrors'],
+                                             resultId=resultId)
+        print(data)
+        return obj
+    else:
+        print(smartbee_response)
+        print(smartbee_response.json())
+
+
 '''
 def json_user_tasks(customer):
     contacts_qs = customer.contact.filter(sumbited=False)
     contacts_task = UserTasksSerializer(contacts_qs, many=True)
-    #print(contacts_task.data)
-    
+    # print(contacts_task.data)
+
     return {'status':'ok','data':contacts_task.data}
 def user_tasks(request):
-    customer,customer_created  = Customer.objects.get_or_create(device=request.COOKIES['device'])
+    customer,customer_created  = Customer.objects.get_or_create(
+        device=request.COOKIES['device'])
     return JsonResponse(json_user_tasks(customer))
 
 
@@ -53,11 +274,10 @@ def admin_subscribe_view(request):
     webpush = {"group": 'admin' }
     return render(request, 'adminSubscribe.html',{"webpush":webpush})
 
- 
+
 def mainView(request, *args, **kwargs):
     return render(request, 'newMain.html', {})
 '''
-from .forms import FormBeseContactInformation
 '''
 def saveBaseContactFormView(request,next, *args, **kwargs):
     if request.method == "POST":
@@ -70,8 +290,8 @@ def saveBaseContactFormView(request,next, *args, **kwargs):
 '''
 
 
-@api_view(['POST', 'GET'])
-@ensure_csrf_cookie
+@ api_view(['POST', 'GET'])
+@ ensure_csrf_cookie
 def set_csrf_token(request, factory_id=None):
     print('factory_id: ', factory_id)
     print('device: ', request.COOKIES.get('device'))
@@ -91,8 +311,8 @@ def set_csrf_token(request, factory_id=None):
     # 'campains': get_user_campains_serializer_data(request.user),}, safe=False)
 
 
-@api_view(['POST'])
-@permission_classes((AllowAny,))
+@ api_view(['POST'])
+@ permission_classes((AllowAny,))
 def svelte_contact_form(request):
     if request.method == "POST":
         try:
@@ -127,8 +347,8 @@ def svelte_contact_form(request):
             })
 
 
-@api_view(['POST'])
-@permission_classes((AllowAny,))
+@ api_view(['POST'])
+@ permission_classes((AllowAny,))
 def track_cart(request):
     body_unicode = request.data
     device = request.COOKIES.get('device')
@@ -143,12 +363,12 @@ def track_cart(request):
     obj.save()
     response = HttpResponse(json.dumps(
         {'status': 'ok', 'active_cart_id': active_cart_id}), content_type='application/json')
-    #response.set_cookie('active_cart', active_cart_id, max_age=60*60*24*365*10, httponly=True)
+    # response.set_cookie('active_cart', active_cart_id, max_age=60*60*24*365*10, httponly=True)
     return response
 
 
-@api_view(['POST'])
-@permission_classes((AllowAny,))
+@ api_view(['POST'])
+@ permission_classes((AllowAny,))
 def send_product_photo(request):
     data = request.data
     print(data)
@@ -179,8 +399,8 @@ def send_product_photo(request):
     })
 
 
-@api_view(['POST'])
-@permission_classes((AllowAny,))
+@ api_view(['POST'])
+@ permission_classes((AllowAny,))
 def client_product_question(request):
     print('client_product_question start')
     body = request.data
@@ -222,8 +442,8 @@ def client_product_question(request):
     })
 
 
-@api_view(['POST'])
-@permission_classes((AllowAny,))
+@ api_view(['POST'])
+@ permission_classes((AllowAny,))
 def svelte_cart_form(request):
     if request.method == "POST":
         body_unicode = request.data  # body.decode('utf-8')
@@ -251,12 +471,12 @@ def svelte_cart_form(request):
                         user_id = None
                 else:
                     user_id = request.user
-                #user_id = int(body.get('asUser') or request.user.id)
+                # user_id = int(body.get('asUser') or request.user.id)
                 agent = request.user
             else:
                 user_id = request.user
         # check if uuid is valid
-        
+
         try:
             user_uuid = uuid.UUID(my_uuid)
         except ValueError:
@@ -279,7 +499,7 @@ def svelte_cart_form(request):
                     user_id = request.user.id
                     cimage = CatalogImage.objects.get(id=pid)
                     price = cimage.get_user_price(user_id)
-                    unitPrice = price#cimage.client_price
+                    unitPrice = price  # cimage.client_price
                 except CatalogImage.DoesNotExist:
                     unitPrice = 0
             print_desition = p.get('print', False)
@@ -290,8 +510,8 @@ def svelte_cart_form(request):
                 data.append(obj)
             except:
                 pass
-        #data = [SvelteCartProductEntery(product_id=p['id'],amount=p['amount'] or 1, details = p['mentries'] or {}) for p in products]
-        #products_objs = SvelteCartProductEntery.objects.bulk_create(data)
+        # data = [SvelteCartProductEntery(product_id=p['id'],amount=p['amount'] or 1, details = p['mentries'] or {}) for p in products]
+        # products_objs = SvelteCartProductEntery.objects.bulk_create(data)
         db_cart.productEntries.set(data)
         db_cart.save()
         if (settings.DEBUG):
@@ -307,8 +527,8 @@ def svelte_cart_form(request):
         })
 
 
-@api_view(['GET'])
-@permission_classes((IsAuthenticated,))
+@ api_view(['GET'])
+@ permission_classes((IsAuthenticated,))
 def svelte_cart_history(request):
     if request.user.is_anonymous:
         return JsonResponse({
@@ -316,12 +536,12 @@ def svelte_cart_history(request):
             'detail': 'User is not authenticated',
         })
     previous_carts = list(
-        SvelteCartModal.objects.all().filter(user_id=request.user).order_by('-created_date').values('user','user__username', 'name','businessName','productsRaw','message','created_date','agent','agent__client__businessName'))
+        SvelteCartModal.objects.all().filter(user_id=request.user).order_by('-created_date').values('user', 'user__username', 'name', 'businessName', 'productsRaw', 'message', 'created_date', 'agent', 'agent__client__businessName'))
     return JsonResponse(previous_carts, safe=False)
 
 
-@api_view(['GET'])
-@permission_classes((IsAuthenticated,))
+@authentication_classes((SessionAuthentication, TokenAuthentication,))
+@ api_view(['GET'])
 def api_logout(request):
     if request.user.is_anonymous:
         return JsonResponse({
@@ -334,7 +554,7 @@ def api_logout(request):
         'detail': 'logout successfuly'
     })
     response.delete_cookie('auth_token')
-
+    logout(request)
     request.session.flush()
     return response
 
@@ -365,7 +585,7 @@ def verify_unique_field_by_field_excel(request):
             filter(lambda x: (x[0] not in to_remove_numbers), df_data))
         # for i,val  in enumerate(df_data):
         # if val[0] in to_remove_numbers:
-        #del df_data[i]
+        # del df_data[i]
         # convert to excel to send
         print('len data after: ', len(df_data))
         output = io.BytesIO()
@@ -399,55 +619,60 @@ def get_session_key(request):
     return request.session.session_key
 
 
-#from .tasks import save_user_search
+# from .tasks import save_user_search
 def convert_to_heb(txt):
     fix_txt_list = []
-    heb_case = { 'a': 'ש', 'b': 'נ', 'c': 'ב', 'd': 'ג', 'e': 'ק', 'f': 'כ', 'g': 'ע', 'h': 'י', 'i': 'ן', 'j': 'ח', 'k': 'ל', 'l': 'ך', 'm': 'צ', 'n': 'מ', 'o': 'ם', 'p': 'פ', 'q': '/', 'r': 'ר', 's': 'ד', 't': 'א', 'u': 'ו', 'v': 'ה', 'w': '\'', 'x': 'ס', 'y': 'ט', 'z': 'ז', ';': 'ף', '.': 'ץ', ',': 'ת', 'A': 'ש', 'B': 'נ', 'C': 'ב', 'D': 'ג', 'E': 'ק', 'F': 'כ', 'G': 'ע', 'H': 'י', 'I': 'ן', 'J': 'ח', 'K': 'ל', 'L': 'ך', 'M': 'צ', 'N': 'מ', 'O': 'ם', 'P': 'פ', 'Q': '/', 'R': 'ר', 'S': 'ד', 'T': 'א', 'U': 'ו', 'V': 'ה', 'W': "'", 'X': 'ס', 'Y': 'ט', 'Z': 'ז', }
+    heb_case = {'a': 'ש', 'b': 'נ', 'c': 'ב', 'd': 'ג', 'e': 'ק', 'f': 'כ', 'g': 'ע', 'h': 'י', 'i': 'ן', 'j': 'ח', 'k': 'ל', 'l': 'ך', 'm': 'צ', 'n': 'מ', 'o': 'ם', 'p': 'פ', 'q': '/', 'r': 'ר', 's': 'ד', 't': 'א', 'u': 'ו', 'v': 'ה', 'w': '\'', 'x': 'ס', 'y': 'ט', 'z': 'ז', ';': 'ף',
+                '.': 'ץ', ',': 'ת', 'A': 'ש', 'B': 'נ', 'C': 'ב', 'D': 'ג', 'E': 'ק', 'F': 'כ', 'G': 'ע', 'H': 'י', 'I': 'ן', 'J': 'ח', 'K': 'ל', 'L': 'ך', 'M': 'צ', 'N': 'מ', 'O': 'ם', 'P': 'פ', 'Q': '/', 'R': 'ר', 'S': 'ד', 'T': 'א', 'U': 'ו', 'V': 'ה', 'W': "'", 'X': 'ס', 'Y': 'ט', 'Z': 'ז', }
     for char in txt:
         if char in heb_case:
             fix_txt_list.append(heb_case[char])
         else:
             fix_txt_list.append(char)
     return ''.join(fix_txt_list)
+
+
 def autocompleteModel(request):
     start = time.time()
     # if request.is_ajax():
     q = request.GET.get('q', '')
     q2 = convert_to_heb(q)
     show_hidden = request.GET.get('show_hidden', False)
-    
-    products_qs = CatalogImage.objects.filter(\
-        Q(title__icontains=q) | Q(title__icontains=q2) | \
-        Q(albums__title__icontains=q) | Q(albums__title__icontains=q2) | \
-        Q(albums__keywords__icontains=q) | Q(albums__keywords__icontains=q2) | \
-        Q(barcode__icontains=q) | Q(barcode__icontains=q2) \
-        ).distinct()
-        
+
+    products_qs = CatalogImage.objects.filter(
+        Q(title__icontains=q) | Q(title__icontains=q2) |
+        Q(albums__title__icontains=q) | Q(albums__title__icontains=q2) |
+        Q(albums__keywords__icontains=q) | Q(albums__keywords__icontains=q2) |
+        Q(barcode__icontains=q) | Q(barcode__icontains=q2)
+    ).distinct()
+
     if not show_hidden:
-        products_qs = products_qs.filter(Q(is_active=True) & ~Q(albums=None) & Q(albums__is_public=True))
+        products_qs = products_qs.filter(Q(is_active=True) & ~Q(
+            albums=None) & Q(albums__is_public=True))
     #  & (~Q(albums=None) & Q(is_active = True)
 #
     # is_hidden=False
+    products_qs = products_qs.prefetch_related('albums')
     ser_context = {'request': request}
     products_qs_short = products_qs[0:20]
-    products_qs_short = products_qs_short.prefetch_related(
-        'colors', 'sizes', 'albums')
-    products = ImageClientApi(products_qs_short, many=True, context={
+    # products_qs_short = products_qs_short.prefetch_related(
+    #     'colors', 'sizes', 'albums')
+    products = SearchProductSerializer(products_qs_short, many=True, context={
         'request': request
     })
-    #products = SearchCatalogImageSerializer(products_qs,context=ser_context, many=True)
+    # products = SearchCatalogImageSerializer(products_qs,context=ser_context, many=True)
     session = get_session_key(request)
 
     search_history = UserSearchData.objects.create(
         session=session, term=q, resultCount=products_qs.count())  # + len(mylogos.data)
     search_history.save()
-    all = products.data  # + mylogos.data
-    #all = all[0:20]
-    context = {'all': all,
+    all_data = products.data  # + mylogos.data
+    # all = all[0:20]
+    context = {'all': all_data,
                'q': q,
                'id': search_history.id}
     print('autocompleteModel', time.time() - start)
-    print('autocompleteModel', len(all))
+    print('autocompleteModel', len(all_data))
 
     end = time.time() - start
     print('autocompleteModel: ', start-end)
@@ -495,7 +720,7 @@ def form_changed(request):
         sumbited = False if form_data_dict['sumbited'] == '' else True
         obj, created = BeseContactInformation.objects.get_or_create(
             formUUID=formUUID)
-        #print('BeseContactInformation ', created, obj)
+        # print('BeseContactInformation ', created, obj)
         obj.name = name
         obj.email = email
         obj.phone = phone

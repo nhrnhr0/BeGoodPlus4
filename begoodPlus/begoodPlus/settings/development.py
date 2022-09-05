@@ -4,10 +4,10 @@ from .base import *
 
 from django.urls import path, include, re_path
 
-DEBUG=True
+DEBUG = True
 COMPRESS_ENABLED = False
 INSTALLED_APPS.append('debug_toolbar')
-#INSTALLED_APPS.insert(0,'livereload')
+# INSTALLED_APPS.insert(0,'livereload')
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
     'http://127.0.0.1:3000',
@@ -16,8 +16,8 @@ CORS_ALLOWED_ORIGINS = [
 
 MIDDLEWARE += [
     'debug_toolbar.middleware.DebugToolbarMiddleware',
-    #'silk.middleware.SilkyMiddleware',
-    #'livereload.middleware.LiveReloadScript',
+    # 'silk.middleware.SilkyMiddleware',
+    # 'livereload.middleware.LiveReloadScript',
 ]
 
 DEBUG_TOOLBAR_CONFIG = {
@@ -28,7 +28,35 @@ INTERNAL_IPS = [
     '*',
 ]
 
+def show_toolbar(request):
+    return True
+SHOW_TOOLBAR_CALLBACK = show_toolbar
+DEBUG_TOOLBAR_CONFIG = {
+    "SHOW_TOOLBAR_CALLBACK" : show_toolbar,
+}
+
 # INSTALLED_APPS += [
 #     'silk',
 # ]
 
+# LOGGING = {
+#     'version': 1,
+#     'filters': {
+#         'require_debug_true': {
+#             '()': 'django.utils.log.RequireDebugTrue',
+#         }
+#     },
+#     'handlers': {
+#         'console': {
+#             'level': 'DEBUG',
+#             'filters': ['require_debug_true'],
+#             'class': 'logging.StreamHandler',
+#         }
+#     },
+#     'loggers': {
+#         'django.db.backends': {
+#             'level': 'DEBUG',
+#             'handlers': ['console'],
+#         }
+#     }
+# }

@@ -12,9 +12,21 @@ from io import StringIO
 from rest_framework.parsers import JSONParser
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.utils import timezone
+import pytz
+import datetime
 # Create your views here.
 # api view to get all the active campains of a user
-
+def get_user_active_campaigns(user):
+    utc_zone = pytz.timezone('Israel')
+    utc_now = datetime.datetime.now(tz=utc_zone)
+    if(user.is_authenticated):
+        campains = MonthCampain.objects.filter(is_shown=True, users__in=[user.client], endTime__gte=utc_now, startTime__lte=utc_now)
+        print(campains.count())
+        campains = campains.order_by('album__id').distinct('album__id').prefetch_related('products',).select_related('album')
+        print(campains.count())
+        return campains
+    else:
+        return None
 def get_user_campains_serializer_data(user):
     if(user.is_anonymous):
         return {}

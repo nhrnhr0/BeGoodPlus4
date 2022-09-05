@@ -1,172 +1,182 @@
 <script>
-import { onMount } from 'svelte';
-import { fly } from 'svelte/transition';
+import { onMount } from "svelte";
+import { fly } from "svelte/transition";
 import AutoComplete from "simple-svelte-autocomplete";
-import {apiSearchProducts, fetch_wraper} from './api/api.js';
-import { Jumper } from 'svelte-loading-spinners'
+import { apiSearchProducts, fetch_wraper } from "./api/api.js";
+import { Jumper } from "svelte-loading-spinners";
 
-import {deepEqual} from './utils/utils.js'
-	import {GET_CAMPAIN_PRODUCTS_URL,CLOUDINARY_BASE_URL,GET_PRODUCT_COST_PRICE_URL} from './consts/consts'
-	export let object_id;
-	let need_update = false;
-	let data;
-	let server_data;
-	let updateing = false;
-	
-	onMount(async()=> {
-		let url = GET_CAMPAIN_PRODUCTS_URL + object_id;
-		console.log('url', url);
-		let resp = await fetch(url)
-			.then(response => response.json())
-			.then(data => data);
-		data = JSON.parse(JSON.stringify(resp));
-		server_data = JSON.parse(JSON.stringify(resp));
-		setInterval(check_server_updates, 500);
+import { deepEqual } from "./utils/utils.js";
+import {
+  GET_CAMPAIN_PRODUCTS_URL,
+  CLOUDINARY_BASE_URL,
+  GET_PRODUCT_COST_PRICE_URL,
+} from "./consts/consts";
+export let object_id;
+let need_update = false;
+let data;
+let server_data;
+let updateing = false;
 
-		// add event listener to the window when 
-		// <input type="submit" value="שמירה" class="default" name="_save">
-		// is clicked
-		window.addEventListener('submit', async(e) => {
-			debugger;
-			if (need_update) {
-				try {
-					await update_data_to_server();
-				} catch (e) {
-					console.log(e);
-				}
-			}
-			console.log('submit, after update_data_to_server');
-		});
-	});
-	
+onMount(async () => {
+  let url = GET_CAMPAIN_PRODUCTS_URL + object_id;
+  console.log("url", url);
+  let resp = await fetch(url)
+    .then((response) => response.json())
+    .then((data) => data);
+  data = JSON.parse(JSON.stringify(resp));
+  server_data = JSON.parse(JSON.stringify(resp));
+  setInterval(check_server_updates, 500);
 
-	function check_server_updates() {
-		//console.log('check_server_updates: ', JSON.stringify(data),'======', JSON.stringify(server_data));
-		console.log('data:', data);
-		console.log('server_data:', server_data);
-		if(deepEqual(data, server_data)) {
-			console.log('equal');
-			need_update = false;
-		} else {
-			console.log('not equal');
-			need_update = true;
-		}
-	}
-	
-	function admin_api_get_cost_price(prudct_id) {
-		let url = GET_PRODUCT_COST_PRICE_URL + prudct_id;
-		return fetch(url)
-			.then(response => response.json())
-	}
+  // add event listener to the window when
+  // <input type="submit" value="שמירה" class="default" name="_save">
+  // is clicked
+  window.addEventListener("submit", async (e) => {
+    debugger;
+    if (need_update) {
+      try {
+        await update_data_to_server();
+      } catch (e) {
+        console.log(e);
+      }
+    }
+    console.log("submit, after update_data_to_server");
+  });
+});
 
-	function update_data_to_server() {
-		// post the data to the server and the same api point as GET_CAMPAIN_PRODUCTS_URL
-		updateing = true;
-		let response = fetch_wraper(GET_CAMPAIN_PRODUCTS_URL + object_id, {
-			method: 'POST',
-			body: JSON.stringify(data)
-		});
+function check_server_updates() {
+  //console.log('check_server_updates: ', JSON.stringify(data),'======', JSON.stringify(server_data));
+  //   console.log("data:", data);
+  //   console.log("server_data:", server_data);
+  if (deepEqual(data, server_data)) {
+    // console.log("equal");
+    need_update = false;
+  } else {
+    // console.log("not equal");
+    need_update = true;
+  }
+}
 
-		console.log('response:', response);
-		return response.then(resp => {
-			console.log('resp:', resp);
-			server_data = JSON.parse(JSON.stringify(resp));
-			data = JSON.parse(JSON.stringify(resp));
-			updateing = false;
-			need_update = false;
-		});
-	}
+function admin_api_get_cost_price(prudct_id) {
+  let url = GET_PRODUCT_COST_PRICE_URL + prudct_id;
+  return fetch(url).then((response) => response.json());
+}
 
-	function autocompleteItemSelected(item) {
-		if(data) {
-			console.log(data);
-			console.log(item);
-			admin_api_get_cost_price(item.id).then((resp)=>{
-				console.log('const_price:', resp);
-				item.cost_price  = resp['cost_price']
-				let newProduct = {
-					order: data.length,
-					cimg: item.cimage,
-					title: item.title,
-					catalogImage: item.id,
-					priceTable: [],
-					cost_price: item.cost_price,
-					client_price: item.client_price,
-					newPrice: item.cost_price*2,
-				};
-				data.push(newProduct);
-				console.log(data);
-				data = data;			
-			});
-		}
-	}
+function update_data_to_server() {
+  // post the data to the server and the same api point as GET_CAMPAIN_PRODUCTS_URL
+  updateing = true;
+  let response = fetch_wraper(GET_CAMPAIN_PRODUCTS_URL + object_id, {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
 
+  console.log("response:", response);
+  return response.then((resp) => {
+    console.log("resp:", resp);
+    server_data = JSON.parse(JSON.stringify(resp));
+    data = JSON.parse(JSON.stringify(resp));
+    updateing = false;
+    need_update = false;
+  });
+}
 
-	let searchValue;
-        async function searchProducts(keyword) {
-            let json = await apiSearchProducts(keyword);
-            let data = json;
-            return data.all
-        }
+function autocompleteItemSelected(item) {
+  if (data) {
+    let found = data.find((v) => v.catalogImage == item.id);
+    if (found !== undefined) {
+      alert("מוצר כבר קיים בקמפיין");
+      return;
+    }
+    admin_api_get_cost_price(item.id).then((resp) => {
+      console.log("const_price:", resp);
+      item.cost_price = resp["cost_price"];
+      item.client_price = resp["client_price"];
+      let newProduct = {
+        order: data.length,
+        cimg: item.cimage,
+        title: item.title,
+        catalogImage: item.id,
+        priceTable: [],
+        cost_price: item.cost_price,
+        client_price: item.client_price,
+        newPrice: item.cost_price * 2,
+      };
+      data.push(newProduct);
+      console.log(data);
+      data = data;
+    });
+  }
+}
 
+let searchValue;
+async function searchProducts(keyword) {
+  let json = await apiSearchProducts(keyword);
+  let data = json;
+  return data.all;
+}
 </script>
 
 {#if object_id}
-<main>
-	<!-- 
+  <main>
+    <!-- 
 		table of products with collumns:
 			order
 			product_id
 			product_image
 	-->
-	<table class="main-table">
-		<thead>
-			<tr>
-				<th>פעולות</th>
-				<th>סדר</th>
-				<th>תמונה</th>
-				<th>מחיר עלות (לפני מע"מ)</th>
-				<th>מחיר באתר כרגע</th>
-				<th>מחיר מוצג ללקוח בקמפיין</th>
-			</tr>
-		</thead>
-		<tbody>
-			{#if data}
-			{#each data as product, j}
-			<tr>
-				<td>
-					<button on:click|preventDefault={(e)=> {
-											
-						// product.priceTable[i];
-						//product.priceTable = product.priceTable;
-						data.splice(j, 1);
-						data = data;
-						
-					}}>מחק</button>
-				</td>
-				<td>
-					<input type="number" bind:value={product.order}/>
-				</td>
-				<td>
-					<img width="50px" height="50px" src="{CLOUDINARY_BASE_URL}{product.cimg}" alt={product.title} />
-					<span>{product.title}</span>
-					<!-- 
+    <table class="main-table">
+      <thead>
+        <tr>
+          <th>פעולות</th>
+          <th>סדר</th>
+          <th>תמונה</th>
+          <th>מחיר עלות (לפני מע"מ)</th>
+          <th>מחיר באתר כרגע</th>
+          <th>מחיר מוצג ללקוח בקמפיין</th>
+        </tr>
+      </thead>
+      <tbody>
+        {#if data}
+          {#each data as product, j}
+            <tr>
+              <td>
+                <button
+                  on:click|preventDefault={(e) => {
+                    // product.priceTable[i];
+                    //product.priceTable = product.priceTable;
+                    data.splice(j, 1);
+                    data = data;
+                  }}>מחק</button
+                >
+              </td>
+              <td>
+                <input type="number" bind:value={product.order} />
+              </td>
+              <td>
+                <img
+                  width="50px"
+                  height="50px"
+                  src="{CLOUDINARY_BASE_URL}{product.cimg}"
+                  alt={product.title}
+                />
+                <span>{product.title}</span>
+                <!-- 
 						table of products with collumns:
 							amount
 							paymentType
 							price
 					-->
-				</td>
-				<td>
-					{product.cost_price} ₪
-				</td>
-				<td>
-					{product.client_price} ₪
-				</td>
-				<td>
-					<input type="number" bind:value={product.newPrice}/>
-					{(((product.newPrice / product.cost_price) - 1)*100).toFixed(2)} %
-					<!--
+              </td>
+              <td>
+                {product.cost_price} ₪
+              </td>
+              <td>
+                {product.client_price} ₪
+              </td>
+              <td>
+                <input type="number" bind:value={product.newPrice} />
+                {((product.newPrice / product.cost_price - 1) * 100).toFixed(2)}
+                %
+                <!--
 					<table>
 						<thead>
 							<tr>
@@ -220,65 +230,88 @@ import {deepEqual} from './utils/utils.js'
 						</tbody>
 					</table>
 					-->
-				</td>
-			</tr>
-			{/each}
-			{/if}
-			<tr>
-				<td></td>
-				<td colspan="1">
-					<form action="">
-						<AutoComplete id="search_input" on:focus loadingText="מחפש מוצרים..." createText="לא נמצאו תוצאות חיפוש" showLoadingIndicator=true noResultsText="" onChange={autocompleteItemSelected} create=true placeholder="חיפוש..." className="autocomplete-cls" searchFunction={searchProducts} delay=200 localFiltering="{false}" labelFieldName="title" valueFieldName="value" bind:value={searchValue}  >
-							<div slot="item" let:item={item} let:label={label}>
-								<div class="search-item">
-									<div class="inner">
-										<img alt="{item.title}" style="height:25px;" src="{CLOUDINARY_BASE_URL}f_auto,w_auto/{item.cimage}" />
-										{@html label}
-									</div>
-								</div>
-							</div>
-						</AutoComplete>
-					</form>
-				</td>
-				<td></td>
-			</tr>
-			
-		</tbody>
-		
-	</table>
-	
-	{#if need_update}
-		<button class="float-btn" transition:fly={{x:-50}} on:click|preventDefault="{update_data_to_server}">
-			{#if updateing}
-				<Jumper size="30" color="#FF3E00" unit="px" duration="1s"></Jumper>
-			{/if}
-				עדכן מידע לשרת
-		</button>
-	{/if}
-	
-<!--
+              </td>
+            </tr>
+          {/each}
+        {/if}
+        <tr>
+          <td />
+          <td colspan="1">
+            <form action="">
+              <AutoComplete
+                id="search_input"
+                on:focus
+                loadingText="מחפש מוצרים..."
+                createText="לא נמצאו תוצאות חיפוש"
+                showLoadingIndicator="true"
+                noResultsText=""
+                onChange={autocompleteItemSelected}
+                create="true"
+                placeholder="חיפוש..."
+                className="autocomplete-cls"
+                searchFunction={searchProducts}
+                delay="200"
+                localFiltering={false}
+                labelFieldName="title"
+                valueFieldName="value"
+                bind:value={searchValue}
+              >
+                <div slot="item" let:item let:label>
+                  <div class="search-item">
+                    <div class="inner">
+                      <img
+                        alt={item.title}
+                        style="height:25px;"
+                        src="{CLOUDINARY_BASE_URL}f_auto,w_auto/{item.cimage}"
+                      />
+                      {@html label}
+                    </div>
+                  </div>
+                </div>
+              </AutoComplete>
+            </form>
+          </td>
+          <td />
+        </tr>
+      </tbody>
+    </table>
+
+    {#if need_update}
+      <button
+        class="float-btn"
+        transition:fly={{ x: -50 }}
+        on:click|preventDefault={update_data_to_server}
+      >
+        {#if updateing}
+          <Jumper size="30" color="#FF3E00" unit="px" duration="1s" />
+        {/if}
+        עדכן מידע לשרת
+      </button>
+    {/if}
+
+    <!--
 	<h3>DATA: {JSON.stringify(data)}</h3>
 	<h3>server_data: {JSON.stringify(server_data)}</h3>
 -->
-</main>
+  </main>
+{/if}
 
-{/if} <!-- end of if object_id -->
-
+<!-- end of if object_id -->
 <style lang="scss">
-	.float-btn {
-		position: fixed;
-		bottom: 10px;
-		left: 10px;
-		z-index: 9999;
-		background: #417690;
-		font-size: xx-large;
-		border: 1px solid #ccc;
-		border-radius: 5px;
-		padding: 15px 25px;
-		cursor: pointer;
-		box-shadow: 0 0 5px #ccc;
-	}
-	/*:global(.search-item) {
+.float-btn {
+  position: fixed;
+  bottom: 10px;
+  left: 10px;
+  z-index: 9999;
+  background: #417690;
+  font-size: xx-large;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 15px 25px;
+  cursor: pointer;
+  box-shadow: 0 0 5px #ccc;
+}
+/*:global(.search-item) {
 		.inner {
 			display: flex;
 			align-items: center;
@@ -287,19 +320,21 @@ import {deepEqual} from './utils/utils.js'
 			border-bottom: 1px solid #ccc;
 		}
 	}*/
-	table, th, td {
-		border: 1px solid black;
-	}
-	main {
-		text-align: center;
-		padding: 1em;
-		max-width: 240px;
-		margin: 0 auto;
-	}
+table,
+th,
+td {
+  border: 1px solid black;
+}
+main {
+  text-align: center;
+  padding: 1em;
+  max-width: 240px;
+  margin: 0 auto;
+}
 
-	@media (min-width: 640px) {
-		main {
-			max-width: none;
-		}
-	}
+@media (min-width: 640px) {
+  main {
+    max-width: none;
+  }
+}
 </style>

@@ -10,4 +10,8 @@ def get_smartbee_doc(request, doc_id):
         return JsonResponse({'error': 'You are not authorized to access this resource'}, status=401)
     else:
         res = SmartbeeResults.request_smartbee_doc(doc_id)
-        return JsonResponse(res)
+        print(res)
+        if res:
+            return JsonResponse(res)
+        else:
+            return JsonResponse({'error': 'error getting the document'})

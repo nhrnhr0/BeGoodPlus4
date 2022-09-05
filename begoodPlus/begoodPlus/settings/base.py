@@ -10,6 +10,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
+import datetime
+from pathlib import Path
 import os
 
 from rest_framework.fields import DateTimeField
@@ -21,16 +23,15 @@ import cloudinary.api
 from begoodPlus.secrects import FULL_DOMAIN, SECRECT_BASE_MY_DOMAIN
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-
+BASE_DIR = os.path.dirname(os.path.dirname(
+    os.path.dirname(os.path.abspath(__file__))))
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-#SECRET_KEY = '#r*r40h()nfz(8duh2%98n2=2y$!7hd6law4t#_mkht3xafe(c'
+# SECRET_KEY = '#r*r40h()nfz(8duh2%98n2=2y$!7hd6law4t#_mkht3xafe(c'
 SECRET_KEY = secrects.SECRET_KEY
 #SECRET_KEY = '123456frtt5'
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -53,7 +54,7 @@ INSTALLED_APPS = [
 
 
     # 3rd party
-    #'django_crontab',
+    # 'django_crontab',
     'colorfield',
     'rest_framework',
     'rest_framework.authtoken',
@@ -66,15 +67,15 @@ INSTALLED_APPS = [
     'django_mptt_admin',
     'adminsortable',
     'admin_numeric_filter',
-    #'jet',
-    #'dbbackup',
-    #'webpush',
-    #'tof',
+    # 'jet',
+    # 'dbbackup',
+    # 'webpush',
+    # 'tof',
     'bootstrap5',
     'drf_multiple_model',
-    #'compressor',
+    # 'compressor',
     'advanced_filters',
-    #'rest_framework_simplejwt',
+    # 'rest_framework_simplejwt',
     'corsheaders',
     'celery',
     'django_celery_beat',
@@ -87,11 +88,11 @@ INSTALLED_APPS = [
     'productColor',
     'productSize',
     'packingType',
-    
+
     'catalogImages',
     'catalogAlbum',
     'catalogLogos',
-    
+
     'customerCart',
     'catalogImageDetail',
     'clientApi',
@@ -101,7 +102,7 @@ INSTALLED_APPS = [
     'morders',
     'inventory',
     'smartbee',
-    
+
     #### old unused modals ####
     'clientLikedImages',
     'myUserTasks',
@@ -118,12 +119,12 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    
+
     'django.contrib.staticfiles',
     'cloudinary_storage',
     'cloudinary',
 
-    #'debug_toolbar', # TODO: remove in production
+    # 'debug_toolbar', # TODO: remove in production
 ]
 
 CELERY_IMPORTS = [
@@ -139,13 +140,12 @@ CELERY_BEAT_SCHEDULE = {
 }
 
 
-
 # django-dbbackup
 DBBACKUP_STORAGE = 'django.core.files.storage.FileSystemStorage'
-DBBACKUP_STORAGE_OPTIONS = {'location': BASE_DIR  + '/backups/'}
-DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240 # higher than the count of fields
+DBBACKUP_STORAGE_OPTIONS = {'location': BASE_DIR + '/backups/'}
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240  # higher than the count of fields
 
-#cron
+# cron
 CRONJOBS = [
     ('59 23 * * *', 'begoodPlus.cron.my_db_backup')
 ]
@@ -162,36 +162,36 @@ CACHES = {
 # cache alias will be used. Set to `None` to disable caching.
 USER_AGENTS_CACHE = 'default'
 
-#django-compressor
+# django-compressor
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 
     # Add this
-    #'compressor.finders.CompressorFinder',
+    # 'compressor.finders.CompressorFinder',
 )
 
 MIDDLEWARE = [
-    #'debug_toolbar.middleware.DebugToolbarMiddleware', # TODO: remove in production
-    #django-compressor
+    # 'debug_toolbar.middleware.DebugToolbarMiddleware', # TODO: remove in production
+    # django-compressor
     'django.middleware.gzip.GZipMiddleware',
-    #'htmlmin.middleware.HtmlMinifyMiddleware',
-    #'htmlmin.middleware.MarkRequestMiddleware',
-    
-    
+    # 'htmlmin.middleware.HtmlMinifyMiddleware',
+    # 'htmlmin.middleware.MarkRequestMiddleware',
+
+
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
-    #'django.middleware.csrf.CsrfViewMiddleware',
+    # 'django.middleware.csrf.CsrfViewMiddleware',
     'core.middleware.DisableCSRF',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 
     # own
-    #'django.middleware.locale.LocaleMiddleware',
-    #'django_user_agents.middleware.UserAgentMiddleware',
+    # 'django.middleware.locale.LocaleMiddleware',
+    # 'django_user_agents.middleware.UserAgentMiddleware',
     'core.middleware.BaseMiddleware',
 ]
 
@@ -220,17 +220,17 @@ ROOT_URLCONF = 'begoodPlus.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'static_cdn','templates'),
-                os.path.join(BASE_DIR, 'static_cdn', 'svelte', 'templates')],
+        'DIRS': [os.path.join(BASE_DIR, 'static_cdn', 'templates'),
+                 os.path.join(BASE_DIR, 'static_cdn', 'svelte', 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
-                #'django.core.context_processors.request', #my code
+                # 'django.core.context_processors.request', #my code
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                
+
                 # own
                 'pages.context_processors.navbar_load',
                 'core.context_processors.loadBaseInfo',
@@ -261,15 +261,15 @@ DATABASES = {
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
-    #{
+    # {
     #    'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    #},
+    # },
     {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
     },
-    #{
+    # {
     #    'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    #},
+    # },
     {
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
@@ -291,34 +291,32 @@ USE_L10N = True
 # use timezone
 
 TIME_ZONE = 'Israel'
-USE_TZ = True 
+USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 
-
 LOCALE_PATHS = [
     os.path.join(BASE_DIR, 'locale')
 ]
-from pathlib import Path
 
-STATIC_ROOT= os.path.join(BASE_DIR, "static") # when changed, change allso templates location
+# when changed, change allso templates location
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static_cdn"),
     Path(BASE_DIR).parent / "svelte" / "public" / "build",
 ]
-
-MEDIA_URL= '/media/'
+MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(STATIC_ROOT, 'media_root/')
 CLOUDINARY_BASE_URL = 'https://res.cloudinary.com/ms-global/image/upload/'
-cloudinary.config( 
-  cloud_name = secrects.CLOUDINARY_NAME,
-  api_key = secrects.CLOUDINARY_KEY,
-  api_secret = secrects.CLOUDINARY_SECRECT,
-  secure = True
+cloudinary.config(
+    cloud_name=secrects.CLOUDINARY_NAME,
+    api_key=secrects.CLOUDINARY_KEY,
+    api_secret=secrects.CLOUDINARY_SECRECT,
+    secure=True
 )
 DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
 CLOUDINARY_STORAGE = {
@@ -335,11 +333,10 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
 EMAIL_HOST_USER = secrects.EMAIL_HOST_USER
-EMAIL_HOST_PASSWORD =  secrects.EMAIL_HOST_PASSWORD
+EMAIL_HOST_PASSWORD = secrects.EMAIL_HOST_PASSWORD
 MAIN_EMAIL_RECEIVER = secrects.MAIN_EMAIL_RECEIVER
 # from django.core.mail import send_mail
 # send_mail(subject='hey', message='message', from_email='bot@ms-global.co.il', recipient_list=['nhrnhr0@gmail.com'])
-import datetime
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': datetime.timedelta(minutes=1),
@@ -351,7 +348,7 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticatedOrReadOnly',
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework.authentication.BasicAuthentication',
+        # 'rest_framework.authentication.BasicAuthentication',
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.TokenAuthentication',
         'core.authentication.TokenAuthSupportCookie',
@@ -360,7 +357,7 @@ REST_FRAMEWORK = {
 
 WEBPUSH_SETTINGS = {
     "VAPID_PUBLIC_KEY": secrects.VAPID_PUBLIC_KEY,
-    "VAPID_PRIVATE_KEY":secrects.VAPID_PRIVATE_KEY,
+    "VAPID_PRIVATE_KEY": secrects.VAPID_PRIVATE_KEY,
     "VAPID_ADMIN_EMAIL": "computer-support@ms-global.co.il"
 }
 
@@ -369,4 +366,4 @@ BROKER_USER = secrects.BROKER_USER
 BROKER_PASSWOD = secrects.BROKER_PASSWORD
 
 MY_DOMAIN = FULL_DOMAIN  # '127.0.0.1:8000'
-CSRF_COOKIE_DOMAIN = '.' +  SECRECT_BASE_MY_DOMAIN
+CSRF_COOKIE_DOMAIN = '.' + SECRECT_BASE_MY_DOMAIN

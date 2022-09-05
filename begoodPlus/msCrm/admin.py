@@ -12,7 +12,7 @@ from django.utils.html import mark_safe
 
 class LeadSubmitAdmin(admin.ModelAdmin):
     list_display = ('id', 'businessType','bussiness_name','address','name','phone','created_at','updated_at',)   
-    #filter_horizontal= ('businessTypeSelects',)
+    #filter_horizontal= ('businessType',)
 admin.site.register(LeadSubmit, LeadSubmitAdmin)
 
 
@@ -53,7 +53,7 @@ class MsCrmUserAdmin(AdminAdvancedFiltersMixin, admin.ModelAdmin):
     #advanced_filter_fields = (('מתי נוצר', 'created_at'), ('מתי עודכן', 'updated_at'), ('בחירת שם עסק', 'businessName__name'), ('שם עסק לא מוגדר', 'businessTypeCustom'), 'name', 'phone', 'email', 'address', 'want_emails', 'want_whatsapp')
     advanced_filter_fields = (( 'created_at','מתי נוצר'), ( 'updated_at','מתי עודכן'), ( 'businessName','שם העסק'), ('businessSelect', 'בחירת סוג עסק מספר'),('businessSelect__name', 'בחירת סוג עסק'),('businessTypeCustom','סוג עסק לא מוגדר',), 'name', 'phone', 'email', 'address', 'want_emails', 'want_whatsapp', ('intrests__title', 'תחומי עניין'))
     ordering = ('-created_at',)
-    filter_horizontal = ('intrests',)
+    filter_horizontal = ('intrests','clients',)
     actions = ['export_xlsx_for_whatsapp','download_full_CRM',]
     
     
