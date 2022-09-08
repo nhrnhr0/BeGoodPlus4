@@ -298,6 +298,8 @@ class SvelteCartModal(models.Model):
                               null=True, blank=True, related_name='agent', verbose_name=_('agent'))
     order_type = models.CharField(verbose_name=_(
         'order type'), max_length=120, null=True, blank=True)
+    # order_type = models.CharField(max_length=120, choices=[('Invoice', 'חשבונית מס'), ('RefundInvoice', 'חשבונית זיכוי'), (
+    #     'PriceProposal', 'הצעת מחיר'), ('ShippingCertificate', 'תעודת משלוח'), ('ReturnCertificate', 'תעודת החזרה')], blank=True, null=True)
 
     def cart_count(self):
         return self.productEntries.count()
@@ -404,7 +406,7 @@ class SvelteCartModal(models.Model):
             email = self.email
         message = self.message if self.message != '' else ''
         agent = self.agent if self.agent != '' else ''
-        status = 'new'
+        status = 'price_proposal' if self.order_type == 'הצעת מחיר' else 'new'
         products = self.productEntries.all()
         products_list = []
         for i in products:
@@ -450,7 +452,8 @@ class SvelteCartModal(models.Model):
             else:
                 ONE_SIZE_ID = 108
                 NO_COLOR_ID = 76
-                currentProduct['entries'] = [{'size_id': ONE_SIZE_ID, 'color_id': NO_COLOR_ID, 'varient_id': None, 'quantity': i.amount}]
+                currentProduct['entries'] = [
+                    {'size_id': ONE_SIZE_ID, 'color_id': NO_COLOR_ID, 'varient_id': None, 'quantity': i.amount}]
             products_list.append(currentProduct)
         #order_product = [MOrderItem(product=i['product'], price=i['price']) for i in products_list]
         # MOrderItem.objects.bulk_create(order_product)
@@ -467,6 +470,7 @@ class SvelteCartModal(models.Model):
         morder = MOrder.objects.create(cart=cart, client=client, name=name,
                                        phone=phone, email=email, status=status, message=message, agent=agent)
         morder.products.add(*dbProducts)
+        morder.save()
 
     def __str__(self):
         # Return a string that represents the instance

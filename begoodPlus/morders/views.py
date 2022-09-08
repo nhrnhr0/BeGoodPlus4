@@ -32,7 +32,7 @@ from django.db import connection, reset_queries
 from django.db.models import F
 
 from django.template.loader import get_template
-#from docxtpl import DocxTemplate
+# from docxtpl import DocxTemplate
 from productSize.models import ProductSize
 from docx.enum.table import WD_TABLE_DIRECTION
 
@@ -95,7 +95,7 @@ def provider_request_update_entry_admin(request):
                 quantity=data['quantity'],
             )
             obj.orderItem.add(morderItem)
-        #morder = MOrder.objects.get(id=data['morder'])
+        # morder = MOrder.objects.get(id=data['morder'])
 
     print(obj)
     obj.save()
@@ -253,7 +253,7 @@ def create_providers_docx(doc_data):
         settings.BASE_DIR, 'static_cdn\\assets\\images\\provider_docx_header.png')
     document.add_picture(file_location, width=Inches(6))
 
-    #document = Document()
+    # document = Document()
 
     rtlstyle = document.styles.add_style('rtl', WD_STYLE_TYPE.PARAGRAPH)
     rtlstyle.font.rtl = True
@@ -299,8 +299,8 @@ def create_providers_docx(doc_data):
     #     # row_cells[2].text = row['size__size']
     #     for i in range(df.shape[1]):
     #         row_cells[i].text = str(row[df.shape[1]-i-1])
-    #p = document.add_heading(df.to_html(), level=1)
-    #p.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+    # p = document.add_heading(df.to_html(), level=1)
+    # p.alignment = WD_ALIGN_PARAGRAPH.RIGHT
 
     # add a table to the end and create a reference variable
     # extra row is so we can add the header row
@@ -585,7 +585,7 @@ def dashboard_orders_collection_smartbee(request, id):
 
     print(id)
     morder = MOrder.objects.get(id=id)
-    #info = morder_to_smartbe_json(morder)
+    # info = morder_to_smartbe_json(morder)
     info = morder.create_smartbe_order()
     morder.subtract_collected_inventory(request.user)
 
@@ -727,8 +727,8 @@ def list_orders_to_collect(request):
 def api_get_order_data2(request, id):
     if request.user.is_superuser == False:
         return JsonResponse({'error': 'You are not authorized to perform this action'}, status=status.HTTP_401_UNAUTHORIZED)
-    #data = AdminMOrderSerializer(order).data
-    #print('querys: => ', connection.queries)
+    # data = AdminMOrderSerializer(order).data
+    # print('querys: => ', connection.queries)
 
     if request.method == 'POST':
         order = MOrder.objects.select_related('client', 'agent').prefetch_related('products', 'products__product__albums', 'products__taken', 'products__entries', 'products__entries__color', 'products__entries__size', 'products__entries__varient',).get(
@@ -741,7 +741,7 @@ def api_get_order_data2(request, id):
         for product in newData['products']:
             if product['id'] != None:
                 item = MOrderItem.objects.get(id=product['id'])
-                #obj.quantity = product['quantity']
+                # obj.quantity = product['quantity']
                 item.price = product['price']
                 item.prining = product['prining']
                 if(item.prining):
@@ -858,13 +858,14 @@ def api_get_order_data2(request, id):
                     )
 
                 item.taken.add(obj)
-                #print('setup', obj.id, ' => ',inventory_takes['taken'])
+                # print('setup', obj.id, ' => ',inventory_takes['taken'])
                 obj.quantity = inventory_takes.get('taken', 0)
-                #obj.toOrder = inventory_takes.get('toOrder',0)
+                # obj.toOrder = inventory_takes.get('toOrder',0)
                 # if obj.quantity < 0:# and obj.toOrder <= 0:
                 #     obj.delete()
                 obj.save()
 
+        order.total_sell_price = order.prop_totalPrice
         order.save()
     order = MOrder.objects.select_related('client', 'agent').prefetch_related('products__toProviders', 'products', 'products__product__albums', 'products__taken', 'products__entries', 'products__entries__color', 'products__entries__size', 'products__entries__varient',).get(
         id=id)  # 'products__taken__quantity','products__taken__color','products__taken__size','products__taken__varient','products__taken__barcode','products__taken__has_physical_barcode','products__taken__provider')
@@ -918,16 +919,26 @@ def api_get_order_data(request, id):
             all_es = []
             for entry in product['entries']:
                 '''
-                    {'id': 103, 'quantity': 0, 'color': 77, 'size': 87, 'varient': None, 'color_name': 'שחור', 'size_name': 'S', 'varient_name': ''}
-                    {'id': 104, 'quantity': 0, 'color': 77, 'size': 88, 'varient': None, 'color_name': 'שחור', 'size_name': 'M', 'varient_name': ''}
-                    {'id': 105, 'quantity': 4, 'color': 77, 'size': 89, 'varient': None, 'color_name': 'שחור', 'size_name': 'L', 'varient_name': ''}
-                    {'id': 106, 'quantity': 4444, 'color': 77, 'size': 90, 'varient': None, 'color_name': 'שחור', 'size_name': 'XL', 'varient_name': ''}
-                    {'id': 107, 'quantity': 0, 'color': 77, 'size': 91, 'varient': None, 'color_name': 'שחור', 'size_name': '2XL', 'varient_name': ''}
-                    {'id': 108, 'quantity': 0, 'color': 78, 'size': 87, 'varient': None, 'color_name': 'לבן', 'size_name': 'S', 'varient_name': ''}
-                    {'id': 109, 'quantity': 0, 'color': 78, 'size': 88, 'varient': None, 'color_name': 'לבן', 'size_name': 'M', 'varient_name': ''}
-                    {'id': 110, 'quantity': 4, 'color': 78, 'size': 89, 'varient': None, 'color_name': 'לבן', 'size_name': 'L', 'varient_name': ''}
-                    {'id': 111, 'quantity': 0, 'color': 78, 'size': 90, 'varient': None, 'color_name': 'לבן', 'size_name': 'XL', 'varient_name': ''}
-                    {'id': 112, 'quantity': 0, 'color': 78, 'size': 91, 'varient': None, 'color_name': 'לבן', 'size_name': '2XL', 'varient_name': ''}
+                    {'id': 103, 'quantity': 0, 'color': 77, 'size': 87, 'varient': None,
+                        'color_name': 'שחור', 'size_name': 'S', 'varient_name': ''}
+                    {'id': 104, 'quantity': 0, 'color': 77, 'size': 88, 'varient': None,
+                        'color_name': 'שחור', 'size_name': 'M', 'varient_name': ''}
+                    {'id': 105, 'quantity': 4, 'color': 77, 'size': 89, 'varient': None,
+                        'color_name': 'שחור', 'size_name': 'L', 'varient_name': ''}
+                    {'id': 106, 'quantity': 4444, 'color': 77, 'size': 90, 'varient': None,
+                        'color_name': 'שחור', 'size_name': 'XL', 'varient_name': ''}
+                    {'id': 107, 'quantity': 0, 'color': 77, 'size': 91, 'varient': None,
+                        'color_name': 'שחור', 'size_name': '2XL', 'varient_name': ''}
+                    {'id': 108, 'quantity': 0, 'color': 78, 'size': 87, 'varient': None,
+                        'color_name': 'לבן', 'size_name': 'S', 'varient_name': ''}
+                    {'id': 109, 'quantity': 0, 'color': 78, 'size': 88, 'varient': None,
+                        'color_name': 'לבן', 'size_name': 'M', 'varient_name': ''}
+                    {'id': 110, 'quantity': 4, 'color': 78, 'size': 89, 'varient': None,
+                        'color_name': 'לבן', 'size_name': 'L', 'varient_name': ''}
+                    {'id': 111, 'quantity': 0, 'color': 78, 'size': 90, 'varient': None,
+                        'color_name': 'לבן', 'size_name': 'XL', 'varient_name': ''}
+                    {'id': 112, 'quantity': 0, 'color': 78, 'size': 91, 'varient': None,
+                        'color_name': 'לבן', 'size_name': '2XL', 'varient_name': ''}
                 '''
                 e = p.entries.filter(id=entry['id'])
                 qyt = entry.get('quantity', '')
@@ -941,22 +952,47 @@ def api_get_order_data(request, id):
                     if qyt > 0:
                         e.quantity = qyt
                         e.save()
+                        dups = p.entries.filter(
+                            Q(color=e.color) and
+                            Q(size=e.size) and
+                            Q(varient=e.varient) and
+                            Q(morder_item=p) and
+                            ~Q(id=e.id)
+                        )
+                        if dups.count() != 0:
+                            print('delete all dups: ', dups)
+                            dups.delete()
                     else:
                         e.delete()
                 else:
                     if qyt > 0:
-                        e = MOrderItemEntry(
-                            quantity=qyt, color_id=entry['color'], size_id=entry['size'], varient_id=entry.get('varient', None))
-                        e.morder_item = p
-                        e.save()
-                        p.entries.add(e)
+                        existing_entry = p.entries.filter(
+                            color_id=entry['color'], size_id=entry['size'], varient_id=entry.get('varient', None))
+                        if existing_entry.count() != 0:
+                            existing_entry = existing_entry.first()
+                            existing_entry.quantity = qyt
+                            existing_entry.save()
+                        else:
+                            e = MOrderItemEntry(
+                                quantity=qyt, color_id=entry['color'], size_id=entry['size'], varient_id=entry.get('varient', None))
+                            e.morder_item = p
+                            e.save()
+                            p.entries.add(e)
                 # e.
 
                 # print('e2', e, 'save')
-
+                p.save()
         order.save()
+        total_price = 0
+        ord = MOrder.objects.get(id=order.id)
+        for item in ord.products.all():
+            totalEntriesQuantity = sum(
+                [entry.quantity for entry in item.entries.all()])
+            total_price += totalEntriesQuantity * item.price
+        ord.total_sell_price = total_price
+        ord.save()
         return JsonResponse({'status': 'ok'}, status=status.HTTP_200_OK)
     #order = MOrder.objects.select_related('client',).prefetch_related('products','products__entries', 'products__entries__color', 'products__entries__size', 'products__entries__varient').get(id=id)#
-    #order = order.select_related('client',).prefetch_related('products','products__entries', 'products__entries__color', 'products__entries__size', 'products__entries__varient')
+    # order = order.select_related('client',).prefetch_related('products','products__entries', 'products__entries__color', 'products__entries__size', 'products__entries__varient')
     data = AdminMOrderSerializer(order).data
     return JsonResponse(data, status=status.HTTP_200_OK)

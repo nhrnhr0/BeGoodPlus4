@@ -14,7 +14,7 @@ import json
 from .models import Customer, BeseContactInformation
 from django.contrib.contenttypes.models import ContentType
 import time
-from .tasks import product_photo_send_notification, send_cantacts_notificatios, send_cart_notification, send_question_notification, test
+from .tasks import product_photo_send_notification, send_cantacts_notificatios, send_cart_notification, send_question_notification, test, turn_to_morder_task
 import xlsxwriter
 import io
 import pandas as pd
@@ -515,10 +515,12 @@ def svelte_cart_form(request):
         db_cart.productEntries.set(data)
         db_cart.save()
         if (settings.DEBUG):
-            # send_cart_notification(db_cart.id)
+            send_cart_notification(db_cart.id)
+            turn_to_morder_task(db_cart.id)
             pass
         else:
             send_cart_notification.delay(db_cart.id)
+            turn_to_morder_task.delay(db_cart.id)
         return JsonResponse({
             'status': 'success',
             'detail': 'form sent successfuly',

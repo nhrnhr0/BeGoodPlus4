@@ -232,6 +232,7 @@ function add_entry_btn_clicked(e) {
 //     'in_progress3', 'בהדפסה',), ('in_progress4', 'מוכן בבית דפוס'), ('in_progress5', 'ארוז מוכן למשלוח'), ('done', 'סופק'), ]
 const STATUS_OPTIONS = [
   ["new", "חדש"],
+  ["price_proposal", "הצעת מחיר"],
   ["in_progress", "סחורה הוזמנה"],
   ["in_progress2", "מוכן לליקוט"],
   ["in_progress3", "בהדפסה"],

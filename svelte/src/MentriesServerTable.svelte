@@ -365,6 +365,12 @@ function clear_sizes_entries(color_key) {
               }, 0)}
           </td>
         {/each}
+
+        <td class="total-cell full-total">
+          {product.entries.reduce((acc, curr) => {
+            return acc + parseInt(curr.quantity || "0");
+          }, 0)}
+        </td>
       </tfoot>
     </table>
   {/if}
@@ -390,6 +396,9 @@ function clear_sizes_entries(color_key) {
   margin: 2px;
   text-align: center;
   color: white;
+  &.full-total {
+    background-color: #8a8989e0;
+  }
 }
 .single-input-wraper {
   width: 100%;
