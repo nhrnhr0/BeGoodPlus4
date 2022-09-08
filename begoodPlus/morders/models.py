@@ -29,6 +29,8 @@ from django.db.models.functions import Length
 from begoodPlus.secrects import SMARTBEE_DOMAIN, SMARTBEE_providerUserToken
 from smartbee.models import SmartbeeResults, SmartbeeTokens
 import requests
+from django.db.models.signals import pre_save, post_save, m2m_changed
+from django.dispatch import receiver
 
 
 class CollectedInventory(models.Model):
@@ -139,6 +141,9 @@ class MOrder(models.Model):
         [item.prop_totalPrice for item in self.products.all()]))
     prop_totalPricePlusTax = property(
         lambda self: self.prop_totalPrice * Decimal('1.17'))
+
+    total_sell_price = models.FloatField(
+        _('total sell price'), default=0)
 
     class Meta:
         ordering = ['-created']
@@ -298,3 +303,13 @@ class MOrder(models.Model):
         html = df.to_html(index=True, header=True,
                           table_id='table_id', na_rep='-')
         return mark_safe(html)
+
+
+@receiver(post_save, sender=MOrder, dispatch_uid="recalculate_total_price")
+def recalculate_total_price_post_save(sender, instance, **kwargs):
+    new_price = instance.prop_totalPrice
+    if instance.total_sell_price != new_price:
+        instance.total_sell_price = new_price
+        instance.save()
+
+    print('recalculate_total_price_post_save: ', instance.total_sell_price)

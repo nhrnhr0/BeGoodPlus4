@@ -470,6 +470,7 @@ class SvelteCartModal(models.Model):
         morder = MOrder.objects.create(cart=cart, client=client, name=name,
                                        phone=phone, email=email, status=status, message=message, agent=agent)
         morder.products.add(*dbProducts)
+        morder.save()
 
     def __str__(self):
         # Return a string that represents the instance

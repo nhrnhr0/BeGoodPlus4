@@ -81,12 +81,12 @@ admin.site.register(ProviderRequest, ProviderRequestAdmin)
 
 class MOrderAdmin(admin.ModelAdmin):
     model = MOrder
-    fields = ('cart', 'client', 'name', 'phone', 'email',
+    fields = ('cart', 'total_sell_price', 'client', 'name', 'phone', 'email',
               'status', 'message',)  # what is this for?
-    readonly_fields = ('created', 'updated', 'get_edit_url',
-                       'view_morder_pdf_link', 'view_morder_stock_document_link',)
-    list_display = ('id', 'client', 'name', 'status', 'status_msg', 'created', 'updated',
-                    'get_edit_url', 'view_morder_pdf_link', 'view_morder_stock_document_link',)
+    readonly_fields = ('created', 'total_sell_price', 'updated', 'get_edit_url',
+                       'view_morder_pdf_link',)
+    list_display = ('id', 'client', 'name', 'status', 'status_msg', 'total_sell_price', 'created', 'updated',
+                    'get_edit_url', 'view_morder_pdf_link',)
     list_editable = ('status', 'status_msg',)
     # filter_horizontal = ('products',)
     list_filter = ('status', 'created', 'updated',)
