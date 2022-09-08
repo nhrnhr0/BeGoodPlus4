@@ -278,17 +278,19 @@ def get_main_info(request):
 
 def get_product_og_meta(product_id):
     product = CatalogImage.objects.get(id=product_id)
+    cimage = product.cimage if product.cimage else 'undefined'
     #
     return {
-        'icon': 'https://res.cloudinary.com/ms-global/image/upload/c_scale,w_365/c_scale,u_v1649744644:msAssets:image_5_qo7yhx.jpg,w_500/' + product.cimage,
+        'icon': 'https://res.cloudinary.com/ms-global/image/upload/c_scale,w_365/c_scale,u_v1649744644:msAssets:image_5_qo7yhx.jpg,w_500/' + cimage,
         'title': product.title,
         'description': product.description[:175] + '...',
     }
 
 
 def get_album_og_meta(album):
+    album_cimage = album.cimage if album.cimage else 'undefined'
     return {
-        'icon': 'https://res.cloudinary.com/ms-global/image/upload/c_scale,w_365/c_scale,u_v1649744644:msAssets:image_5_qo7yhx.jpg,w_500/' + album.cimage,
+        'icon': 'https://res.cloudinary.com/ms-global/image/upload/c_scale,w_365/c_scale,u_v1649744644:msAssets:image_5_qo7yhx.jpg,w_500/' + album_cimage,
         'title': album.title,
         'description': album.description[:175] + '...',
         'keywords': album.keywords,

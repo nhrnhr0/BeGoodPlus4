@@ -49,7 +49,7 @@ class TakenInventory(models.Model):
     provider = models.ForeignKey(to=Provider, on_delete=models.CASCADE,)
     collected = models.ManyToManyField(
         to=CollectedInventory, related_name='taken_inventory')
-    #toOrder = models.IntegerField(default=0)
+    # toOrder = models.IntegerField(default=0)
 
 
 class MOrderItemEntry(models.Model):
@@ -77,14 +77,14 @@ class MOrderItem(models.Model):
     """
     product = models.ForeignKey(to=CatalogImage, on_delete=models.CASCADE)
     price = models.DecimalField(max_digits=10, decimal_places=2)
-    #quantity = models.IntegerField(default=1)
-    #color = models.ForeignKey(to=Color, on_delete=models.SET_DEFAULT,default=76, null=True, blank=True)
-    #size = models.ForeignKey(to=ProductSize, on_delete=models.SET_DEFAULT, default=108, null=True, blank=True)
-    #varient = models.ForeignKey(to=CatalogImageVarient, on_delete=models.CASCADE, null=True, blank=True)
-    #provider = models.ForeignKey(to=Provider, on_delete=models.SET_DEFAULT, default=7)
+    # quantity = models.IntegerField(default=1)
+    # color = models.ForeignKey(to=Color, on_delete=models.SET_DEFAULT,default=76, null=True, blank=True)
+    # size = models.ForeignKey(to=ProductSize, on_delete=models.SET_DEFAULT, default=108, null=True, blank=True)
+    # varient = models.ForeignKey(to=CatalogImageVarient, on_delete=models.CASCADE, null=True, blank=True)
+    # provider = models.ForeignKey(to=Provider, on_delete=models.SET_DEFAULT, default=7)
     providers = models.ManyToManyField(to=Provider, blank=True)
-    #clientProvider = models.CharField(max_length=255, null=True, blank=True)
-    #clientBuyPrice = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    # clientProvider = models.CharField(max_length=255, null=True, blank=True)
+    # clientBuyPrice = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     ergent = models.BooleanField(default=False)
     prining = models.BooleanField(default=False)
     priningComment = models.CharField(max_length=255, null=True, blank=True)
@@ -122,9 +122,11 @@ class MOrder(models.Model):
     name = models.CharField(max_length=100, blank=True, null=True, default='')
     phone = models.CharField(max_length=100, blank=True, null=True, default='')
     email = models.CharField(max_length=100, blank=True, null=True, default='')
-    status = models.CharField(max_length=100, choices=[('new', 'חדש'), ('in_progress', 'סחורה הוזמנה'), ('in_progress2', 'מוכן לליקוט',), (
+    status = models.CharField(max_length=100, choices=[('new', 'חדש'), ('price_proposal', 'הצעת מחיר'), ('in_progress', 'סחורה הוזמנה'), ('in_progress2', 'מוכן לליקוט',), (
         'in_progress3', 'בהדפסה',), ('in_progress4', 'מוכן בבית דפוס'), ('in_progress5', 'ארוז מוכן למשלוח'), ('done', 'סופק'), ], default='new')
     status_msg = models.TextField(_('status message'), blank=True, null=True)
+    # order_type = models.CharField(max_length=100, choices=[('Invoice', 'חשבונית מס'), ('RefundInvoice', 'חשבונית זיכוי'), (
+    #     'PriceProposal', 'הצעת מחיר'), ('ShippingCertificate', 'תעודת משלוח'), ('ReturnCertificate', 'תעודת החזרה')], blank=True, null=True)
     products = models.ManyToManyField(
         to=MOrderItem, blank=True, related_name='morder')
     message = models.TextField(null=True, blank=True)
@@ -157,17 +159,8 @@ class MOrder(models.Model):
     def morder_to_smartbe_json(self):
         collected_items = CollectedInventory.objects.filter(
             taken_inventory__orderItem__morder=self)
-        vals = collected_items.values('warehouseStock__ppn__product__id', 'warehouseStock__ppn__product__title', 'warehouseStock__ppn__barcode', 'taken_inventory__orderItem__price')\
-            .order_by('warehouseStock__ppn__product__title', 'warehouseStock__ppn__barcode')\
-            .annotate(quantity=Sum('quantity'), providerItemId=F('warehouseStock__ppn__product__id'), barcodeLen=Length(F('warehouseStock__ppn__barcode')),
-                      catNumber=F('warehouseStock__ppn__product__id'), pricePerUnit=F('taken_inventory__orderItem__price'),
-                      vatOption=Value("NotInclude", output_field=models.CharField()), description=Case(
-                When(barcodeLen__gte=1, then=Concat(F('warehouseStock__ppn__barcode',), Value(
-                    ' | '), F('warehouseStock__ppn__product__title'))),
-                default=F(
-                    'warehouseStock__ppn__product__title'),
-            ))\
-            .values('quantity', 'providerItemId', 'catNumber', 'pricePerUnit', 'vatOption', 'description')
+        vals = collected_items.values('warehouseStock__ppn__product__id', 'warehouseStock__ppn__product__title', 'warehouseStock__ppn__barcode', 'taken_inventory__orderItem__price').order_by('warehouseStock__ppn__product__title', 'warehouseStock__ppn__barcode').annotate(quantity=Sum('quantity'), providerItemId=F('warehouseStock__ppn__product__id'), barcodeLen=Length(F('warehouseStock__ppn__barcode')), catNumber=F(
+            'warehouseStock__ppn__product__id'), pricePerUnit=F('taken_inventory__orderItem__price'), vatOption=Value("NotInclude", output_field=models.CharField()), description=Case(When(barcodeLen__gte=1, then=Concat(F('warehouseStock__ppn__barcode',), Value(' | '), F('warehouseStock__ppn__product__title'))), default=F('warehouseStock__ppn__product__title'),)).values('quantity', 'providerItemId', 'catNumber', 'pricePerUnit', 'vatOption', 'description')
 
         info = {
             "providerUserToken": SMARTBEE_providerUserToken,
@@ -241,7 +234,7 @@ class MOrder(models.Model):
                 size_order = entry.size.code if entry.size != None else defualt_size.code
                 varient = entry.varient.name if entry.varient != None else ''
                 key = tuple([color, size, varient, color_order, size_order])
-                #entries.append([color, size,varient,entry.quantity])
+                # entries.append([color, size,varient,entry.quantity])
                 entries[key] = entry.quantity
             item_data = {'title': item.product.title, 'total_quantity': item.prop_totalEntriesQuantity,
                          'price': item.price,
@@ -294,11 +287,11 @@ class MOrder(models.Model):
         print(df.columns)
         print(df.head())
         # df['cell_display'] = df['quantity'].astype(str)# + ' ' + df['price'].astype(str) + '₪'
-        #df['price_display'] = df['price'] + '₪'
+        # df['price_display'] = df['price'] + '₪'
         if len(df) == 0:
             return mark_safe(df.to_html(index=False))
         df = df.pivot(index=['product', 'color', 'varient',
-                      'price'], columns='size', values=['quantity'])
+                             'price'], columns='size', values=['quantity'])
 
         print(df.columns)
         print(df.head())

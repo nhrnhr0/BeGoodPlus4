@@ -1,4 +1,13 @@
 from __future__ import absolute_import, unicode_literals
+import datetime
+from django.template.loader import render_to_string
+from begoodPlus.celery import telegram_bot
+import telegram
+from begoodPlus.secrects import TELEGRAM_CHAT_ID_CARTS, MAIN_EMAIL_RECEIVER, TELEGRAM_CHAT_ID_LEADS, TELEGRAM_CHAT_ID_PRODUCT_PHOTO, TELEGRAM_CHAT_ID_QUESTIONS
+from django.conf import settings
+from django.utils.html import strip_tags
+from django.core import mail
+from django.utils import timezone
 import email
 
 from begoodPlus.celery import app
@@ -13,12 +22,12 @@ from core.models import SvelteCartModal, SvelteContactFormModal, UserProductPhot
 
 
 @shared_task
-def test(a,b):
+def test(a, b):
     print('hey')
     time.sleep(5)
     return a+b
-import datetime
-from django.utils import timezone
+
+
 @shared_task
 def close_inactive_user_sessions():
     print('=================== close_inactive_user_sessions is running ==========================')
@@ -42,13 +51,7 @@ def close_inactive_user_sessions():
             ret.append({session, False})
     return ret
 
-from django.template.loader import render_to_string
-from django.core import mail
-from django.utils.html import strip_tags
-from django.conf import settings
-from begoodPlus.secrects import TELEGRAM_CHAT_ID_CARTS, MAIN_EMAIL_RECEIVER, TELEGRAM_CHAT_ID_LEADS, TELEGRAM_CHAT_ID_PRODUCT_PHOTO, TELEGRAM_CHAT_ID_QUESTIONS
-import telegram
-from begoodPlus.celery import telegram_bot
+
 @shared_task
 def send_cantacts_notificatios(contacts_id):
     contact_info = SvelteContactFormModal.objects.get(id=contacts_id)
@@ -83,18 +86,25 @@ def send_cantacts_notificatios(contacts_id):
     to = MAIN_EMAIL_RECEIVER
     html_text = text.replace('\n', '<br>')
     mail.send_mail(subject, text, from_email, [to], html_message=html_text)
-    telegram_bot.send_message(chat_id=chat_id, text=text, parse_mode=telegram.ParseMode.HTML)
+    telegram_bot.send_message(
+        chat_id=chat_id, text=text, parse_mode=telegram.ParseMode.HTML)
+
+
 @shared_task
 def product_photo_send_notification(user_product_photo):
     obj = UserProductPhoto.objects.get(id=user_product_photo)
     chat_id = TELEGRAM_CHAT_ID_PRODUCT_PHOTO
-    caption = '<b> משתמש: </b> ' + str(obj.user) + '\n<b> הודעה: </b> ' + obj.description + '\n<b> מחיר קנייה: </b> '+str(obj.buy_price)+'\n<b> מחיר רצוי: </b> '+ str(obj.want_price) +' '
+    caption = '<b> משתמש: </b> ' + str(obj.user) + '\n<b> הודעה: </b> ' + obj.description + \
+        '\n<b> מחיר קנייה: </b> ' + \
+        str(obj.buy_price)+'\n<b> מחיר רצוי: </b> ' + str(obj.want_price) + ' '
 
     if obj.photo:
         image = obj.photo.url
-        telegram_bot.send_photo(chat_id, image, caption=caption, parse_mode=telegram.ParseMode.HTML)
+        telegram_bot.send_photo(
+            chat_id, image, caption=caption, parse_mode=telegram.ParseMode.HTML)
     else:
-        telegram_bot.send_message(chat_id, caption, parse_mode=telegram.ParseMode.HTML)
+        telegram_bot.send_message(
+            chat_id, caption, parse_mode=telegram.ParseMode.HTML)
     try:
         email_html = caption.replace('\n', '<br>')
         email_text = strip_tags(email_html)
@@ -103,10 +113,12 @@ def product_photo_send_notification(user_product_photo):
         subject = 'משתמש רוצה את המוצר הזה באתר' + str(obj.id)
         from_email = 'מוצר רצוי <Main@ms-global.co.il>'
         to = MAIN_EMAIL_RECEIVER
-        mail.send_mail(subject, email_text, from_email, [to], html_message=email_html)
+        mail.send_mail(subject, email_text, from_email,
+                       [to], html_message=email_html)
     except:
         pass
-    
+
+
 @shared_task
 def send_question_notification(question_id):
     obj = UserQuestion.objects.get(id=question_id)
@@ -122,7 +134,8 @@ def send_question_notification(question_id):
         'email': obj.email,
     }
     chat_id = TELEGRAM_CHAT_ID_QUESTIONS
-    text = 'שאלה חדשה\n IP: <b> {ip} </b>\n :תאריך <b> {created_at} </b> :מוצר <b> {product} </b>\n'.format(**info)
+    text = 'שאלה חדשה\n IP: <b> {ip} </b>\n :תאריך <b> {created_at} </b> :מוצר <b> {product} </b>\n'.format(
+        **info)
     text += 'פרטי משתמש:\n'
     text += 'משתמש: <b>{user}</b>\n'.format(**info)
     text += 'שם: <b>{name}</b>\n'.format(**info)
@@ -130,13 +143,24 @@ def send_question_notification(question_id):
     text += 'טלפון: <b>{phone}</b>\n'.format(**info)
     text += 'אימייל: <b>{email}</b>\n'.format(**info)
     text += '\n\nהשאלה: <b>{question}</b>\n'.format(**info)
-    telegram_bot.send_message(chat_id=chat_id, text=text, parse_mode=telegram.ParseMode.HTML)
-    
-    subject = 'שאלה חדשה נשלחה על ידי ' + str(obj.user) + ' בעזרת האתר שלנו בכתובת ' + str(obj.ip) + ' בתאריך ' + str(obj.created_at) + ' עבור המוצר ' + str(obj.product)
+    telegram_bot.send_message(
+        chat_id=chat_id, text=text, parse_mode=telegram.ParseMode.HTML)
+
+    subject = 'שאלה חדשה נשלחה על ידי ' + str(obj.user) + ' בעזרת האתר שלנו בכתובת ' + str(
+        obj.ip) + ' בתאריך ' + str(obj.created_at) + ' עבור המוצר ' + str(obj.product)
     from_email = 'שאלה חדשה <Main@ms-global.co.il>'
     to = MAIN_EMAIL_RECEIVER
     html_text = text.replace('\n', '<br>')
     mail.send_mail(subject, text, from_email, [to], html_message=html_text)
+
+
+@shared_task
+def turn_to_morder_task(cart_id):
+    cart = SvelteCartModal.objects.get(id=cart_id)
+    cart.turn_to_morder()
+    print('done')
+
+
 @shared_task
 def send_cart_notification(cart_id):
     print('=================== send_cart_email is running ==========================')
@@ -147,22 +171,29 @@ def send_cart_notification(cart_id):
     else:
         s = str(cart.name)
     subject = str(cart.id) + ') ' + s
-    html_message = render_to_string('emails/cart_template.html', {'cart': cart})
+    html_message = render_to_string(
+        'emails/cart_template.html', {'cart': cart})
     plain_message = strip_tags(html_message)
     from_email = 'עגלת קניות <Main@ms-global.co.il>'
     to = MAIN_EMAIL_RECEIVER
-    mail.send_mail(subject, plain_message, from_email, [to], html_message=html_message)
+    mail.send_mail(subject, plain_message, from_email,
+                   [to], html_message=html_message)
     print('=================== send_cart_email is done ==========================')
 
     # sending telegram message
-    #for chat_id in self.chat_ids:
+    # for chat_id in self.chat_ids:
     chat_id = TELEGRAM_CHAT_ID_CARTS
     telegram_message = '* ' + subject + ' *' + '\n'
+    telegram_message += 'סטטוס: * ' + cart.order_type + ' * \n'
+    if cart.agent:
+        telegram_message += 'סוכן: * ' + cart.agent.username + ' * \n'
     for item in cart.productEntries.all():
         row = str(item.amount) + ' ' + item.product.title + '\n'
         telegram_message += row
-    telegram_bot.send_message(chat_id=chat_id, text=telegram_message)
-    
+    telegram_bot.send_message(
+        chat_id=chat_id, text=telegram_message, parse_mode='markdown')
+
+
 '''from __future__ import absolute_import, unicode_literals
 
 from celery import shared_task
@@ -171,7 +202,7 @@ from .models import UserSearchData
 def save_user_search(session, term, resultCount):
     search_history = UserSearchData.objects.create(session=session, term=q, resultCount=resultCount)
     search_history.save()'''
-    
+
 '''
 from __future__ import absolute_import, unicode_literals
 from celery import shared_task
