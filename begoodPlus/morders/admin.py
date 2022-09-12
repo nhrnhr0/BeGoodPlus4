@@ -131,6 +131,7 @@ class MOrderAdmin(admin.ModelAdmin):
                         'comment': (name + ': ' + order_product['comment'] + '\n') if order_product['comment'] else '',
                         'barcode': order_product['barcode'],
                         'total_quantity': 0,
+                        'details': [],
                     }
                 else:
                     # all_products[product_name] += product['entries']
@@ -145,6 +146,8 @@ class MOrderAdmin(admin.ModelAdmin):
                     all_products[product_name]['comment'] += (
                         name + ': ' + order_product['comment'] + '\n') if order_product['comment'] else ''
                 all_products[product_name]['total_quantity'] += order_product['total_quantity']
+                all_products[product_name]['details'].append(
+                    name + ' - ' + str(order_product['total_quantity']))
             # create total of quantity, total price,   the products by name
             pass
         # current all_products:
@@ -419,7 +422,8 @@ class MOrderAdmin(admin.ModelAdmin):
             # for order_product in order_products:
             #     product_name = order_product['title']
 
-        headers = ['ברקוד', 'פריט', 'כמות כוללת', 'הערות', ]
+        headers = ['ברקוד', 'פריט', 'כמות כוללת',
+                   'הערות', 'פירוט', 'ספק', 'כמות חדשה לספקים', 'האם שורה ראשית']
         # Add headers in bold
         for i in range(len(headers)):
             main_ws.cell(row=ws_rows_counter, column=i+1).value = headers[i]
@@ -457,6 +461,20 @@ class MOrderAdmin(admin.ModelAdmin):
             main_ws.cell(row=ws_rows_counter, column=4).alignment = align_rtl
             main_ws.cell(row=ws_rows_counter, column=4).font = header_font
             main_ws.cell(row=ws_rows_counter, column=4).border = bottom_border
+
+            main_ws.cell(row=ws_rows_counter,
+                         column=5).value = '\n'.join(product['details'])
+            main_ws.cell(row=ws_rows_counter, column=5).fill = header_fill
+            main_ws.cell(row=ws_rows_counter, column=5).alignment = align_rtl
+            main_ws.cell(row=ws_rows_counter, column=5).font = header_font
+            main_ws.cell(row=ws_rows_counter, column=5).border = bottom_border
+
+            main_ws.cell(row=ws_rows_counter,
+                         column=8).value = 'כן'
+            main_ws.cell(row=ws_rows_counter, column=8).fill = header_fill
+            main_ws.cell(row=ws_rows_counter, column=8).alignment = align_rtl
+            main_ws.cell(row=ws_rows_counter, column=8).font = header_font
+            main_ws.cell(row=ws_rows_counter, column=8).border = bottom_border
 
             # ws_rows_counter += 1
             # main_ws.cell(row=ws_rows_counter, column=1).value = 'צבע'

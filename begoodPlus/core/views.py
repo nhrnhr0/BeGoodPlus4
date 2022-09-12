@@ -1,4 +1,8 @@
+import zipfile
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
+
+from morders.views import create_providers_docx
+from productSize.models import ProductSize
 from .forms import FormBeseContactInformation
 import requests
 from cmath import isnan
@@ -46,6 +50,15 @@ from django.urls import reverse
 from core.models import UserProductPhoto
 # Create your views here.
 from django.contrib import messages
+import os
+from docx import Document
+from docx.shared import Inches
+from docx.enum.style import WD_STYLE_TYPE
+from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.enum.table import WD_TABLE_ALIGNMENT
+from docx.enum.table import WD_TABLE_DIRECTION
+
+from docx.shared import Pt
 '''
 info = {
             "providerUserToken": SMARTBEE_providerUserToken,
@@ -81,6 +94,7 @@ info = {
         }
 '''
 from morders.models import MOrder
+from docx.shared import Inches, Cm
 
 
 def get_smartbee_info_from_dfs(client_info, items_table, sheet_name, docType):
@@ -203,6 +217,244 @@ def get_smartbee_info_from_dfs(client_info, items_table, sheet_name, docType):
     }
 
     return customer_details
+
+
+def process_exel_to_providers_docx(file):
+    all_sheets = pd.ExcelFile(file)
+    # get the sheets named 'Sheet'
+    sheet = all_sheets.parse(sheet_name='Sheet')
+    # iterate over the rows
+    pink_data = None
+    data = {}
+    for idx, row in sheet.iterrows():
+        # get value in vloumn 'כמות כוללת'
+        print('row: ', idx)
+        is_header = row['האם שורה ראשית']
+        # if there is a value in the cell, then it's a pink row (header)
+        if not pd.isna(is_header):
+            if pink_data != None:
+                if len(data[provider_name][product_name]['items']) == 0:
+                    data[provider_name][product_name]['items'].append({
+                        'size': 'ONE SIZE',
+                        'color': 'ON COLOR',
+                        'verient': '',
+                        'qty': pink_data['new_amount'],
+                    })
+
+            amount = row['כמות כוללת']
+            provider_name = row['ספק']
+            if pd.isna(provider_name):
+                provider_name = 'ספק ריק'
+            new_amount = row['כמות חדשה לספקים']
+            if pd.isna(new_amount):
+                new_amount = row['כמות כוללת']
+                is_new_amount_header_set = False
+            else:
+                is_new_amount_header_set = True
+            product_name = row['פריט']
+            pink_data = {
+                'provider_name': provider_name,
+                'new_amount': new_amount,
+                'product_name': product_name,
+                'is_new_amount_header_set': is_new_amount_header_set,
+            }
+            if provider_name not in data:
+                data[provider_name] = {}
+            if product_name not in data[provider_name]:
+                data[provider_name][product_name] = {
+                    'items': []
+                }
+
+        else:
+            # if there is no value in the cell, then it's a item row item
+            if pink_data:
+                if pink_data['is_new_amount_header_set']:
+                    continue
+                else:
+                    # amount = row['כמות חדשה לספקים']
+                    # if pd.isna(amount):
+                    #     amount = row['הערות']
+                    _provider_name = row['ספק']
+                    if pd.isna(_provider_name):
+                        _provider_name = provider_name
+                    if _provider_name not in data:
+                        data[_provider_name] = {
+                            'provider_name': _provider_name,
+                            'new_amount': 0,
+                            'product_name': pink_data['product_name'],
+                            'is_new_amount_header_set': False,
+                            'items': []
+                        }
+                    if product_name not in data[_provider_name]:
+                        data[_provider_name][product_name] = {
+                            'items': []
+                        }
+                    cell_qyt = row['כמות חדשה לספקים']
+                    if pd.isna(cell_qyt):
+                        cell_qyt = row['הערות']
+                    data[_provider_name][product_name]['items'].append({
+                        'size': row['פריט'],
+                        'color': row['ברקוד'],
+                        'verient': row['כמות כוללת'],
+                        'qty': cell_qyt,
+                    })
+
+                    # pink_data['items'].append({
+                    #     'size': row['גודל'],
+                    #     'color': row['צבע'],
+                    #     'amount': row['כמות כוללת'],
+                    # })
+            else:
+                pass
+    return data
+
+
+def add_table_to_doc(doc, df):
+    # , style="ColorfulList-Accent5"
+    t = doc.add_table(df.shape[0]+1, df.shape[1], style="TableGrid")
+    t.autofit = False
+    #t.alignment = WD_TABLE_ALIGNMENT.CENTER
+    t.direction = WD_TABLE_DIRECTION.RTL
+    t.allow_autofit = False
+    tmp = 0
+    for cell in t.columns[0].cells:
+        cell.width = Inches(3.3)
+        if tmp == 0:
+            cell.width = Inches(3.5)
+        tmp += 1
+    # add the header rows.
+    for j in range(df.shape[-1]):
+        t.cell(0, j).text = df.columns[df.shape[-1]-j - 1]
+
+    # add the rest of the data frame
+    for i in range(df.shape[0]):
+        for j in range(df.shape[-1]):
+            val = str(df.values[i, df.shape[-1]-j - 1])
+            if val == 'nan' or val == '0':
+                val = ''
+            print('val: ', val)
+            t.cell(i+1, j).text = val
+
+    # set font size to 16
+    for row in t.rows:
+        for cell in row.cells:
+            for paragraph in cell.paragraphs:
+                for run in paragraph.runs:
+                    run.font.size = Pt(10)
+    return t
+
+
+def generate_provider_docx(provider_data, provider_name):
+    document = Document()
+
+    today = datetime.datetime.now()
+    date_time = today.strftime("%d/%m/%Y")
+
+    file_location = os.path.join(
+        settings.BASE_DIR, 'static_cdn\\assets\\images\\provider_docx_header.png')
+
+    document.add_picture(file_location, width=Cm(21.5 - 0.75*2))
+    print(provider_data)
+    entries = []
+    for product_name, product_data in provider_data.items():
+        for item in product_data['items']:
+            entries.append({
+                'מוצר': product_name,
+                'מידה': item['size'],
+                'צבע': item['color'],
+                'מודל': item['verient'],
+                'כמות': item['qty'],
+            })
+    # document = Document()
+    # crete pivot table
+    indexs = ['מוצר', 'מודל', 'צבע']
+    column = 'מידה'
+    value = 'כמות'
+    df = pd.DataFrame(entries)
+    df = df.pivot_table(index=indexs, columns=column,
+                        values=value, aggfunc='sum')
+    df = df.fillna(0)
+    df = df.astype(int)
+    df = df.reset_index()
+
+    options = ProductSize.objects.all().order_by(
+        'code').values_list('size', flat=True)
+    opt1 = ['XS', 'S',
+            'M', 'L', 'XL', '2XL', '3XL', '4XL', '5XL']
+    opt2 = ['36', '37', '38', '39',
+            '40', '41', '42', '43', '44', '45', '46', '47', '48']
+    # opt3 = ['מוצר', 'צבע', 'מודל', + all options exept what is in opt1 and opt2]
+    base = ['מוצר', 'צבע', 'מודל']
+    opt1 = base + opt1[::-1]
+    opt2 = base + opt2[::-1]
+    opt3 = ['מוצר', 'צבע', 'מודל']
+    for option in options:
+        if option not in opt1 and option not in opt2:
+            opt3.append(option)
+
+    t1 = df.reindex(labels=opt1, axis=1)
+    t2 = df.reindex(labels=opt2, axis=1)
+
+    #
+    t3 = df.reindex(labels=['מוצר', 'צבע', 'מודל', 'ONE SIZE'], axis=1)
+    # add to t3 all what is in df that is not in t1 and t2
+    t3 = t3.reindex(labels=opt3, axis=1)
+
+    rtlstyle = document.styles.add_style('rtl', WD_STYLE_TYPE.PARAGRAPH)
+    rtlstyle.font.rtl = True
+    p = document.add_heading('תאריך: ' + date_time, level=1)
+    p = document.add_heading('לכבוד: ' + provider_name, level=1)
+    p.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+
+    t1_in_doc = add_table_to_doc(document, t1)
+
+    # changing the page margins
+    margin = 0.75
+    sections = document.sections
+    for section in sections:
+        section.top_margin = Cm(margin)
+        section.bottom_margin = Cm(margin)
+        section.left_margin = Cm(margin)
+        section.right_margin = Cm(margin)
+    return document
+
+
+def exel_to_providers_docx(request):
+    if request.user.is_authenticated and request.user.is_superuser:
+        if(request.method == "POST"):
+            # print(request.FILES)
+            file = request.FILES.get('file', None)
+            if file:
+                data = process_exel_to_providers_docx(file)
+
+                print(data)
+                # iterate the keys (provider_names) and generate_provider_docx for each
+                docs = []
+                for provider_name in data:
+                    doc = generate_provider_docx(
+                        data[provider_name], provider_name)
+                    docs.append(doc)
+                    zip_buffer = io.BytesIO()
+                    with zipfile.ZipFile(zip_buffer, "a", zipfile.ZIP_DEFLATED, False) as zip_file:
+                        for doc in docs:
+                            file_stream = io.BytesIO()
+                            doc.save(file_stream)
+                            file_name = str(uuid.uuid4()) + '.docx'
+                            file_stream.seek(0)
+                            zip_file.writestr(
+                                file_name, file_stream.getvalue())
+                    zip_buffer.seek(0)
+                    response = HttpResponse(
+                        zip_buffer.read(), content_type="application/zip")
+                    response['Content-Disposition'] = 'attachment; filename="products.zip"'
+                    return response
+
+            else:
+                messages.add_message(request, messages.ERROR, 'נא להוסיף קובץ')
+        else:
+            messages.add_message(request, messages.ERROR,
+                                 'קריאה צריכה להיות POST')
+    return redirect('/admin/morders/morder/')
 
 
 def submit_exel_to_smartbee(request):
@@ -542,7 +794,7 @@ def svelte_cart_history(request):
     return JsonResponse(previous_carts, safe=False)
 
 
-@authentication_classes((SessionAuthentication, TokenAuthentication,))
+@ authentication_classes((SessionAuthentication, TokenAuthentication,))
 @ api_view(['GET'])
 def api_logout(request):
     if request.user.is_anonymous:
