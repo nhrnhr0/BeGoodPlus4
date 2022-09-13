@@ -1,3 +1,4 @@
+from distutils.debug import DEBUG
 import zipfile
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 
@@ -374,9 +375,11 @@ def generate_provider_docx(provider_data, provider_name):
 
     today = datetime.datetime.now()
     date_time = today.strftime("%d/%m/%Y")
-
+    end_file_location = 'static_cdn' if settings.DEBUG else 'static'
+    end_file_location = end_file_location + \
+        '\\assets\\images\\provider_docx_header.png'
     file_location = os.path.join(
-        settings.BASE_DIR, 'static_cdn\\assets\\images\\provider_docx_header.png')
+        settings.BASE_DIR, end_file_location)
 
     document.add_picture(file_location, width=Cm(21.5 - 0.75*2))
     entries = []
