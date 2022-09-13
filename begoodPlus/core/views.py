@@ -377,7 +377,7 @@ def generate_provider_docx(provider_data, provider_name):
     date_time = today.strftime("%d/%m/%Y")
     end_file_location = 'static_cdn' if settings.DEBUG else 'static'
     end_file_location = end_file_location + \
-        '\\assets\\images\\provider_docx_header.png'
+        '/assets/images/provider_docx_header.png'
     file_location = os.path.join(
         settings.BASE_DIR, end_file_location)
 
