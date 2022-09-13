@@ -312,4 +312,4 @@ def recalculate_total_price_post_save(sender, instance, **kwargs):
         instance.total_sell_price = new_price
         instance.save()
 
-    print('recalculate_total_price_post_save: ', instance.total_sell_price)
+    #print('recalculate_total_price_post_save: ', instance.total_sell_price)
