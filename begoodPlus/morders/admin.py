@@ -1,3 +1,4 @@
+from reversion.admin import VersionAdmin
 import datetime
 from django.contrib import admin
 from openpyxl import Workbook
@@ -79,12 +80,12 @@ class ProviderRequestAdmin(admin.ModelAdmin):
 admin.site.register(ProviderRequest, ProviderRequestAdmin)
 
 
-class MOrderAdmin(admin.ModelAdmin):
+class MOrderAdmin(VersionAdmin):  # admin.ModelAdmin
     model = MOrder
     fields = ('cart', 'total_sell_price', 'client', 'name', 'phone', 'email',
               'status', 'message',)  # what is this for?
     readonly_fields = ('created', 'total_sell_price', 'updated', 'get_edit_url',
-                       'view_morder_pdf_link',)
+                       'view_morder_pdf_link', 'cart', 'client',)
     list_display = ('id', 'client', 'name', 'status', 'status_msg', 'total_sell_price', 'created', 'updated',
                     'get_edit_url', 'view_morder_pdf_link',)
     list_editable = ('status', 'status_msg',)

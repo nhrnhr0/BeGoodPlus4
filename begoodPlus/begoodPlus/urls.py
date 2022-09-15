@@ -14,6 +14,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
+from core.views import admin_upload_docs_page
 from catalogAlbum.views import get_albums, get_catalog_albums
 from inventory.views import doc_stock_enter_provider_requests_api, get_stock_by_id_api, save_doc_stock_enter_provider_requests, unpivot_inventory_exel, upload_inventory_csv
 from clientApi.views import CustomAuthToken, get_all_varients_api, get_products_info, get_products_info2
@@ -82,6 +83,8 @@ clientRouter.register(r'logos', LogoClientViewSet)
 #from rest_framework.authtoken.views import obtain_auth_token
 #from rest_framework_simplejwt.views import (TokenObtainPairView,TokenRefreshView,)
 urlpatterns = [
+    path('admin-upload-docs/', admin_upload_docs_page,
+         name='admin_upload_docs_page'),
     path('create-image-from-exel', create_image_from_exel,
          name='create-image-from-exel'),
     #path('my-api/main/main', MainAlbumsViewSet.as_view({'get': 'list'})),

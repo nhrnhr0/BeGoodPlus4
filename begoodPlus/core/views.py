@@ -1,3 +1,5 @@
+from docx.shared import Inches, Cm
+from morders.models import MOrder
 from distutils.debug import DEBUG
 import zipfile
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
@@ -60,6 +62,12 @@ from docx.enum.table import WD_TABLE_ALIGNMENT
 from docx.enum.table import WD_TABLE_DIRECTION
 
 from docx.shared import Pt
+
+
+def admin_upload_docs_page(request):
+    return render(request, 'adminUploadDocs.html', context={})
+
+
 '''
 info = {
             "providerUserToken": SMARTBEE_providerUserToken,
@@ -94,8 +102,6 @@ info = {
             "docDate": datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S+03:00"),
         }
 '''
-from morders.models import MOrder
-from docx.shared import Inches, Cm
 
 
 def get_smartbee_info_from_dfs(client_info, items_table, sheet_name, docType):

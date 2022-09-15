@@ -1,3 +1,4 @@
+import reversion
 from decimal import Decimal
 import secrets
 from django.forms import ValidationError
@@ -114,6 +115,7 @@ class MOrderItem(models.Model):
 # Create your models here.
 
 
+@reversion.register()
 class MOrder(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
