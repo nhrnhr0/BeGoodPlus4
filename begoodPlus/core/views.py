@@ -97,6 +97,7 @@ def get_smartbee_info_from_dfs(client_info, items_table, sheet_name, docType):
     product_name = ''
     res_products = []
     price = ''
+    barcode = ''
     last_row_was_a_header = False
     for idx, row in items_table.iterrows():
         # print(row)
@@ -106,11 +107,13 @@ def get_smartbee_info_from_dfs(client_info, items_table, sheet_name, docType):
                 print('product_name: ', product_name)
                 product_obj = CatalogImage.objects.filter(
                     title=product_name).first()
+                barcode = row['ברקוד'] if not pd.isna(row['ברקוד']) else ''
                 res_products.append({
                     'product_obj': product_obj,
                     'product_name': product_name,
                     'amount_taken': amount_taken,
                     'include_tax': includeTaxBool,
+                    'barcode': barcode,
                     'price': price,
                 })
                 continue_add_amounts = False
@@ -150,23 +153,23 @@ def get_smartbee_info_from_dfs(client_info, items_table, sheet_name, docType):
         'product_name': product_name,
         'amount_taken': amount_taken,
         'include_tax': includeTaxBool,
+        'barcode': barcode,
         'price': price,
     })
 
     paymentItems = []
     for prod in res_products:
         description = prod['product_name']
-        if prod['product_obj'].barcode != None and prod['product_obj'].barcode != '':
-            description += ' (' + prod['product_obj'].barcode + ')'
-        paymentItems.append(
-            {
-                "providerItemId": prod['product_obj'].id,
-                "catNum": prod['product_obj'].id,
-                "quantity": prod['amount_taken'],
-                "pricePerUnit": prod['price'].replace('₪', ''),
-                "vatOption": "Include" if prod['include_tax'] else "NotInclude",
-                "description":  description,
-            })
+        if prod['barcode']:
+            description += ' (' + str(prod['barcode']) + ')'
+        entry = {
+            "providerItemId": prod['product_name'],
+            "quantity": prod['amount_taken'],
+            "pricePerUnit": prod['price'].replace('₪', ''),
+            "vatOption": "Include" if prod['include_tax'] else "NotInclude",
+            "description":  description,
+        }
+        paymentItems.append(entry)
 
     customer_details = {
         "providerUserToken": SMARTBEE_providerUserToken,
