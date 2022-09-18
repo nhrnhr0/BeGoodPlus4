@@ -1,4 +1,11 @@
+from docx.shared import Inches, Cm
+from morders.models import MOrder
+from distutils.debug import DEBUG
+import zipfile
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
+
+from morders.views import create_providers_docx
+from productSize.models import ProductSize
 from .forms import FormBeseContactInformation
 import requests
 from cmath import isnan
@@ -46,6 +53,21 @@ from django.urls import reverse
 from core.models import UserProductPhoto
 # Create your views here.
 from django.contrib import messages
+import os
+from docx import Document
+from docx.shared import Inches
+from docx.enum.style import WD_STYLE_TYPE
+from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.enum.table import WD_TABLE_ALIGNMENT
+from docx.enum.table import WD_TABLE_DIRECTION
+
+from docx.shared import Pt
+
+
+def admin_upload_docs_page(request):
+    return render(request, 'adminUploadDocs.html', context={})
+
+
 '''
 info = {
             "providerUserToken": SMARTBEE_providerUserToken,
@@ -80,7 +102,6 @@ info = {
             "docDate": datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S+03:00"),
         }
 '''
-from morders.models import MOrder
 
 
 def get_smartbee_info_from_dfs(client_info, items_table, sheet_name, docType):
@@ -208,13 +229,379 @@ def get_smartbee_info_from_dfs(client_info, items_table, sheet_name, docType):
     return customer_details
 
 
-def submit_exel_to_smartbee(request):
+def process_exel_to_providers_docx(file):
+    all_sheets = pd.ExcelFile(file)
+    # get the sheets named 'Sheet'
+    sheet = all_sheets.parse(sheet_name='Sheet')
+
+    # sheets_names = all_sheets.sheet_names exept 'Sheet'
+    sheets_names = all_sheets.sheet_names
+    sheets_names.remove('Sheet')
+    # iterate over the rows
+    pink_data = None
+    data = {}
+    for idx, row in sheet.iterrows():
+        # get value in vloumn 'כמות כוללת'
+        is_header = row['האם שורה ראשית']
+        # if there is a value in the cell, then it's a pink row (header)
+        if not pd.isna(is_header):
+            if pink_data != None:
+                if len(data[provider_name][product_name]['items']) == 0:
+                    data[provider_name][product_name]['items'].append({
+                        'size': 'ONE SIZE',
+                        'color': 'ON COLOR',
+                        'verient': '',
+                        'qty': pink_data['new_amount'],
+                    })
+
+            amount = row['כמות כוללת']
+            provider_name = row['ספק']
+            if pd.isna(provider_name):
+                provider_name = 'ספק ריק'
+            new_amount = row['כמות חדשה לספקים']
+            if pd.isna(new_amount):
+                new_amount = row['כמות כוללת']
+                is_new_amount_header_set = False
+            else:
+                is_new_amount_header_set = True
+            product_name = row['פריט']
+            pink_data = {
+                'provider_name': provider_name,
+                'new_amount': new_amount,
+                'product_name': product_name,
+                'is_new_amount_header_set': is_new_amount_header_set,
+            }
+            if provider_name not in data:
+                data[provider_name] = {}
+            if product_name not in data[provider_name]:
+                data[provider_name][product_name] = {
+                    'items': []
+                }
+
+        else:
+            # if there is no value in the cell, then it's a item row item
+            if pink_data:
+                if pink_data['is_new_amount_header_set']:
+                    continue
+                else:
+                    # amount = row['כמות חדשה לספקים']
+                    # if pd.isna(amount):
+                    #     amount = row['הערות']
+                    _provider_name = row['ספק']
+                    if pd.isna(_provider_name):
+                        _provider_name = provider_name
+                    if _provider_name not in data:
+                        data[_provider_name] = {
+                            'provider_name': _provider_name,
+                            'new_amount': 0,
+                            'product_name': pink_data['product_name'],
+                            'is_new_amount_header_set': False,
+                            'items': []
+                        }
+                    if product_name not in data[_provider_name]:
+                        data[_provider_name][product_name] = {
+                            'items': []
+                        }
+                    cell_qyt = row['כמות חדשה לספקים']
+                    if pd.isna(cell_qyt):
+                        cell_qyt = row['הערות']
+                    data[_provider_name][product_name]['items'].append({
+                        'size': row['פריט'],
+                        'color': row['ברקוד'],
+                        'verient': row['כמות כוללת'],
+                        'qty': cell_qyt,
+                    })
+
+                    # pink_data['items'].append({
+                    #     'size': row['גודל'],
+                    #     'color': row['צבע'],
+                    #     'amount': row['כמות כוללת'],
+                    # })
+            else:
+                pass
+    return {
+        'data': data,
+        'sheets_names': sheets_names,
+    }
+
+
+def add_table_to_doc(document, data):
+    # , style="ColorfulList-Accent5"
+    # First row are table headers!
+    # https://github.com/python-openxml/python-docx/issues/149
+    table = document.add_table(
+        rows=(data.shape[0]+1), cols=data.shape[1], style="Light Shading")
+    table.autofit = False
+    table.allow_autofit = False
+
+    # widths = (Inches(3), Inches(3),)
+    # for row in table.rows:
+    #     for idx, width in enumerate(widths):
+    #         row.cells[idx].width = width
+    table.direction = WD_TABLE_DIRECTION.LTR
+    table.alignment = WD_TABLE_ALIGNMENT.CENTER
+
+    # first row is the headers (column names)
+    for j in range(data.shape[-1]):
+        table.cell(
+            0, data.shape[-1] - j - 1).text = data.columns[j]
+        table.cell(
+            0, data.shape[-1] - j - 1).paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
+    # data rows
+    for i in range(data.shape[0]):
+        for j in range(data.shape[-1]):
+            txt = str(data.values[data.shape[0] -
+                                  i - 1, data.shape[-1] - j - 1])
+            if txt == 'nan' or txt == '0' or txt == 'ON COLOR' or txt == '0.0':
+                txt = ''
+            table.cell(i + 1,
+                       j).text = txt
+            table.cell(i + 1,
+                       j).paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
+            # if it's the last 3 columns, then align right
+            if j >= data.shape[-1] - 3:
+                table.cell(i + 1,
+                           j).paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.RIGHT
+
+    # for i, column in enumerate(data):
+    #     for row in range(data.shape[0]):
+    #         table.cell(row, i).text = str(data[column][row])
+    # for cell in table.columns[0].cells:
+    #     cell.width = Inches(0.5)
+    table.columns[len(table.columns) - 1].width = Inches(1.5)
+    if (len(table.columns) > 2):
+        table.columns[len(table.columns) - 2].width = Inches(0.95)
+        table.columns[len(table.columns) - 3].width = Inches(0.95)
+    # align center
+    table.columns[len(table.columns) - 1].alignment = WD_TABLE_ALIGNMENT.RIGHT
+    #table.rows[0].cells[0].width = Inches(5.0)
+    return table
+
+
+def generate_provider_docx(provider_data, provider_name):
+    pd.option_context('expand_frame_repr', False, 'display.max_rows', None)
+    document = Document()
+
+    today = datetime.datetime.now()
+    date_time = today.strftime("%d/%m/%Y")
+    end_file_location = 'static_cdn' if settings.DEBUG else 'static'
+    end_file_location = end_file_location + \
+        '/assets/images/provider_docx_header.png'
+    file_location = os.path.join(
+        settings.BASE_DIR, end_file_location)
+
+    document.add_picture(file_location, width=Cm(21.5 - 0.75*2))
+    entries = []
+    for product_name, product_data in provider_data.items():
+        for item in product_data['items']:
+            entries.append({
+                'מוצר': product_name,
+                'מידה': item['size'],
+                'צבע': item['color'],
+                'מודל': item['verient'],
+                'כמות': item['qty'],
+            })
+    # document = Document()
+    # crete pivot table
+    indexs = ['מוצר', 'מודל', 'צבע']
+    column = 'מידה'
+    value = 'כמות'
+    df = pd.DataFrame(entries)
+    df = df.fillna(0)
+    df = df.pivot_table(index=indexs, columns=[column],
+                        values=value, aggfunc='sum')
+    df = df.fillna(0)
+    df = df.astype(int)
+    df = df.reset_index()
+
+    options = ProductSize.objects.all().order_by(
+        'code').values_list('size', flat=True)
+    opt1 = ['XS', 'S',
+            'M', 'L', 'XL', '2XL', '3XL', '4XL', '5XL']
+    opt2 = ['36', '37', '38', '39',
+            '40', '41', '42', '43', '44', '45', '46', '47', '48']
+    opt3 = ['ONE SIZE']
+    # opt4 = 2-18 (in tows)
+    opt4 = ['2', '4', '6', '8', '10', '12', '14', '16', '18']
+    # opt5 = 36-54 (in tows)
+    opt5 = ['36', '38', '40', '42', '44', '46', '48', '50', '52', '54']
+    # opt3 = ['מוצר', 'צבע', 'מודל', + all options exept what is in opt1 and opt2]
+    opt6 = []
+    for option in options:
+        if option not in opt1 and option not in opt2 and option not in opt3 and option not in opt4 and option not in opt5:
+            opt6.append(option)
+    all_options = [opt1, opt2, opt3, opt4, opt5, opt6]
+    # df = find for each product (מוצר) the best option to be used as the columns names (מידה)
+    # for example if the product has only XS and S then the option will be opt1
+    # if the product has only 36 and 37 then the option will be opt2
+    # if the product has only ONE SIZE then the option will be opt3
+    # if the product has only 2 and 4 then the option will be opt4
+    # if the product has only 36 and 38 then the option will be opt2
+    # if the product has only 36 and 38 and 50 then the option will be opt5
+    # if the product has only 36 and 38 and 50 and 52 then the option will be opt5
+    # code:
+    tables = []
+    options_dfs = {}
+    for index, row in df.iterrows():
+        # print(row)
+        product_name = row['מוצר']
+        # itate over all options and find the best one
+        best_option = None
+        best_option_len = 0
+        best_option_idx = -1
+        curr_option_idx = 0
+        for option in all_options:
+            found = 0
+
+            indexs = row.index.to_list()
+            indexs = list(filter(lambda x: x not in [
+                'מוצר', 'מודל', 'צבע'], indexs))
+            for size in option:
+                if size in indexs and row.get(size) > 0:
+                    found += 1
+            if found > best_option_len:
+                best_option_len = found
+                best_option = option
+                best_option_idx = curr_option_idx
+            curr_option_idx += 1
+        # create new df with the best option
+        if options_dfs.get(best_option_idx) is None:
+            options_dfs[best_option_idx] = pd.DataFrame()
+        d = {
+            'מוצר': product_name,
+            'מודל': row['מודל'],
+            'צבע': row['צבע'],
+            **{size: row.get(size, '') for size in best_option}
+        }
+        options_dfs[best_option_idx] = options_dfs[best_option_idx].append(
+            d, ignore_index=True)
+    # base = ['מוצר', 'צבע', 'מודל']
+
+    # opt1 = base + opt1[:: -1]
+    # opt2 = base + opt2[:: -1]
+    # t1 = df.reindex(labels=opt1, axis=1)
+    # t2 = df.reindex(labels=opt2, axis=1)
+
+    # #
+    # t3 = df.reindex(labels=['מוצר', 'צבע', 'מודל', 'ONE SIZE'], axis=1)
+    # add to t3 all what is in df that is not in t1 and t2
+
+    rtlstyle = document.styles.add_style('rtl', WD_STYLE_TYPE.PARAGRAPH)
+    rtlstyle.font.rtl = True
+    p = document.add_heading(
+        'לכבוד: ' + provider_name + ' \t\t תאריך: ' + date_time, level=1)
+    p.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+    #t1.dropna(axis=1, how='all', inplace=True)
+    # if not t1.dropna(axis=1, how='all').empty:
+    #     document.add_heading('טבלת ביגוד', level=2)
+    #     add_table_to_doc(document, t1.dropna(axis=0, how='all'))
+    # if not t2.dropna(axis=1, how='all').empty:
+    #     document.add_heading('טבלת נעליים', level=2)
+    #     add_table_to_doc(document, t2.dropna(axis=0, how='all'))
+    # if not t3.dropna(axis=1, how='all').empty:
+    #     document.add_heading('טבלת כלים', level=2)
+    #     add_table_to_doc(document, t3.dropna(axis=0, how='all'))
+    for key, value in options_dfs.items():
+        if not value.dropna(axis=1, how='all').empty:
+            cols = all_options[key][0]
+            if key == 0:
+                label = 'טבלת ביגוד'
+            elif key == 1:
+                label = 'טבלת נעליים'
+            elif key == 2:
+                label = 'טבלת כלים'
+            elif key == 3:
+                label = 'טבלת ילדים'
+            elif key == 4:
+                label = 'טבלת מכנסיים'
+            else:
+                label = 'טבלה'
+
+            # add title with the label in the center
+            p = document.add_heading(label, level=2)
+            p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+
+            base = ['מוצר', 'צבע', 'מודל']
+            if 'ONE SIZE' in value.columns:
+                base = ['מוצר', ]
+            lbls = base + all_options[key][:: -1]
+            value = value.reindex(labels=lbls, axis=1)
+            # if all the col of מודל are empty strings then remove the col
+            models = pd.Series(value.get('מודל'), dtype='str').str.strip()
+            found_model = False
+            for m in models:
+                if m != '' and m != 'nan' and m != '0' and m != 'None' and m != '0.0':
+                    found_model = True
+                    break
+            if not found_model:
+                try:
+                    value = value.drop('מודל', axis=1)
+                except:
+                    pass
+
+            add_table_to_doc(document, value.dropna(axis=0, how='all'))
+    # changing the page margins
+    margin = 1
+    sections = document.sections
+    for section in sections:
+        section.top_margin = Cm(margin)
+        section.bottom_margin = Cm(margin)
+        section.left_margin = Cm(margin)
+        section.right_margin = Cm(margin)
+    return document
+
+
+def exel_to_providers_docx(request):
     if request.user.is_authenticated and request.user.is_superuser:
         if(request.method == "POST"):
             # print(request.FILES)
             file = request.FILES.get('file', None)
             if file:
-                # print(file)
+                info = process_exel_to_providers_docx(file)
+                data = info['data']
+                client_names = list(map(lambda x: x.split(' ')[
+                    -1], info['sheets_names']))
+                # iterate the keys (provider_names) and generate_provider_docx for each
+                #docs = []
+                docs_data = []
+                for provider_name in data.keys():
+                    doc = generate_provider_docx(
+                        data[provider_name], provider_name)
+                    # docs.append(doc)
+                    docs_data.append({
+                        'doc': doc,
+                        'provider_name': provider_name,
+                    })
+                zip_buffer = io.BytesIO()
+                with zipfile.ZipFile(zip_buffer, "a", zipfile.ZIP_DEFLATED, False) as zip_file:
+                    for doc_info in docs_data:
+                        file_stream = io.BytesIO()
+                        doc = doc_info['doc']
+                        doc.save(file_stream)
+                        file_name = str(
+                            '(' + doc_info['provider_name'] + ') ' + '|'.join(client_names)) + '.docx'
+                        file_stream.seek(0)
+                        zip_file.writestr(
+                            file_name, file_stream.getvalue())
+                zip_buffer.seek(0)
+                response = HttpResponse(
+                    zip_buffer.read(), content_type="application/zip")
+                response['Content-Disposition'] = 'attachment; filename="products.zip"'
+                return response
+
+            else:
+                messages.add_message(request, messages.ERROR, 'נא להוסיף קובץ')
+        else:
+            messages.add_message(request, messages.ERROR,
+                                 'קריאה צריכה להיות POST')
+    return redirect('/admin/morders/morder/')
+
+
+def submit_exel_to_smartbee(request):
+    if request.user.is_authenticated and request.user.is_superuser:
+        if(request.method == "POST"):
+            file = request.FILES.get('file', None)
+            if file:
                 all_sheets = pd.ExcelFile(file)
                 docType = request.POST.get('docType')
                 for sheets_name in all_sheets.sheet_names:
@@ -545,7 +932,7 @@ def svelte_cart_history(request):
     return JsonResponse(previous_carts, safe=False)
 
 
-@authentication_classes((SessionAuthentication, TokenAuthentication,))
+@ authentication_classes((SessionAuthentication, TokenAuthentication,))
 @ api_view(['GET'])
 def api_logout(request):
     if request.user.is_anonymous:

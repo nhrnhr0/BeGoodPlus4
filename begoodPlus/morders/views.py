@@ -35,6 +35,7 @@ from django.template.loader import get_template
 # from docxtpl import DocxTemplate
 from productSize.models import ProductSize
 from docx.enum.table import WD_TABLE_DIRECTION
+import reversion
 
 
 def request_provider_info_admin(request, ppn_id):
@@ -877,122 +878,131 @@ def api_get_order_data2(request, id):
 def api_get_order_data(request, id):
     if not request.user.is_superuser:
         return JsonResponse({'status': 'error'}, status=status.HTTP_403_FORBIDDEN)
+
     order = MOrder.objects.select_related('client', 'agent').prefetch_related(
         'products', 'products__entries', 'products__entries__color', 'products__entries__size', 'products__entries__varient', 'products__toProviders',).get(id=id)
     if request.method == 'POST':
-        data = json.loads(request.body)
-        order.status = data['status']
-        order.message = data['message']
-        order.email = data['email']
-        order.name = data['name']
-        order.phone = data['phone']
-        order.status_msg = data['status_msg']
-        for product in data['products']:
-            '''
-                'id':258
-                'product':78
-                'price':'19.00'
-                'providers':['8', '11']
-                'ergent':True
-                'prining':False
-                'embroidery':True
-                'comment':None
-                'product_name':'חולצת פלאנל'
-            '''
-            p = order.products.filter(id=product['id'])
-            if len(p) != 0:
-                p = p.first()
-            else:
-                p = MOrderItem()
-                p.morder.set(order)
-                p.product = product['product']
-                p.save()
-            p.price = product['price']
-            p.providers.set(product['providers'])
-            p.ergent = product['ergent']
-            p.prining = product['prining']
-            p.embroidery = product['embroidery']
-            p.embroideryComment = product.get('embroideryComment', '')
-            p.priningComment = product.get('priningComment', '')
-            p.comment = product['comment']
-            p.save()
-            all_es = []
-            for entry in product['entries']:
+        with reversion.create_revision():
+            data = json.loads(request.body)
+            order.status = data['status']
+            order.message = data['message']
+            order.email = data['email']
+            order.name = data['name']
+            order.phone = data['phone']
+            order.status_msg = data['status_msg']
+            for product in data['products']:
                 '''
-                    {'id': 103, 'quantity': 0, 'color': 77, 'size': 87, 'varient': None,
-                        'color_name': 'שחור', 'size_name': 'S', 'varient_name': ''}
-                    {'id': 104, 'quantity': 0, 'color': 77, 'size': 88, 'varient': None,
-                        'color_name': 'שחור', 'size_name': 'M', 'varient_name': ''}
-                    {'id': 105, 'quantity': 4, 'color': 77, 'size': 89, 'varient': None,
-                        'color_name': 'שחור', 'size_name': 'L', 'varient_name': ''}
-                    {'id': 106, 'quantity': 4444, 'color': 77, 'size': 90, 'varient': None,
-                        'color_name': 'שחור', 'size_name': 'XL', 'varient_name': ''}
-                    {'id': 107, 'quantity': 0, 'color': 77, 'size': 91, 'varient': None,
-                        'color_name': 'שחור', 'size_name': '2XL', 'varient_name': ''}
-                    {'id': 108, 'quantity': 0, 'color': 78, 'size': 87, 'varient': None,
-                        'color_name': 'לבן', 'size_name': 'S', 'varient_name': ''}
-                    {'id': 109, 'quantity': 0, 'color': 78, 'size': 88, 'varient': None,
-                        'color_name': 'לבן', 'size_name': 'M', 'varient_name': ''}
-                    {'id': 110, 'quantity': 4, 'color': 78, 'size': 89, 'varient': None,
-                        'color_name': 'לבן', 'size_name': 'L', 'varient_name': ''}
-                    {'id': 111, 'quantity': 0, 'color': 78, 'size': 90, 'varient': None,
-                        'color_name': 'לבן', 'size_name': 'XL', 'varient_name': ''}
-                    {'id': 112, 'quantity': 0, 'color': 78, 'size': 91, 'varient': None,
-                        'color_name': 'לבן', 'size_name': '2XL', 'varient_name': ''}
+                    'id':258
+                    'product':78
+                    'price':'19.00'
+                    'providers':['8', '11']
+                    'ergent':True
+                    'prining':False
+                    'embroidery':True
+                    'comment':None
+                    'product_name':'חולצת פלאנל'
                 '''
-                e = p.entries.filter(id=entry['id'])
-                qyt = entry.get('quantity', '')
-                qyt = int(qyt) if qyt != "" else 0
-
-                if len(e) != 0:
-                    e = e.first()
-                    # e.color_id = entry['color']
-                    # e.size_id = entry['size']
-                    # e.varient_id = entry.get('varient', None)
-                    if qyt > 0:
-                        e.quantity = qyt
-                        e.save()
-                        dups = p.entries.filter(
-                            Q(color=e.color) and
-                            Q(size=e.size) and
-                            Q(varient=e.varient) and
-                            Q(morder_item=p) and
-                            ~Q(id=e.id)
-                        )
-                        if dups.count() != 0:
-                            print('delete all dups: ', dups)
-                            dups.delete()
-                    else:
-                        e.delete()
+                p = order.products.filter(id=product['id'])
+                if len(p) != 0:
+                    p = p.first()
                 else:
-                    if qyt > 0:
-                        existing_entry = p.entries.filter(
-                            color_id=entry['color'], size_id=entry['size'], varient_id=entry.get('varient', None))
-                        if existing_entry.count() != 0:
-                            existing_entry = existing_entry.first()
-                            existing_entry.quantity = qyt
-                            existing_entry.save()
-                        else:
-                            e = MOrderItemEntry(
-                                quantity=qyt, color_id=entry['color'], size_id=entry['size'], varient_id=entry.get('varient', None))
-                            e.morder_item = p
-                            e.save()
-                            p.entries.add(e)
-                # e.
-
-                # print('e2', e, 'save')
+                    p = MOrderItem()
+                    p.morder.set(order)
+                    p.product = product['product']
+                    p.save()
+                p.price = product['price']
+                p.providers.set(product['providers'])
+                p.ergent = product['ergent']
+                p.prining = product['prining']
+                p.embroidery = product['embroidery']
+                p.embroideryComment = product.get('embroideryComment', '')
+                p.priningComment = product.get('priningComment', '')
+                p.comment = product['comment']
                 p.save()
-        order.save()
-        total_price = 0
-        ord = MOrder.objects.get(id=order.id)
-        for item in ord.products.all():
-            totalEntriesQuantity = sum(
-                [entry.quantity for entry in item.entries.all()])
-            total_price += totalEntriesQuantity * item.price
-        ord.total_sell_price = total_price
-        ord.save()
+                all_es = []
+                for entry in product['entries']:
+                    '''
+                        {'id': 103, 'quantity': 0, 'color': 77, 'size': 87, 'varient': None,
+                            'color_name': 'שחור', 'size_name': 'S', 'varient_name': ''}
+                        {'id': 104, 'quantity': 0, 'color': 77, 'size': 88, 'varient': None,
+                            'color_name': 'שחור', 'size_name': 'M', 'varient_name': ''}
+                        {'id': 105, 'quantity': 4, 'color': 77, 'size': 89, 'varient': None,
+                            'color_name': 'שחור', 'size_name': 'L', 'varient_name': ''}
+                        {'id': 106, 'quantity': 4444, 'color': 77, 'size': 90, 'varient': None,
+                            'color_name': 'שחור', 'size_name': 'XL', 'varient_name': ''}
+                        {'id': 107, 'quantity': 0, 'color': 77, 'size': 91, 'varient': None,
+                            'color_name': 'שחור', 'size_name': '2XL', 'varient_name': ''}
+                        {'id': 108, 'quantity': 0, 'color': 78, 'size': 87, 'varient': None,
+                            'color_name': 'לבן', 'size_name': 'S', 'varient_name': ''}
+                        {'id': 109, 'quantity': 0, 'color': 78, 'size': 88, 'varient': None,
+                            'color_name': 'לבן', 'size_name': 'M', 'varient_name': ''}
+                        {'id': 110, 'quantity': 4, 'color': 78, 'size': 89, 'varient': None,
+                            'color_name': 'לבן', 'size_name': 'L', 'varient_name': ''}
+                        {'id': 111, 'quantity': 0, 'color': 78, 'size': 90, 'varient': None,
+                            'color_name': 'לבן', 'size_name': 'XL', 'varient_name': ''}
+                        {'id': 112, 'quantity': 0, 'color': 78, 'size': 91, 'varient': None,
+                            'color_name': 'לבן', 'size_name': '2XL', 'varient_name': ''}
+                    '''
+                    e = p.entries.filter(id=entry['id'])
+                    qyt = entry.get('quantity', '')
+                    qyt = int(qyt) if qyt != "" else 0
+
+                    if len(e) != 0:
+                        e = e.first()
+                        # e.color_id = entry['color']
+                        # e.size_id = entry['size']
+                        # e.varient_id = entry.get('varient', None)
+                        if qyt > 0:
+                            e.quantity = qyt
+                            e.save()
+                            dups = p.entries.filter(
+                                Q(color=e.color) and
+                                Q(size=e.size) and
+                                Q(varient=e.varient) and
+                                Q(morder_item=p) and
+                                ~Q(id=e.id)
+                            )
+                            if dups.count() != 0:
+                                print('delete all dups: ', dups)
+                                dups.delete()
+                        else:
+                            e.delete()
+                    else:
+                        if qyt > 0:
+                            existing_entry = p.entries.filter(
+                                color_id=entry['color'], size_id=entry['size'], varient_id=entry.get('varient', None))
+                            if existing_entry.count() != 0:
+                                existing_entry = existing_entry.first()
+                                existing_entry.quantity = qyt
+                                existing_entry.save()
+                            else:
+                                e = MOrderItemEntry(
+                                    quantity=qyt, color_id=entry['color'], size_id=entry['size'], varient_id=entry.get('varient', None))
+                                e.morder_item = p
+                                e.save()
+                                p.entries.add(e)
+                    # e.
+
+                    # print('e2', e, 'save')
+                    p.save()
+            order.save()
+            _ord = MOrder.objects.get(id=order.id)
+            total_price = 0
+            for item in _ord.products.all():
+                totalEntriesQuantity = sum(
+                    [entry.quantity for entry in item.entries.all()])
+                total_price += totalEntriesQuantity * item.price
+            _ord.total_sell_price = total_price
+            _ord.save()
+            user = request.user._wrapped if hasattr(
+                request.user, '_wrapped') else request.user
+            reversion.set_user(user)
+            reversion.set_comment(
+                'סטטוס: ' + str(_ord.status) + ' - סה"כ: ' + str(_ord.total_sell_price) + '₪')
         return JsonResponse({'status': 'ok'}, status=status.HTTP_200_OK)
     #order = MOrder.objects.select_related('client',).prefetch_related('products','products__entries', 'products__entries__color', 'products__entries__size', 'products__entries__varient').get(id=id)#
     # order = order.select_related('client',).prefetch_related('products','products__entries', 'products__entries__color', 'products__entries__size', 'products__entries__varient')
     data = AdminMOrderSerializer(order).data
+    # Store some meta-information.
+
     return JsonResponse(data, status=status.HTTP_200_OK)

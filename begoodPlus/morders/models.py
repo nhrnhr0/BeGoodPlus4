@@ -1,3 +1,4 @@
+import reversion
 from decimal import Decimal
 import secrets
 from django.forms import ValidationError
@@ -114,6 +115,7 @@ class MOrderItem(models.Model):
 # Create your models here.
 
 
+@reversion.register()
 class MOrder(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -312,4 +314,4 @@ def recalculate_total_price_post_save(sender, instance, **kwargs):
         instance.total_sell_price = new_price
         instance.save()
 
-    print('recalculate_total_price_post_save: ', instance.total_sell_price)
+    #print('recalculate_total_price_post_save: ', instance.total_sell_price)
