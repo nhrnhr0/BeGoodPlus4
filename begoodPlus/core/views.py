@@ -246,8 +246,8 @@ def process_exel_to_providers_docx(file):
         # if there is a value in the cell, then it's a pink row (header)
         if not pd.isna(is_header):
             if pink_data != None:
-                if len(data[provider_name][product_name]['items']) == 0:
-                    data[provider_name][product_name]['items'].append({
+                if len(data[provider_name]['products'][product_name]['items']) == 0:
+                    data[provider_name]['products'][product_name]['items'].append({
                         'size': 'ONE SIZE',
                         'color': 'ON COLOR',
                         'verient': '',
@@ -273,8 +273,10 @@ def process_exel_to_providers_docx(file):
             }
             if provider_name not in data:
                 data[provider_name] = {}
+            if not 'products' in data[provider_name]:
+                data[provider_name]['products'] = {}
             if product_name not in data[provider_name]:
-                data[provider_name][product_name] = {
+                data[provider_name]['products'][product_name] = {
                     'items': []
                 }
 
@@ -296,16 +298,22 @@ def process_exel_to_providers_docx(file):
                             'new_amount': 0,
                             'product_name': pink_data['product_name'],
                             'is_new_amount_header_set': False,
+                        }
+                    if 'products' not in data[_provider_name]:
+                        data[_provider_name]['products'] = {}
+
+                    if product_name not in data[_provider_name]['products']:
+                        data[_provider_name]['products'][product_name] = {
                             'items': []
                         }
-                    if product_name not in data[_provider_name]:
-                        data[_provider_name][product_name] = {
-                            'items': []
-                        }
+
+                        # data[_provider_name][product_name] = {
+                        #     'items': []
+                        # }
                     cell_qyt = row['כמות חדשה לספקים']
                     if pd.isna(cell_qyt):
                         cell_qyt = row['הערות']
-                    data[_provider_name][product_name]['items'].append({
+                    data[_provider_name]['products'][product_name]['items'].append({
                         'size': row['פריט'],
                         'color': row['ברקוד'],
                         'verient': row['כמות כוללת'],
@@ -355,7 +363,7 @@ def add_table_to_doc(document, data):
             if txt == 'nan' or txt == '0' or txt == 'ON COLOR' or txt == '0.0':
                 txt = ''
             table.cell(i + 1,
-                       j).text = txt
+                       j).text = txt.replace('.0', '')
             table.cell(i + 1,
                        j).paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
             # if it's the last 3 columns, then align right
@@ -392,11 +400,11 @@ def generate_provider_docx(provider_data, provider_name):
 
     document.add_picture(file_location, width=Cm(21.5 - 0.75*2))
     entries = []
-    for product_name, product_data in provider_data.items():
+    for product_name, product_data in provider_data['products'].items():
         for item in product_data['items']:
             entries.append({
                 'מוצר': product_name,
-                'מידה': item['size'],
+                'מידה': 'ONE SIZE' if item['size'] == 'one size' else item['size'],
                 'צבע': item['color'],
                 'מודל': item['verient'],
                 'כמות': item['qty'],
