@@ -483,9 +483,6 @@ def generate_provider_docx(provider_data, provider_name):
         }
         options_dfs[best_option_idx] = options_dfs[best_option_idx].append(
             d, ignore_index=True)
-
-    print(options_dfs)
-
     # base = ['מוצר', 'צבע', 'מודל']
 
     # opt1 = base + opt1[:: -1]
