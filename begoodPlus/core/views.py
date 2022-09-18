@@ -338,9 +338,9 @@ def add_table_to_doc(document, data):
     # First row are table headers!
     # https://github.com/python-openxml/python-docx/issues/149
     table = document.add_table(
-        rows=(data.shape[0]+1), cols=data.shape[1], style="Light Shading")
-    table.autofit = False
-    table.allow_autofit = False
+        rows=(data.shape[0]+1), cols=data.shape[1], )  # style="Light Shading"
+    table.autofit = True
+    table.allow_autofit = True
 
     # widths = (Inches(3), Inches(3),)
     # for row in table.rows:
@@ -483,6 +483,9 @@ def generate_provider_docx(provider_data, provider_name):
         }
         options_dfs[best_option_idx] = options_dfs[best_option_idx].append(
             d, ignore_index=True)
+
+    print(options_dfs)
+
     # base = ['מוצר', 'צבע', 'מודל']
 
     # opt1 = base + opt1[:: -1]
@@ -524,6 +527,27 @@ def generate_provider_docx(provider_data, provider_name):
                 label = 'טבלת מכנסיים'
             else:
                 label = 'טבלה'
+            cols = value.columns.to_list()
+            # remove 'מוצר', 'מודל', 'צבע' from cols
+            cols = list(filter(lambda x: x not in [
+                'מוצר', 'מודל', 'צבע'], cols))
+            # iterate over all cols and remove all rows that have 0 in all cols from the start and the end but not in the middle
+            cols.sort(
+                key=lambda x: ProductSize.objects.get(size=x).code)
+            to_remove = []
+            for col in cols:
+                if value[col].sum() == 0 or value[col].sum() == '':
+                    to_remove.append(col)
+                else:
+                    break
+            for col in reversed(cols):
+                if value[col].sum() == 0 or value[col].sum() == '':
+                    to_remove.append(col)
+                else:
+                    break
+            for col in to_remove:
+                value.drop(col, axis=1, inplace=True)
+                cols.remove(col)
 
             # add title with the label in the center
             p = document.add_heading(label, level=2)
@@ -532,7 +556,7 @@ def generate_provider_docx(provider_data, provider_name):
             base = ['מוצר', 'צבע', 'מודל']
             if 'ONE SIZE' in value.columns:
                 base = ['מוצר', ]
-            lbls = base + all_options[key][:: -1]
+            lbls = base + cols[::-1]  # all_options[key][:: -1]
             value = value.reindex(labels=lbls, axis=1)
             # if all the col of מודל are empty strings then remove the col
             models = pd.Series(value.get('מודל'), dtype='str').str.strip()
