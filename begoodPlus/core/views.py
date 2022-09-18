@@ -475,11 +475,12 @@ def generate_provider_docx(provider_data, provider_name):
         # create new df with the best option
         if options_dfs.get(best_option_idx) is None:
             options_dfs[best_option_idx] = pd.DataFrame()
+        print(product_name)
         d = {
             'מוצר': product_name,
             'מודל': row['מודל'],
             'צבע': row['צבע'],
-            **{size: row.get(size, '') for size in best_option}
+            **{size: row.get('ONE SIZE' if size == 'one size' else size, '') for size in best_option}
         }
         options_dfs[best_option_idx] = options_dfs[best_option_idx].append(
             d, ignore_index=True)
