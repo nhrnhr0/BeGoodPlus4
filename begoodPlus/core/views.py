@@ -338,7 +338,7 @@ def add_table_to_doc(document, data):
     # First row are table headers!
     # https://github.com/python-openxml/python-docx/issues/149
     table = document.add_table(
-        rows=(data.shape[0]+1), cols=data.shape[1], )  # style="Light Shading"
+        rows=(data.shape[0]+1), cols=data.shape[1], style="Light Shading")  #
     table.autofit = True
     table.allow_autofit = True
 
@@ -400,15 +400,21 @@ def generate_provider_docx(provider_data, provider_name):
 
     document.add_picture(file_location, width=Cm(21.5 - 0.75*2))
     entries = []
-    for product_name, product_data in provider_data['products'].items():
-        for item in product_data['items']:
-            entries.append({
-                'מוצר': product_name,
-                'מידה': 'ONE SIZE' if item['size'] == 'one size' else item['size'],
-                'צבע': item['color'],
-                'מודל': item['verient'],
-                'כמות': item['qty'],
-            })
+    _last_product_name = ''
+    try:
+        for product_name, product_data in provider_data['products'].items():
+            _last_product_name = product_name
+            print(product_name)
+            for item in product_data['items']:
+                entries.append({
+                    'מוצר': product_name,
+                    'מידה': 'ONE SIZE' if item['size'] == 'one size' else item['size'],
+                    'צבע': item['color'],
+                    'מודל': item['verient'],
+                    'כמות': item['qty'],
+                })
+    except Exception as e:
+        return _last_product_name
     # document = Document()
     # crete pivot table
     indexs = ['מוצר', 'מודל', 'צבע']
@@ -475,7 +481,7 @@ def generate_provider_docx(provider_data, provider_name):
         # create new df with the best option
         if options_dfs.get(best_option_idx) is None:
             options_dfs[best_option_idx] = pd.DataFrame()
-        print(product_name)
+        print(product_name, best_option)
         d = {
             'מוצר': product_name,
             'מודל': row['מודל'],
@@ -552,8 +558,8 @@ def generate_provider_docx(provider_data, provider_name):
             p.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
             base = ['מוצר', 'צבע', 'מודל']
-            if 'ONE SIZE' in value.columns:
-                base = ['מוצר', ]
+            # if 'ONE SIZE' in value.columns:
+            #     base = ['מוצר', ]
             lbls = base + cols[::-1]  # all_options[key][:: -1]
             value = value.reindex(labels=lbls, axis=1)
             # if all the col of מודל are empty strings then remove the col
@@ -597,6 +603,12 @@ def exel_to_providers_docx(request):
                 for provider_name in data.keys():
                     doc = generate_provider_docx(
                         data[provider_name], provider_name)
+                    # if doc is string then there was an error
+                    if type(doc) == str:
+                        return JsonResponse({'error': {
+                            'provider_name': provider_name,
+                            'product_name': doc
+                        }})
                     # docs.append(doc)
                     docs_data.append({
                         'doc': doc,
