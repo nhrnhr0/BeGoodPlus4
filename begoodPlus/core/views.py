@@ -1,4 +1,3 @@
-from turtle import right
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from docx.shared import Inches, Cm
