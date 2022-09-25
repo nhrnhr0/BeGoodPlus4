@@ -418,9 +418,9 @@ def generate_provider_docx(provider_data, provider_name):
             for item in product_data['items']:
                 entries.append({
                     'מוצר': product_name,
-                    'מידה': 'ONE SIZE' if item['size'] == 'one size' else item['size'],
-                    'צבע': item['color'],
-                    'מודל': item['verient'],
+                    'מידה': str('ONE SIZE' if item['size'] == 'one size' else item['size']),
+                    'צבע': str(item['color']),
+                    'מודל': str(item['verient']),
                     'כמות': item['qty'],
                 })
     except Exception as e:
@@ -492,12 +492,20 @@ def generate_provider_docx(provider_data, provider_name):
         if options_dfs.get(best_option_idx) is None:
             options_dfs[best_option_idx] = pd.DataFrame()
         print(product_name, best_option)
-        d = {
-            'מוצר': product_name,
-            'מודל': row['מודל'],
-            'צבע': row['צבע'],
-            **{size: row.get('ONE SIZE' if size == 'one size' else size, '') for size in best_option}
-        }
+        if best_option:
+            d = {
+                'מוצר': product_name,
+                'מודל': row['מודל'],
+                'צבע': row['צבע'],
+                **{size: row.get('ONE SIZE' if size == 'one size' else size, '') for size in best_option}
+            }
+        else:
+            d = {
+                'מוצר': product_name,
+                'מודל': row['מודל'],
+                'צבע': row['צבע'],
+                'ONE SIZE': row.get('ONE SIZE', '0')
+            }
         options_dfs[best_option_idx] = options_dfs[best_option_idx].append(
             d, ignore_index=True)
     # base = ['מוצר', 'צבע', 'מודל']
