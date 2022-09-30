@@ -27,6 +27,8 @@ from .tasks import product_photo_send_notification, send_cantacts_notificatios, 
 import xlsxwriter
 import io
 import pandas as pd
+import traceback
+
 from rest_framework.decorators import api_view, permission_classes
 from django.contrib.auth.models import User
 from django.conf import settings
@@ -611,27 +613,30 @@ def exel_to_providers_docx(request):
             # print(request.FILES)
             file = request.FILES.get('file', None)
             if file:
-                info = process_exel_to_providers_docx(file)
-                data = info['data']
-                client_names = list(map(lambda x: x.split(' ')[
-                    -1], info['sheets_names']))
-                # iterate the keys (provider_names) and generate_provider_docx for each
-                #docs = []
-                docs_data = []
-                for provider_name in data.keys():
-                    doc = generate_provider_docx(
-                        data[provider_name], provider_name)
-                    # if doc is string then there was an error
-                    if type(doc) == str:
-                        return JsonResponse({'error': {
+                try:
+                    info = process_exel_to_providers_docx(file)
+                    data = info['data']
+                    client_names = list(map(lambda x: x.split(' ')[
+                        -1], info['sheets_names']))
+                    # iterate the keys (provider_names) and generate_provider_docx for each
+                    #docs = []
+                    docs_data = []
+                    for provider_name in data.keys():
+                        doc = generate_provider_docx(
+                            data[provider_name], provider_name)
+                        # if doc is string then there was an error
+                        if type(doc) == str:
+                            return JsonResponse({'error': {
+                                'provider_name': provider_name,
+                                'product_name': doc
+                            }})
+                        # docs.append(doc)
+                        docs_data.append({
+                            'doc': doc,
                             'provider_name': provider_name,
-                            'product_name': doc
-                        }})
-                    # docs.append(doc)
-                    docs_data.append({
-                        'doc': doc,
-                        'provider_name': provider_name,
-                    })
+                        })
+                except Exception as e:
+                    return JsonResponse({'error': str(e), 'details': traceback.format_exc()})
                 zip_buffer = io.BytesIO()
                 with zipfile.ZipFile(zip_buffer, "a", zipfile.ZIP_DEFLATED, False) as zip_file:
                     for doc_info in docs_data:
