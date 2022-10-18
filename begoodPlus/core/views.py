@@ -1,3 +1,5 @@
+from docx.oxml import OxmlElement
+from docx.oxml.ns import qn
 from docx.shared import Inches, Cm
 from morders.models import MOrder
 from distutils.debug import DEBUG
@@ -25,6 +27,8 @@ from .tasks import product_photo_send_notification, send_cantacts_notificatios, 
 import xlsxwriter
 import io
 import pandas as pd
+import traceback
+
 from rest_framework.decorators import api_view, permission_classes
 from django.contrib.auth.models import User
 from django.conf import settings
@@ -118,6 +122,7 @@ def get_smartbee_info_from_dfs(client_info, items_table, sheet_name, docType):
     product_name = ''
     res_products = []
     price = ''
+    barcode = ''
     last_row_was_a_header = False
     for idx, row in items_table.iterrows():
         # print(row)
@@ -127,11 +132,13 @@ def get_smartbee_info_from_dfs(client_info, items_table, sheet_name, docType):
                 print('product_name: ', product_name)
                 product_obj = CatalogImage.objects.filter(
                     title=product_name).first()
+                barcode = row['ברקוד'] if not pd.isna(row['ברקוד']) else ''
                 res_products.append({
                     'product_obj': product_obj,
                     'product_name': product_name,
                     'amount_taken': amount_taken,
                     'include_tax': includeTaxBool,
+                    'barcode': barcode,
                     'price': price,
                 })
                 continue_add_amounts = False
@@ -171,23 +178,23 @@ def get_smartbee_info_from_dfs(client_info, items_table, sheet_name, docType):
         'product_name': product_name,
         'amount_taken': amount_taken,
         'include_tax': includeTaxBool,
+        'barcode': barcode,
         'price': price,
     })
 
     paymentItems = []
     for prod in res_products:
         description = prod['product_name']
-        if prod['product_obj'].barcode != None and prod['product_obj'].barcode != '':
-            description += ' (' + prod['product_obj'].barcode + ')'
-        paymentItems.append(
-            {
-                "providerItemId": prod['product_obj'].id,
-                "catNum": prod['product_obj'].id,
-                "quantity": prod['amount_taken'],
-                "pricePerUnit": prod['price'].replace('₪', ''),
-                "vatOption": "Include" if prod['include_tax'] else "NotInclude",
-                "description":  description,
-            })
+        if prod['barcode']:
+            description += ' (' + str(prod['barcode']) + ')'
+        entry = {
+            "providerItemId": prod['product_name'],
+            "quantity": prod['amount_taken'],
+            "pricePerUnit": prod['price'].replace('₪', ''),
+            "vatOption": "Include" if prod['include_tax'] else "NotInclude",
+            "description":  description,
+        }
+        paymentItems.append(entry)
 
     customer_details = {
         "providerUserToken": SMARTBEE_providerUserToken,
@@ -243,8 +250,8 @@ def process_exel_to_providers_docx(file):
         # if there is a value in the cell, then it's a pink row (header)
         if not pd.isna(is_header):
             if pink_data != None:
-                if len(data[provider_name][product_name]['items']) == 0:
-                    data[provider_name][product_name]['items'].append({
+                if len(data[provider_name]['products'][product_name]['items']) == 0:
+                    data[provider_name]['products'][product_name]['items'].append({
                         'size': 'ONE SIZE',
                         'color': 'ON COLOR',
                         'verient': '',
@@ -270,8 +277,10 @@ def process_exel_to_providers_docx(file):
             }
             if provider_name not in data:
                 data[provider_name] = {}
+            if not 'products' in data[provider_name]:
+                data[provider_name]['products'] = {}
             if product_name not in data[provider_name]:
-                data[provider_name][product_name] = {
+                data[provider_name]['products'][product_name] = {
                     'items': []
                 }
 
@@ -293,16 +302,22 @@ def process_exel_to_providers_docx(file):
                             'new_amount': 0,
                             'product_name': pink_data['product_name'],
                             'is_new_amount_header_set': False,
+                        }
+                    if 'products' not in data[_provider_name]:
+                        data[_provider_name]['products'] = {}
+
+                    if product_name not in data[_provider_name]['products']:
+                        data[_provider_name]['products'][product_name] = {
                             'items': []
                         }
-                    if product_name not in data[_provider_name]:
-                        data[_provider_name][product_name] = {
-                            'items': []
-                        }
+
+                        # data[_provider_name][product_name] = {
+                        #     'items': []
+                        # }
                     cell_qyt = row['כמות חדשה לספקים']
                     if pd.isna(cell_qyt):
                         cell_qyt = row['הערות']
-                    data[_provider_name][product_name]['items'].append({
+                    data[_provider_name]['products'][product_name]['items'].append({
                         'size': row['פריט'],
                         'color': row['ברקוד'],
                         'verient': row['כמות כוללת'],
@@ -327,9 +342,9 @@ def add_table_to_doc(document, data):
     # First row are table headers!
     # https://github.com/python-openxml/python-docx/issues/149
     table = document.add_table(
-        rows=(data.shape[0]+1), cols=data.shape[1], style="Light Shading")
-    table.autofit = False
-    table.allow_autofit = False
+        rows=(data.shape[0]+1), cols=data.shape[1], style="Light Shading")  #
+    table.autofit = True
+    table.allow_autofit = True
 
     # widths = (Inches(3), Inches(3),)
     # for row in table.rows:
@@ -352,9 +367,17 @@ def add_table_to_doc(document, data):
             if txt == 'nan' or txt == '0' or txt == 'ON COLOR' or txt == '0.0':
                 txt = ''
             table.cell(i + 1,
-                       j).text = txt
+                       j).text = txt.replace('.0', '')
             table.cell(i + 1,
                        j).paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
+            cell = table.cell(i + 1, j)
+            set_cell_border(
+                cell,
+                top={"sz": 12, "color": "#000000", "val": "single"},
+                bottom={"sz": 12, "color": "#000000", "val": "single"},
+                left={"sz": 12, "color": "#000000", "val": "single"},
+                right={"sz": 12, "color": "#000000", "val": "single"},
+            )
             # if it's the last 3 columns, then align right
             if j >= data.shape[-1] - 3:
                 table.cell(i + 1,
@@ -389,15 +412,21 @@ def generate_provider_docx(provider_data, provider_name):
 
     document.add_picture(file_location, width=Cm(21.5 - 0.75*2))
     entries = []
-    for product_name, product_data in provider_data.items():
-        for item in product_data['items']:
-            entries.append({
-                'מוצר': product_name,
-                'מידה': item['size'],
-                'צבע': item['color'],
-                'מודל': item['verient'],
-                'כמות': item['qty'],
-            })
+    _last_product_name = ''
+    try:
+        for product_name, product_data in provider_data['products'].items():
+            _last_product_name = product_name
+            print(product_name)
+            for item in product_data['items']:
+                entries.append({
+                    'מוצר': product_name,
+                    'מידה': str('ONE SIZE' if item['size'] == 'one size' else item['size']),
+                    'צבע': str(item['color']),
+                    'מודל': str(item['verient']),
+                    'כמות': item['qty'],
+                })
+    except Exception as e:
+        return _last_product_name
     # document = Document()
     # crete pivot table
     indexs = ['מוצר', 'מודל', 'צבע']
@@ -464,12 +493,21 @@ def generate_provider_docx(provider_data, provider_name):
         # create new df with the best option
         if options_dfs.get(best_option_idx) is None:
             options_dfs[best_option_idx] = pd.DataFrame()
-        d = {
-            'מוצר': product_name,
-            'מודל': row['מודל'],
-            'צבע': row['צבע'],
-            **{size: row.get(size, '') for size in best_option}
-        }
+        print(product_name, best_option)
+        if best_option:
+            d = {
+                'מוצר': product_name,
+                'מודל': row['מודל'],
+                'צבע': row['צבע'],
+                **{size: row.get('ONE SIZE' if size == 'one size' else size, '') for size in best_option}
+            }
+        else:
+            d = {
+                'מוצר': product_name,
+                'מודל': row['מודל'],
+                'צבע': row['צבע'],
+                'ONE SIZE': row.get('ONE SIZE', '0')
+            }
         options_dfs[best_option_idx] = options_dfs[best_option_idx].append(
             d, ignore_index=True)
     # base = ['מוצר', 'צבע', 'מודל']
@@ -513,15 +551,36 @@ def generate_provider_docx(provider_data, provider_name):
                 label = 'טבלת מכנסיים'
             else:
                 label = 'טבלה'
+            cols = value.columns.to_list()
+            # remove 'מוצר', 'מודל', 'צבע' from cols
+            cols = list(filter(lambda x: x not in [
+                'מוצר', 'מודל', 'צבע'], cols))
+            # iterate over all cols and remove all rows that have 0 in all cols from the start and the end but not in the middle
+            cols.sort(
+                key=lambda x: ProductSize.objects.get(size=x).code)
+            to_remove = []
+            for col in cols:
+                if value[col].sum() == 0 or value[col].sum() == '':
+                    to_remove.append(col)
+                else:
+                    break
+            for col in reversed(cols):
+                if value[col].sum() == 0 or value[col].sum() == '':
+                    to_remove.append(col)
+                else:
+                    break
+            for col in to_remove:
+                value.drop(col, axis=1, inplace=True)
+                cols.remove(col)
 
             # add title with the label in the center
             p = document.add_heading(label, level=2)
             p.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
             base = ['מוצר', 'צבע', 'מודל']
-            if 'ONE SIZE' in value.columns:
-                base = ['מוצר', ]
-            lbls = base + all_options[key][:: -1]
+            # if 'ONE SIZE' in value.columns:
+            #     base = ['מוצר', ]
+            lbls = base + cols[::-1]  # all_options[key][:: -1]
             value = value.reindex(labels=lbls, axis=1)
             # if all the col of מודל are empty strings then remove the col
             models = pd.Series(value.get('מודל'), dtype='str').str.strip()
@@ -554,21 +613,30 @@ def exel_to_providers_docx(request):
             # print(request.FILES)
             file = request.FILES.get('file', None)
             if file:
-                info = process_exel_to_providers_docx(file)
-                data = info['data']
-                client_names = list(map(lambda x: x.split(' ')[
-                    -1], info['sheets_names']))
-                # iterate the keys (provider_names) and generate_provider_docx for each
-                #docs = []
-                docs_data = []
-                for provider_name in data.keys():
-                    doc = generate_provider_docx(
-                        data[provider_name], provider_name)
-                    # docs.append(doc)
-                    docs_data.append({
-                        'doc': doc,
-                        'provider_name': provider_name,
-                    })
+                try:
+                    info = process_exel_to_providers_docx(file)
+                    data = info['data']
+                    client_names = list(map(lambda x: x.split(' ')[
+                        -1], info['sheets_names']))
+                    # iterate the keys (provider_names) and generate_provider_docx for each
+                    #docs = []
+                    docs_data = []
+                    for provider_name in data.keys():
+                        doc = generate_provider_docx(
+                            data[provider_name], provider_name)
+                        # if doc is string then there was an error
+                        if type(doc) == str:
+                            return JsonResponse({'error': {
+                                'provider_name': provider_name,
+                                'product_name': doc
+                            }})
+                        # docs.append(doc)
+                        docs_data.append({
+                            'doc': doc,
+                            'provider_name': provider_name,
+                        })
+                except Exception as e:
+                    return JsonResponse({'error': str(e), 'details': traceback.format_exc()})
                 zip_buffer = io.BytesIO()
                 with zipfile.ZipFile(zip_buffer, "a", zipfile.ZIP_DEFLATED, False) as zip_file:
                     for doc_info in docs_data:
@@ -619,6 +687,46 @@ def submit_exel_to_smartbee(request):
                 messages.add_message(request, messages.ERROR, 'נא להוסיף קובץ')
 
         return redirect('/admin/morders/morder/')
+
+
+def set_cell_border(cell, **kwargs):
+    """
+    Set cell`s border
+    Usage:
+
+    set_cell_border(
+        cell,
+        top={"sz": 12, "val": "single", "color": "#FF0000", "space": "0"},
+        bottom={"sz": 12, "color": "#00FF00", "val": "single"},
+        start={"sz": 24, "val": "dashed", "shadow": "true"},
+        end={"sz": 12, "val": "dashed"},
+    )
+    """
+    tc = cell._tc
+    tcPr = tc.get_or_add_tcPr()
+
+    # check for tag existnace, if none found, then create one
+    tcBorders = tcPr.first_child_found_in("w:tcBorders")
+    if tcBorders is None:
+        tcBorders = OxmlElement('w:tcBorders')
+        tcPr.append(tcBorders)
+
+    # list over all available tags
+    for edge in ('start', 'top', 'end', 'bottom', 'insideH', 'insideV'):
+        edge_data = kwargs.get(edge)
+        if edge_data:
+            tag = 'w:{}'.format(edge)
+
+            # check for tag existnace, if none found, then create one
+            element = tcBorders.find(qn(tag))
+            if element is None:
+                element = OxmlElement(tag)
+                tcBorders.append(element)
+
+            # looks like order of attributes is important
+            for key in ["sz", "val", "color", "space", "shadow"]:
+                if key in edge_data:
+                    element.set(qn('w:{}'.format(key)), str(edge_data[key]))
 
 
 def send_smartbe_info(info, morder_id):

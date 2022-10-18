@@ -14,6 +14,8 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
+
+from docsSignature.views import api_get_doc_signature, api_sign_on_doc
 from core.views import admin_upload_docs_page
 from catalogAlbum.views import get_albums, get_catalog_albums
 from inventory.views import doc_stock_enter_provider_requests_api, get_stock_by_id_api, save_doc_stock_enter_provider_requests, unpivot_inventory_exel, upload_inventory_csv
@@ -55,6 +57,7 @@ from client.views import create_client_user, get_all_users_by_admin, whoAmI, use
 from color.views import ColorsViewSet
 from productSize.views import SizesViewSet
 from smartbee.views import get_smartbee_doc
+from docsSignature.views import edit_doc_signature, api_adit_doc_signature
 router = routers.DefaultRouter()
 router.register(r'CatalogAlbums', CatalogAlbumViewSet)
 router.register(r'CatalogImages', CatalogImageViewSet)
@@ -83,6 +86,12 @@ clientRouter.register(r'logos', LogoClientViewSet)
 #from rest_framework.authtoken.views import obtain_auth_token
 #from rest_framework_simplejwt.views import (TokenObtainPairView,TokenRefreshView,)
 urlpatterns = [
+    path('sign-on-doc/<uuid:uuid>/', api_sign_on_doc),
+    path('api-signature/<uuid:uuid>/', api_get_doc_signature),
+    path('api-edit-doc-signature/<uuid:uuid>',
+         api_adit_doc_signature, name='edit_doc_signature'),
+    path('edit-doc-signature/<uuid:uuid>',
+         edit_doc_signature, name='edit_doc_signature'),
     path('admin-upload-docs/', admin_upload_docs_page,
          name='admin_upload_docs_page'),
     path('create-image-from-exel', create_image_from_exel,

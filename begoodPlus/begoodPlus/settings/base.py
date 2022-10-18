@@ -103,6 +103,7 @@ INSTALLED_APPS = [
     'morders',
     'inventory',
     'smartbee',
+    'docsSignature',
 
     #### old unused modals ####
     'clientLikedImages',
