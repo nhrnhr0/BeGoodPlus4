@@ -572,18 +572,20 @@ def generate_provider_docx(provider_data, provider_name):
             # iterate over all cols and remove all rows that have 0 in all cols from the start and the end but not in the middle
             cols.sort(
                 key=lambda x: ProductSize.objects.get(size=x).code)
-            to_remove = []
+            to_remove = set()
             for col in cols:
                 if value[col].sum() == 0 or value[col].sum() == '':
-                    to_remove.append(col)
+                    to_remove.add(col)
                 else:
                     break
             for col in reversed(cols):
                 if value[col].sum() == 0 or value[col].sum() == '':
-                    to_remove.append(col)
+                    to_remove.add(col)
                 else:
                     break
             for col in to_remove:
+                print('removing', col, ' from ',
+                      label, value.columns.to_list())
                 value.drop(col, axis=1, inplace=True)
                 cols.remove(col)
 
