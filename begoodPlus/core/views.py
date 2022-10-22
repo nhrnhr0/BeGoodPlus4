@@ -1,3 +1,8 @@
+import re
+import googleapiclient
+from django.views.decorators.csrf import csrf_exempt
+from begoodPlus.settings.base import drive_service, drive_creds
+from googleapiclient.http import MediaFileUpload, MediaIoBaseDownload
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from docx.shared import Inches, Cm
@@ -110,11 +115,18 @@ info = {
 
 def get_smartbee_info_from_dfs(client_info, items_table, sheet_name, docType):
     morder_id = client_info['מספר הזמנה'][0]
-    db_morder = MOrder.objects.get(id=morder_id)
-    db_client = db_morder.client
-    dealerNumber = db_client.privateCompany if db_client else '0'
+    try:
+        db_morder = MOrder.objects.get(id=morder_id)
+        db_client = db_morder.client
+        dealerNumber = db_client.privateCompany if db_client else '0'
+        name = 'morder (' + str(db_morder.id) + ')'
+    except:
+        db_morder = None
+        db_client = ''
+        dealerNumber = '0'
+        name = morder_id
     providerCustomerId = str(uuid.uuid4()).replace('-', '')
-    name = 'morder (' + str(db_morder.id) + ')'
+
     if(len(name) < 2):
         name = 'name'
 
@@ -190,7 +202,7 @@ def get_smartbee_info_from_dfs(client_info, items_table, sheet_name, docType):
         entry = {
             "providerItemId": prod['product_name'],
             "quantity": prod['amount_taken'],
-            "pricePerUnit": prod['price'].replace('₪', ''),
+            "pricePerUnit": str(prod['price']).replace('₪', ''),
             "vatOption": "Include" if prod['include_tax'] else "NotInclude",
             "description":  description,
         }
@@ -210,8 +222,7 @@ def get_smartbee_info_from_dfs(client_info, items_table, sheet_name, docType):
         },
         "docType": docType,
         "createDraftOnFailure": True,
-        "dueDate": db_morder.updated.strftime("%Y-%m-%d"),
-        "title": 'הזמנה מספר ' + str(db_morder.id),
+
         "extraCommentsForEmail": "",
         "currency": {
             "currencyType": "ILS",
@@ -229,7 +240,10 @@ def get_smartbee_info_from_dfs(client_info, items_table, sheet_name, docType):
         "isSendOrigEng": False,
         "docDate": datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S+03:00"),
     }
-
+    if db_morder:
+        # "dueDate": db_morder.updated.strftime("%Y-%m-%d"),
+        customer_details['dueDate'] = db_morder.updated.strftime("%Y-%m-%d")
+        customer_details["title"] = 'הזמנה מספר ' + str(db_morder.id)
     return customer_details
 
 
@@ -662,6 +676,74 @@ def exel_to_providers_docx(request):
     return redirect('/admin/morders/morder/')
 
 
+def get_drive_file(service, file_id):
+    # pylint: disable=maybe-no-member
+    request = service.files().export(fileId=file_id,
+                                     mimeType='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    file = io.BytesIO()
+    downloader = MediaIoBaseDownload(file, request)
+    done = False
+    while done is False:
+        status, done = downloader.next_chunk()
+        print(F'Download {int(status.progress() * 100)}.')
+    return file.getvalue()
+
+
+@csrf_exempt
+def sheetsurl_to_smartbee(request):
+    if request.user.is_authenticated and request.user.is_superuser:
+        if(request.method == "POST"):
+            # read the url from the POST body:
+            url = request.POST.get('sheet_url')
+            print(url)
+            docType = request.POST.get('docType')
+            if url:
+                # https://docs.google.com/spreadsheets/d/1Qtkm3krWMmRSXKGWFwkw1giuypjjjfhGie-bjTieSJM/edit#gid=241255938
+                # fileId = 1Qtkm3krWMmRSXKGWFwkw1giuypjjjfhGie-bjTieSJM
+                # sheetId = 241255938
+                fileId = url.split(
+                    'https://docs.google.com/spreadsheets/d/')[1].split('/edit')[0]
+                sheetId = url.split('gid=')[1]
+                bytes_exel_file = get_drive_file(drive_service, fileId)
+                # conver bytes to in memory file
+                file = io.BytesIO(bytes_exel_file)
+                # process the file
+                all_sheets = pd.ExcelFile(file)
+                # f'https://docs.google.com/spreadsheets/d/{doc_id}/gviz/tq?tqx=out:csv&sheet={sheet_name}'
+                # get sheetname from url
+                sheetname = get_sheetname_from_driveurl(url)
+                order_id = None
+                df = all_sheets.parse(sheet_name=sheetname)
+                df2 = all_sheets.parse(
+                    sheet_name=sheetname, skiprows=2, )
+                info = get_smartbee_info_from_dfs(
+                    df, df2, sheetname, docType)
+                send_smartbe_info(
+                    info=info, morder_id=int(order_id) if order_id else None)
+
+            else:
+                return JsonResponse({'error': 'no url'})
+            return redirect('/admin-upload-docs/')
+
+        else:
+            return JsonResponse({'error': 'call should be POST'})
+    else:
+        return JsonResponse({'error': 'user is not authenticated'})
+
+
+def get_sheetname_from_driveurl(url):
+    sheetId = url.split('gid=')[1]
+    http_client = googleapiclient.discovery._auth.authorized_http(
+        drive_creds)
+    response, content = http_client.request(url)
+    cont = content.decode('utf-8')
+    regex = sheetId
+    regex += r"\\\",\[{\\\"\d\\\":\[\[\d,\d,\\\"(.+?)\\\"]"
+    matches = re.search(regex, cont)
+    sheet_name = matches.group(1)
+    return sheet_name
+
+
 def submit_exel_to_smartbee(request):
     if request.user.is_authenticated and request.user.is_superuser:
         if(request.method == "POST"):
@@ -735,6 +817,7 @@ def send_smartbe_info(info, morder_id):
     smartbee_response = requests.post(
         SMARTBEE_DOMAIN + '/api/v1/documents/create', json=info, headers=headers)
     if smartbee_response.status_code == 200:
+        print(smartbee_response.json())
         # self.isOrder = True
         # self.save()
         data = smartbee_response.json()

@@ -10,6 +10,12 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
+from google.auth.transport.requests import Request
+from googleapiclient.http import MediaFileUpload, MediaIoBaseDownload
+from googleapiclient.discovery import build
+from google_auth_oauthlib.flow import Flow, InstalledAppFlow
+import pickle
+import io
 import datetime
 from pathlib import Path
 import os
@@ -20,7 +26,7 @@ from .. import secrects
 import cloudinary
 import cloudinary.uploader
 import cloudinary.api
-from begoodPlus.secrects import FULL_DOMAIN, SECRECT_BASE_MY_DOMAIN
+from begoodPlus.secrects import FULL_DOMAIN, SECRECT_BASE_MY_DOMAIN, GOOGLE_CLIENT_SECRET_PATH, GOOGLE_AUTH_DIR
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(
@@ -368,3 +374,46 @@ BROKER_PASSWOD = secrects.BROKER_PASSWORD
 
 MY_DOMAIN = FULL_DOMAIN  # '127.0.0.1:8000'
 CSRF_COOKIE_DOMAIN = '.' + SECRECT_BASE_MY_DOMAIN
+
+
+# google drive api
+def Create_Service(client_secret_file, api_name, api_version, *scopes):
+    print(client_secret_file, api_name, api_version, scopes, sep='-')
+    CLIENT_SECRET_FILE = client_secret_file
+    API_SERVICE_NAME = api_name
+    API_VERSION = api_version
+    SCOPES = [scope for scope in scopes[0]]
+    print(SCOPES)
+
+    cred = None
+
+    pickle_file = f'{GOOGLE_AUTH_DIR}token_{API_SERVICE_NAME}_{API_VERSION}.pickle'
+    # print(pickle_file)
+
+    if os.path.exists(pickle_file):
+        with open(pickle_file, 'rb') as token:
+            cred = pickle.load(token)
+
+    if not cred or not cred.valid:
+        if cred and cred.expired and cred.refresh_token:
+            cred.refresh(Request())
+        else:
+            flow = InstalledAppFlow.from_client_secrets_file(
+                CLIENT_SECRET_FILE, SCOPES)
+            cred = flow.run_local_server()
+
+        with open(pickle_file, 'wb') as token:
+            pickle.dump(cred, token)
+
+    try:
+        service = build(API_SERVICE_NAME, API_VERSION, credentials=cred)
+        print(API_SERVICE_NAME, 'service created successfully')
+        return service, cred
+    except Exception as e:
+        print('Unable to connect.')
+        print(e)
+        return None
+
+
+drive_service, drive_creds = Create_Service(GOOGLE_CLIENT_SECRET_PATH, 'drive', 'v3', [
+    'https://www.googleapis.com/auth/drive'])
