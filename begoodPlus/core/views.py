@@ -449,6 +449,9 @@ def generate_provider_docx(provider_data, provider_name):
     value = 'כמות'
     df = pd.DataFrame(entries)
     df = df.fillna(0)
+    # if df is empty, then return
+    if df.empty:
+        return {}, False
     df = df.pivot_table(index=indexs, columns=[column],
                         values=value, aggfunc='sum')
     df = df.fillna(0)
@@ -621,7 +624,7 @@ def generate_provider_docx(provider_data, provider_name):
         section.bottom_margin = Cm(margin)
         section.left_margin = Cm(margin)
         section.right_margin = Cm(margin)
-    return document
+    return document, True
 
 
 def merge_data_to_providers_dict(original_data, provider_name, product_name, color, size, varient, qyt):
@@ -821,7 +824,7 @@ def sheetsurl_to_providers_docx(request):
                 morders_ids.append(str(int(sheet.iloc[0, 0])))
             docs_data = []
             for provider_name in info.keys():
-                doc = generate_provider_docx(
+                doc, seccsess = generate_provider_docx(
                     info[provider_name], provider_name)
                 # if doc is string then there was an error
                 if type(doc) == str:
@@ -830,10 +833,11 @@ def sheetsurl_to_providers_docx(request):
                         'product_name': doc
                     }})
                 # docs.append(doc)
-                docs_data.append({
-                    'doc': doc,
-                    'provider_name': provider_name,
-                })
+                if seccsess:
+                    docs_data.append({
+                        'doc': doc,
+                        'provider_name': provider_name,
+                    })
 
             zip_buffer = io.BytesIO()
             with zipfile.ZipFile(zip_buffer, "a", zipfile.ZIP_DEFLATED, False) as zip_file:
