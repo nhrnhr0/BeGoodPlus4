@@ -130,8 +130,19 @@ def api_adit_doc_signature(request, uuid):
             # loop over the details
             for detail in details:
                 # get the detail by id
-                detail_obj = MOrderSignatureItemDetail.objects.get(
-                    id=detail['id'])  # quantity, color, size, varient
+                if detail['id'] == None:
+                    detail_obj = MOrderSignatureItemDetail()
+
+                    # color_id, size_id, varient_id (if '' set None)
+                    detail_obj.color_id = detail['color_id']
+                    detail_obj.size_id = detail['size_id']
+                    detail_obj.varient_id = detail['varient_id'] if detail['varient_id'] != '' else None
+                    detail_obj.save()
+                    item_obj.details.add(detail_obj)
+                else:
+                    detail_obj = MOrderSignatureItemDetail.objects.get(
+                        id=detail['id'])  # quantity, color, size, varient
+
                 # update the detail's fields
                 detail_obj.quantity = detail['quantity']
                 # detail_obj.color = detail['color']

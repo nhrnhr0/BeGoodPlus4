@@ -206,21 +206,25 @@ function submit_btn_clicked(e) {
       "Content-Type": "application/json",
     },
     body: JSON.stringify(data),
-  }).then((res) => {
-    saveing = false;
-    debugger;
-    if (res.status === "ok") {
-      //reload
-      window.location.reload();
-    } else {
-      alert("המסמך לא נשמר בהצלחה");
-    }
-    // if (res.status === 200) {
-    //   alert("המסמך נשמר בהצלחה");
-    // } else {
-    //   alert("התרחשה שגיאה בשמירת המסמך");
-    // }
-  });
+  })
+    .then((res) => {
+      saveing = false;
+      if (res.status === "ok") {
+        //reload
+        window.location.reload();
+      } else {
+        alert("המסמך לא נשמר בהצלחה");
+      }
+      // if (res.status === 200) {
+      //   alert("המסמך נשמר בהצלחה");
+      // } else {
+      //   alert("התרחשה שגיאה בשמירת המסמך");
+      // }
+    })
+    .catch((err) => {
+      saveing = false;
+      alert("התרחשה שגיאה בשמירת המסמך");
+    });
 }
 </script>
 
@@ -525,7 +529,6 @@ function submit_btn_clicked(e) {
                           } else {
                             //color_id :  81 color_name :  "אפור כהה" id :  98 quantity :  1 size_code :  "ak" size_id :  104 size_name :  "46" varient_id :  12 varient_name :  "עם גומי"
                             // add the new detail to the item
-                            debugger;
                             const curr_size = ALL_SIZES.find(
                               (v) => v.id == size_id
                             );
@@ -542,11 +545,17 @@ function submit_btn_clicked(e) {
                               size_id: parseInt(size_id),
                               size_name: curr_size.size,
                               size_code: curr_size.code,
-                              varient_id: parseInt(varient_id),
+                              varient_id:
+                                varient_id == null ||
+                                varient_id == "" ||
+                                varient_id.toString() == "NaN"
+                                  ? ""
+                                  : parseInt(varient_id),
                               varient_name: curr_varient?.name,
                               quantity: parseInt(quantity),
                             });
                           }
+                          debugger;
                           item.details = [...item.details];
                         }}
                       >
@@ -554,6 +563,7 @@ function submit_btn_clicked(e) {
                       </button>
                     </div>
                   {/if}
+                  <!-- all colos all variants all sizes -->
                 {/if}
               </td>
             </tr>
