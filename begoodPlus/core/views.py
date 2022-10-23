@@ -653,8 +653,8 @@ def merge_data_to_providers_dict(original_data, provider_name, product_name, col
         }
     found = False
     for item in original_data[provider_name]['products'][product_name]['items']:
-        if item['color'] == color and item['size'] == size and item['varient'] == varient:
-            item['amount'] += qyt
+        if item['color'] == color and item['size'] == size and item['verient'] == varient:
+            item['qty'] += qyt
             found = True
             break
     if not found:
