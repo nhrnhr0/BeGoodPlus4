@@ -36,6 +36,11 @@ class MOrderSignatureItem(models.Model):
     show_details = models.BooleanField(default=True)
 
 
+class MOrderSignatureSimulation(models.Model):
+    description = models.TextField()
+    cimage = models.CharField(max_length=350, blank=True, null=True)
+
+
 class MOrderSignature(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -48,6 +53,8 @@ class MOrderSignature(models.Model):
     published_at = models.DateTimeField(null=True, blank=True)
     signed_at = models.DateTimeField(null=True, blank=True)
     items = models.ManyToManyField(to=MOrderSignatureItem, blank=True)
+    simulations = models.ManyToManyField(
+        to=MOrderSignatureSimulation, blank=True)
     signature_cimage = models.CharField(max_length=350, null=True, blank=True)
     signature_info = models.JSONField(null=True, blank=True)
 

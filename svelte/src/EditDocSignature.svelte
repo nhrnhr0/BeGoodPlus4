@@ -4,9 +4,12 @@ import {
   apiGetAllColors,
   apiGetAllSizes,
   apiGetAllVariants,
+  apiSearchProducts,
   fetch_wraper,
 } from "./api/api";
-import { API_EDIT_DOC_SIGNATURE } from "./consts/consts";
+import AutoComplete from "simple-svelte-autocomplete";
+
+import { API_EDIT_DOC_SIGNATURE, CLOUDINARY_BASE_URL } from "./consts/consts";
 import SvelteMarkdown from "svelte-markdown";
 import { Loading } from "carbon-components-svelte";
 
@@ -14,7 +17,75 @@ export let uuid;
 let ALL_SIZES, ALL_COLORS, ALL_VARIENTS;
 let data;
 let saveing = false;
+let newProductsearchValue;
+let newProductImage;
+let newProductTitle;
+let newProductPrice;
+let newProductDescription;
 
+function handleImageUploadSim(e) {
+  let file = e.target.files[0];
+  let reader = new FileReader();
+  reader.readAsDataURL(file);
+  reader.onload = function () {
+    let image = reader.result;
+    simImage = image;
+  };
+}
+let simImage;
+let SimDescriptionNew;
+function addNewSimBtnClicked(e) {
+  e.preventDefault();
+  data.simulations.push({
+    cimage: simImage,
+    description: SimDescriptionNew,
+  });
+  data.simulations = [...data.simulations];
+  simImage = "";
+  SimDescriptionNew = "";
+}
+async function searchProducts(keyword) {
+  let json = await apiSearchProducts(keyword);
+  let data = json;
+  return data.all;
+}
+function addNewProductBtnClicked(e) {
+  e.preventDefault();
+  //      "id": 23,
+  //     "name": "דגמ\"ח אינדאני",
+  //     "description": "* המכנס האהוב ביותר בקרב העובדים בישראל\r\n* 100% כותנה\r\n* 6 כיסים\r\n* תפירה מחוזקת בנקודות החשובות\r\n* חצי גומי מאחורה\r\n* מתאים לחברות,מפעלים, תעשיה ועוד...\r\n* אפשרות לרקמה או הדפסה",
+  //     "cimage": "https://res.cloudinary.com/ms-global/image/upload/v1635672276/site/products/%D7%93%D7%92%D7%9E%D7%97_%D7%90%D7%99%D7%A0%D7%93%D7%90%D7%A0%D7%99_IyWQaK6_Tj5EYOe_P9uUDPV_t64qw8e_xJY95O3.png",
+  //     "price": "32.00",
+  //     "show_details": true,
+  //     "details": [...]
+  data.items.push({
+    id: null,
+    name: newProductTitle,
+    description: newProductDescription || "",
+    cimage: newProductImage,
+    price: newProductPrice || 0,
+    show_details: true,
+    details: [],
+  });
+  data.items = [...data.items];
+  newProductImage = "";
+  newProductTitle = "";
+  newProductPrice = "";
+  newProductDescription = "";
+}
+function autocompleteItemSelected(item) {
+  if (item && item.id) {
+    console.log("autocompleteItemSelected", item);
+    newProductImage = CLOUDINARY_BASE_URL + item.cimage;
+    newProductTitle = item.title;
+  }
+  // console.log("autocompleteItemSelected: ", new_products);
+  /*searchValue = item.title;
+        apiSearchProducts(searchValue).then(response => {
+            new_products = response.data;
+            console.log(new_products);
+        });*/
+}
 onMount(async () => {
   // request api-edit-doc-signature/<uuid:uuid>
   /**
@@ -179,7 +250,15 @@ function handleQuantityChange(e) {
   detail.quantity = quantity;
   data = { ...data };
 }
-
+function handleImageUploadNewProduct(e) {
+  let file = e.target.files[0];
+  let reader = new FileReader();
+  reader.readAsDataURL(file);
+  reader.onload = function () {
+    let image = reader.result;
+    newProductImage = image;
+  };
+}
 function handleImageUpload(e) {
   let file = e.target.files[0];
   let reader = new FileReader();
@@ -225,6 +304,12 @@ function submit_btn_clicked(e) {
       saveing = false;
       alert("התרחשה שגיאה בשמירת המסמך");
     });
+}
+
+function deleteProduct(item) {
+  console.log("deleteProduct", item);
+  let index = data.items.findIndex((i) => i.id === item.id);
+  data.items[index].deleted = !data.items[index].deleted;
 }
 </script>
 
@@ -282,8 +367,20 @@ function submit_btn_clicked(e) {
                   alt={item.name}
                 />
               </td>
-              <td>
+              <td class:deleted={item.deleted}>
                 <input type="text" bind:value={item.name} />
+                <button
+                  on:click={(e) => {
+                    e.preventDefault();
+                    deleteProduct(item);
+                  }}
+                >
+                  {#if !item.deleted}
+                    מחק
+                  {:else}
+                    שחזר
+                  {/if}
+                </button>
               </td>
 
               <td>
@@ -457,7 +554,9 @@ function submit_btn_clicked(e) {
                       </select>
                       <select class="size-select">
                         <option value="">בחר מידה</option>
-                        {#each ALL_SIZES as size}
+                        {#each ALL_SIZES.sort((a, b) => {
+                          return a.code.localeCompare(b.code);
+                        }) as size}
                           <option value={size.id}>{size.size}</option>
                         {/each}
                       </select>
@@ -570,6 +669,150 @@ function submit_btn_clicked(e) {
             <tr class="details-tr" />
           {/each}
         </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="8">
+              <AutoComplete
+                id="search_input"
+                on:focus
+                loadingText="מחפש מוצרים..."
+                createText="לא נמצאו תוצאות חיפוש"
+                showLoadingIndicator="true"
+                noResultsText=""
+                onChange={autocompleteItemSelected}
+                create="true"
+                placeholder="חיפוש..."
+                className="autocomplete-cls"
+                searchFunction={searchProducts}
+                delay="200"
+                localFiltering={false}
+                labelFieldName="title"
+                valueFieldName="value"
+                bind:value={newProductsearchValue}
+              >
+                <div slot="item" let:item let:label>
+                  <div class="search-item">
+                    <div class="inner">
+                      <img
+                        alt={item.title}
+                        style="height:25px;"
+                        src="{CLOUDINARY_BASE_URL}f_auto,w_auto/{item.cimage}"
+                      />
+                      {@html label}
+                    </div>
+                  </div>
+                </div>
+              </AutoComplete>
+              <div class="new-product-form">
+                <div class="item">
+                  <input
+                    type="file"
+                    id="selectedFileNew"
+                    on:change={handleImageUploadNewProduct}
+                  />
+                  <img width="50px" height="50px" src={newProductImage} />
+                </div>
+                <div class="item">
+                  <label for="title">שם מוצר</label>
+                  <input type="text" id="title" bind:value={newProductTitle} />
+                </div>
+                <div class="item">
+                  <label for="price">מחיר</label>
+                  <input
+                    type="number"
+                    id="price"
+                    bind:value={newProductPrice}
+                  />
+                </div>
+                <div class="item">
+                  <label for="description">תיאור</label>
+                  <textarea
+                    id="description"
+                    bind:value={newProductDescription}
+                  />
+                </div>
+                <div class="item">
+                  <button type="button" on:click={addNewProductBtnClicked}
+                    >הוסף מוצר</button
+                  >
+                </div>
+              </div></td
+            >
+          </tr>
+        </tfoot>
+      </table>
+
+      <table class="simulation">
+        {#each data?.simulations || [] as sim, i}
+          <tr data-idx={i} class:deleted={sim.deleted}>
+            <td>
+              <img
+                src={sim.cimage}
+                width="auto"
+                style="display: block;width: 100%;height: auto;"
+                height="auto"
+              />
+            </td>
+            <td>
+              <div class="sim-description">
+                <textarea
+                  name="sim-{i}"
+                  id=""
+                  cols="50"
+                  rows="5"
+                  placeholder="תיאור הדמייה"
+                  bind:value={sim.description}
+                />
+              </div>
+            </td>
+            <td>
+              <div class="delete-action">
+                <button
+                  type="button"
+                  on:click={() => {
+                    sim.deleted = !sim.deleted;
+                  }}
+                >
+                  {#if !sim.deleted}
+                    מחק
+                  {:else}
+                    שחזר
+                  {/if}
+                </button>
+              </div>
+            </td>
+          </tr>
+        {/each}
+        <tr>
+          <td colspan="2"> הדמייה חדשה: </td>
+        </tr>
+        <tr>
+          <td colspan="1">
+            <input
+              type="file"
+              id="selectedFileSim"
+              on:change={handleImageUploadSim}
+            />
+            <img width="50px" height="50px" src={simImage} />
+          </td>
+          <td colspan="1">
+            <div class="sim-description">
+              <textarea
+                name="sim-new"
+                id=""
+                cols="50"
+                rows="5"
+                placeholder="תיאור הדמייה"
+                bind:value={SimDescriptionNew}
+              />
+            </div>
+          </td>
+          <td>
+            <button type="button" on:click={addNewSimBtnClicked}
+              >הוסף הדמייה</button
+            >
+          </td>
+        </tr>
       </table>
     </form>
     <button disabled={saveing} class="submit-btn" on:click={submit_btn_clicked}>
@@ -583,12 +826,34 @@ function submit_btn_clicked(e) {
 {/if}
 
 <style lang="scss">
+table.simulation {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #ccc;
+  margin-top: 20px;
+  tr {
+    border: 1px solid #ccc;
+    td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      img {
+        width: 100%;
+        height: auto;
+      }
+    }
+
+    &.deleted {
+      background-color: #f10101;
+      color: #fff;
+    }
+  }
+}
 .submit-btn {
   border: none;
   position: sticky;
   bottom: 10px;
   right: 0px;
-
+  margin-top: 250px;
   height: 50px;
   width: 200px;
   background-color: #eaa852;
@@ -730,6 +995,11 @@ main {
           }
         }
 
+        td.deleted {
+          background-color: #f10101;
+          color: #fff;
+        }
+
         td.description-td {
           margin: 5px;
           padding: 5px;
@@ -767,6 +1037,18 @@ main {
       tr:nth-child(odd) {
         background-color: #f2f2f2;
       }
+      // tfoot {
+      //   tr {
+      //     td {
+      //       :global(div) {
+      //         margin-top: 50px;
+      //         margin-bottom: 50px;
+      //         border: 1px solid red;
+      //       }
+      //       border: none;
+      //     }
+      //   }
+      // }
     }
   }
 }
