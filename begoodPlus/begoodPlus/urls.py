@@ -15,7 +15,7 @@ Including another URLconf
 """
 
 
-from core.views import admin_upload_docs_page, sheetsurl_to_smartbee
+from core.views import admin_upload_docs_page, sheetsurl_to_smartbee, sheetsurl_to_providers_docx
 from catalogAlbum.views import get_albums, get_catalog_albums
 from inventory.views import doc_stock_enter_provider_requests_api, get_stock_by_id_api, save_doc_stock_enter_provider_requests, unpivot_inventory_exel, upload_inventory_csv
 from clientApi.views import CustomAuthToken, get_all_varients_api, get_products_info, get_products_info2
@@ -41,7 +41,7 @@ from catalogImages.views import SvelteCatalogImageViewSet, create_mini_table, ca
 from productSize.views import SvelteApiSizesViewSet
 from django.contrib import admin
 import debug_toolbar
-#from pages.views import order_form, order_form2, order_form3,catalog_view,catalog_page, landing_page_view, my_logo_wrapper_view, catalog_page2
+# from pages.views import order_form, order_form2, order_form3,catalog_view,catalog_page, landing_page_view, my_logo_wrapper_view, catalog_page2
 
 from django.conf import settings
 from django.conf.urls.static import static
@@ -78,18 +78,18 @@ clientRouter.register(r'images', ImageClientViewSet)
 clientRouter.register(r'colors', ColorsClientViewSet)
 clientRouter.register(r'sizes', SizesClientViewSet)
 clientRouter.register(r'logos', LogoClientViewSet)
-#router.register(r'stores', StoreList.as_view(),basename='stores')
+# router.register(r'stores', StoreList.as_view(),basename='stores')
 
-#from customerCart.views import cart_changed
-#from rest_framework.authtoken.views import obtain_auth_token
-#from rest_framework_simplejwt.views import (TokenObtainPairView,TokenRefreshView,)
+# from customerCart.views import cart_changed
+# from rest_framework.authtoken.views import obtain_auth_token
+# from rest_framework_simplejwt.views import (TokenObtainPairView,TokenRefreshView,)
 urlpatterns = [
     path('sheetsurl-to-smartbee/', sheetsurl_to_smartbee),
     path('admin-upload-docs/', admin_upload_docs_page,
          name='admin_upload_docs_page'),
     path('create-image-from-exel', create_image_from_exel,
          name='create-image-from-exel'),
-    #path('my-api/main/main', MainAlbumsViewSet.as_view({'get': 'list'})),
+    # path('my-api/main/main', MainAlbumsViewSet.as_view({'get': 'list'})),
     path('get-main-page-albums/', get_main_albums_for_main_page),
     path('my-api/get-similar-products/<int:product_id>',
          get_similar_products, name='get_similar_products'),
@@ -99,7 +99,7 @@ urlpatterns = [
          name='get_products_info2'),
     path('my-api/get-album-images',
          AlbumImagesApiView.as_view(), name='album_images'),
-    #path('my-api/get-main-albums', get_main_albums_for_main_page, name='get_main_albums_for_main_page'),
+    # path('my-api/get-main-albums', get_main_albums_for_main_page, name='get_main_albums_for_main_page'),
     path('api/v1/products',
          get_products_viewset.as_view({'get': 'list'}), name='get_products_viewset'),
     path('get-albums/', get_albums, name='get-albums'),
@@ -150,8 +150,8 @@ urlpatterns = [
     path('test', test_celery_view),
     path('create_mini_table/<int:id>/',
          create_mini_table, name='create_mini_table'),
-    #path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    #path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    # path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    # path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/get-token/', CustomAuthToken.as_view(), name='get_token'),
     path('api/get-all-users/', get_all_users_by_admin,
          name='get_all_users_by_admin'),
@@ -187,7 +187,7 @@ urlpatterns = [
     path('enter-doc-edit/', enter_doc_edit, name='admin_enter_doc_edit'),
     path('enter-doc-remove-product/', enter_doc_remove_product,
          name='admin_enter_doc_remove_product'),
-    #path('enter-doc-insert-inventory/', enter_doc_insert_inventory, name='admin_enter_doc_insert_inventory'),
+    # path('enter-doc-insert-inventory/', enter_doc_insert_inventory, name='admin_enter_doc_insert_inventory'),
     path('get-all-warehouses-api/', get_all_warehouses_api,
          name='admin_get_all_warehouses_api'),
     path('enter-doc-insert-inventory/<int:doc_id>',
@@ -227,6 +227,7 @@ urlpatterns = [
          view_morder_stock_document, name='view_morder_stock_document'),
     path('exel-to-providers-docx/', exel_to_providers_docx,
          name='exel_to_providers_docx'),
+    path('sheetsurl-to-providers-docx/', sheetsurl_to_providers_docx),
     path('exel-to-smartbee/', submit_exel_to_smartbee),
     path('morders/list-orders-to-collect', list_orders_to_collect,
          name='admin_list_orders_to_collect'),
@@ -240,7 +241,7 @@ urlpatterns = [
          get_smartbee_doc, name='admin_get_smartbee_doc'),
     path('api/get-all-orders', get_all_orders, name='admin_get_all_orders'),
     path('search-ppn/', search_ppn, name='search_ppn'),
-    #path('api/', include(router.urls)),
+    # path('api/', include(router.urls)),
 
     re_path(r'get_album_images/(?P<pk>\d+)', get_album_images),
     path('client-api/', include(clientRouter.urls)),
@@ -258,8 +259,8 @@ urlpatterns = [
          get_crm_users_for_whatsapp, name='crm_get_crm_users_for_whatsapp'),
     path('crm-api/get_crm_users_numbers_in_excel',
          get_crm_users_numbers_in_excel, name='crm_get_crm_users_numbers_in_excel'),
-    #path('admin/crm/crmuser/upload_execl/', upload_crm_execl, name='crm_upload_execl'),
-    #path('admin_upload_bulk_crm_exel', admin_upload_bulk_crm_exel, name='admin_upload_bulk_crm_exel'),
+    # path('admin/crm/crmuser/upload_execl/', upload_crm_execl, name='crm_upload_execl'),
+    # path('admin_upload_bulk_crm_exel', admin_upload_bulk_crm_exel, name='admin_upload_bulk_crm_exel'),
     path('admin/crm/crmuser/upload_execl2/',
          import_mscrm_from_exel, name='crm_upload_execl2'),
     path('admin/catalogImage/upload_slim_exel', catalogimage_upload_slim_excel,
@@ -276,9 +277,9 @@ urlpatterns = [
     path('api/logout/', api_logout),
     path('api/all-image-ids/', all_images_ids),
 
-    #path('api/get-providers/', api_providers, name='admin_api_providers'),
+    # path('api/get-providers/', api_providers, name='admin_api_providers'),
 
-    #path('', catalogView, name="catalogView"),
+    # path('', catalogView, name="catalogView"),
 
     path('catalog_api', catalogView_api, name="catalog-view-api"),
     path('search-warehouses/', search_warehouses, name='search_warehouses'),
@@ -288,14 +289,13 @@ urlpatterns = [
     path('contact-form', svelte_contact_form, name='contact-form'),
     path('cart-form', svelte_cart_form, name='svelte-cart-form'),
     path('cart-history', svelte_cart_history, name='svelte-cart-history'),
-    #path('track-cart', track_cart, name='track-cart'),
+    # path('track-cart', track_cart, name='track-cart'),
     re_path('api/set_csrf_token/(?P<factory_id>.+)/$',
             set_csrf_token, name='set_csrf_token'),
     path('api/set_csrf_token/', set_csrf_token, name='set_csrf_token'),
-    #path('form-change', form_changed, name='form-change'),
+    # path('form-change', form_changed, name='form-change'),
 
-
-    #path('user-tasks', user_tasks, name='user-tasks'),
+    # path('user-tasks', user_tasks, name='user-tasks'),
     #     path('success/', success_view, name='success'),
     re_path(r'^advanced_filters/', include('advanced_filters.urls')),
 
@@ -307,7 +307,7 @@ if settings.DEBUG:
         static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns = urlpatterns + \
         static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
-    #urlpatterns =urlpatterns +  [path('silk/', include('silk.urls', namespace='silk'))]
+    # urlpatterns =urlpatterns +  [path('silk/', include('silk.urls', namespace='silk'))]
 
 if settings.DEBUG:
     urlpatterns = [

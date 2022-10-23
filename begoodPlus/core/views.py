@@ -1,6 +1,7 @@
 import re
 import googleapiclient
 from django.views.decorators.csrf import csrf_exempt
+import numpy as np
 from begoodPlus.settings.base import drive_service, drive_creds
 from googleapiclient.http import MediaFileUpload, MediaIoBaseDownload
 from docx.oxml import OxmlElement
@@ -48,7 +49,7 @@ from decimal import Decimal
 import celery
 import datetime
 from django.shortcuts import render, redirect, HttpResponse
-from django.http import JsonResponse
+from django.http import HttpResponseForbidden, JsonResponse
 from django.db.models.functions import Greatest
 from django.contrib.postgres.search import TrigramSimilarity
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -408,7 +409,7 @@ def add_table_to_doc(document, data):
         table.columns[len(table.columns) - 3].width = Inches(0.95)
     # align center
     table.columns[len(table.columns) - 1].alignment = WD_TABLE_ALIGNMENT.RIGHT
-    #table.rows[0].cells[0].width = Inches(5.0)
+    # table.rows[0].cells[0].width = Inches(5.0)
     return table
 
 
@@ -427,11 +428,12 @@ def generate_provider_docx(provider_data, provider_name):
     document.add_picture(file_location, width=Cm(21.5 - 0.75*2))
     entries = []
     _last_product_name = ''
-    try:
-        for product_name, product_data in provider_data['products'].items():
-            _last_product_name = product_name
-            print(product_name)
-            for item in product_data['items']:
+    for product_name, product_data in provider_data['products'].items():
+        _last_product_name = product_name
+        print(product_name)
+        for item in product_data['items']:
+            print('qty', item['qty'])
+            if item['qty'] != '0' and item['qty'] != 0.0:
                 entries.append({
                     'מוצר': product_name,
                     'מידה': str('ONE SIZE' if item['size'] == 'one size' else item['size']),
@@ -439,8 +441,7 @@ def generate_provider_docx(provider_data, provider_name):
                     'מודל': str(item['verient']),
                     'כמות': item['qty'],
                 })
-    except Exception as e:
-        return _last_product_name
+
     # document = Document()
     # crete pivot table
     indexs = ['מוצר', 'מודל', 'צבע']
@@ -497,7 +498,7 @@ def generate_provider_docx(provider_data, provider_name):
             indexs = list(filter(lambda x: x not in [
                 'מוצר', 'מודל', 'צבע'], indexs))
             for size in option:
-                if size in indexs and row.get(size) > 0:
+                if size in indexs and row.get(size) != 0:
                     found += 1
             if found > best_option_len:
                 best_option_len = found
@@ -540,7 +541,7 @@ def generate_provider_docx(provider_data, provider_name):
     p = document.add_heading(
         'לכבוד: ' + provider_name + ' \t\t תאריך: ' + date_time, level=1)
     p.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-    #t1.dropna(axis=1, how='all', inplace=True)
+    # t1.dropna(axis=1, how='all', inplace=True)
     # if not t1.dropna(axis=1, how='all').empty:
     #     document.add_heading('טבלת ביגוד', level=2)
     #     add_table_to_doc(document, t1.dropna(axis=0, how='all'))
@@ -623,6 +624,240 @@ def generate_provider_docx(provider_data, provider_name):
     return document
 
 
+def merge_data_to_providers_dict(original_data, provider_name, product_name, color, size, varient, qyt):
+    # data: {
+    # '$provider_name': {
+    # 'products': {
+    # '$product_name': {
+    # items = [
+    # {
+    # 'color': '$product_color',
+    # 'size': '$product_size',
+    # 'varient': '$product_varient',
+    # 'amount': '$product_amount',
+    # },
+    # ]
+    # }
+    # }
+    # }
+    if provider_name not in original_data:
+        original_data[provider_name] = {
+            'products': {},
+        }
+    if product_name not in original_data[provider_name]['products']:
+        original_data[provider_name]['products'][product_name] = {
+            'items': [],
+        }
+    found = False
+    for item in original_data[provider_name]['products'][product_name]['items']:
+        if item['color'] == color and item['size'] == size and item['varient'] == varient:
+            item['amount'] += qyt
+            found = True
+            break
+    if not found:
+        original_data[provider_name]['products'][product_name]['items'].append({
+            'color': color,
+            'size': size,
+            'verient': varient,
+            'qty': qyt,
+        })
+    return original_data
+
+
+def process_sheets_to_providers_docx(sheets):
+    # beutifly print each sheet to console
+    all_sheets_data = []
+    for sheet in sheets:
+        rows_data = []
+        current_row_data = None
+        for idx, row in sheet.iterrows():
+            print(idx, ') ')
+            for i in range(len(sheet.columns)):
+                print(row[i], end=' ')
+            if idx == 0 or idx == 1:
+                print('skip')
+                continue
+            # col[7] is the 'print?' column
+            # if it has any value, it means we are on a header row
+            if not pd.isna(row[7]):
+                print('header row')
+                if current_row_data:
+                    rows_data.append(current_row_data)
+                product_name = row[1]
+                header_total_amount = row[2]
+                header_taken_amount = row[4]
+                if str(header_taken_amount).lower() == 'v':
+                    header_taken_amount = header_total_amount
+                elif pd.isna(header_taken_amount):
+                    header_taken_amount = 0
+
+                header_provider_name = row[11] if len(
+                    sheet.columns) > 11 else ''
+                header_amount = header_total_amount - header_taken_amount
+                current_row_data = {
+                    'product_name': product_name,
+                    'header_anount': header_amount,
+                    'header_provider_name': header_provider_name,
+                    'has_child': False,
+                }
+                continue
+            else:
+                print('product row')
+                product_color = row[0]
+                product_size = row[1]
+                product_varient = row[2]
+                product_total_amount = row[3]
+                product_taken_amount = row[4]
+                if str(product_taken_amount).lower() == 'v':
+                    product_taken_amount = row[3]
+                elif pd.isna(product_taken_amount):
+                    product_taken_amount = 0
+                product_provider_name = row[5]
+                print(product_taken_amount, product_total_amount)
+                print(type(product_taken_amount), type(product_total_amount))
+                current_row_data['has_child'] = True
+                if(current_row_data.get('childs') == None):
+                    current_row_data['childs'] = []
+                current_row_data['childs'].append({
+                    'product_color': product_color,
+                    'product_size': product_size,
+                    'product_varient': product_varient,
+                    'product_amount': product_total_amount - product_taken_amount,
+                    'product_provider_name': product_provider_name,
+                })
+                continue
+        # adding the last row
+        if current_row_data:
+            rows_data.append(current_row_data)
+
+        for row in rows_data:
+            all_sheets_data.append(row)
+
+    # all_sheets_data = [
+        # 'product_name': 'חולצת טריקו 160 גרם שרוול קצר',
+        # 'header_anount': 85.0,
+        # 'header_provider_name': '',
+        # 'has_child': True,
+        # 'childs': [
+        #     {
+        #         'product_color': 'כחול כהה',
+        #         'product_size': 'S',
+        #         'product_varient': nan,
+        #         'product_amount': 0.0,
+        #         'product_provider_name': nan,
+        #     },
+        #     {
+        #         'product_color': 'כחול כהה',
+        #         'product_size': 'M',
+        #         'product_varient': nan,
+        #         'product_amount': 0.0,
+        #         'product_provider_name': nan,
+        #     },
+        #     ...
+        # }
+    # ]
+    # convert to:
+    # data: {
+        # if not has_child: '$header_provider_name' else '$product_provider_name' {
+            # 'products': {
+            # '$product_name': {
+            # items = [
+            # {
+            # 'color': '$product_color',
+            # 'size': '$product_size',
+            # 'varient': '$product_varient',
+            # 'amount': '$product_amount',
+            # },
+            # ]
+            # }
+        # }
+    # }
+    # merge data as needed
+    data = {}
+    print(all_sheets_data)
+    for row in all_sheets_data:
+        if not row['has_child']:
+            provider_name = row['header_provider_name'] if not pd.isna(
+                row['header_provider_name']) else 'ספק ריק'
+            size = 'ONE SIZE'
+            color = 'NO COLOR'
+            varient = ''
+            qyt = row['header_anount']
+            product_name = row['product_name']
+            data = merge_data_to_providers_dict(
+                data, provider_name, product_name, color, size, varient, qyt)
+        else:
+            product_name = row['product_name']
+            for child in row['childs']:
+                provider_name = child['product_provider_name'] if not pd.isna(
+                    child['product_provider_name']) else ''
+                size = child['product_size']
+                color = child['product_color']
+                varient = child['product_varient']
+                qyt = child['product_amount']
+                data = merge_data_to_providers_dict(
+                    data, provider_name, product_name, color, size, varient, qyt)
+    return data
+
+
+def sheetsurl_to_providers_docx(request):
+    if request.user.is_authenticated and request.user.is_superuser:
+        if(request.method == "POST"):
+            # get sheets urls from urls in request.POST['urls']
+            urls = request.POST['urls'].splitlines()
+            urls = list(filter(lambda x: x != '', urls))
+            sheets = []
+            for url in urls:
+                sheets.append(get_sheet_from_drive_url(url))
+
+            info = process_sheets_to_providers_docx(sheets)
+            print(info)
+            # get all sheet names
+            # get each sheet get row[1] col[0] as the sheetname
+            morders_ids = []
+            for sheet in sheets:
+                print(sheet.columns)
+                print(sheet.iloc[0, 0])
+                morders_ids.append(str(int(sheet.iloc[0, 0])))
+            docs_data = []
+            for provider_name in info.keys():
+                doc = generate_provider_docx(
+                    info[provider_name], provider_name)
+                # if doc is string then there was an error
+                if type(doc) == str:
+                    return JsonResponse({'error': {
+                        'provider_name': provider_name,
+                        'product_name': doc
+                    }})
+                # docs.append(doc)
+                docs_data.append({
+                    'doc': doc,
+                    'provider_name': provider_name,
+                })
+
+            zip_buffer = io.BytesIO()
+            with zipfile.ZipFile(zip_buffer, "a", zipfile.ZIP_DEFLATED, False) as zip_file:
+                for doc_info in docs_data:
+                    file_stream = io.BytesIO()
+                    doc = doc_info['doc']
+                    doc.save(file_stream)
+                    file_name = str(
+                        '(' + doc_info['provider_name'] + ') ' + '|'.join(morders_ids)) + '.docx'
+                    file_stream.seek(0)
+                    zip_file.writestr(
+                        file_name, file_stream.getvalue())
+            zip_buffer.seek(0)
+            response = HttpResponse(
+                zip_buffer.read(), content_type="application/zip")
+            response['Content-Disposition'] = 'attachment; filename="products.zip"'
+            return response
+
+        else:
+            return JsonResponse({'error': 'not post'})
+    else:
+        return HttpResponseForbidden()
+
+
 def exel_to_providers_docx(request):
     if request.user.is_authenticated and request.user.is_superuser:
         if(request.method == "POST"):
@@ -635,7 +870,7 @@ def exel_to_providers_docx(request):
                     client_names = list(map(lambda x: x.split(' ')[
                         -1], info['sheets_names']))
                     # iterate the keys (provider_names) and generate_provider_docx for each
-                    #docs = []
+                    # docs = []
                     docs_data = []
                     for provider_name in data.keys():
                         doc = generate_provider_docx(
@@ -685,10 +920,31 @@ def get_drive_file(service, file_id):
     file = io.BytesIO()
     downloader = MediaIoBaseDownload(file, request)
     done = False
-    while done is False:
-        status, done = downloader.next_chunk()
-        print(F'Download {int(status.progress() * 100)}.')
-    return file.getvalue()
+    try:
+        while done is False:
+            status, done = downloader.next_chunk()
+            print(F'Download {int(status.progress() * 100)}.')
+        return file.getvalue()
+    except Exception as e:
+        return str(e)
+
+
+def get_sheet_from_drive_url(url, serv=None):
+    if serv is None:
+        from begoodPlus.settings.base import drive_service
+        serv = drive_service
+    fileId = url.split(
+        'https://docs.google.com/spreadsheets/d/')[1].split('/edit')[0]
+    sheetId = url.split('gid=')[1]
+    bytes_exel_file = get_drive_file(serv, fileId)
+    # conver bytes to in memory file
+    file = io.BytesIO(bytes_exel_file)
+    # process the file
+    all_sheets = pd.ExcelFile(file)
+    # f'https://docs.google.com/spreadsheets/d/{doc_id}/gviz/tq?tqx=out:csv&sheet={sheet_name}'
+    # get sheetname from url
+    sheetname = get_sheetname_from_driveurl(url)
+    return all_sheets.parse(sheetname)
 
 
 @csrf_exempt
@@ -743,7 +999,7 @@ def get_sheetname_from_driveurl(url):
     regex += r"\\\",\[{\\\"\d\\\":\[\[\d,\d,\\\"(.+?)\\\"]"
     matches = re.search(regex, cont)
     sheet_name = matches.group(1)
-    return sheet_name
+    return sheet_name.replace('\\', '')
 
 
 def submit_exel_to_smartbee(request):
@@ -896,7 +1152,6 @@ def set_csrf_token(request, factory_id=None):
 def svelte_contact_form(request):
     if request.method == "POST":
         try:
-            print(request.user)
             body_unicode = request.data  # .decode('utf-8')
             device = request.COOKIES.get('device')
             body = body_unicode  # json.loads(body_unicode)

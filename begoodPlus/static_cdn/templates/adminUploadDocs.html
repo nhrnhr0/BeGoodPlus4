@@ -44,6 +44,11 @@
           <button type="submit">הפוך אקסל לטופס ספקים </button>
         </form>
         
+        <form method="POST" action="/sheetsurl-to-providers-docx/">
+          {% csrf_token %}
+          <textarea name="urls" id="urls" cols="50"  width="100%" rows="10" placeholder="הדבק כתובות דפי אקסל בדרייב"></textarea>
+          <button type="submit">הפוך טפסי גוגל שיט לטופס ספקים</button>
+        </form>
       </div>
 
       
