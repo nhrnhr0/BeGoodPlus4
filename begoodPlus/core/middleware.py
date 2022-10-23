@@ -3,14 +3,18 @@
 from django.utils.deprecation import MiddlewareMixin
 
 import uuid
+
+
 class DisableCSRF(MiddlewareMixin):
     def process_request(self, request):
         setattr(request, '_dont_enforce_csrf_checks', True)
+
+
 class BaseMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
         # One-time configuration and initialization.
-        
+
     def get_client_ip(self, request):
         x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
         if x_forwarded_for:
@@ -27,18 +31,15 @@ class BaseMiddleware:
         else:
             ip = self.get_client_ip(request)
             #uniqe_str = str(uuid.uuid1())
-            
-            device = ip #+ '_'+ uniqe_str
-            request.COOKIES['device']=device
+
+            device = ip  # + '_'+ uniqe_str
+            request.COOKIES['device'] = device
 
         response = self.get_response(request)
         # Code to be executed for each request/response after
         # the view is called.
 
         if response.cookies.get('device') == None:
-            response.set_cookie('device', device,max_age=30)
-
-
+            response.set_cookie('device', device, max_age=30)
 
         return response
-        

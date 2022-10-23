@@ -27,3 +27,8 @@ newEnv
 .DS_Store
 svelte/src/config.js
 data_analysis
+
+
+# drive api
+drive_auth/client_secret.json
+drive_auth/token_drive_v3.pickle
