@@ -27,3 +27,5 @@ newEnv
 .DS_Store
 svelte/src/config.js
 data_analysis
+
+drive_auth

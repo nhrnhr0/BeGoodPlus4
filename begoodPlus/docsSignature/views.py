@@ -138,7 +138,10 @@ def api_adit_doc_signature(request, uuid):
                 # detail_obj.size = detail['size']
                 # detail_obj.varient = detail['varient']
                 # save the detail
-                detail_obj.save()
+                if detail_obj.quantity == 0 or detail_obj.quantity == None:
+                    detail_obj.delete()
+                else:
+                    detail_obj.save()
         return JsonResponse({'status': 'ok'})
     obj = MOrderSignature.objects.prefetch_related('items', 'items__details',  'items__details__color',  'items__details__size',  'items__details__varient').get(
         uuid=uuid)

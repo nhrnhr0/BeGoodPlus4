@@ -1,14 +1,20 @@
 <script>
 import { onMount } from "svelte";
-import { apiGetAllSizes, fetch_wraper } from "./api/api";
+import {
+  apiGetAllColors,
+  apiGetAllSizes,
+  apiGetAllVariants,
+  fetch_wraper,
+} from "./api/api";
 import { API_EDIT_DOC_SIGNATURE } from "./consts/consts";
 import SvelteMarkdown from "svelte-markdown";
 import { Loading } from "carbon-components-svelte";
 
 export let uuid;
-let ALL_SIZES;
+let ALL_SIZES, ALL_COLORS, ALL_VARIENTS;
 let data;
 let saveing = false;
+
 onMount(async () => {
   // request api-edit-doc-signature/<uuid:uuid>
   /**
@@ -75,13 +81,26 @@ onMount(async () => {
     },
   });
   ALL_SIZES = await apiGetAllSizes();
+  apiGetAllColors().then((res) => {
+    ALL_COLORS = res;
+  });
+  apiGetAllVariants().then((res) => {
+    ALL_VARIENTS = res;
+  });
   tempData.items.forEach((item) => {
     item.details_pivot = create_pivot_table(item.details);
   });
+
   data = tempData;
 });
-
+$: {
+  console.log("$:", data?.items);
+  (data?.items || []).forEach((item) => {
+    item.details_pivot = create_pivot_table(item.details);
+  });
+}
 function create_pivot_table(details) {
+  console.log("create_pivot_table", details);
   /*data = {{
         "quantity": 1,
         "color_id": 77,
@@ -359,7 +378,7 @@ function submit_btn_clicked(e) {
                         <th colspan="2"> צבע / מודל</th>
                         {#each item.details_pivot["sizes"] as size_id}
                           <th>
-                            {ALL_SIZES.find((v) => v.id == size_id).size}</th
+                            {ALL_SIZES.find((v) => v.id == size_id)?.size}</th
                           >
                         {/each}
                       </tr>
@@ -374,27 +393,27 @@ function submit_btn_clicked(e) {
                             </td>
                             <td>
                               {item.details.find((v) => v.varient_id == varient)
-                                .varient_name}
+                                ?.varient_name || ""}
                             </td>
                             {#each item.details_pivot["sizes"] as size_id}
                               <td>
-                                {#if item.details.find((v) => v.color_id == color_id && v.size_id == size_id && v.varient_id == varient)}
-                                  <input
-                                    type="number"
-                                    step="1"
-                                    value={item.details.find(
-                                      (v) =>
-                                        v.color_id == color_id &&
-                                        v.size_id == size_id &&
-                                        v.varient_id == varient
-                                    ).quantity}
-                                    data-color={color_id}
-                                    data-size={size_id}
-                                    data-varient={varient}
-                                    data-item={item.name}
-                                    on:change={handleQuantityChange}
-                                  />
-                                {/if}
+                                <!-- {#if item.details.find((v) => v.color_id == color_id && v.size_id == size_id && v.varient_id == varient)} -->
+                                <input
+                                  type="number"
+                                  step="1"
+                                  value={item.details.find(
+                                    (v) =>
+                                      v.color_id == color_id &&
+                                      v.size_id == size_id &&
+                                      v.varient_id == varient
+                                  )?.quantity || ""}
+                                  data-color={color_id}
+                                  data-size={size_id}
+                                  data-varient={varient}
+                                  data-item={item.name}
+                                  on:change={handleQuantityChange}
+                                />
+                                <!-- {/if} -->
                               </td>
                             {/each}
                           </tr>
@@ -424,6 +443,117 @@ function submit_btn_clicked(e) {
                       {/each}
                     </tbody>
                   </table>
+                  {#if ALL_COLORS && ALL_SIZES && ALL_VARIENTS}
+                    <div class="add-new-detail">
+                      <select class="color-select">
+                        <option value="">בחר צבע</option>
+                        {#each ALL_COLORS as color}
+                          <option value={color.id}>{color.name}</option>
+                        {/each}
+                      </select>
+                      <select class="size-select">
+                        <option value="">בחר מידה</option>
+                        {#each ALL_SIZES as size}
+                          <option value={size.id}>{size.size}</option>
+                        {/each}
+                      </select>
+                      <select class="varient-select">
+                        <option value="">בחר מודל</option>
+                        {#each ALL_VARIENTS as varient}
+                          <option value={varient.id}>{varient.name}</option>
+                        {/each}
+                      </select>
+
+                      <input
+                        type="number"
+                        step="1"
+                        value=""
+                        class="quantity-input"
+                      />
+
+                      <button
+                        type="button"
+                        on:click={(e) => {
+                          // get the closest .color-select and .size-select and .varient-select
+                          const color_select = e.target
+                            .closest(".add-new-detail")
+                            .querySelector(".color-select");
+                          const varient_select = e.target
+                            .closest(".add-new-detail")
+                            .querySelector(".varient-select");
+                          const size_select = e.target
+                            .closest(".add-new-detail")
+                            .querySelector(".size-select");
+                          // get the value of the selected option
+                          const color_id = color_select.value;
+                          const varient_id = varient_select.value;
+                          const size_id = size_select.value;
+
+                          // if color is not selected, or size is not selected alert the user and return
+                          if (!color_id || !size_id) {
+                            alert("יש לבחור צבע ומידה");
+                            return;
+                          }
+
+                          // get the closest .quantity-input
+                          const quantity_input = e.target
+                            .closest(".add-new-detail")
+                            .querySelector(".quantity-input");
+                          // get the value of the input
+                          const quantity = quantity_input.value;
+                          // if quantity is not a number, alert the user and return
+                          if (isNaN(quantity)) {
+                            alert("יש להזין מספר");
+                            return;
+                          }
+
+                          // if the detail already exists, update the quantity
+                          if (
+                            item.details.find(
+                              (v) =>
+                                v.color_id == color_id &&
+                                v.size_id == size_id &&
+                                v.varient_id == varient_id
+                            )
+                          ) {
+                            item.details.find(
+                              (v) =>
+                                v.color_id == color_id &&
+                                v.size_id == size_id &&
+                                v.varient_id == varient_id
+                            ).quantity += quantity;
+                          } else {
+                            //color_id :  81 color_name :  "אפור כהה" id :  98 quantity :  1 size_code :  "ak" size_id :  104 size_name :  "46" varient_id :  12 varient_name :  "עם גומי"
+                            // add the new detail to the item
+                            debugger;
+                            const curr_size = ALL_SIZES.find(
+                              (v) => v.id == size_id
+                            );
+                            const curr_color = ALL_COLORS.find(
+                              (v) => v.id == color_id
+                            );
+                            const curr_varient = ALL_VARIENTS.find(
+                              (v) => v.id == varient_id
+                            );
+                            item.details.push({
+                              id: null,
+                              color_id: parseInt(color_id),
+                              color_name: curr_color.name,
+                              size_id: parseInt(size_id),
+                              size_name: curr_size.size,
+                              size_code: curr_size.code,
+                              varient_id: parseInt(varient_id),
+                              varient_name: curr_varient?.name,
+                              quantity: parseInt(quantity),
+                            });
+                          }
+                          item.details = [...item.details];
+                        }}
+                      >
+                        הוסף פריט חדש
+                      </button>
+                    </div>
+                  {/if}
                 {/if}
               </td>
             </tr>
