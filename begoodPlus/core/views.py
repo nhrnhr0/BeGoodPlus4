@@ -125,7 +125,7 @@ def get_smartbee_info_from_dfs(client_info, items_table, sheet_name, docType):
         db_morder = None
         db_client = ''
         dealerNumber = '0'
-        name = morder_id
+        name = str(morder_id)
     providerCustomerId = str(uuid.uuid4()).replace('-', '')
 
     if(len(name) < 2):
@@ -653,8 +653,8 @@ def merge_data_to_providers_dict(original_data, provider_name, product_name, col
         }
     found = False
     for item in original_data[provider_name]['products'][product_name]['items']:
-        if item['color'] == color and item['size'] == size and item['varient'] == varient:
-            item['amount'] += qyt
+        if item['color'] == color and item['size'] == size and item['verient'] == varient:
+            item['qty'] += qyt
             found = True
             break
     if not found:
