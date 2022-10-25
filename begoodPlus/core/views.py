@@ -125,7 +125,7 @@ def get_smartbee_info_from_dfs(client_info, items_table, sheet_name, docType):
         db_morder = None
         db_client = ''
         dealerNumber = '0'
-        name = morder_id
+        name = str(morder_id)
     providerCustomerId = str(uuid.uuid4()).replace('-', '')
 
     if(len(name) < 2):
