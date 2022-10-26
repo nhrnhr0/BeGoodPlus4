@@ -56,6 +56,10 @@ def api_sign_on_doc(request, uuid):
         order.signature_cimage = image_url
         order.signed_at = timezone.now().astimezone(pytz.timezone('Asia/Jerusalem'))
 
+        order.user_info_fullname = data['user_data']['name']
+        order.user_info_phone = data['user_data']['phone']
+        order.user_info_id = data['user_data']['id']
+
         # check if signature_info is empty, if yes, make it an array
         if(order.signature_info == '' or order.signature_info == None):
             order.signature_info = []
@@ -227,6 +231,9 @@ def serialize_doc_signature(obj):
         'signature': obj.signature_cimage,
         'items': [],
         'simulations': [],
+        'user_info_fullname': obj.user_info_fullname,
+        'user_info_phone': obj.user_info_phone,
+        'user_info_id': obj.user_info_id,
     }
     for sim in obj.simulations.all():
         ret['simulations'].append({

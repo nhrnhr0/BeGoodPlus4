@@ -57,6 +57,10 @@ class MOrderSignature(models.Model):
         to=MOrderSignatureSimulation, blank=True)
     signature_cimage = models.CharField(max_length=350, null=True, blank=True)
     signature_info = models.JSONField(null=True, blank=True)
+    user_info_fullname = models.CharField(
+        max_length=100, null=True, blank=True)
+    user_info_phone = models.CharField(max_length=100, null=True, blank=True)
+    user_info_id = models.CharField(max_length=100, null=True, blank=True)
 
     def get_admin_url(self):
         return f'/admin/docsSignature/mordersignature/{self.id}/change/'
