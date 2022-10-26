@@ -1,11 +1,12 @@
 from io import BytesIO
+from uuid import uuid4
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from datetime import datetime
 # Create your views here.
 import json
-from .models import DOC_STATUS_OPTIONS, MOrderSignature, MOrderSignatureItem, MOrderSignatureItemDetail
+from .models import DOC_STATUS_OPTIONS, MOrderSignature, MOrderSignatureItem, MOrderSignatureItemDetail, MOrderSignatureSimulation
 import cloudinary
 import base64
 
@@ -25,9 +26,9 @@ def save_image_to_cloudinary(image_data, name, folder="site/signiture-pics/"):
     res = cloudinary.uploader.upload(mfile,
                                      folder=folder,
                                      #public_id = fname,
-                                     unique_filename=False,
-                                     use_filename=True,
-                                     overwrite=True,
+                                     unique_filename=True,
+                                     use_filename=False,
+                                     overwrite=False,
                                      invalidate=True
                                      )
     return res['url']
@@ -54,6 +55,10 @@ def api_sign_on_doc(request, uuid):
         order.status = DOC_STATUS_OPTIONS[2][0]  # Signed
         order.signature_cimage = image_url
         order.signed_at = timezone.now().astimezone(pytz.timezone('Asia/Jerusalem'))
+
+        order.user_info_fullname = data['user_data']['name']
+        order.user_info_phone = data['user_data']['phone']
+        order.user_info_id = data['user_data']['id']
 
         # check if signature_info is empty, if yes, make it an array
         if(order.signature_info == '' or order.signature_info == None):
@@ -109,7 +114,22 @@ def api_adit_doc_signature(request, uuid):
         # loop over the items
         for item in items:
             # get the item by id
-            item_obj = MOrderSignatureItem.objects.get(id=item['id'])
+            if item.get('deleted'):
+                # delete the item
+                if item.get('id'):
+                    item_to_delete = MOrderSignatureItem.objects.get(
+                        id=item['id'])
+                    item_to_delete.details.all().delete()
+                    item_to_delete.delete()
+                continue
+            if item['id'] != None:
+                item_obj = MOrderSignatureItem.objects.get(id=item['id'])
+            else:
+                item_obj = MOrderSignatureItem()
+
+                item_obj.save()
+                obj.items.add(item_obj)
+
             # update the item's fields
             item_obj.name = item['name']
             item_obj.description = item['description']
@@ -130,17 +150,61 @@ def api_adit_doc_signature(request, uuid):
             # loop over the details
             for detail in details:
                 # get the detail by id
-                detail_obj = MOrderSignatureItemDetail.objects.get(
-                    id=detail['id'])  # quantity, color, size, varient
+                if detail['id'] == None:
+                    detail_obj = MOrderSignatureItemDetail()
+
+                    # color_id, size_id, varient_id (if '' set None)
+                    detail_obj.color_id = detail['color_id']
+                    detail_obj.size_id = detail['size_id']
+                    detail_obj.varient_id = detail['varient_id'] if detail['varient_id'] != '' else None
+                    detail_obj.save()
+                    item_obj.details.add(detail_obj)
+                else:
+                    detail_obj = MOrderSignatureItemDetail.objects.get(
+                        id=detail['id'])  # quantity, color, size, varient
+
                 # update the detail's fields
                 detail_obj.quantity = detail['quantity']
                 # detail_obj.color = detail['color']
                 # detail_obj.size = detail['size']
                 # detail_obj.varient = detail['varient']
                 # save the detail
-                detail_obj.save()
+                if detail_obj.quantity == 0 or detail_obj.quantity == None:
+                    detail_obj.delete()
+                else:
+                    detail_obj.save()
+
+        # iter simulations, check if need to delete of update or add
+        simulations = body['simulations']
+        for sim in simulations:
+            if sim.get('deleted'):
+                if sim.get('id'):
+                    try:
+                        sim_to_delete = MOrderSignatureSimulation.objects.get(
+                            id=sim['id'])
+                        sim_to_delete.delete()
+                    except:
+                        pass
+                continue
+            if sim.get('id') != None:
+                sim_obj = MOrderSignatureSimulation.objects.get(id=sim['id'])
+            else:
+                sim_obj = MOrderSignatureSimulation()
+                sim_obj.save()
+                obj.simulations.add(sim_obj)
+            sim_obj.description = sim.get('description', '')
+            if sim.get('cimage') and sim['cimage'].startswith('data:image'):
+                # image data;str
+                image_data = sim['cimage']
+                # save the image to cloudinary and get the url
+                url = save_image_to_cloudinary(
+                    image_data, str(sim_obj.id) + str(uuid4()), 'simulations')
+                # update the item's cimage field
+                sim_obj.cimage = url
+            sim_obj.save()
+
         return JsonResponse({'status': 'ok'})
-    obj = MOrderSignature.objects.prefetch_related('items', 'items__details',  'items__details__color',  'items__details__size',  'items__details__varient').get(
+    obj = MOrderSignature.objects.prefetch_related('items', 'items__details',  'items__details__color',  'items__details__size',  'items__details__varient', 'simulations',).get(
         uuid=uuid)
     # client_name
     # status
@@ -166,7 +230,17 @@ def serialize_doc_signature(obj):
         'status': obj.status,
         'signature': obj.signature_cimage,
         'items': [],
+        'simulations': [],
+        'user_info_fullname': obj.user_info_fullname,
+        'user_info_phone': obj.user_info_phone,
+        'user_info_id': obj.user_info_id,
     }
+    for sim in obj.simulations.all():
+        ret['simulations'].append({
+            'id': sim.id,
+            'description': sim.description,
+            'cimage': sim.cimage,
+        })
     for item in obj.items.all():
         ret['items'].append({
             'id': item.id,

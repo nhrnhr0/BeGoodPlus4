@@ -59,3 +59,4 @@ def create_signature_doc_from_morder(morder):
         item.save()
         signatureObj.items.add(item)
     pass
+    return signatureObj

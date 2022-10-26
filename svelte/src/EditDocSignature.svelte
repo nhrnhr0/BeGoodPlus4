@@ -1,14 +1,91 @@
 <script>
 import { onMount } from "svelte";
-import { apiGetAllSizes, fetch_wraper } from "./api/api";
-import { API_EDIT_DOC_SIGNATURE } from "./consts/consts";
+import {
+  apiGetAllColors,
+  apiGetAllSizes,
+  apiGetAllVariants,
+  apiSearchProducts,
+  fetch_wraper,
+} from "./api/api";
+import AutoComplete from "simple-svelte-autocomplete";
+
+import { API_EDIT_DOC_SIGNATURE, CLOUDINARY_BASE_URL } from "./consts/consts";
 import SvelteMarkdown from "svelte-markdown";
 import { Loading } from "carbon-components-svelte";
 
 export let uuid;
-let ALL_SIZES;
+let ALL_SIZES, ALL_COLORS, ALL_VARIENTS;
 let data;
 let saveing = false;
+let newProductsearchValue;
+let newProductImage;
+let newProductTitle;
+let newProductPrice;
+let newProductDescription;
+
+function handleImageUploadSim(e) {
+  let file = e.target.files[0];
+  let reader = new FileReader();
+  reader.readAsDataURL(file);
+  reader.onload = function () {
+    let image = reader.result;
+    simImage = image;
+  };
+}
+let simImage;
+let SimDescriptionNew;
+function addNewSimBtnClicked(e) {
+  e.preventDefault();
+  data.simulations.push({
+    cimage: simImage,
+    description: SimDescriptionNew,
+  });
+  data.simulations = [...data.simulations];
+  simImage = "";
+  SimDescriptionNew = "";
+}
+async function searchProducts(keyword) {
+  let json = await apiSearchProducts(keyword);
+  let data = json;
+  return data.all;
+}
+function addNewProductBtnClicked(e) {
+  e.preventDefault();
+  //      "id": 23,
+  //     "name": "דגמ\"ח אינדאני",
+  //     "description": "* המכנס האהוב ביותר בקרב העובדים בישראל\r\n* 100% כותנה\r\n* 6 כיסים\r\n* תפירה מחוזקת בנקודות החשובות\r\n* חצי גומי מאחורה\r\n* מתאים לחברות,מפעלים, תעשיה ועוד...\r\n* אפשרות לרקמה או הדפסה",
+  //     "cimage": "https://res.cloudinary.com/ms-global/image/upload/v1635672276/site/products/%D7%93%D7%92%D7%9E%D7%97_%D7%90%D7%99%D7%A0%D7%93%D7%90%D7%A0%D7%99_IyWQaK6_Tj5EYOe_P9uUDPV_t64qw8e_xJY95O3.png",
+  //     "price": "32.00",
+  //     "show_details": true,
+  //     "details": [...]
+  data.items.push({
+    id: null,
+    name: newProductTitle,
+    description: newProductDescription || "",
+    cimage: newProductImage,
+    price: newProductPrice || 0,
+    show_details: true,
+    details: [],
+  });
+  data.items = [...data.items];
+  newProductImage = "";
+  newProductTitle = "";
+  newProductPrice = "";
+  newProductDescription = "";
+}
+function autocompleteItemSelected(item) {
+  if (item && item.id) {
+    console.log("autocompleteItemSelected", item);
+    newProductImage = CLOUDINARY_BASE_URL + item.cimage;
+    newProductTitle = item.title;
+  }
+  // console.log("autocompleteItemSelected: ", new_products);
+  /*searchValue = item.title;
+        apiSearchProducts(searchValue).then(response => {
+            new_products = response.data;
+            console.log(new_products);
+        });*/
+}
 onMount(async () => {
   // request api-edit-doc-signature/<uuid:uuid>
   /**
@@ -75,13 +152,26 @@ onMount(async () => {
     },
   });
   ALL_SIZES = await apiGetAllSizes();
+  apiGetAllColors().then((res) => {
+    ALL_COLORS = res;
+  });
+  apiGetAllVariants().then((res) => {
+    ALL_VARIENTS = res;
+  });
   tempData.items.forEach((item) => {
     item.details_pivot = create_pivot_table(item.details);
   });
+
   data = tempData;
 });
-
+$: {
+  console.log("$:", data?.items);
+  (data?.items || []).forEach((item) => {
+    item.details_pivot = create_pivot_table(item.details);
+  });
+}
 function create_pivot_table(details) {
+  console.log("create_pivot_table", details);
   /*data = {{
         "quantity": 1,
         "color_id": 77,
@@ -160,7 +250,15 @@ function handleQuantityChange(e) {
   detail.quantity = quantity;
   data = { ...data };
 }
-
+function handleImageUploadNewProduct(e) {
+  let file = e.target.files[0];
+  let reader = new FileReader();
+  reader.readAsDataURL(file);
+  reader.onload = function () {
+    let image = reader.result;
+    newProductImage = image;
+  };
+}
 function handleImageUpload(e) {
   let file = e.target.files[0];
   let reader = new FileReader();
@@ -187,21 +285,31 @@ function submit_btn_clicked(e) {
       "Content-Type": "application/json",
     },
     body: JSON.stringify(data),
-  }).then((res) => {
-    saveing = false;
-    debugger;
-    if (res.status === "ok") {
-      //reload
-      window.location.reload();
-    } else {
-      alert("המסמך לא נשמר בהצלחה");
-    }
-    // if (res.status === 200) {
-    //   alert("המסמך נשמר בהצלחה");
-    // } else {
-    //   alert("התרחשה שגיאה בשמירת המסמך");
-    // }
-  });
+  })
+    .then((res) => {
+      saveing = false;
+      if (res.status === "ok") {
+        //reload
+        window.location.reload();
+      } else {
+        alert("המסמך לא נשמר בהצלחה");
+      }
+      // if (res.status === 200) {
+      //   alert("המסמך נשמר בהצלחה");
+      // } else {
+      //   alert("התרחשה שגיאה בשמירת המסמך");
+      // }
+    })
+    .catch((err) => {
+      saveing = false;
+      alert("התרחשה שגיאה בשמירת המסמך");
+    });
+}
+
+function deleteProduct(item) {
+  console.log("deleteProduct", item);
+  let index = data.items.findIndex((i) => i.id === item.id);
+  data.items[index].deleted = !data.items[index].deleted;
 }
 </script>
 
@@ -259,8 +367,20 @@ function submit_btn_clicked(e) {
                   alt={item.name}
                 />
               </td>
-              <td>
+              <td class:deleted={item.deleted}>
                 <input type="text" bind:value={item.name} />
+                <button
+                  on:click={(e) => {
+                    e.preventDefault();
+                    deleteProduct(item);
+                  }}
+                >
+                  {#if !item.deleted}
+                    מחק
+                  {:else}
+                    שחזר
+                  {/if}
+                </button>
               </td>
 
               <td>
@@ -359,7 +479,7 @@ function submit_btn_clicked(e) {
                         <th colspan="2"> צבע / מודל</th>
                         {#each item.details_pivot["sizes"] as size_id}
                           <th>
-                            {ALL_SIZES.find((v) => v.id == size_id).size}</th
+                            {ALL_SIZES.find((v) => v.id == size_id)?.size}</th
                           >
                         {/each}
                       </tr>
@@ -374,27 +494,27 @@ function submit_btn_clicked(e) {
                             </td>
                             <td>
                               {item.details.find((v) => v.varient_id == varient)
-                                .varient_name}
+                                ?.varient_name || ""}
                             </td>
                             {#each item.details_pivot["sizes"] as size_id}
                               <td>
-                                {#if item.details.find((v) => v.color_id == color_id && v.size_id == size_id && v.varient_id == varient)}
-                                  <input
-                                    type="number"
-                                    step="1"
-                                    value={item.details.find(
-                                      (v) =>
-                                        v.color_id == color_id &&
-                                        v.size_id == size_id &&
-                                        v.varient_id == varient
-                                    ).quantity}
-                                    data-color={color_id}
-                                    data-size={size_id}
-                                    data-varient={varient}
-                                    data-item={item.name}
-                                    on:change={handleQuantityChange}
-                                  />
-                                {/if}
+                                <!-- {#if item.details.find((v) => v.color_id == color_id && v.size_id == size_id && v.varient_id == varient)} -->
+                                <input
+                                  type="number"
+                                  step="1"
+                                  value={item.details.find(
+                                    (v) =>
+                                      v.color_id == color_id &&
+                                      v.size_id == size_id &&
+                                      v.varient_id == varient
+                                  )?.quantity || ""}
+                                  data-color={color_id}
+                                  data-size={size_id}
+                                  data-varient={varient}
+                                  data-item={item.name}
+                                  on:change={handleQuantityChange}
+                                />
+                                <!-- {/if} -->
                               </td>
                             {/each}
                           </tr>
@@ -424,12 +544,271 @@ function submit_btn_clicked(e) {
                       {/each}
                     </tbody>
                   </table>
+                  {#if ALL_COLORS && ALL_SIZES && ALL_VARIENTS}
+                    <div class="add-new-detail">
+                      <select class="color-select">
+                        <option value="">בחר צבע</option>
+                        {#each ALL_COLORS as color}
+                          <option value={color.id}>{color.name}</option>
+                        {/each}
+                      </select>
+                      <select class="size-select">
+                        <option value="">בחר מידה</option>
+                        {#each ALL_SIZES.sort((a, b) => {
+                          return a.code.localeCompare(b.code);
+                        }) as size}
+                          <option value={size.id}>{size.size}</option>
+                        {/each}
+                      </select>
+                      <select class="varient-select">
+                        <option value="">בחר מודל</option>
+                        {#each ALL_VARIENTS as varient}
+                          <option value={varient.id}>{varient.name}</option>
+                        {/each}
+                      </select>
+
+                      <input
+                        type="number"
+                        step="1"
+                        value=""
+                        class="quantity-input"
+                      />
+
+                      <button
+                        type="button"
+                        on:click={(e) => {
+                          // get the closest .color-select and .size-select and .varient-select
+                          const color_select = e.target
+                            .closest(".add-new-detail")
+                            .querySelector(".color-select");
+                          const varient_select = e.target
+                            .closest(".add-new-detail")
+                            .querySelector(".varient-select");
+                          const size_select = e.target
+                            .closest(".add-new-detail")
+                            .querySelector(".size-select");
+                          // get the value of the selected option
+                          const color_id = color_select.value;
+                          const varient_id = varient_select.value;
+                          const size_id = size_select.value;
+
+                          // if color is not selected, or size is not selected alert the user and return
+                          if (!color_id || !size_id) {
+                            alert("יש לבחור צבע ומידה");
+                            return;
+                          }
+
+                          // get the closest .quantity-input
+                          const quantity_input = e.target
+                            .closest(".add-new-detail")
+                            .querySelector(".quantity-input");
+                          // get the value of the input
+                          const quantity = quantity_input.value;
+                          // if quantity is not a number, alert the user and return
+                          if (isNaN(quantity)) {
+                            alert("יש להזין מספר");
+                            return;
+                          }
+
+                          // if the detail already exists, update the quantity
+                          if (
+                            item.details.find(
+                              (v) =>
+                                v.color_id == color_id &&
+                                v.size_id == size_id &&
+                                v.varient_id == varient_id
+                            )
+                          ) {
+                            item.details.find(
+                              (v) =>
+                                v.color_id == color_id &&
+                                v.size_id == size_id &&
+                                v.varient_id == varient_id
+                            ).quantity += quantity;
+                          } else {
+                            //color_id :  81 color_name :  "אפור כהה" id :  98 quantity :  1 size_code :  "ak" size_id :  104 size_name :  "46" varient_id :  12 varient_name :  "עם גומי"
+                            // add the new detail to the item
+                            const curr_size = ALL_SIZES.find(
+                              (v) => v.id == size_id
+                            );
+                            const curr_color = ALL_COLORS.find(
+                              (v) => v.id == color_id
+                            );
+                            const curr_varient = ALL_VARIENTS.find(
+                              (v) => v.id == varient_id
+                            );
+                            item.details.push({
+                              id: null,
+                              color_id: parseInt(color_id),
+                              color_name: curr_color.name,
+                              size_id: parseInt(size_id),
+                              size_name: curr_size.size,
+                              size_code: curr_size.code,
+                              varient_id:
+                                varient_id == null ||
+                                varient_id == "" ||
+                                varient_id.toString() == "NaN"
+                                  ? ""
+                                  : parseInt(varient_id),
+                              varient_name: curr_varient?.name,
+                              quantity: parseInt(quantity),
+                            });
+                          }
+                          debugger;
+                          item.details = [...item.details];
+                        }}
+                      >
+                        הוסף פריט חדש
+                      </button>
+                    </div>
+                  {/if}
+                  <!-- all colos all variants all sizes -->
                 {/if}
               </td>
             </tr>
             <tr class="details-tr" />
           {/each}
         </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="8">
+              <AutoComplete
+                id="search_input"
+                on:focus
+                loadingText="מחפש מוצרים..."
+                createText="לא נמצאו תוצאות חיפוש"
+                showLoadingIndicator="true"
+                noResultsText=""
+                onChange={autocompleteItemSelected}
+                create="true"
+                placeholder="חיפוש..."
+                className="autocomplete-cls"
+                searchFunction={searchProducts}
+                delay="200"
+                localFiltering={false}
+                labelFieldName="title"
+                valueFieldName="value"
+                bind:value={newProductsearchValue}
+              >
+                <div slot="item" let:item let:label>
+                  <div class="search-item">
+                    <div class="inner">
+                      <img
+                        alt={item.title}
+                        style="height:25px;"
+                        src="{CLOUDINARY_BASE_URL}f_auto,w_auto/{item.cimage}"
+                      />
+                      {@html label}
+                    </div>
+                  </div>
+                </div>
+              </AutoComplete>
+              <div class="new-product-form">
+                <div class="item">
+                  <input
+                    type="file"
+                    id="selectedFileNew"
+                    on:change={handleImageUploadNewProduct}
+                  />
+                  <img width="50px" height="50px" src={newProductImage} />
+                </div>
+                <div class="item">
+                  <label for="title">שם מוצר</label>
+                  <input type="text" id="title" bind:value={newProductTitle} />
+                </div>
+                <div class="item">
+                  <label for="price">מחיר</label>
+                  <input
+                    type="number"
+                    id="price"
+                    bind:value={newProductPrice}
+                  />
+                </div>
+                <div class="item">
+                  <label for="description">תיאור</label>
+                  <textarea
+                    id="description"
+                    bind:value={newProductDescription}
+                  />
+                </div>
+                <div class="item">
+                  <button type="button" on:click={addNewProductBtnClicked}
+                    >הוסף מוצר</button
+                  >
+                </div>
+              </div></td
+            >
+          </tr>
+        </tfoot>
+      </table>
+
+      <table class="simulation">
+        {#each data?.simulations || [] as sim, i}
+          <tr data-idx={i} class:deleted={sim.deleted}>
+            <td>
+              <img src={sim.cimage} class="sim-img" />
+            </td>
+            <td>
+              <div class="sim-description">
+                <textarea
+                  name="sim-{i}"
+                  id=""
+                  cols="50"
+                  rows="5"
+                  placeholder="תיאור הדמייה"
+                  bind:value={sim.description}
+                />
+              </div>
+            </td>
+            <td>
+              <div class="delete-action">
+                <button
+                  type="button"
+                  on:click={() => {
+                    sim.deleted = !sim.deleted;
+                  }}
+                >
+                  {#if !sim.deleted}
+                    מחק
+                  {:else}
+                    שחזר
+                  {/if}
+                </button>
+              </div>
+            </td>
+          </tr>
+        {/each}
+        <tr>
+          <td colspan="2"> הדמייה חדשה: </td>
+        </tr>
+        <tr>
+          <td colspan="1" class="sim-image-td">
+            <input
+              type="file"
+              id="selectedFileSim"
+              on:change={handleImageUploadSim}
+              accept="image/png, image/gif, image/jpeg"
+            />
+            <img width="50px" height="50px" src={simImage} class="sim-img" />
+          </td>
+          <td colspan="1">
+            <div class="sim-description">
+              <textarea
+                name="sim-new"
+                id=""
+                cols="50"
+                rows="5"
+                placeholder="תיאור הדמייה"
+                bind:value={SimDescriptionNew}
+              />
+            </div>
+          </td>
+          <td>
+            <button type="button" on:click={addNewSimBtnClicked}
+              >הוסף הדמייה</button
+            >
+          </td>
+        </tr>
       </table>
     </form>
     <button disabled={saveing} class="submit-btn" on:click={submit_btn_clicked}>
@@ -443,12 +822,53 @@ function submit_btn_clicked(e) {
 {/if}
 
 <style lang="scss">
+table.simulation {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #ccc;
+  margin-top: 20px;
+  tr {
+    border: 1px solid #ccc;
+    // display: flex;
+    // flex-direction: row;
+    // justify-content: space-between;
+    // align-items: center;
+
+    td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      img {
+        width: 100%;
+        height: auto;
+
+        &.sim-img {
+          max-width: 350px;
+          width: auto;
+          height: auto;
+          // height: 100px;
+        }
+      }
+
+      &.sim-image-td {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      }
+    }
+
+    &.deleted {
+      background-color: #f10101;
+      color: #fff;
+    }
+  }
+}
 .submit-btn {
   border: none;
   position: sticky;
   bottom: 10px;
   right: 0px;
-
+  margin-top: 250px;
   height: 50px;
   width: 200px;
   background-color: #eaa852;
@@ -590,6 +1010,11 @@ main {
           }
         }
 
+        td.deleted {
+          background-color: #f10101;
+          color: #fff;
+        }
+
         td.description-td {
           margin: 5px;
           padding: 5px;
@@ -627,6 +1052,18 @@ main {
       tr:nth-child(odd) {
         background-color: #f2f2f2;
       }
+      // tfoot {
+      //   tr {
+      //     td {
+      //       :global(div) {
+      //         margin-top: 50px;
+      //         margin-bottom: 50px;
+      //         border: 1px solid red;
+      //       }
+      //       border: none;
+      //     }
+      //   }
+      // }
     }
   }
 }

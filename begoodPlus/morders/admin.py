@@ -1,3 +1,5 @@
+from django.utils.html import mark_safe
+from django.contrib import messages
 from reversion.admin import VersionAdmin
 import datetime
 from django.contrib import admin
@@ -104,7 +106,13 @@ class MOrderAdmin(VersionAdmin):  # admin.ModelAdmin
 
     def export_to_signiture_doc(self, request, queryset):
         for morder in queryset:
-            create_signature_doc_from_morder(morder)
+            sigObj = create_signature_doc_from_morder(morder)
+            if sigObj:
+                # /admin/docsSignature/mordersignature/1/change/
+                messages.add_message(
+                    request, messages.INFO, mark_safe(f'מסמך חתימה {sigObj.id} <a href="/admin/docsSignature/mordersignature/{sigObj.id}/change/"> לחץ כאן </a>'))
+        messages.add_message(request, messages.INFO, mark_safe(
+            'לדף כל המסמכים <a href="/admin/docsSignature/mordersignature/"> לחץ כאן </a>'))
 
     def export_to_excel(self, request, queryset):
         filesbuffers = []
