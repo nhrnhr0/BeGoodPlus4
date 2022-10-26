@@ -249,6 +249,7 @@ def get_smartbee_info_from_dfs(client_info, items_table, sheet_name, docType):
 
 
 def process_exel_to_providers_docx(file):
+    #  pd.read_excel(xls, sheetName, header=0, dtype=str)
     all_sheets = pd.ExcelFile(file)
     # get the sheets named 'Sheet'
     sheet = all_sheets.parse(sheet_name='Sheet')
@@ -687,12 +688,14 @@ def process_sheets_to_providers_docx(sheets):
                 if current_row_data:
                     rows_data.append(current_row_data)
                 product_name = row[1]
-                header_total_amount = row[2]
+                header_total_amount = int(float(row[2]))
                 header_taken_amount = row[4]
                 if str(header_taken_amount).lower() == 'v':
                     header_taken_amount = header_total_amount
                 elif pd.isna(header_taken_amount):
                     header_taken_amount = 0
+                else:
+                    header_taken_amount = int(float(header_taken_amount))
 
                 header_provider_name = row[11] if len(
                     sheet.columns) > 11 else ''
@@ -709,13 +712,16 @@ def process_sheets_to_providers_docx(sheets):
                 product_color = row[0]
                 product_size = row[1]
                 product_varient = row[2]
-                product_total_amount = row[3]
+                product_total_amount = int(float(row[3]))
                 product_taken_amount = row[4]
                 if str(product_taken_amount).lower() == 'v':
-                    product_taken_amount = row[3]
+                    product_taken_amount = int(float(row[3]))
                 elif pd.isna(product_taken_amount):
                     product_taken_amount = 0
-                product_provider_name = row[5]
+                else:
+                    product_taken_amount = int(float(product_taken_amount))
+                product_provider_name = row[11] if len(
+                    sheet.columns) > 11 else ''
                 print(product_taken_amount, product_total_amount)
                 print(type(product_taken_amount), type(product_total_amount))
                 current_row_data['has_child'] = True
@@ -734,6 +740,7 @@ def process_sheets_to_providers_docx(sheets):
             rows_data.append(current_row_data)
 
         for row in rows_data:
+            # filter out the rows that has no childs and the header amount is 0 or less and rows childs that has 0 or less amount
             all_sheets_data.append(row)
 
     # all_sheets_data = [
@@ -787,6 +794,8 @@ def process_sheets_to_providers_docx(sheets):
             varient = ''
             qyt = row['header_anount']
             product_name = row['product_name']
+            if qyt <= 0:
+                continue
             data = merge_data_to_providers_dict(
                 data, provider_name, product_name, color, size, varient, qyt)
         else:
@@ -798,6 +807,8 @@ def process_sheets_to_providers_docx(sheets):
                 color = child['product_color']
                 varient = child['product_varient']
                 qyt = child['product_amount']
+                if qyt <= 0:
+                    continue
                 data = merge_data_to_providers_dict(
                     data, provider_name, product_name, color, size, varient, qyt)
     return data
@@ -806,13 +817,17 @@ def process_sheets_to_providers_docx(sheets):
 def sheetsurl_to_providers_docx(request):
     if request.user.is_authenticated and request.user.is_superuser:
         if(request.method == "POST"):
+            logs = []
             # get sheets urls from urls in request.POST['urls']
             urls = request.POST['urls'].splitlines()
             urls = list(filter(lambda x: x != '', urls))
             sheets = []
             for url in urls:
+                log = 'fetching sheet from url: ' + url
+                logs.append(log)
                 sheets.append(get_sheet_from_drive_url(url))
 
+            logs.append('parsing sheets')
             info = process_sheets_to_providers_docx(sheets)
             print(info)
             # get all sheet names
@@ -821,7 +836,7 @@ def sheetsurl_to_providers_docx(request):
             for sheet in sheets:
                 print(sheet.columns)
                 print(sheet.iloc[0, 0])
-                morders_ids.append(str(int(sheet.iloc[0, 0])))
+                morders_ids.append(str(int(float(sheet.iloc[0, 0]))))
             docs_data = []
             for provider_name in info.keys():
                 doc, seccsess = generate_provider_docx(
@@ -948,7 +963,7 @@ def get_sheet_from_drive_url(url, serv=None):
     # f'https://docs.google.com/spreadsheets/d/{doc_id}/gviz/tq?tqx=out:csv&sheet={sheet_name}'
     # get sheetname from url
     sheetname = get_sheetname_from_driveurl(url)
-    return all_sheets.parse(sheetname)
+    return all_sheets.parse(sheetname, header=0, dtype=str)
 
 
 @csrf_exempt
