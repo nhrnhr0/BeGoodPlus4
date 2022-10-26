@@ -788,7 +788,7 @@ def process_sheets_to_providers_docx(sheets):
     for row in all_sheets_data:
         if not row['has_child']:
             provider_name = row['header_provider_name'] if not pd.isna(
-                row['header_provider_name']) else 'ספק ריק'
+                row['header_provider_name']) else ''
             size = 'ONE SIZE'
             color = 'NO COLOR'
             varient = ''
