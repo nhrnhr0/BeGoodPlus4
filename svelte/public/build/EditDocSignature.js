@@ -14165,20 +14165,20 @@ var editdocsignature = (function () {
     			t45 = space();
     			button2 = element("button");
     			if_block.c();
-    			attr_dev(h1, "class", "svelte-1l8h23y");
+    			attr_dev(h1, "class", "svelte-1dz4ff3");
     			add_location(h1, file, 317, 4, 8860);
     			attr_dev(label0, "for", "client_name");
-    			attr_dev(label0, "class", "svelte-1l8h23y");
+    			attr_dev(label0, "class", "svelte-1dz4ff3");
     			add_location(label0, file, 320, 8, 8926);
     			attr_dev(input0, "type", "text");
     			attr_dev(input0, "name", "client_name");
     			attr_dev(input0, "id", "client_name");
-    			attr_dev(input0, "class", "svelte-1l8h23y");
+    			attr_dev(input0, "class", "svelte-1dz4ff3");
     			add_location(input0, file, 321, 8, 8976);
-    			attr_dev(div0, "class", "svelte-1l8h23y");
+    			attr_dev(div0, "class", "svelte-1dz4ff3");
     			add_location(div0, file, 319, 6, 8912);
     			attr_dev(label1, "for", "status");
-    			attr_dev(label1, "class", "svelte-1l8h23y");
+    			attr_dev(label1, "class", "svelte-1dz4ff3");
     			add_location(label1, file, 329, 8, 9145);
     			option0.__value = "Draft";
     			option0.value = option0.__value;
@@ -14193,123 +14193,124 @@ var editdocsignature = (function () {
     			attr_dev(select, "id", "status");
     			if (/*data*/ ctx[0].status === void 0) add_render_callback(() => /*select_change_handler*/ ctx[24].call(select));
     			add_location(select, file, 330, 8, 9187);
-    			attr_dev(div1, "class", "svelte-1l8h23y");
+    			attr_dev(div1, "class", "svelte-1dz4ff3");
     			add_location(div1, file, 328, 6, 9131);
-    			attr_dev(th0, "class", "svelte-1l8h23y");
+    			attr_dev(th0, "class", "svelte-1dz4ff3");
     			add_location(th0, file, 339, 12, 9494);
-    			attr_dev(th1, "class", "svelte-1l8h23y");
+    			attr_dev(th1, "class", "svelte-1dz4ff3");
     			add_location(th1, file, 340, 12, 9523);
-    			attr_dev(th2, "class", "svelte-1l8h23y");
+    			attr_dev(th2, "class", "svelte-1dz4ff3");
     			add_location(th2, file, 341, 12, 9549);
-    			attr_dev(th3, "class", "svelte-1l8h23y");
+    			attr_dev(th3, "class", "svelte-1dz4ff3");
     			add_location(th3, file, 342, 12, 9583);
-    			attr_dev(th4, "class", "svelte-1l8h23y");
+    			attr_dev(th4, "class", "svelte-1dz4ff3");
     			add_location(th4, file, 343, 12, 9615);
-    			attr_dev(th5, "class", "svelte-1l8h23y");
+    			attr_dev(th5, "class", "svelte-1dz4ff3");
     			add_location(th5, file, 344, 12, 9644);
-    			attr_dev(tr0, "class", "svelte-1l8h23y");
+    			attr_dev(tr0, "class", "svelte-1dz4ff3");
     			add_location(tr0, file, 338, 10, 9477);
-    			attr_dev(thead, "class", "svelte-1l8h23y");
+    			attr_dev(thead, "class", "svelte-1dz4ff3");
     			add_location(thead, file, 337, 8, 9459);
-    			attr_dev(tbody, "class", "svelte-1l8h23y");
+    			attr_dev(tbody, "class", "svelte-1dz4ff3");
     			add_location(tbody, file, 347, 8, 9702);
     			attr_dev(input1, "type", "file");
     			attr_dev(input1, "id", "selectedFileNew");
-    			attr_dev(input1, "class", "svelte-1l8h23y");
+    			attr_dev(input1, "class", "svelte-1dz4ff3");
     			add_location(input1, file, 707, 18, 24921);
     			attr_dev(img0, "width", "50px");
     			attr_dev(img0, "height", "50px");
     			if (!src_url_equal(img0.src, img0_src_value = /*newProductImage*/ ctx[6])) attr_dev(img0, "src", img0_src_value);
-    			attr_dev(img0, "class", "svelte-1l8h23y");
+    			attr_dev(img0, "class", "svelte-1dz4ff3");
     			add_location(img0, file, 712, 18, 25100);
-    			attr_dev(div2, "class", "item svelte-1l8h23y");
+    			attr_dev(div2, "class", "item svelte-1dz4ff3");
     			add_location(div2, file, 706, 16, 24884);
     			attr_dev(label2, "for", "title");
-    			attr_dev(label2, "class", "svelte-1l8h23y");
+    			attr_dev(label2, "class", "svelte-1dz4ff3");
     			add_location(label2, file, 715, 18, 25233);
     			attr_dev(input2, "type", "text");
     			attr_dev(input2, "id", "title");
-    			attr_dev(input2, "class", "svelte-1l8h23y");
+    			attr_dev(input2, "class", "svelte-1dz4ff3");
     			add_location(input2, file, 716, 18, 25286);
-    			attr_dev(div3, "class", "item svelte-1l8h23y");
+    			attr_dev(div3, "class", "item svelte-1dz4ff3");
     			add_location(div3, file, 714, 16, 25196);
     			attr_dev(label3, "for", "price");
-    			attr_dev(label3, "class", "svelte-1l8h23y");
+    			attr_dev(label3, "class", "svelte-1dz4ff3");
     			add_location(label3, file, 719, 18, 25424);
     			attr_dev(input3, "type", "number");
     			attr_dev(input3, "id", "price");
-    			attr_dev(input3, "class", "svelte-1l8h23y");
+    			attr_dev(input3, "class", "svelte-1dz4ff3");
     			add_location(input3, file, 720, 18, 25474);
-    			attr_dev(div4, "class", "item svelte-1l8h23y");
+    			attr_dev(div4, "class", "item svelte-1dz4ff3");
     			add_location(div4, file, 718, 16, 25387);
     			attr_dev(label4, "for", "description");
-    			attr_dev(label4, "class", "svelte-1l8h23y");
+    			attr_dev(label4, "class", "svelte-1dz4ff3");
     			add_location(label4, file, 727, 18, 25692);
     			attr_dev(textarea0, "id", "description");
-    			attr_dev(textarea0, "class", "svelte-1l8h23y");
+    			attr_dev(textarea0, "class", "svelte-1dz4ff3");
     			add_location(textarea0, file, 728, 18, 25749);
-    			attr_dev(div5, "class", "item svelte-1l8h23y");
+    			attr_dev(div5, "class", "item svelte-1dz4ff3");
     			add_location(div5, file, 726, 16, 25655);
     			attr_dev(button0, "type", "button");
-    			attr_dev(button0, "class", "svelte-1l8h23y");
+    			attr_dev(button0, "class", "svelte-1dz4ff3");
     			add_location(button0, file, 734, 18, 25948);
-    			attr_dev(div6, "class", "item svelte-1l8h23y");
+    			attr_dev(div6, "class", "item svelte-1dz4ff3");
     			add_location(div6, file, 733, 16, 25911);
-    			attr_dev(div7, "class", "new-product-form svelte-1l8h23y");
+    			attr_dev(div7, "class", "new-product-form svelte-1dz4ff3");
     			add_location(div7, file, 705, 14, 24837);
     			attr_dev(td0, "colspan", "8");
-    			attr_dev(td0, "class", "svelte-1l8h23y");
+    			attr_dev(td0, "class", "svelte-1dz4ff3");
     			add_location(td0, file, 673, 12, 23625);
-    			attr_dev(tr1, "class", "svelte-1l8h23y");
+    			attr_dev(tr1, "class", "svelte-1dz4ff3");
     			add_location(tr1, file, 672, 10, 23608);
     			add_location(tfoot, file, 671, 8, 23590);
-    			attr_dev(table0, "class", "items svelte-1l8h23y");
+    			attr_dev(table0, "class", "items svelte-1dz4ff3");
     			add_location(table0, file, 336, 6, 9429);
     			attr_dev(td1, "colspan", "2");
-    			attr_dev(td1, "class", "svelte-1l8h23y");
-    			add_location(td1, file, 786, 10, 27385);
-    			attr_dev(tr2, "class", "svelte-1l8h23y");
-    			add_location(tr2, file, 785, 8, 27370);
+    			attr_dev(td1, "class", "svelte-1dz4ff3");
+    			add_location(td1, file, 781, 10, 27247);
+    			attr_dev(tr2, "class", "svelte-1dz4ff3");
+    			add_location(tr2, file, 780, 8, 27232);
     			attr_dev(input4, "type", "file");
     			attr_dev(input4, "id", "selectedFileSim");
-    			attr_dev(input4, "class", "svelte-1l8h23y");
-    			add_location(input4, file, 790, 12, 27487);
+    			attr_dev(input4, "accept", "image/png, image/gif, image/jpeg");
+    			attr_dev(input4, "class", "svelte-1dz4ff3");
+    			add_location(input4, file, 785, 12, 27370);
     			attr_dev(img1, "width", "50px");
     			attr_dev(img1, "height", "50px");
     			if (!src_url_equal(img1.src, img1_src_value = /*simImage*/ ctx[10])) attr_dev(img1, "src", img1_src_value);
-    			attr_dev(img1, "class", "svelte-1l8h23y");
-    			add_location(img1, file, 795, 12, 27629);
+    			attr_dev(img1, "class", "sim-img svelte-1dz4ff3");
+    			add_location(img1, file, 791, 12, 27568);
     			attr_dev(td2, "colspan", "1");
-    			attr_dev(td2, "class", "svelte-1l8h23y");
-    			add_location(td2, file, 789, 10, 27458);
+    			attr_dev(td2, "class", "sim-image-td svelte-1dz4ff3");
+    			add_location(td2, file, 784, 10, 27320);
     			attr_dev(textarea1, "name", "sim-new");
     			attr_dev(textarea1, "id", "");
     			attr_dev(textarea1, "cols", "50");
     			attr_dev(textarea1, "rows", "5");
     			attr_dev(textarea1, "placeholder", "תיאור הדמייה");
-    			attr_dev(textarea1, "class", "svelte-1l8h23y");
-    			add_location(textarea1, file, 799, 14, 27778);
-    			attr_dev(div8, "class", "sim-description svelte-1l8h23y");
-    			add_location(div8, file, 798, 12, 27734);
+    			attr_dev(textarea1, "class", "svelte-1dz4ff3");
+    			add_location(textarea1, file, 795, 14, 27733);
+    			attr_dev(div8, "class", "sim-description svelte-1dz4ff3");
+    			add_location(div8, file, 794, 12, 27689);
     			attr_dev(td3, "colspan", "1");
-    			attr_dev(td3, "class", "svelte-1l8h23y");
-    			add_location(td3, file, 797, 10, 27705);
+    			attr_dev(td3, "class", "svelte-1dz4ff3");
+    			add_location(td3, file, 793, 10, 27660);
     			attr_dev(button1, "type", "button");
-    			attr_dev(button1, "class", "svelte-1l8h23y");
-    			add_location(button1, file, 810, 12, 28061);
-    			attr_dev(td4, "class", "svelte-1l8h23y");
-    			add_location(td4, file, 809, 10, 28044);
-    			attr_dev(tr3, "class", "svelte-1l8h23y");
-    			add_location(tr3, file, 788, 8, 27443);
-    			attr_dev(table1, "class", "simulation svelte-1l8h23y");
+    			attr_dev(button1, "class", "svelte-1dz4ff3");
+    			add_location(button1, file, 806, 12, 28016);
+    			attr_dev(td4, "class", "svelte-1dz4ff3");
+    			add_location(td4, file, 805, 10, 27999);
+    			attr_dev(tr3, "class", "svelte-1dz4ff3");
+    			add_location(tr3, file, 783, 8, 27305);
+    			attr_dev(table1, "class", "simulation svelte-1dz4ff3");
     			add_location(table1, file, 744, 6, 26181);
     			attr_dev(form, "action", "POST");
-    			attr_dev(form, "class", "svelte-1l8h23y");
+    			attr_dev(form, "class", "svelte-1dz4ff3");
     			add_location(form, file, 318, 4, 8885);
     			button2.disabled = /*saveing*/ ctx[4];
-    			attr_dev(button2, "class", "submit-btn svelte-1l8h23y");
-    			add_location(button2, file, 817, 4, 28224);
-    			attr_dev(main, "class", "svelte-1l8h23y");
+    			attr_dev(button2, "class", "submit-btn svelte-1dz4ff3");
+    			add_location(button2, file, 813, 4, 28179);
+    			attr_dev(main, "class", "svelte-1dz4ff3");
     			add_location(main, file, 316, 2, 8849);
     		},
     		m: function mount(target, anchor) {
@@ -14666,9 +14667,9 @@ var editdocsignature = (function () {
     			attr_dev(textarea, "id", textarea_id_value = "description-" + /*item*/ ctx[50].id);
     			attr_dev(textarea, "rows", "5");
     			attr_dev(textarea, "cols", "50");
-    			attr_dev(textarea, "class", "svelte-1l8h23y");
+    			attr_dev(textarea, "class", "svelte-1dz4ff3");
     			add_location(textarea, file, 427, 22, 12382);
-    			attr_dev(div, "class", "editing-wraper svelte-1l8h23y");
+    			attr_dev(div, "class", "editing-wraper svelte-1dz4ff3");
     			add_location(div, file, 426, 20, 12331);
     		},
     		m: function mount(target, anchor) {
@@ -14726,7 +14727,7 @@ var editdocsignature = (function () {
     			if (!src_url_equal(img.src, img_src_value = "/static/hidden-icon.png")) attr_dev(img, "src", img_src_value);
     			attr_dev(img, "width", "50px");
     			attr_dev(img, "height", "50px");
-    			attr_dev(img, "class", "svelte-1l8h23y");
+    			attr_dev(img, "class", "svelte-1dz4ff3");
     			add_location(img, file, 461, 20, 13701);
     		},
     		m: function mount(target, anchor) {
@@ -14759,7 +14760,7 @@ var editdocsignature = (function () {
     			if (!src_url_equal(img.src, img_src_value = "/static/shown-icon.png")) attr_dev(img, "src", img_src_value);
     			attr_dev(img, "width", "50px");
     			attr_dev(img, "height", "50px");
-    			attr_dev(img, "class", "svelte-1l8h23y");
+    			attr_dev(img, "class", "svelte-1dz4ff3");
     			add_location(img, file, 455, 20, 13505);
     		},
     		m: function mount(target, anchor) {
@@ -14834,15 +14835,15 @@ var editdocsignature = (function () {
     			if (if_block) if_block.c();
     			if_block_anchor = empty();
     			attr_dev(th, "colspan", "2");
-    			attr_dev(th, "class", "svelte-1l8h23y");
+    			attr_dev(th, "class", "svelte-1dz4ff3");
     			add_location(th, file, 478, 24, 14231);
-    			attr_dev(tr, "class", "svelte-1l8h23y");
+    			attr_dev(tr, "class", "svelte-1dz4ff3");
     			add_location(tr, file, 477, 22, 14202);
-    			attr_dev(thead, "class", "svelte-1l8h23y");
+    			attr_dev(thead, "class", "svelte-1dz4ff3");
     			add_location(thead, file, 476, 20, 14172);
-    			attr_dev(tbody, "class", "svelte-1l8h23y");
+    			attr_dev(tbody, "class", "svelte-1dz4ff3");
     			add_location(tbody, file, 486, 20, 14582);
-    			attr_dev(table, "class", "details svelte-1l8h23y");
+    			attr_dev(table, "class", "details svelte-1dz4ff3");
     			add_location(table, file, 475, 18, 14128);
     		},
     		m: function mount(target, anchor) {
@@ -14964,7 +14965,7 @@ var editdocsignature = (function () {
     		c: function create() {
     			th = element("th");
     			t = text(t_value);
-    			attr_dev(th, "class", "svelte-1l8h23y");
+    			attr_dev(th, "class", "svelte-1dz4ff3");
     			add_location(th, file, 480, 26, 14361);
     		},
     		m: function mount(target, anchor) {
@@ -15018,9 +15019,9 @@ var editdocsignature = (function () {
     			attr_dev(input, "data-size", input_data_size_value = /*size_id*/ ctx[67]);
     			attr_dev(input, "data-varient", input_data_varient_value = /*varient*/ ctx[53]);
     			attr_dev(input, "data-item", input_data_item_value = /*item*/ ctx[50].name);
-    			attr_dev(input, "class", "svelte-1l8h23y");
+    			attr_dev(input, "class", "svelte-1dz4ff3");
     			add_location(input, file, 501, 32, 15449);
-    			attr_dev(td, "class", "svelte-1l8h23y");
+    			attr_dev(td, "class", "svelte-1dz4ff3");
     			add_location(td, file, 499, 30, 15265);
     		},
     		m: function mount(target, anchor) {
@@ -15115,11 +15116,11 @@ var editdocsignature = (function () {
     				each_blocks[i].c();
     			}
 
-    			attr_dev(td0, "class", "svelte-1l8h23y");
+    			attr_dev(td0, "class", "svelte-1dz4ff3");
     			add_location(td0, file, 490, 28, 14794);
-    			attr_dev(td1, "class", "svelte-1l8h23y");
+    			attr_dev(td1, "class", "svelte-1dz4ff3");
     			add_location(td1, file, 494, 28, 14986);
-    			attr_dev(tr, "class", "svelte-1l8h23y");
+    			attr_dev(tr, "class", "svelte-1dz4ff3");
     			add_location(tr, file, 489, 26, 14761);
     		},
     		m: function mount(target, anchor) {
@@ -15330,31 +15331,31 @@ var editdocsignature = (function () {
     			button.textContent = "הוסף פריט חדש";
     			option0.__value = "";
     			option0.value = option0.__value;
-    			attr_dev(option0, "class", "svelte-1l8h23y");
+    			attr_dev(option0, "class", "svelte-1dz4ff3");
     			add_location(option0, file, 549, 24, 17761);
-    			attr_dev(select0, "class", "color-select svelte-1l8h23y");
+    			attr_dev(select0, "class", "color-select svelte-1dz4ff3");
     			add_location(select0, file, 548, 22, 17707);
     			option1.__value = "";
     			option1.value = option1.__value;
-    			attr_dev(option1, "class", "svelte-1l8h23y");
+    			attr_dev(option1, "class", "svelte-1dz4ff3");
     			add_location(option1, file, 555, 24, 18059);
-    			attr_dev(select1, "class", "size-select svelte-1l8h23y");
+    			attr_dev(select1, "class", "size-select svelte-1dz4ff3");
     			add_location(select1, file, 554, 22, 18006);
     			option2.__value = "";
     			option2.value = option2.__value;
-    			attr_dev(option2, "class", "svelte-1l8h23y");
+    			attr_dev(option2, "class", "svelte-1dz4ff3");
     			add_location(option2, file, 563, 24, 18464);
-    			attr_dev(select2, "class", "varient-select svelte-1l8h23y");
+    			attr_dev(select2, "class", "varient-select svelte-1dz4ff3");
     			add_location(select2, file, 562, 22, 18408);
     			attr_dev(input, "type", "number");
     			attr_dev(input, "step", "1");
     			input.value = "";
-    			attr_dev(input, "class", "quantity-input svelte-1l8h23y");
+    			attr_dev(input, "class", "quantity-input svelte-1dz4ff3");
     			add_location(input, file, 569, 22, 18719);
     			attr_dev(button, "type", "button");
-    			attr_dev(button, "class", "svelte-1l8h23y");
+    			attr_dev(button, "class", "svelte-1dz4ff3");
     			add_location(button, file, 576, 22, 18925);
-    			attr_dev(div, "class", "add-new-detail svelte-1l8h23y");
+    			attr_dev(div, "class", "add-new-detail svelte-1dz4ff3");
     			add_location(div, file, 547, 20, 17656);
     		},
     		m: function mount(target, anchor) {
@@ -15501,7 +15502,7 @@ var editdocsignature = (function () {
     			t = text(t_value);
     			option.__value = option_value_value = /*color*/ ctx[59].id;
     			option.value = option.__value;
-    			attr_dev(option, "class", "svelte-1l8h23y");
+    			attr_dev(option, "class", "svelte-1dz4ff3");
     			add_location(option, file, 551, 26, 17873);
     		},
     		m: function mount(target, anchor) {
@@ -15545,7 +15546,7 @@ var editdocsignature = (function () {
     			t = text(t_value);
     			option.__value = option_value_value = /*size*/ ctx[56].id;
     			option.value = option.__value;
-    			attr_dev(option, "class", "svelte-1l8h23y");
+    			attr_dev(option, "class", "svelte-1dz4ff3");
     			add_location(option, file, 559, 26, 18277);
     		},
     		m: function mount(target, anchor) {
@@ -15589,7 +15590,7 @@ var editdocsignature = (function () {
     			t = text(t_value);
     			option.__value = option_value_value = /*varient*/ ctx[53].id;
     			option.value = option.__value;
-    			attr_dev(option, "class", "svelte-1l8h23y");
+    			attr_dev(option, "class", "svelte-1dz4ff3");
     			add_location(option, file, 565, 26, 18581);
     		},
     		m: function mount(target, anchor) {
@@ -15745,46 +15746,46 @@ var editdocsignature = (function () {
     			attr_dev(input0, "id", input0_id_value = "selectedFile-" + /*item*/ ctx[50].id);
     			set_style(input0, "display", "none");
     			attr_dev(input0, "data-item", input0_data_item_value = /*item*/ ctx[50].id);
-    			attr_dev(input0, "class", "svelte-1l8h23y");
+    			attr_dev(input0, "class", "svelte-1dz4ff3");
     			add_location(input0, file, 355, 16, 9938);
     			attr_dev(img, "width", "50px");
     			attr_dev(img, "height", "50px");
     			if (!src_url_equal(img.src, img_src_value = /*item*/ ctx[50].cimage)) attr_dev(img, "src", img_src_value);
     			attr_dev(img, "alt", img_alt_value = /*item*/ ctx[50].name);
-    			attr_dev(img, "class", "svelte-1l8h23y");
+    			attr_dev(img, "class", "svelte-1dz4ff3");
     			add_location(img, file, 362, 16, 10183);
-    			attr_dev(td0, "class", "svelte-1l8h23y");
+    			attr_dev(td0, "class", "svelte-1dz4ff3");
     			add_location(td0, file, 350, 14, 9778);
     			attr_dev(input1, "type", "text");
-    			attr_dev(input1, "class", "svelte-1l8h23y");
+    			attr_dev(input1, "class", "svelte-1dz4ff3");
     			add_location(input1, file, 370, 16, 10424);
-    			attr_dev(button0, "class", "svelte-1l8h23y");
+    			attr_dev(button0, "class", "svelte-1dz4ff3");
     			add_location(button0, file, 371, 16, 10485);
-    			attr_dev(td1, "class", "svelte-1l8h23y");
+    			attr_dev(td1, "class", "svelte-1dz4ff3");
     			toggle_class(td1, "deleted", /*item*/ ctx[50].deleted);
     			add_location(td1, file, 369, 14, 10374);
-    			attr_dev(td2, "class", "svelte-1l8h23y");
+    			attr_dev(td2, "class", "svelte-1dz4ff3");
     			add_location(td2, file, 385, 14, 10848);
-    			attr_dev(td3, "class", "svelte-1l8h23y");
+    			attr_dev(td3, "class", "svelte-1dz4ff3");
     			add_location(td3, file, 391, 14, 11029);
-    			attr_dev(div, "class", "description-wraper svelte-1l8h23y");
+    			attr_dev(div, "class", "description-wraper svelte-1dz4ff3");
     			add_location(div, file, 423, 16, 12168);
-    			attr_dev(td4, "class", "description-td svelte-1l8h23y");
+    			attr_dev(td4, "class", "description-td svelte-1dz4ff3");
     			toggle_class(td4, "editing", /*item*/ ctx[50].edit_description);
     			add_location(td4, file, 402, 14, 11389);
     			attr_dev(button1, "type", "button");
-    			attr_dev(button1, "class", "svelte-1l8h23y");
+    			attr_dev(button1, "class", "svelte-1dz4ff3");
     			add_location(button1, file, 450, 16, 13309);
-    			attr_dev(td5, "class", "borderless svelte-1l8h23y");
+    			attr_dev(td5, "class", "borderless svelte-1dz4ff3");
     			attr_dev(td5, "colspan", "2");
     			add_location(td5, file, 448, 14, 13180);
     			attr_dev(td6, "colspan", "3");
-    			attr_dev(td6, "class", "details-td svelte-1l8h23y");
+    			attr_dev(td6, "class", "details-td svelte-1dz4ff3");
     			toggle_class(td6, "blured", !/*item*/ ctx[50].show_details);
     			add_location(td6, file, 469, 14, 13936);
-    			attr_dev(tr0, "class", "svelte-1l8h23y");
+    			attr_dev(tr0, "class", "svelte-1dz4ff3");
     			add_location(tr0, file, 349, 12, 9759);
-    			attr_dev(tr1, "class", "details-tr svelte-1l8h23y");
+    			attr_dev(tr1, "class", "details-tr svelte-1dz4ff3");
     			add_location(tr1, file, 668, 12, 23521);
     		},
     		m: function mount(target, anchor) {
@@ -15991,15 +15992,15 @@ var editdocsignature = (function () {
     			attr_dev(img, "alt", img_alt_value = /*item*/ ctx[50].title);
     			set_style(img, "height", "25px");
     			if (!src_url_equal(img.src, img_src_value = "" + (CLOUDINARY_BASE_URL + "f_auto,w_auto/" + /*item*/ ctx[50].cimage))) attr_dev(img, "src", img_src_value);
-    			attr_dev(img, "class", "svelte-1l8h23y");
+    			attr_dev(img, "class", "svelte-1dz4ff3");
     			add_location(img, file, 695, 22, 24487);
     			html_tag.a = null;
-    			attr_dev(div0, "class", "inner svelte-1l8h23y");
+    			attr_dev(div0, "class", "inner svelte-1dz4ff3");
     			add_location(div0, file, 694, 20, 24445);
-    			attr_dev(div1, "class", "search-item svelte-1l8h23y");
+    			attr_dev(div1, "class", "search-item svelte-1dz4ff3");
     			add_location(div1, file, 693, 18, 24399);
     			attr_dev(div2, "slot", "item");
-    			attr_dev(div2, "class", "svelte-1l8h23y");
+    			attr_dev(div2, "class", "svelte-1dz4ff3");
     			add_location(div2, file, 692, 16, 24344);
     		},
     		m: function mount(target, anchor) {
@@ -16037,7 +16038,7 @@ var editdocsignature = (function () {
     	return block;
     }
 
-    // (778:18) {:else}
+    // (773:18) {:else}
     function create_else_block_1(ctx) {
     	let t;
 
@@ -16057,14 +16058,14 @@ var editdocsignature = (function () {
     		block,
     		id: create_else_block_1.name,
     		type: "else",
-    		source: "(778:18) {:else}",
+    		source: "(773:18) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (776:18) {#if !sim.deleted}
+    // (771:18) {#if !sim.deleted}
     function create_if_block_2(ctx) {
     	let t;
 
@@ -16084,7 +16085,7 @@ var editdocsignature = (function () {
     		block,
     		id: create_if_block_2.name,
     		type: "if",
-    		source: "(776:18) {#if !sim.deleted}",
+    		source: "(771:18) {#if !sim.deleted}",
     		ctx
     	});
 
@@ -16139,35 +16140,30 @@ var editdocsignature = (function () {
     			button = element("button");
     			if_block.c();
     			if (!src_url_equal(img.src, img_src_value = /*sim*/ ctx[46].cimage)) attr_dev(img, "src", img_src_value);
-    			attr_dev(img, "width", "auto");
-    			set_style(img, "display", "block");
-    			set_style(img, "width", "100%");
-    			set_style(img, "height", "auto");
-    			attr_dev(img, "height", "auto");
-    			attr_dev(img, "class", "svelte-1l8h23y");
+    			attr_dev(img, "class", "sim-img svelte-1dz4ff3");
     			add_location(img, file, 748, 14, 26345);
-    			attr_dev(td0, "class", "svelte-1l8h23y");
+    			attr_dev(td0, "class", "svelte-1dz4ff3");
     			add_location(td0, file, 747, 12, 26326);
     			attr_dev(textarea, "name", "sim-" + /*i*/ ctx[48]);
     			attr_dev(textarea, "id", "");
     			attr_dev(textarea, "cols", "50");
     			attr_dev(textarea, "rows", "5");
     			attr_dev(textarea, "placeholder", "תיאור הדמייה");
-    			attr_dev(textarea, "class", "svelte-1l8h23y");
-    			add_location(textarea, file, 757, 16, 26619);
-    			attr_dev(div0, "class", "sim-description svelte-1l8h23y");
-    			add_location(div0, file, 756, 14, 26573);
-    			attr_dev(td1, "class", "svelte-1l8h23y");
-    			add_location(td1, file, 755, 12, 26554);
+    			attr_dev(textarea, "class", "svelte-1dz4ff3");
+    			add_location(textarea, file, 752, 16, 26481);
+    			attr_dev(div0, "class", "sim-description svelte-1dz4ff3");
+    			add_location(div0, file, 751, 14, 26435);
+    			attr_dev(td1, "class", "svelte-1dz4ff3");
+    			add_location(td1, file, 750, 12, 26416);
     			attr_dev(button, "type", "button");
-    			attr_dev(button, "class", "svelte-1l8h23y");
-    			add_location(button, file, 769, 16, 26966);
-    			attr_dev(div1, "class", "delete-action svelte-1l8h23y");
-    			add_location(div1, file, 768, 14, 26922);
-    			attr_dev(td2, "class", "svelte-1l8h23y");
-    			add_location(td2, file, 767, 12, 26903);
+    			attr_dev(button, "class", "svelte-1dz4ff3");
+    			add_location(button, file, 764, 16, 26828);
+    			attr_dev(div1, "class", "delete-action svelte-1dz4ff3");
+    			add_location(div1, file, 763, 14, 26784);
+    			attr_dev(td2, "class", "svelte-1dz4ff3");
+    			add_location(td2, file, 762, 12, 26765);
     			attr_dev(tr, "data-idx", /*i*/ ctx[48]);
-    			attr_dev(tr, "class", "svelte-1l8h23y");
+    			attr_dev(tr, "class", "svelte-1dz4ff3");
     			toggle_class(tr, "deleted", /*sim*/ ctx[46].deleted);
     			add_location(tr, file, 746, 10, 26268);
     		},
@@ -16239,7 +16235,7 @@ var editdocsignature = (function () {
     	return block;
     }
 
-    // (821:6) {:else}
+    // (817:6) {:else}
     function create_else_block(ctx) {
     	let t;
 
@@ -16259,14 +16255,14 @@ var editdocsignature = (function () {
     		block,
     		id: create_else_block.name,
     		type: "else",
-    		source: "(821:6) {:else}",
+    		source: "(817:6) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (819:6) {#if saveing}
+    // (815:6) {#if saveing}
     function create_if_block_1(ctx) {
     	let t;
 
@@ -16286,7 +16282,7 @@ var editdocsignature = (function () {
     		block,
     		id: create_if_block_1.name,
     		type: "if",
-    		source: "(819:6) {#if saveing}",
+    		source: "(815:6) {#if saveing}",
     		ctx
     	});
 

@@ -746,12 +746,7 @@ function deleteProduct(item) {
         {#each data?.simulations || [] as sim, i}
           <tr data-idx={i} class:deleted={sim.deleted}>
             <td>
-              <img
-                src={sim.cimage}
-                width="auto"
-                style="display: block;width: 100%;height: auto;"
-                height="auto"
-              />
+              <img src={sim.cimage} class="sim-img" />
             </td>
             <td>
               <div class="sim-description">
@@ -787,13 +782,14 @@ function deleteProduct(item) {
           <td colspan="2"> הדמייה חדשה: </td>
         </tr>
         <tr>
-          <td colspan="1">
+          <td colspan="1" class="sim-image-td">
             <input
               type="file"
               id="selectedFileSim"
               on:change={handleImageUploadSim}
+              accept="image/png, image/gif, image/jpeg"
             />
-            <img width="50px" height="50px" src={simImage} />
+            <img width="50px" height="50px" src={simImage} class="sim-img" />
           </td>
           <td colspan="1">
             <div class="sim-description">
@@ -833,12 +829,31 @@ table.simulation {
   margin-top: 20px;
   tr {
     border: 1px solid #ccc;
+    // display: flex;
+    // flex-direction: row;
+    // justify-content: space-between;
+    // align-items: center;
+
     td {
       border: 1px solid #ccc;
       padding: 10px;
       img {
         width: 100%;
         height: auto;
+
+        &.sim-img {
+          max-width: 350px;
+          width: auto;
+          height: auto;
+          // height: 100px;
+        }
+      }
+
+      &.sim-image-td {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
       }
     }
 

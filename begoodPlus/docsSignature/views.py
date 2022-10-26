@@ -175,9 +175,12 @@ def api_adit_doc_signature(request, uuid):
         for sim in simulations:
             if sim.get('deleted'):
                 if sim.get('id'):
-                    sim_to_delete = MOrderSignatureSimulation.objects.get(
-                        id=sim['id'])
-                    sim_to_delete.delete()
+                    try:
+                        sim_to_delete = MOrderSignatureSimulation.objects.get(
+                            id=sim['id'])
+                        sim_to_delete.delete()
+                    except:
+                        pass
                 continue
             if sim.get('id') != None:
                 sim_obj = MOrderSignatureSimulation.objects.get(id=sim['id'])
@@ -185,7 +188,7 @@ def api_adit_doc_signature(request, uuid):
                 sim_obj = MOrderSignatureSimulation()
                 sim_obj.save()
                 obj.simulations.add(sim_obj)
-            sim_obj.description = sim['description']
+            sim_obj.description = sim.get('description', '')
             if sim.get('cimage') and sim['cimage'].startswith('data:image'):
                 # image data;str
                 image_data = sim['cimage']
