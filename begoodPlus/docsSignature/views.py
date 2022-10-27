@@ -1,11 +1,14 @@
 from io import BytesIO
 from uuid import uuid4
+from django.conf import settings
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from datetime import datetime
 # Create your views here.
 import json
+
+from docsSignature.tasks import send_signature_doc_telegram_task
 from .models import DOC_STATUS_OPTIONS, MOrderSignature, MOrderSignatureItem, MOrderSignatureItemDetail, MOrderSignatureSimulation
 import cloudinary
 import base64
@@ -77,8 +80,18 @@ def api_sign_on_doc(request, uuid):
             'signed_at': timezone.now().astimezone(pytz.timezone('Asia/Jerusalem')).strftime("%Y-%m-%d %H:%M:%S")
         })
         order.save()
+        send_signature_doc_telegram(order.id)
         return JsonResponse({'status': 'success'})
     return JsonResponse({'status': 'error', 'message': 'not post request'})
+
+
+def send_signature_doc_telegram(order_id):
+    # if debug, call the send, else: call the send with celery delay
+    if(settings.DEBUG):
+        send_signature_doc_telegram_task(order_id)
+    else:
+        send_signature_doc_telegram_task.delay(order_id)
+    pass
 
 
 def api_get_doc_signature(request, uuid):
