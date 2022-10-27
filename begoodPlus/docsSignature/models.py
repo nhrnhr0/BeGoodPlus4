@@ -1,5 +1,6 @@
 import uuid
 from django.db import models
+from begoodPlus.secrects import SECRECT_CLIENT_SIDE_DOMAIN
 from catalogImages.models import CatalogImageVarient
 from color.models import Color
 from productSize.models import ProductSize
@@ -64,3 +65,10 @@ class MOrderSignature(models.Model):
 
     def get_admin_url(self):
         return f'/admin/docsSignature/mordersignature/{self.id}/change/'
+
+    def get_client_sign_url(self):
+        url = SECRECT_CLIENT_SIDE_DOMAIN
+        if not url.startswith('http'):
+            url = 'http://' + url
+        url += f'/signature/{self.uuid}/'
+        return url
