@@ -182,6 +182,9 @@ def get_smartbee_info_from_dfs(client_info, items_table, sheet_name, docType):
                 if str(amount_taken_temp).lower() == 'v':
                     amount_taken_temp = row['הערות']
                 if not pd.isna(amount_taken_temp):
+                    # if type is str, we need to convert it to int
+                    if type(amount_taken_temp) == str:
+                        amount_taken_temp = int(amount_taken_temp)
                     amount_taken += amount_taken_temp
             last_row_was_a_header = False
 
