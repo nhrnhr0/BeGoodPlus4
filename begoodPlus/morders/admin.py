@@ -1,7 +1,10 @@
+from django.utils.html import mark_safe
+from django.contrib import messages
 from reversion.admin import VersionAdmin
 import datetime
 from django.contrib import admin
 from openpyxl import Workbook
+from docsSignature.utils import create_signature_doc_from_morder
 from productColor.models import ProductColor
 from django.db import models
 from django.forms import Textarea
@@ -94,12 +97,22 @@ class MOrderAdmin(VersionAdmin):  # admin.ModelAdmin
     search_fields = ('id', 'name', 'phone', 'email', 'status', 'message', 'products__product__title',
                      'client__businessName', 'client__email', 'client__extraName', 'client__contactMan', 'client__user__username')
     list_select_related = ('client', 'client__user',)
-    actions = ('export_to_excel',)
+    actions = ('export_to_excel', 'export_to_signiture_doc')
     formfield_overrides = {
         models.TextField: {'widget': Textarea(
             attrs={'rows': 2,
                    'cols': 20, })},  # 'style': 'height: 1em;'
     }
+
+    def export_to_signiture_doc(self, request, queryset):
+        for morder in queryset:
+            sigObj = create_signature_doc_from_morder(morder)
+            if sigObj:
+                # /admin/docsSignature/mordersignature/1/change/
+                messages.add_message(
+                    request, messages.INFO, mark_safe(f'מסמך חתימה {sigObj.id} <a href="/admin/docsSignature/mordersignature/{sigObj.id}/change/"> לחץ כאן </a>'))
+        messages.add_message(request, messages.INFO, mark_safe(
+            'לדף כל המסמכים <a href="/admin/docsSignature/mordersignature/"> לחץ כאן </a>'))
 
     def export_to_excel(self, request, queryset):
         filesbuffers = []

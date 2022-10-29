@@ -10,6 +10,8 @@
     <main>
     <div class="forms-wraper">
         <h1>העלאת טפסים לאתר</h1>
+
+        <h2>smartbee</h2>
         <form method="post" action="/exel-to-smartbee/"  enctype="multipart/form-data">
             {% csrf_token %}
             <input type="file" name="file" id="file" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"/>
@@ -23,18 +25,42 @@
             </select>
             <button type="submit">העלה טופס אקסל לסמארט-בי</button>
         </form>
+        <form method="POST" action="/sheetsurl-to-smartbee/">
+        {% csrf_token %}
+          <input type="url" name="sheet_url" class="url-input" placeholder="כתובת לקובץ בדרייב"/>
+          <select name="docType">
+              <option value="Invoice">חשבונית מס</option>
+              <option value="RefundInvoice">חשבונית זיכוי</option>
+              <option value="PriceProposal">הצעת מחיר</option>
+              <option value="ShippingCertificate">תעודת משלוח</option>
+              <option value="ReturnCertificate">תעודת החזרה</option>
+            </select>
+          <button type="submit">העלה טופס גוגל שיט לסמארט-בי</button> 
+      </form>
+      <h2>ספקים</h2>
         <form method="post" action="/exel-to-providers-docx/" enctype="multipart/form-data">
           {% csrf_token %}
-          <input type="file" name="file" id="file" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"/>
+          <input type="file" name="file"  id="file" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"/>
           <button type="submit">הפוך אקסל לטופס ספקים </button>
         </form>
+        
+        <form method="POST" action="/sheetsurl-to-providers-docx/">
+          {% csrf_token %}
+          <textarea name="urls" id="urls" cols="50"  width="100%" rows="10" placeholder="הדבק כתובות דפי אקסל בדרייב"></textarea>
+          <button type="submit">הפוך טפסי גוגל שיט לטופס ספקים</button>
+        </form>
       </div>
+
+      
     </main> 
 
 </body>
 </html>
 
 <style>
+  .url-input {
+    min-width: 300px;
+  }
     main {
         direction: rtl;
         text-align: center;
