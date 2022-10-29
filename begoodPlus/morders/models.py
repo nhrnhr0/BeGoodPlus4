@@ -1,3 +1,4 @@
+from django.conf import settings
 import reversion
 from decimal import Decimal
 import secrets
@@ -9,6 +10,7 @@ from multiprocessing.connection import Client
 import pandas as pd
 from django.db import models
 from django.contrib.auth.models import User
+from morders.tasks import send_morder_status_update_to_telegram
 from catalogImages.models import CatalogImage
 from client.models import Client
 from color.models import Color
@@ -115,6 +117,10 @@ class MOrderItem(models.Model):
 # Create your models here.
 
 
+STATUS_CHOICES = [('new', 'חדש'), ('price_proposal', 'הצעת מחיר'), ('in_progress', 'סחורה הוזמנה'), ('in_progress2', 'מוכן לליקוט',), (
+    'in_progress3', 'בהדפסה',), ('in_progress4', 'מוכן בבית דפוס'), ('in_progress5', 'ארוז מוכן למשלוח'), ('done', 'סופק'), ]
+
+
 @reversion.register()
 class MOrder(models.Model):
     created = models.DateTimeField(auto_now_add=True)
@@ -126,8 +132,8 @@ class MOrder(models.Model):
     name = models.CharField(max_length=100, blank=True, null=True, default='')
     phone = models.CharField(max_length=100, blank=True, null=True, default='')
     email = models.CharField(max_length=100, blank=True, null=True, default='')
-    status = models.CharField(max_length=100, choices=[('new', 'חדש'), ('price_proposal', 'הצעת מחיר'), ('in_progress', 'סחורה הוזמנה'), ('in_progress2', 'מוכן לליקוט',), (
-        'in_progress3', 'בהדפסה',), ('in_progress4', 'מוכן בבית דפוס'), ('in_progress5', 'ארוז מוכן למשלוח'), ('done', 'סופק'), ], default='new')
+    status = models.CharField(
+        max_length=100, choices=STATUS_CHOICES, default='new')
     status_msg = models.TextField(_('status message'), blank=True, null=True)
     # order_type = models.CharField(max_length=100, choices=[('Invoice', 'חשבונית מס'), ('RefundInvoice', 'חשבונית זיכוי'), (
     #     'PriceProposal', 'הצעת מחיר'), ('ShippingCertificate', 'תעודת משלוח'), ('ReturnCertificate', 'תעודת החזרה')], blank=True, null=True)
@@ -306,6 +312,21 @@ class MOrder(models.Model):
                           table_id='table_id', na_rep='-')
         return mark_safe(html)
 
+    def get_status_display(self):
+        status = self.status
+        # STATUS_CHOICES = [('new', 'חדש'), ('price_proposal',....
+        for choice in STATUS_CHOICES:
+            if choice[0] == status:
+                return choice[1]
+
+    def get_edit_order_url(self):
+        return reverse('admin_edit_order', args=(self.pk,))
+        # morders/edit-order/{self.pk}/
+# @receiver(pre_save, sender=MOrder)
+# def check_for_status_update(sender, instance, *args, **kwargs):
+
+#     pass
+
 
 @receiver(post_save, sender=MOrder, dispatch_uid="recalculate_total_price")
 def recalculate_total_price_post_save(sender, instance, **kwargs):
@@ -313,5 +334,9 @@ def recalculate_total_price_post_save(sender, instance, **kwargs):
     if instance.total_sell_price != new_price:
         instance.total_sell_price = new_price
         instance.save()
-
+        return
+    if settings.DEBUG:
+        send_morder_status_update_to_telegram(instance.id)
+    else:
+        send_morder_status_update_to_telegram.delay(instance.id)
     #print('recalculate_total_price_post_save: ', instance.total_sell_price)

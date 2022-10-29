@@ -86,10 +86,10 @@ class MOrderAdmin(VersionAdmin):  # admin.ModelAdmin
     fields = ('cart', 'total_sell_price', 'client', 'name', 'phone', 'email',
               'status', 'message',)  # what is this for?
     readonly_fields = ('created', 'total_sell_price', 'updated', 'get_edit_url',
-                       'view_morder_pdf_link', 'cart', 'client',)
-    list_display = ('id', 'client', 'name', 'status', 'status_msg', 'total_sell_price', 'created', 'updated',
-                    'get_edit_url', 'view_morder_pdf_link',)
-    list_editable = ('status', 'status_msg',)
+                       'view_morder_pdf_link', 'cart', 'client', 'status',)
+    list_display = ('id', 'client', 'name', 'status', 'status_msg', 'total_sell_price',
+                    'get_edit_url', 'view_morder_pdf_link', 'created', 'updated',)
+    # list_editable = ('status_msg',)
     # filter_horizontal = ('products',)
     list_filter = ('status', 'created', 'updated',)
     search_fields = ('id', 'name', 'phone', 'email', 'status', 'message', 'products__product__title',
