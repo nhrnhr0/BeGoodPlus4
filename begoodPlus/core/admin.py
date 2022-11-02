@@ -5,7 +5,7 @@ import json
 from core.models import UserProductPhoto
 from .models import SvelteContactFormModal
 from .models import Customer
-from .models import BeseContactInformation
+from .models import BeseContactInformation, ProvidersDocxTask
 from calendar import c
 import requests
 from django.contrib import admin
@@ -405,3 +405,6 @@ admin.site.register(UserQuestion, UserQuestionAdmin)
 class ProvidersDocxTaskAdmin(admin.ModelAdmin):
     list_display = ('id', 'created_date', 'updated_date', 'status', 'progress')
     search_fields = ('id', 'created_date', 'updated_date', 'status',)
+
+
+admin.site.register(ProvidersDocxTask, ProvidersDocxTaskAdmin)

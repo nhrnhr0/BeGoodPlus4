@@ -15,7 +15,7 @@ Including another URLconf
 """
 
 
-from core.views import admin_upload_docs_page, sheetsurl_to_smartbee, sheetsurl_to_providers_docx
+from core.views import admin_upload_docs_page, providers_docx_task, sheetsurl_to_smartbee, sheetsurl_to_providers_docx
 
 from docsSignature.views import api_get_doc_signature, api_sign_on_doc
 from core.views import admin_upload_docs_page
@@ -88,6 +88,8 @@ clientRouter.register(r'logos', LogoClientViewSet)
 # from rest_framework.authtoken.views import obtain_auth_token
 # from rest_framework_simplejwt.views import (TokenObtainPairView,TokenRefreshView,)
 urlpatterns = [
+    path('providers_docx_task/<int:task_id>/',
+         providers_docx_task, name='providers_docx_task'),
     path('sheetsurl-to-smartbee/', sheetsurl_to_smartbee),
     path('sign-on-doc/<uuid:uuid>/', api_sign_on_doc),
     path('api-signature/<uuid:uuid>/', api_get_doc_signature),

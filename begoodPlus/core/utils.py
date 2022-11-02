@@ -1,3 +1,6 @@
+from docx.oxml.ns import qn
+import os
+import re
 from docx.shared import Inches, Cm
 from productSize.models import ProductSize
 from django.conf import settings
@@ -14,6 +17,7 @@ import googleapiclient
 from googleapiclient.http import MediaFileUpload, MediaIoBaseDownload
 import pandas as pd
 import io
+from docx.oxml import OxmlElement
 from django.urls import reverse
 
 from catalogAlbum.models import CatalogAlbum, TopLevelCategory
@@ -85,6 +89,46 @@ def get_sheetname_from_driveurl(url):
     matches = re.search(regex, cont)
     sheet_name = matches.group(1)
     return sheet_name.replace('\\', '')
+
+
+def set_cell_border(cell, **kwargs):
+    """
+    Set cell`s border
+    Usage:
+
+    set_cell_border(
+        cell,
+        top={"sz": 12, "val": "single", "color": "#FF0000", "space": "0"},
+        bottom={"sz": 12, "color": "#00FF00", "val": "single"},
+        start={"sz": 24, "val": "dashed", "shadow": "true"},
+        end={"sz": 12, "val": "dashed"},
+    )
+    """
+    tc = cell._tc
+    tcPr = tc.get_or_add_tcPr()
+
+    # check for tag existnace, if none found, then create one
+    tcBorders = tcPr.first_child_found_in("w:tcBorders")
+    if tcBorders is None:
+        tcBorders = OxmlElement('w:tcBorders')
+        tcPr.append(tcBorders)
+
+    # list over all available tags
+    for edge in ('start', 'top', 'end', 'bottom', 'insideH', 'insideV'):
+        edge_data = kwargs.get(edge)
+        if edge_data:
+            tag = 'w:{}'.format(edge)
+
+            # check for tag existnace, if none found, then create one
+            element = tcBorders.find(qn(tag))
+            if element is None:
+                element = OxmlElement(tag)
+                tcBorders.append(element)
+
+            # looks like order of attributes is important
+            for key in ["sz", "val", "color", "space", "shadow"]:
+                if key in edge_data:
+                    element.set(qn('w:{}'.format(key)), str(edge_data[key]))
 
 
 def add_table_to_doc(document, data):
@@ -405,8 +449,10 @@ def merge_data_to_providers_dict(original_data, provider_name, product_name, col
 def process_sheets_to_providers_docx(sheets, obj):
     # beutifly print each sheet to console
     all_sheets_data = []
+    sheet_index = 1
     for sheet in sheets:
-        obj.logs.append('processing sheet: ' + sheet.name)
+        obj.logs.append('processing sheet: ' + str(sheet_index))
+        sheet_index += 1
         rows_data = []
         current_row_data = None
         for idx, row in sheet.iterrows():
@@ -425,7 +471,7 @@ def process_sheets_to_providers_docx(sheets, obj):
                     rows_data.append(current_row_data)
                 product_name = row[1]
                 obj.logs.append(
-                    'row: ', idx, 'processing product: ' + product_name)
+                    'row: ' + str(idx) + ' processing product: ' + product_name)
                 header_total_amount = int(float(row[2]))
                 header_taken_amount = row[4]
                 if str(header_taken_amount).lower() == 'v':
@@ -460,8 +506,8 @@ def process_sheets_to_providers_docx(sheets, obj):
                     product_taken_amount = int(float(product_taken_amount))
                 product_provider_name = row[11] if len(
                     sheet.columns) > 11 else ''
-                obj.logs.append('row: ', idx, 'processing product: ' + product_name + ' color: ' + product_color + ' size: ' + product_size +
-                                ' varient: ' + product_varient, ' product_total_amount: ' + str(product_total_amount) + ' product_taken_amount: ', product_taken_amount)
+                obj.logs.append('row: ' + str(idx) + ' processing product: ' + str(product_name) + ' color: ' + str(product_color) + ' size: ' + str(product_size) +
+                                ' varient: ' + str(product_varient) + ' total_amount: ' + str(product_total_amount) + ' taken_amount: ' + str(product_taken_amount))
                 print(product_taken_amount, product_total_amount)
                 print(type(product_taken_amount), type(product_total_amount))
                 current_row_data['has_child'] = True
@@ -482,12 +528,12 @@ def process_sheets_to_providers_docx(sheets, obj):
         for row in rows_data:
             # filter out the rows that has no childs and the header amount is 0 or less and rows childs that has 0 or less amount
             all_sheets_data.append(row)
-        obj.logs.append('finished processing sheet: ' + sheet.name)
+        obj.logs.append('finished processing sheet: ' + str(sheet_index))
     # merge data as needed
     data = {}
     print(all_sheets_data)
     obj.logs.append('merging data')
-    obj.logs.append(all_sheets_data)
+    # obj.logs.append(all_sheets_data)
     for row in all_sheets_data:
         if not row['has_child']:
             provider_name = row['header_provider_name'] if not pd.isna(
@@ -515,5 +561,5 @@ def process_sheets_to_providers_docx(sheets, obj):
                 data = merge_data_to_providers_dict(
                     data, provider_name, product_name, color, size, varient, qyt)
     obj.logs.append('finished merging data')
-    obj.logs.append(data)
+    # obj.logs.append(data)
     return data
