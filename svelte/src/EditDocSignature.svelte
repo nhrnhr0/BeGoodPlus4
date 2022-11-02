@@ -66,6 +66,7 @@ function addNewProductBtnClicked(e) {
     price: newProductPrice || 0,
     show_details: true,
     details: [],
+    order: Math.max(...data.items.map((i) => i.order)) + 1,
   });
   data.items = [...data.items];
   newProductImage = "";
@@ -337,6 +338,7 @@ function deleteProduct(item) {
       <table class="items">
         <thead>
           <tr>
+            <th>#</th>
             <th> תמונה </th>
             <th> שם </th>
             <th> כמות כוללת </th>
@@ -348,6 +350,13 @@ function deleteProduct(item) {
         <tbody>
           {#each data.items as item}
             <tr>
+              <td>
+                <input
+                  style="max-width:40px"
+                  type="number"
+                  bind:value={item.order}
+                />
+              </td>
               <td
                 on:click={document
                   .querySelector(`#selectedFile-${item.id}`)
@@ -745,6 +754,9 @@ function deleteProduct(item) {
       <table class="simulation">
         {#each data?.simulations || [] as sim, i}
           <tr data-idx={i} class:deleted={sim.deleted}>
+            <td>
+              <input type="number" bind:value={sim.order} />
+            </td>
             <td>
               <img src={sim.cimage} class="sim-img" />
             </td>
