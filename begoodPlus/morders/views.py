@@ -874,13 +874,14 @@ def api_get_order_data2(request, id):
     return JsonResponse(data, status=status.HTTP_200_OK)
 
 
-@api_view(['GET', 'POST'])
+# @api_view(['GET', 'POST'])
 def api_get_order_data(request, id):
     if not request.user.is_superuser:
         return JsonResponse({'status': 'error'}, status=status.HTTP_403_FORBIDDEN)
 
-    order = MOrder.objects.select_related('client', 'agent').prefetch_related(
-        'products', 'products__entries', 'products__entries__color', 'products__entries__size', 'products__entries__varient', 'products__toProviders',).get(id=id)
+    order = MOrder.objects.select_related('client', 'agent', 'client__user',).prefetch_related(
+        'products', 'products__product__sizes', 'products__product__colors', 'products__product__varients', 'products__entries', 'products__entries__color', 'products__entries__size', 'products__entries__varient', 'products__toProviders',
+        'products__providers', 'products__product').get(id=id)
     if request.method == 'POST':
         with reversion.create_revision():
             data = json.loads(request.body)
@@ -986,23 +987,21 @@ def api_get_order_data(request, id):
                     # print('e2', e, 'save')
                     p.save()
             order.save()
-            _ord = MOrder.objects.get(id=order.id)
-            total_price = 0
-            for item in _ord.products.all():
-                totalEntriesQuantity = sum(
-                    [entry.quantity for entry in item.entries.all()])
-                total_price += totalEntriesQuantity * item.price
-            _ord.total_sell_price = total_price
-            _ord.save()
+            # _ord = MOrder.objects.get(id=order.id)
+            # total_price = 0
+            # for item in _ord.products.all():
+            #     totalEntriesQuantity = sum(
+            #         [entry.quantity for entry in item.entries.all()])
+            #     total_price += totalEntriesQuantity * item.price
+            # _ord.total_sell_price = total_price
+            # _ord.save()
             user = request.user._wrapped if hasattr(
                 request.user, '_wrapped') else request.user
             reversion.set_user(user)
             reversion.set_comment(
-                'סטטוס: ' + str(_ord.status) + ' - סה"כ: ' + str(_ord.total_sell_price) + '₪')
+                'סטטוס: ' + str(order.status) + ' - סה"כ: ' + str(order.total_sell_price) + '₪')
         return JsonResponse({'status': 'ok'}, status=status.HTTP_200_OK)
-    #order = MOrder.objects.select_related('client',).prefetch_related('products','products__entries', 'products__entries__color', 'products__entries__size', 'products__entries__varient').get(id=id)#
-    # order = order.select_related('client',).prefetch_related('products','products__entries', 'products__entries__color', 'products__entries__size', 'products__entries__varient')
+
     data = AdminMOrderSerializer(order).data
-    # Store some meta-information.
 
     return JsonResponse(data, status=status.HTTP_200_OK)

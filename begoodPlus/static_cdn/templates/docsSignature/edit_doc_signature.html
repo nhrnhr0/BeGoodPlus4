@@ -1,0 +1,38 @@
+
+
+<!--
+DOC_STATUS_OPTIONS = (
+    ('Draft', _('Draft')),
+    ('Published', _('Published')),
+    ('Signed', _('Signed')),
+)
+    form with the following fields: (connected to obj: MOrderSignature)
+    client_name
+    status
+    items
+        name
+        description
+        cimage
+        price
+        show_details
+        details
+            quantity
+            color
+            size
+            varient
+-->
+
+{% load static %}
+{% load django_svelte %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ערוך סמסך חתימה</title>
+</head>
+<body>
+    {% display_svelte "EditDocSignature.svelte" my_data %}
+</body>
+</html>

@@ -95,7 +95,8 @@ let exportable = [];
 	"DocumentStockList",
 	"App",
 	"CampainEditor",
-	"AdminCartEditor"
+	"AdminCartEditor",
+	"EditDocSignature"
   // "MyComponent",
 ].forEach((d) => exportable.push(componentExportDetails(d)));
 
