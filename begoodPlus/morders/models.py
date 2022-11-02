@@ -146,6 +146,8 @@ class MOrder(models.Model):
 
     total_sell_price = models.FloatField(
         _('total sell price'), default=0)
+    last_status_updated = models.CharField(
+        _('last status updated'), max_length=100, blank=True, null=True)
 
     class Meta:
         ordering = ['-created']
