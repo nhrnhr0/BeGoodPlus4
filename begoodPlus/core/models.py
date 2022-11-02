@@ -1,3 +1,8 @@
+from django.core.files.base import ContentFile
+import io
+import zipfile
+from core.utils import generate_provider_docx, process_sheets_to_providers_docx
+from core.utils import get_sheet_from_drive_url
 from catalogImages.models import CatalogImage, CatalogImageVarient
 from colorhash import ColorHash
 from customerCart.models import CustomerCart
@@ -11,6 +16,8 @@ from django.conf import settings
 import json
 import uuid
 from json2html import *
+from django.core.files.storage import FileSystemStorage
+
 
 from django.conf import settings
 from django.db.models.signals import post_save
@@ -23,6 +30,9 @@ from uuid import UUID
 from productColor.models import ProductColor
 
 from productSize.models import ProductSize
+
+
+fs = FileSystemStorage(location=settings.MEDIA_ROOT)
 
 
 def uuid2slug(uuidstring):
@@ -363,7 +373,7 @@ class SvelteCartModal(models.Model):
                     #detail_table += f'<tr><td>{size.size}</td><td>{color.name}</td><td>{str(qyt)}</td></tr>'
                 #detail_table += '</table></td><hr>'
                 #ret += detail_table
-                if(len(tableData) > 0):
+                if (len(tableData) > 0):
                     df = pd.DataFrame(tableData)
                     # remove from df rows with qyt == '-' or qyt == 0 or qyt == Nan or qyt == None
                     #df = df[df['qyt'].str.contains('-') == True or df['qyt'].str.contains('0') == True or df['qyt'].str.contains('NaN') == True or df['qyt'].str.contains('None') == True]
@@ -447,7 +457,7 @@ class SvelteCartModal(models.Model):
                                 if quantity != None and quantity != 0:
                                     entries_list.append(
                                         {'size_id': size_id, 'color_id': color_id, 'varient_id': varient_id, 'quantity': quantity})
-            if(len(entries_list) > 0):
+            if (len(entries_list) > 0):
                 currentProduct['entries'] = entries_list
             else:
                 ONE_SIZE_ID = 108
@@ -475,3 +485,96 @@ class SvelteCartModal(models.Model):
     def __str__(self):
         # Return a string that represents the instance
         return f"{self.created_date.strftime('%Y-%m-%d %H:%M:%S')} - {self.name} - {self.cart_count()}"
+
+
+ProvidersDocxTaskStatusChoices = (
+    ('new', _('New')),
+    ('in_progress', _('In Progress')),
+    ('done', _('Done')),
+    ('error', _('Error')),
+)
+
+
+class ProvidersDocxTask(models.Model):
+    links = models.JSONField(blank=True, null=True)
+    created_date = models.DateTimeField(auto_now_add=True)
+    updated_date = models.DateTimeField(auto_now=True)
+    logs = models.JSONField(blank=True, null=True)
+    docx = models.FileField(
+        upload_to='docx', blank=True, null=True, storage=fs)
+    status = models.CharField(
+        max_length=20, choices=ProvidersDocxTaskStatusChoices, default='new')
+    progress = models.IntegerField(default=0)
+
+    def status_str_display(self):
+        ret = dict(ProvidersDocxTaskStatusChoices)[self.status]
+        return ret
+
+    def process_sheetsurl_to_providers_docx(self):
+        # try:
+        sheets = []
+        urls = self.links
+        self.status = 'in_progress'
+        self.logs = []
+        self.save()
+        for url in urls:
+            log = 'fetching sheet from url: ' + url
+            self.logs.append(log)
+            self.save()
+            sheet, sheetname = get_sheet_from_drive_url(url)
+            sheets.append(sheet)
+            log = 'downloaded'
+            self.logs.append(log)
+            self.save()
+
+        self.logs.append('parsing sheets')
+        info = process_sheets_to_providers_docx(sheets, self)
+        self.save()
+        print(info)
+        # get all sheet names
+        # get each sheet get row[1] col[0] as the sheetname
+        morders_ids = []
+        for sheet in sheets:
+            print(sheet.columns)
+            print(sheet.iloc[0, 0])
+            morders_ids.append(str(int(float(sheet.iloc[0, 0]))))
+        docs_data = []
+        for provider_name in info.keys():
+            doc, seccsess = generate_provider_docx(
+                info[provider_name], provider_name)
+            # if doc is string then there was an error
+            if type(doc) == str:
+                return {'error': {
+                    'provider_name': provider_name,
+                    'product_name': doc
+                }}
+            # docs.append(doc)
+            if seccsess:
+                docs_data.append({
+                    'doc': doc,
+                    'provider_name': provider_name,
+                })
+
+        zip_buffer = io.BytesIO()
+        with zipfile.ZipFile(zip_buffer, "a", zipfile.ZIP_DEFLATED, False) as zip_file:
+            for doc_info in docs_data:
+                file_stream = io.BytesIO()
+                doc = doc_info['doc']
+                doc.save(file_stream)
+                file_name = str(
+                    '(' + doc_info['provider_name'] + ') ' + '|'.join(morders_ids)) + '.docx'
+                file_stream.seek(0)
+                zip_file.writestr(
+                    file_name, file_stream.getvalue())
+        zip_buffer.seek(0)
+        self.status = 'done'
+        self.docx = ContentFile(zip_buffer.getvalue(
+        ), 'providers - ' + str(self.created_date) + '.zip')
+        self.save()
+        return {'zip': zip_buffer}
+        # except Exception as e:
+        #     print(e)
+        #     self.status = 'error'
+        #     self.logs.append(str(e))
+        #     self.save()
+        #     return {'error': str(e)}

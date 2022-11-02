@@ -3,8 +3,10 @@ from begoodPlus.secrects import SECRECT_BASE_MY_DOMAIN
 from begoodPlus.celery import telegram_bot
 import telegram
 from begoodPlus.secrects import TELEGRAM_CHAT_ID_STATUS_UPDATES
+from celery import shared_task
 
 
+@shared_task
 def send_morder_status_update_to_telegram(morder_id):
     from morders.models import MOrder
     print('=================== send_morder_status_update_to_telegram is running ==========================')
