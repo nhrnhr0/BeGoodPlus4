@@ -400,3 +400,8 @@ class UserQuestionAdmin(admin.ModelAdmin):
 
 
 admin.site.register(UserQuestion, UserQuestionAdmin)
+
+
+class ProvidersDocxTaskAdmin(admin.ModelAdmin):
+    list_display = ('id', 'created_date', 'updated_date', 'status', 'progress')
+    search_fields = ('id', 'created_date', 'updated_date', 'status',)

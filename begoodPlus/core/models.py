@@ -1,3 +1,7 @@
+import io
+import zipfile
+from core.utils import generate_provider_docx, process_sheets_to_providers_docx
+from core.utils import get_sheet_from_drive_url
 from catalogImages.models import CatalogImage, CatalogImageVarient
 from colorhash import ColorHash
 from customerCart.models import CustomerCart
@@ -475,3 +479,80 @@ class SvelteCartModal(models.Model):
     def __str__(self):
         # Return a string that represents the instance
         return f"{self.created_date.strftime('%Y-%m-%d %H:%M:%S')} - {self.name} - {self.cart_count()}"
+
+
+ProvidersDocxTaskStatusChoices = (
+    ('new', _('New')),
+    ('in_progress', _('In Progress')),
+    ('done', _('Done')),
+    ('error', _('Error')),
+)
+
+
+class ProvidersDocxTask(models.Model):
+    links = models.JSONField(blank=True, null=True)
+    created_date = models.DateTimeField(auto_now_add=True)
+    updated_date = models.DateTimeField(auto_now=True)
+    logs = models.JSONField(blank=True, null=True)
+    docx = models.FileField(upload_to='docx', blank=True, null=True)
+    status = models.CharField(
+        max_length=20, choices=ProvidersDocxTaskStatusChoices, default='new')
+    progress = models.IntegerField(default=0)
+
+    def process_sheetsurl_to_providers_docx(self):
+        sheets = []
+        urls = self.links
+        self.logs = []
+        for url in urls:
+            log = 'fetching sheet from url: ' + url
+            self.logs.append(log)
+            self.save()
+            sheet, sheetname = get_sheet_from_drive_url(url)
+            sheets.append(sheet)
+            log = 'fetched sheet from url: ' + url
+            self.save()
+
+        self.logs.append('parsing sheets')
+        info = process_sheets_to_providers_docx(sheets, self)
+        print(info)
+        # get all sheet names
+        # get each sheet get row[1] col[0] as the sheetname
+        morders_ids = []
+        for sheet in sheets:
+            print(sheet.columns)
+            print(sheet.iloc[0, 0])
+            morders_ids.append(str(int(float(sheet.iloc[0, 0]))))
+        docs_data = []
+        for provider_name in info.keys():
+            doc, seccsess = generate_provider_docx(
+                info[provider_name], provider_name)
+            # if doc is string then there was an error
+            if type(doc) == str:
+                return {'error': {
+                    'provider_name': provider_name,
+                    'product_name': doc
+                }}
+            # docs.append(doc)
+            if seccsess:
+                docs_data.append({
+                    'doc': doc,
+                    'provider_name': provider_name,
+                })
+
+        zip_buffer = io.BytesIO()
+        with zipfile.ZipFile(zip_buffer, "a", zipfile.ZIP_DEFLATED, False) as zip_file:
+            for doc_info in docs_data:
+                file_stream = io.BytesIO()
+                doc = doc_info['doc']
+                doc.save(file_stream)
+                file_name = str(
+                    '(' + doc_info['provider_name'] + ') ' + '|'.join(morders_ids)) + '.docx'
+                file_stream.seek(0)
+                zip_file.writestr(
+                    file_name, file_stream.getvalue())
+        zip_buffer.seek(0)
+        return {'zip': zip_buffer}
+        # response = HttpResponse(
+        #     zip_buffer.read(), content_type="application/zip")
+        # response['Content-Disposition'] = 'attachment; filename="products.zip"'
+        # return response
