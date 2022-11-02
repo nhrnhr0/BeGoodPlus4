@@ -35,11 +35,19 @@ class MOrderSignatureItem(models.Model):
     price = models.DecimalField(max_digits=100, decimal_places=2, default=0.00)
     details = models.ManyToManyField(to=MOrderSignatureItemDetail)
     show_details = models.BooleanField(default=True)
+    order = models.IntegerField(default=1)
+
+    class Meta:
+        ordering = ['order']
 
 
 class MOrderSignatureSimulation(models.Model):
     description = models.TextField()
     cimage = models.CharField(max_length=350, blank=True, null=True)
+    order = models.IntegerField(default=1)
+
+    class Meta:
+        ordering = ['order']
 
 
 class MOrderSignature(models.Model):

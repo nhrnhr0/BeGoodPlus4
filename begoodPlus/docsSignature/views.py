@@ -148,7 +148,8 @@ def api_adit_doc_signature(request, uuid):
             item_obj.description = item['description']
             item_obj.price = item['price']
             item_obj.show_details = item['show_details']
-            if item['cimage'].startswith('data:image'):
+            item_obj.order = item.get('order', 1)
+            if item.get('cimage').startswith('data:image'):
                 # image data;str
                 image_data = item['cimage']
                 # save the image to cloudinary and get the url
@@ -156,6 +157,8 @@ def api_adit_doc_signature(request, uuid):
                     image_data, item_obj.name + str(item_obj.id))
                 # update the item's cimage field
                 item_obj.cimage = url
+            else:
+                item_obj.cimage = item.get('cimage')
             # save the item
             item_obj.save()
             # get the details
@@ -206,6 +209,7 @@ def api_adit_doc_signature(request, uuid):
                 sim_obj.save()
                 obj.simulations.add(sim_obj)
             sim_obj.description = sim.get('description', '')
+            sim_obj.order = sim.get('order', 1)
             if sim.get('cimage') and sim['cimage'].startswith('data:image'):
                 # image data;str
                 image_data = sim['cimage']
@@ -253,11 +257,13 @@ def serialize_doc_signature(obj):
             'id': sim.id,
             'description': sim.description,
             'cimage': sim.cimage,
+            'order': sim.order,
         })
     for item in obj.items.all():
         ret['items'].append({
             'id': item.id,
             'name': item.name,
+            'order': item.order,
             'description': item.description,
             'cimage': item.cimage,
             'price': item.price,
