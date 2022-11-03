@@ -15,7 +15,7 @@ Including another URLconf
 """
 
 
-from core.views import admin_upload_docs_page, sheetsurl_to_smartbee, sheetsurl_to_providers_docx
+from core.views import admin_upload_docs_page, providers_docx_task, sheetsurl_to_smartbee, sheetsurl_to_providers_docx
 
 from docsSignature.views import api_get_doc_signature, api_sign_on_doc
 from core.views import admin_upload_docs_page
@@ -91,6 +91,8 @@ clientRouter.register(r'logos', LogoClientViewSet)
 urlpatterns = [
     path('get-shareable-cart/<uuid:uuid>/', get_shareable_cart),
     path('create-shareable-cart/', create_shareable_cart),
+    path('providers_docx_task/<int:task_id>/',
+         providers_docx_task, name='providers_docx_task'),
     path('sheetsurl-to-smartbee/', sheetsurl_to_smartbee),
     path('sign-on-doc/<uuid:uuid>/', api_sign_on_doc),
     path('api-signature/<uuid:uuid>/', api_get_doc_signature),

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <main>
+        <div id="hideen-status">
+            {{task.status}}
+        </div>
+        <div class="container">
+            <div class="label">
+                קישורים
+            </div>
+            <div class="value">
+                <ul>
+                    {%for link in task.links%}
+                    <li>
+                        <a href="{{link}}">{{link}}</a>
+                    </li>
+                    {%endfor%}
+                </ul>
+            </div>
+        </div>
+        <div class="container">
+            נוצר בתאריך: {{task.created_date}}
+        </div>
+        <div class="container">
+            עדכון אחרון: {{task.updated_date}}
+        </div>
+        <div class="container">
+            <div class="label">
+            סטטוס: 
+            </div>
+            <div class="value">{{task.status_str_display}}</div>
+        </div>
+        <div class="container">
+            {%if task.docx%}
+                <div class="label">
+                    קובץ:
+                </div>
+                <div class="value">
+                    <a href="{{task.docx.url}}">קובץ</a>
+                </div>
+            {%endif%}
+        </div>
+        <div class="container">
+            <div class="label">
+                    לוגים:
+                </div>
+                <div class="value logs">
+                    <ul>
+                        {%for log in task.logs%}
+                        <li>
+                            {{log}}
+                        </li>
+                        {%endfor%}
+                    </ul>
+                
+            </div>
+        </div>
+
+        
+    </main>
+
+    <script>
+        window.onload = function() {
+            setTimeout(function() {
+                let status = document.querySelector('#hideen-status').innerHTML;
+                if(status.trim() != 'done') {
+                    window.location.reload();
+                }
+            }, 1500);
+        }
+    </script>
+</body>
+</html>
+
+<style>
+    body {
+        direction: rtl;
+    }
+    main .container {
+        display: flex;
+        flex-direction: column;
+        margin: 10px;
+    }
+    main .container .label {
+        font-size: 20px;
+        font-weight: bold;
+    }
+    main .container .value {
+        font-size: 18px;
+    }
+    .logs {
+        direction: ltr;
+    }
+</style>
