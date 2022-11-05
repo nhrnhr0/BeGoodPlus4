@@ -32,7 +32,7 @@ from productColor.models import ProductColor
 from productSize.models import ProductSize
 
 
-fs = FileSystemStorage(location=settings.MEDIA_ROOT)
+fs = FileSystemStorage()
 
 
 def uuid2slug(uuidstring):
