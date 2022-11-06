@@ -332,9 +332,10 @@ class MOrder(models.Model):
 
 @receiver(pre_save, sender=MOrder, dispatch_uid="recalculate_total_price")
 def recalculate_total_price_pre_save(sender, instance, **kwargs):
-    new_price = instance.prop_totalPrice
-    if instance.total_sell_price != new_price:
-        instance.total_sell_price = new_price
+    if instance.pk:
+        new_price = instance.prop_totalPrice
+        if instance.total_sell_price != new_price:
+            instance.total_sell_price = new_price
 
 
 @receiver(post_save, sender=MOrder, dispatch_uid="notify_order_status_update")
