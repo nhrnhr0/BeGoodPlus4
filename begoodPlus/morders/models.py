@@ -340,11 +340,10 @@ def recalculate_total_price_pre_save(sender, instance, **kwargs):
 
 @receiver(post_save, sender=MOrder, dispatch_uid="notify_order_status_update")
 def notify_order_status_update_post_save(instance, *args, **kwargs):
-    if instance.last_status_updated != instance.status and instance.total_sell_price > 0:
-        instance.last_status_updated = instance.status
+    if instance.total_sell_price > 0:
         if settings.DEBUG:
             send_morder_status_update_to_telegram(instance.id)
         else:
             send_morder_status_update_to_telegram.delay(instance.id)
-        instance.save()
+
     # print('recalculate_total_price_post_save: ', instance.total_sell_price)
