@@ -20,12 +20,13 @@ import time
 from client.models import UserQuestion, UserSessionLogger
 from core.models import SvelteCartModal, SvelteContactFormModal, UserProductPhoto
 
+
 @shared_task
 def sheetsurl_to_providers_docx_task(providersDocxTask_id):
     from core.models import ProvidersDocxTask
     providersDocxTask = ProvidersDocxTask.objects.get(id=providersDocxTask_id)
     providersDocxTask.process_sheetsurl_to_providers_docx()
-    
+
 
 @shared_task
 def test(a, b):
@@ -172,10 +173,17 @@ def send_cart_notification(cart_id):
     print('=================== send_cart_email is running ==========================')
     cart = SvelteCartModal.objects.get(id=cart_id)
     # subject = to the current date and time if the cart
-    if cart.user is not None and cart.user.is_anonymous == False:
-        s = str(cart.user.client.businessName)
-    else:
+    # if cart.user is not None and cart.user.is_anonymous == False:
+    #     s = str(cart.user.client.businessName)
+    # else:
+    #     s = str(cart.name)
+    if cart.name:
         s = str(cart.name)
+    else:
+        if cart.user and cart.user.client:
+            s = str(cart.user.client.businessName)
+        else:
+            s = str(cart.user)
     subject = str(cart.id) + ') ' + s
     html_message = render_to_string(
         'emails/cart_template.html', {'cart': cart})

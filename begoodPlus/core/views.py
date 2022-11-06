@@ -199,7 +199,7 @@ def get_smartbee_info_from_dfs(client_info, items_table, sheet_name, docType):
         'barcode': barcode,
         'price': price,
     })
-
+    res_products = list(filter(lambda x: x['amount_taken'] > 0, res_products))
     paymentItems = []
     for prod in res_products:
         description = prod['product_name']
@@ -442,7 +442,6 @@ def providers_docx_task(request, task_id):
         return HttpResponseForbidden()
 
 
-
 @csrf_exempt
 def sheetsurl_to_smartbee(request):
     if request.user.is_authenticated and request.user.is_superuser:
@@ -472,8 +471,10 @@ def sheetsurl_to_smartbee(request):
                     sheet_name=sheetname, skiprows=2, )
                 info = get_smartbee_info_from_dfs(
                     df, df2, sheetname, docType)
-                send_smartbe_info(
+                obj, errors = send_smartbe_info(
                     info=info, morder_id=int(order_id) if order_id else None)
+                if errors:
+                    return JsonResponse({'errors': errors})
 
             else:
                 return JsonResponse({'error': 'no url'})
@@ -502,8 +503,10 @@ def submit_exel_to_smartbee(request):
                         sheet_name=sheets_name, skiprows=2, )
                     info = get_smartbee_info_from_dfs(
                         df, df2, sheets_name, docType)
-                    send_smartbe_info(info=info, morder_id=int(
+                    obj, errors = send_smartbe_info(info=info, morder_id=int(
                         order_id))  # TODO: rmeove this
+                    if errors:
+                        return JsonResponse({'errors': errors})
                     # return JsonResponse(info, safe=False)
 
             else:
@@ -529,10 +532,11 @@ def send_smartbe_info(info, morder_id):
                                              validationErrors=data['validationErrors'],
                                              resultId=resultId)
         print(data)
-        return obj
+        return obj, None
     else:
-        print(smartbee_response)
-        print(smartbee_response.json())
+        # print(smartbee_response)
+        # print(smartbee_response.json())
+        return None, smartbee_response.json()
 
 
 '''

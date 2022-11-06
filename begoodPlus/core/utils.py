@@ -136,7 +136,8 @@ def add_table_to_doc(document, data):
     # First row are table headers!
     # https://github.com/python-openxml/python-docx/issues/149
     table = document.add_table(
-        rows=(data.shape[0]+1), cols=data.shape[1], style="Light Shading")  #
+        rows=(data.shape[0]+1), cols=data.shape[1], style="Light Shading")
+    table.direction = WD_TABLE_DIRECTION.RTL
     table.autofit = True
     table.allow_autofit = True
 
@@ -144,7 +145,7 @@ def add_table_to_doc(document, data):
     # for row in table.rows:
     #     for idx, width in enumerate(widths):
     #         row.cells[idx].width = width
-    table.direction = WD_TABLE_DIRECTION.LTR
+    # table.direction = WD_TABLE_DIRECTION.LTR
     table.alignment = WD_TABLE_ALIGNMENT.CENTER
 
     # first row is the headers (column names)
@@ -173,7 +174,11 @@ def add_table_to_doc(document, data):
                 right={"sz": 12, "color": "#000000", "val": "single"},
             )
             # if it's the last 3 columns, then align right
-            if j >= data.shape[-1] - 3:
+            has_modal = 'מודל' in data.columns.tolist()
+            headers_len = data.shape[-1] - \
+                3 if has_modal else data.shape[-1] - 2
+
+            if j >= headers_len:
                 table.cell(i + 1,
                            j).paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.RIGHT
 
