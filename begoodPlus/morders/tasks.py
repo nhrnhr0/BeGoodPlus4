@@ -17,6 +17,7 @@ def send_morder_status_update_to_telegram(morder_id):
     msg += f'סטטוס: <b> {status} </b> \n'
     msg += f'סכום: <b> {morder.total_sell_price}₪ </b> \n'
     chat_id = TELEGRAM_CHAT_ID_STATUS_UPDATES
+    print({'chat_id': chat_id, 'text': msg, 'parse_mode': telegram.ParseMode.HTML})
     try:
         telegram_bot.send_message(
             chat_id=chat_id, text=msg, parse_mode=telegram.ParseMode.HTML)
