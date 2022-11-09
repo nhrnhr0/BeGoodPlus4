@@ -75,6 +75,8 @@ def get_sheet_from_drive_url(url, serv=None):
     # f'https://docs.google.com/spreadsheets/d/{doc_id}/gviz/tq?tqx=out:csv&sheet={sheet_name}'
     # get sheetname from url
     sheetname = get_sheetname_from_driveurl(url)
+    sheetname = sheetname[:31]
+    print(all_sheets.sheet_names)
     return all_sheets.parse(sheetname, header=0, dtype=str), sheetname
 
 
