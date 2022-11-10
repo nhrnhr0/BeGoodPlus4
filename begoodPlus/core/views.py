@@ -199,6 +199,10 @@ def get_smartbee_info_from_dfs(client_info, items_table, sheet_name, docType):
         'barcode': barcode,
         'price': price,
     })
+    # make sure all amount_taken is int
+    for product in res_products:
+        if type(product['amount_taken']) == str:
+            product['amount_taken'] = int(product['amount_taken'])
     res_products = list(filter(lambda x: x['amount_taken'] > 0, res_products))
     paymentItems = []
     for prod in res_products:

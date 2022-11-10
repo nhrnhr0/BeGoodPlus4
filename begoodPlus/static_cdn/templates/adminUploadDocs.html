@@ -49,15 +49,38 @@
           <textarea name="urls" id="urls" cols="50"  width="100%" rows="10" placeholder="הדבק כתובות דפי אקסל בדרייב"></textarea>
           <button type="submit">הפוך טפסי גוגל שיט לטופס ספקים</button>
         </form>
-      </div>
 
-      
+
+      <h2>CRM</h2>
+      <form method="post" action="/upload-mscrm-business-select-to-intrests-exel" enctype="multipart/form-data">
+        <form >
+        {% csrf_token %}
+        <div class="d-flex row">
+        <label for="sheetName">שם גיליון</label>
+        <input type="text" name="sheetName" value="upload">
+        <br>
+        <label for="file">קובץ</label>
+        <input type="file" name="file" />
+        </div>
+        <button type="submit" value="Upload" >
+          העלה טופס אקסל לרשימת תפוצה בוואצאפ
+      </form>
+      </div>
     </main> 
 
 </body>
 </html>
 
 <style>
+  .d-flex {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  } 
+  .row {
+    flex-direction: row;
+  }
   .url-input {
     min-width: 300px;
   }
