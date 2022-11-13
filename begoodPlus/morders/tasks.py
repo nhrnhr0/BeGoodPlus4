@@ -2,7 +2,7 @@
 
 from begoodPlus.celery import telegram_bot
 import telegram
-from begoodPlus.secrects import TELEGRAM_CHAT_ID_STATUS_UPDATES, SECRECT_SERVER_SIDE_DOMAIN
+from begoodPlus.secrects import TELEGRAM_CHAT_ID_STATUS_UPDATES, SECRECT_CLIENT_SIDE_DOMAIN
 from celery import shared_task
 
 
