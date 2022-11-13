@@ -1,6 +1,6 @@
 from google.oauth2.credentials import Credentials
 import google_auth_oauthlib
-from begoodPlus.begoodPlus.secrects import FULL_DOMAIN
+from begoodPlus.secrects import FULL_DOMAIN
 from begoodPlus.secrects import SECRECT_BASE_MY_DOMAIN
 
 from begoodPlus.secrects import GOOGLE_CLIENT_SECRET_PATH
