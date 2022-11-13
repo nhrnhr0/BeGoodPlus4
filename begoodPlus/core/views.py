@@ -1,9 +1,10 @@
 from google.oauth2.credentials import Credentials
 import google_auth_oauthlib
+from begoodPlus.begoodPlus.secrects import FULL_DOMAIN
 from begoodPlus.secrects import SECRECT_BASE_MY_DOMAIN
 
 from begoodPlus.secrects import GOOGLE_CLIENT_SECRET_PATH
-from .utils import build_drive_service, generate_provider_docx, get_drive_file, get_sheetname_from_driveurl
+from .utils import build_drive_service, get_drive_file, get_sheetname_from_driveurl
 import re
 from threading import Thread
 import googleapiclient
@@ -381,8 +382,7 @@ def process_exel_to_providers_docx(file):
 
 
 def request_dride_auth():
-    url = 'http://' + SECRECT_BASE_MY_DOMAIN + \
-        '/oauth2callback/'
+    url = FULL_DOMAIN + '/oauth2callback/'
     flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
         GOOGLE_CLIENT_SECRET_PATH, scopes=['https://www.googleapis.com/auth/drive'])
     flow.redirect_uri = url

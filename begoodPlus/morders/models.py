@@ -1,4 +1,4 @@
-from begoodPlus.secrects import SECRECT_SERVER_SIDE_DOMAIN
+from begoodPlus.secrects import SECRECT_CLIENT_SIDE_DOMAIN
 from django.conf import settings
 import reversion
 from decimal import Decimal
@@ -342,7 +342,7 @@ def recalculate_total_price_pre_save(sender, instance, **kwargs):
 @receiver(post_save, sender=MOrder, dispatch_uid="notify_order_status_update")
 def notify_order_status_update_post_save(instance, *args, **kwargs):
     if instance.total_sell_price > 0:
-        edit_url = SECRECT_SERVER_SIDE_DOMAIN + instance.get_edit_order_url()
+        edit_url = SECRECT_CLIENT_SIDE_DOMAIN + instance.get_edit_order_url()
         status = instance.get_status_display()
         name = instance.name or instance.client.businessName
         total_sell = instance.total_sell_price
