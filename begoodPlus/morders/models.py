@@ -1,3 +1,4 @@
+from begoodPlus.secrects import SECRECT_SERVER_SIDE_DOMAIN
 from django.conf import settings
 import reversion
 from decimal import Decimal
@@ -330,15 +331,26 @@ class MOrder(models.Model):
 #     pass
 
 
-@receiver(post_save, sender=MOrder, dispatch_uid="recalculate_total_price")
-def recalculate_total_price_post_save(sender, instance, **kwargs):
-    new_price = instance.prop_totalPrice
-    if instance.total_sell_price != new_price:
-        instance.total_sell_price = new_price
-        instance.save()
-        return
-    if settings.DEBUG:
-        send_morder_status_update_to_telegram(instance.id)
-    else:
-        send_morder_status_update_to_telegram.delay(instance.id)
-    #print('recalculate_total_price_post_save: ', instance.total_sell_price)
+@receiver(pre_save, sender=MOrder, dispatch_uid="recalculate_total_price")
+def recalculate_total_price_pre_save(sender, instance, **kwargs):
+    if instance.pk:
+        new_price = instance.prop_totalPrice
+        if instance.total_sell_price != new_price:
+            instance.total_sell_price = new_price
+
+
+@receiver(post_save, sender=MOrder, dispatch_uid="notify_order_status_update")
+def notify_order_status_update_post_save(instance, *args, **kwargs):
+    if instance.total_sell_price > 0:
+        edit_url = SECRECT_SERVER_SIDE_DOMAIN + instance.get_edit_order_url()
+        status = instance.get_status_display()
+        name = instance.name or instance.client.businessName
+        total_sell = instance.total_sell_price
+        if settings.DEBUG:
+            send_morder_status_update_to_telegram(
+                edit_url=edit_url, status=status, name=name, total_price=total_sell, morder_id=instance.id)
+        else:
+            send_morder_status_update_to_telegram.delay(
+                edit_url=edit_url, status=status, name=name, total_price=total_sell, morder_id=instance.id)
+
+    # print('recalculate_total_price_post_save: ', instance.total_sell_price)

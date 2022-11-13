@@ -6,6 +6,10 @@ from django.urls import path, include, re_path
 
 DEBUG = True
 COMPRESS_ENABLED = False
+
+# drive auth
+os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+
 INSTALLED_APPS.append('debug_toolbar')
 # INSTALLED_APPS.insert(0,'livereload')
 CORS_ALLOW_CREDENTIALS = True
