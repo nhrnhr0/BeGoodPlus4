@@ -1,7 +1,10 @@
+from django.shortcuts import redirect
 from docx.oxml.ns import qn
 import os
 import re
 from docx.shared import Inches, Cm
+import google_auth_oauthlib
+from begoodPlus.secrects import GOOGLE_CLIENT_SECRET_PATH
 from productSize.models import ProductSize
 from django.conf import settings
 from docx import Document
@@ -12,16 +15,21 @@ from docx.enum.table import WD_TABLE_ALIGNMENT
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.enum.style import WD_STYLE_TYPE
 from docx.shared import Inches
-from begoodPlus.settings.base import drive_service, drive_creds
 import googleapiclient
 from googleapiclient.http import MediaFileUpload, MediaIoBaseDownload
 import pandas as pd
 import io
 from docx.oxml import OxmlElement
 from django.urls import reverse
+from googleapiclient.discovery import build
 
 from catalogAlbum.models import CatalogAlbum, TopLevelCategory
 from catalogImages.models import CatalogImage
+
+
+def build_drive_service(cred):
+    service = build('drive', 'v3', credentials=cred)
+    return service
 
 
 def url_to_edit_object(obj):
@@ -60,27 +68,25 @@ def get_drive_file(service, file_id):
         return str(e)
 
 
-def get_sheet_from_drive_url(url, serv=None):
-    if serv is None:
-        from begoodPlus.settings.base import drive_service
-        serv = drive_service
+def get_sheet_from_drive_url(url, drive_service, drive_creds=None):
+
     fileId = url.split(
         'https://docs.google.com/spreadsheets/d/')[1].split('/edit')[0]
     sheetId = url.split('gid=')[1]
-    bytes_exel_file = get_drive_file(serv, fileId)
+    bytes_exel_file = get_drive_file(drive_service, fileId)
     # conver bytes to in memory file
     file = io.BytesIO(bytes_exel_file)
     # process the file
     all_sheets = pd.ExcelFile(file)
     # f'https://docs.google.com/spreadsheets/d/{doc_id}/gviz/tq?tqx=out:csv&sheet={sheet_name}'
     # get sheetname from url
-    sheetname = get_sheetname_from_driveurl(url)
+    sheetname = get_sheetname_from_driveurl(url, drive_creds)
     sheetname = sheetname[:31]
     print(all_sheets.sheet_names)
     return all_sheets.parse(sheetname, header=0, dtype=str), sheetname
 
 
-def get_sheetname_from_driveurl(url):
+def get_sheetname_from_driveurl(url, drive_creds=None):
     sheetId = url.split('gid=')[1]
     http_client = googleapiclient.discovery._auth.authorized_http(
         drive_creds)

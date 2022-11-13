@@ -510,7 +510,7 @@ class ProvidersDocxTask(models.Model):
         ret = dict(ProvidersDocxTaskStatusChoices)[self.status]
         return ret
 
-    def process_sheetsurl_to_providers_docx(self):
+    def process_sheetsurl_to_providers_docx(self,drive_service,drive_creds):
         # try:
         sheets = []
         urls = self.links
@@ -521,7 +521,7 @@ class ProvidersDocxTask(models.Model):
             log = 'fetching sheet from url: ' + url
             self.logs.append(log)
             self.save()
-            sheet, sheetname = get_sheet_from_drive_url(url)
+            sheet, sheetname = get_sheet_from_drive_url(url,drive_service,drive_creds)
             sheets.append(sheet)
             log = 'downloaded'
             self.logs.append(log)
