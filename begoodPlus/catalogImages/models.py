@@ -1,4 +1,5 @@
 
+from django.db.models.signals import m2m_changed
 from datetime import datetime
 from email.policy import default
 import decimal
@@ -125,6 +126,11 @@ class CatalogImage(models.Model):
     ]
     discount = models.CharField(
         max_length=50, choices=DISCOUNT_TYPES, default=NO_DISCOUNT, null=True, blank=True)
+
+    def is_main_public_album_set(self):
+        return self.main_public_album != None
+    is_main_public_album_set.boolean = True
+    is_main_public_album_set.short_description = 'יש אלבום ראשי'
 
     def get_user_price(self, user_id):
         from campains.models import CampainProduct
@@ -311,3 +317,7 @@ def recalculate_main_public_album_post_save(sender, instance, **kwargs):
         if instance.albums.all().count() == 0:
             instance.albums.add(instance.main_public_album)
             instance.save()
+
+
+# m2m_changed.connect(
+#     albums_changed, sender='catalogImages.CatalogImage.albums.through', dispatch_uid="albums_changed")

@@ -1,10 +1,15 @@
-from .utils import get_drive_file, get_sheetname_from_driveurl
+from google.oauth2.credentials import Credentials
+import google_auth_oauthlib
+from begoodPlus.secrects import FULL_DOMAIN
+from begoodPlus.secrects import SECRECT_BASE_MY_DOMAIN
+
+from begoodPlus.secrects import GOOGLE_CLIENT_SECRET_PATH
+from .utils import build_drive_service, get_drive_file, get_sheetname_from_driveurl
 import re
 from threading import Thread
 import googleapiclient
 from django.views.decorators.csrf import csrf_exempt
 import numpy as np
-from begoodPlus.settings.base import drive_service, drive_creds
 from googleapiclient.http import MediaFileUpload, MediaIoBaseDownload
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
@@ -74,10 +79,24 @@ from docx.enum.table import WD_TABLE_ALIGNMENT
 from docx.enum.table import WD_TABLE_DIRECTION
 
 from docx.shared import Pt
+from google.auth.transport.requests import Request
 
 
 def admin_upload_docs_page(request):
-    return render(request, 'adminUploadDocs.html', context={})
+    if request.user.is_authenticated and request.user.is_superuser:
+        creds = request.session.get('credentials')
+        if creds:
+            credsObj = Credentials(token=creds['token'], refresh_token=creds['refresh_token'], token_uri=creds['token_uri'],
+                                   client_id=creds['client_id'], client_secret=creds['client_secret'], scopes=creds['scopes'])
+            if credsObj.valid and credsObj.expired:
+                credsObj.refresh(Request())
+            if credsObj.valid and not credsObj.expired:
+                return render(request, 'adminUploadDocs.html', context={})
+        request.session['next'] = reverse('admin_upload_docs_page')
+        return request_dride_auth()
+
+    else:
+        return redirect('/admin/login/?next=' + reverse('admin_upload_docs_page'))
 
 
 '''
@@ -362,23 +381,41 @@ def process_exel_to_providers_docx(file):
     }
 
 
+def request_dride_auth():
+    url = FULL_DOMAIN + '/oauth2callback/'
+    flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
+        GOOGLE_CLIENT_SECRET_PATH, scopes=['https://www.googleapis.com/auth/drive'])
+    flow.redirect_uri = url
+    authorization_url, state = flow.authorization_url(
+        # Enable offline access so that you can refresh an access token without
+        # re-prompting the user for permission. Recommended for web server apps.
+        access_type='offline',
+        # Enable incremental authorization. Recommended as a best practice.
+        include_granted_scopes='true')
+
+    return redirect(authorization_url)
+
+
 def sheetsurl_to_providers_docx(request):
     if request.user.is_authenticated and request.user.is_superuser:
-        if(request.method == "POST"):
-            logs = []
-            # get sheets urls from urls in request.POST['urls']
-            urls = request.POST['urls'].splitlines()
-            urls = list(filter(lambda x: x != '', urls))
-            # create a ProvidersDocxTask with urls as links
-            task = ProvidersDocxTask.objects.create(
-                links=urls)
-            Thread(target=sheetsurl_to_providers_docx_task,
-                   args=(task.id,)).start()
+        credantials = request.session.get('credentials')
+        if not credantials:
+            return redirect('admin_upload_docs_page')
 
-            return redirect('providers_docx_task', task_id=task.id)
+        drive_creds = Credentials(token=credantials['token'], refresh_token=credantials['refresh_token'], token_uri=credantials['token_uri'],
+                                  client_id=credantials['client_id'], client_secret=credantials['client_secret'], scopes=credantials['scopes'],)
+        drive_service = build_drive_service(drive_creds)
+        logs = []
+        # get sheets urls from urls in request.POST['urls']
+        urls = request.POST['urls'].splitlines()
+        urls = list(filter(lambda x: x != '', urls))
+        # create a ProvidersDocxTask with urls as links
+        task = ProvidersDocxTask.objects.create(
+            links=urls)
+        Thread(target=sheetsurl_to_providers_docx_task,
+               args=(task.id, drive_service, drive_creds)).start()
 
-        else:
-            return JsonResponse({'error': 'not post'})
+        return redirect('providers_docx_task', task_id=task.id)
     else:
         return HttpResponseForbidden()
 
@@ -447,13 +484,46 @@ def providers_docx_task(request, task_id):
 
 
 @csrf_exempt
+def oauth2callback(request, next=None):
+    if request.user.is_authenticated and request.user.is_superuser:
+        flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
+            GOOGLE_CLIENT_SECRET_PATH, scopes=['https://www.googleapis.com/auth/drive'])
+        # flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
+        #     'client_secret.json',
+        #     scopes=['https://www.googleapis.com/auth/spreadsheets.readonly'])
+        flow.redirect_uri = request.build_absolute_uri(
+            reverse('oauth2callback'))
+        authorization_response = request.build_absolute_uri()
+        flow.fetch_token(authorization_response=authorization_response)
+        credentials = flow.credentials
+        print(credentials)
+        session = flow.authorized_session()
+        request.session['credentials'] = credentials_to_dict(credentials)
+        return redirect(request.session['next'])
+
+
+def credentials_to_dict(credentials):
+    return {'token': credentials.token,
+            'refresh_token': credentials.refresh_token,
+            'token_uri': credentials.token_uri,
+            'client_id': credentials.client_id,
+            'client_secret': credentials.client_secret,
+            'scopes': credentials.scopes}
+
+
+@csrf_exempt
 def sheetsurl_to_smartbee(request):
     if request.user.is_authenticated and request.user.is_superuser:
         if(request.method == "POST"):
+
             # read the url from the POST body:
             url = request.POST.get('sheet_url')
             print(url)
             docType = request.POST.get('docType')
+            credantials = request.session.get('credentials', None)
+            drive_creds = Credentials(token=credantials['token'], refresh_token=credantials['refresh_token'], token_uri=credantials['token_uri'],
+                                      client_id=credantials['client_id'], client_secret=credantials['client_secret'], scopes=credantials['scopes'],)
+            drive_service = build_drive_service(drive_creds)
             if url:
                 # https://docs.google.com/spreadsheets/d/1Qtkm3krWMmRSXKGWFwkw1giuypjjjfhGie-bjTieSJM/edit#gid=241255938
                 # fileId = 1Qtkm3krWMmRSXKGWFwkw1giuypjjjfhGie-bjTieSJM
@@ -468,7 +538,7 @@ def sheetsurl_to_smartbee(request):
                 all_sheets = pd.ExcelFile(file)
                 # f'https://docs.google.com/spreadsheets/d/{doc_id}/gviz/tq?tqx=out:csv&sheet={sheet_name}'
                 # get sheetname from url
-                sheetname = get_sheetname_from_driveurl(url)
+                sheetname = get_sheetname_from_driveurl(url, drive_creds)
                 order_id = None
                 df = all_sheets.parse(sheet_name=sheetname)
                 df2 = all_sheets.parse(
