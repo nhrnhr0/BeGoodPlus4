@@ -1,3 +1,4 @@
+import docx
 from django.shortcuts import redirect
 from docx.oxml.ns import qn
 import os
@@ -330,6 +331,10 @@ def generate_provider_docx(provider_data, provider_name):
     # #
     # t3 = df.reindex(labels=['מוצר', 'צבע', 'מודל', 'ONE SIZE'], axis=1)
     # add to t3 all what is in df that is not in t1 and t2
+    styles_element = document.styles.element
+    rpr_default = styles_element.xpath('./w:docDefaults/w:rPrDefault/w:rPr')[0]
+    lang_default = rpr_default.xpath('w:lang')[0]
+    lang_default.set(docx.oxml.shared.qn('w:val'), 'HE-IL')
 
     rtlstyle = document.styles.add_style('rtl', WD_STYLE_TYPE.PARAGRAPH)
     rtlstyle.font.rtl = True

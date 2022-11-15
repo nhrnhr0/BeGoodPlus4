@@ -11,7 +11,7 @@ def send_signature_doc_telegram_task(order_id):
     print('=================== send_signature_doc_telegram_task is running ==========================')
 
     order = MOrderSignature.objects.get(id=order_id)
-    msg = f'מסמך לתחימת {order.client_name} נחתם\n'
+    msg = f'מסמך לתחימת <b> {order.client_name} </b> נחתם\n'
     msg += f'לצפייה במסמך לחץ על הקישור הבא:\n'
     msg += f'<a href="{order.get_client_sign_url()}">לחץ כאן</a>'
 
