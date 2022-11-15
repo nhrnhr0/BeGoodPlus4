@@ -82,6 +82,14 @@ from docx.shared import Pt
 from google.auth.transport.requests import Request
 
 
+def clear_drive_creds(request):
+    if request.user.is_authenticated and request.user.is_superuser:
+        request.session['credentials'] = None
+        return HttpResponse('ok')
+    else:
+        return HttpResponseForbidden()
+
+
 def admin_upload_docs_page(request):
     if request.user.is_authenticated and request.user.is_superuser:
         creds = request.session.get('credentials')
