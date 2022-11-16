@@ -82,14 +82,23 @@ from docx.shared import Pt
 from google.auth.transport.requests import Request
 
 
+def clear_drive_creds(request):
+    if request.user.is_authenticated and request.user.is_superuser:
+        request.session['credentials'] = None
+        return HttpResponse('ok')
+    else:
+        return HttpResponseForbidden()
+
+
 def admin_upload_docs_page(request):
     if request.user.is_authenticated and request.user.is_superuser:
         creds = request.session.get('credentials')
         if creds:
             credsObj = Credentials(token=creds['token'], refresh_token=creds['refresh_token'], token_uri=creds['token_uri'],
                                    client_id=creds['client_id'], client_secret=creds['client_secret'], scopes=creds['scopes'])
-            if credsObj.valid and credsObj.expired:
+            if credsObj.expired:
                 credsObj.refresh(Request())
+                request.session['credentials'] = credentials_to_dict(credsObj)
             if credsObj.valid and not credsObj.expired:
                 return render(request, 'adminUploadDocs.html', context={})
         request.session['next'] = reverse('admin_upload_docs_page')
@@ -399,11 +408,12 @@ def request_dride_auth():
 def sheetsurl_to_providers_docx(request):
     if request.user.is_authenticated and request.user.is_superuser:
         credantials = request.session.get('credentials')
-        if not credantials:
+        if credantials:
+            drive_creds = Credentials(token=credantials['token'], refresh_token=credantials['refresh_token'], token_uri=credantials['token_uri'],
+                                      client_id=credantials['client_id'], client_secret=credantials['client_secret'], scopes=credantials['scopes'],)
+        if not credantials or drive_creds.expired:
             return redirect('admin_upload_docs_page')
 
-        drive_creds = Credentials(token=credantials['token'], refresh_token=credantials['refresh_token'], token_uri=credantials['token_uri'],
-                                  client_id=credantials['client_id'], client_secret=credantials['client_secret'], scopes=credantials['scopes'],)
         drive_service = build_drive_service(drive_creds)
         logs = []
         # get sheets urls from urls in request.POST['urls']

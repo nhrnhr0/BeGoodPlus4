@@ -65,6 +65,16 @@
         <button type="submit" value="Upload" >
           העלה טופס אקסל לרשימת תפוצה בוואצאפ
       </form>
+
+
+      
+      </div>
+      <div class="forms-wraper">
+        <form method="get" action="/clear-drive-creds/">
+        <button type="submit" class="btn btn-danger" value="התנקת">
+          התנתק מגוגל שיטס
+        </button>
+      </form>
       </div>
     </main> 
 
@@ -72,6 +82,10 @@
 </html>
 
 <style>
+  .forms-wraper form .btn.btn-danger {
+    background-color: #dc3545;
+    color:white;
+  }
   .d-flex {
     display: flex;
     flex-direction: column;
