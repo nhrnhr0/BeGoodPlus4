@@ -86,7 +86,7 @@ class BeseContactInformation(models.Model):
 
     class Meta:
         pass
-        #unique_together = ('name', 'phone','email','url','sumbited')
+        # unique_together = ('name', 'phone','email','url','sumbited')
 
     def __str__(self):
         url = self.url or 'None'
@@ -144,7 +144,7 @@ class SvelteCartProductEntery(models.Model):
     amount = models.IntegerField(verbose_name=_('amount'), default=1)
     details = models.JSONField(verbose_name=_(
         'details'), blank=True, null=True)
-    #cart = models.ForeignKey(to='SvelteCartModal', on_delete=models.CASCADE, null=True, blank=True)
+    # cart = models.ForeignKey(to='SvelteCartModal', on_delete=models.CASCADE, null=True, blank=True)
     unitPrice = models.DecimalField(verbose_name=_(
         'unit price'), max_digits=10, decimal_places=2, default=0)
     print = models.BooleanField(verbose_name=_('print'), default=False)
@@ -155,7 +155,7 @@ class SvelteCartProductEntery(models.Model):
 
     class Meta:
         pass
-        #unique_together = ('cart', 'product')
+        # unique_together = ('cart', 'product')
 
 
 class UserProductPhoto(models.Model):
@@ -275,7 +275,7 @@ class ActiveCartTracker(models.Model):
         df = pd.DataFrame(ret_data)
         piv = df.pivot(index=['מוצר', 'צבע', 'מודל'],
                        columns=['גודל'], values=['qty'])
-        #piv = piv.sort_index(axis='columns', level='size_code')
+        # piv = piv.sort_index(axis='columns', level='size_code')
         piv = piv.dropna(axis='columns', how='all')
         piv = piv.fillna('')
         html = piv.to_html(
@@ -348,7 +348,7 @@ class SvelteCartModal(models.Model):
             ret += f'<tr><td style="font-weight: bold;">{str(i.amount)} - {str(i.product)}</td>'
             if i.details != None:
                 details = i.details
-                #detail_table = '<td><table>'
+                # detail_table = '<td><table>'
                 # i.details = [{"size_id": 90, "color_id": "77", "quantity": 12}, {"size_id": 90, "color_id": "78", "quantity": 35}, {"size_id": 89, "color_id": "79", "quantity": 6}, {"size_id": 88, "color_id": "83", "quantity": 19}, {"size_id": 89, "color_id": "83", "quantity": 7}]
                 tableData = []
 
@@ -370,13 +370,13 @@ class SvelteCartModal(models.Model):
                                     tableData.append(
                                         {'size': size, 'color': color, 'varient': varient, 'qyt': qyt})
 
-                    #detail_table += f'<tr><td>{size.size}</td><td>{color.name}</td><td>{str(qyt)}</td></tr>'
-                #detail_table += '</table></td><hr>'
-                #ret += detail_table
+                    # detail_table += f'<tr><td>{size.size}</td><td>{color.name}</td><td>{str(qyt)}</td></tr>'
+                # detail_table += '</table></td><hr>'
+                # ret += detail_table
                 if (len(tableData) > 0):
                     df = pd.DataFrame(tableData)
                     # remove from df rows with qyt == '-' or qyt == 0 or qyt == Nan or qyt == None
-                    #df = df[df['qyt'].str.contains('-') == True or df['qyt'].str.contains('0') == True or df['qyt'].str.contains('NaN') == True or df['qyt'].str.contains('None') == True]
+                    # df = df[df['qyt'].str.contains('-') == True or df['qyt'].str.contains('0') == True or df['qyt'].str.contains('NaN') == True or df['qyt'].str.contains('None') == True]
                     try:
                         df = df.pivot(
                             index=['color', 'varient'], columns='size', values='qyt')
@@ -391,7 +391,7 @@ class SvelteCartModal(models.Model):
                 ret += f'<td>רקמה</td>'
             if i.unitPrice:
                 ret += f'<td>{i.unitPrice} ש"ח ליח</td>'
-            #ret += '<td id="cart-entry-'+str(i.id)+'">'  + '<input type="hidden" name="product_id" value="' + str(i.product.id) + '">' + '<input type="hidden" name="cart_id" value="' + str(self.id) + '">' + '<input type="hidden" name="entry_id" value="' + str(i.id) + '"><button type="button" onclick="remove_product_from_cart(' + str(self.id) + ',' +str(i.id)+')">' + 'מחק' + '</button>' + '</td>'
+            # ret += '<td id="cart-entry-'+str(i.id)+'">'  + '<input type="hidden" name="product_id" value="' + str(i.product.id) + '">' + '<input type="hidden" name="cart_id" value="' + str(self.id) + '">' + '<input type="hidden" name="entry_id" value="' + str(i.id) + '"><button type="button" onclick="remove_product_from_cart(' + str(self.id) + ',' +str(i.id)+')">' + 'מחק' + '</button>' + '</td>'
             ret += '</tr>'
         ret += '</table>'
         return mark_safe(ret)
@@ -444,7 +444,7 @@ class SvelteCartModal(models.Model):
                             quantity = details[color_id][size_id].get(
                                 'quantity', None)
 
-                            #products_list.append({'product': product,'price':price, 'quantity': quantity, 'color_id': color_id, 'size_id': size_id, 'varient_id': None})
+                            # products_list.append({'product': product,'price':price, 'quantity': quantity, 'color_id': color_id, 'size_id': size_id, 'varient_id': None})
                             if quantity != None and quantity != 0:
                                 entries_list.append(
                                     {'size_id': size_id, 'color_id': color_id, 'varient_id': None, 'quantity': quantity})
@@ -453,7 +453,7 @@ class SvelteCartModal(models.Model):
                             for varient_id in details[color_id][size_id].keys():
                                 quantity = details[color_id][size_id][varient_id].get(
                                     'quantity', None)
-                                #products_list.append({'product': product,'price':price, 'quantity': quantity, 'color_id': color_id, 'size_id': size_id, 'varient_id': varient_id})
+                                # products_list.append({'product': product,'price':price, 'quantity': quantity, 'color_id': color_id, 'size_id': size_id, 'varient_id': varient_id})
                                 if quantity != None and quantity != 0:
                                     entries_list.append(
                                         {'size_id': size_id, 'color_id': color_id, 'varient_id': varient_id, 'quantity': quantity})
@@ -465,7 +465,7 @@ class SvelteCartModal(models.Model):
                 currentProduct['entries'] = [
                     {'size_id': ONE_SIZE_ID, 'color_id': NO_COLOR_ID, 'varient_id': None, 'quantity': i.amount}]
             products_list.append(currentProduct)
-        #order_product = [MOrderItem(product=i['product'], price=i['price']) for i in products_list]
+        # order_product = [MOrderItem(product=i['product'], price=i['price']) for i in products_list]
         # MOrderItem.objects.bulk_create(order_product)
         dbProducts = []
         for product in products_list:
@@ -510,7 +510,7 @@ class ProvidersDocxTask(models.Model):
         ret = dict(ProvidersDocxTaskStatusChoices)[self.status]
         return ret
 
-    def process_sheetsurl_to_providers_docx(self,drive_service,drive_creds):
+    def process_sheetsurl_to_providers_docx(self, drive_service, drive_creds):
         # try:
         sheets = []
         urls = self.links
@@ -521,7 +521,8 @@ class ProvidersDocxTask(models.Model):
             log = 'fetching sheet from url: ' + url
             self.logs.append(log)
             self.save()
-            sheet, sheetname = get_sheet_from_drive_url(url,drive_service,drive_creds)
+            sheet, sheetname = get_sheet_from_drive_url(
+                url, drive_service, drive_creds)
             sheets.append(sheet)
             log = 'downloaded'
             self.logs.append(log)
@@ -530,14 +531,14 @@ class ProvidersDocxTask(models.Model):
         self.logs.append('parsing sheets')
         info = process_sheets_to_providers_docx(sheets, self)
         self.save()
-        print(info)
+        # print(info)
         # get all sheet names
         # get each sheet get row[1] col[0] as the sheetname
-        morders_ids = []
-        for sheet in sheets:
-            print(sheet.columns)
-            print(sheet.iloc[0, 0])
-            morders_ids.append(str(int(float(sheet.iloc[0, 0]))))
+        # morders_ids = []
+        # for sheet in sheets:
+        #     print(sheet.columns)
+        #     print(sheet.iloc[0, 0])
+        #     morders_ids.append(str(int(float(sheet.iloc[0, 0]))))
         docs_data = []
         for provider_name in info.keys():
             doc, seccsess = generate_provider_docx(
@@ -553,6 +554,7 @@ class ProvidersDocxTask(models.Model):
                 docs_data.append({
                     'doc': doc,
                     'provider_name': provider_name,
+                    'morders_ids': info[provider_name].get('morders', '')
                 })
 
         zip_buffer = io.BytesIO()
@@ -561,8 +563,9 @@ class ProvidersDocxTask(models.Model):
                 file_stream = io.BytesIO()
                 doc = doc_info['doc']
                 doc.save(file_stream)
+
                 file_name = str(
-                    '(' + doc_info['provider_name'] + ') ' + '|'.join(morders_ids)) + '.docx'
+                    '(' + doc_info['provider_name'] + ') ' + '|'.join(doc_info['morders_ids']) + '.docx')
                 file_stream.seek(0)
                 zip_file.writestr(
                     file_name, file_stream.getvalue())
