@@ -149,7 +149,7 @@ def api_adit_doc_signature(request, uuid):
             item_obj.price = item['price']
             item_obj.show_details = item['show_details']
             item_obj.order = item.get('order', 1)
-            if item.get('cimage').startswith('data:image'):
+            if item.get('cimage') and item.get('cimage').startswith('data:image'):
                 # image data;str
                 image_data = item['cimage']
                 # save the image to cloudinary and get the url
