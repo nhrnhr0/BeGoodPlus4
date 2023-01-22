@@ -23,6 +23,7 @@ export const ADMIN_GET_PRODUCT_SIZES_COLORS_MARTIX = BASE_URL + '/admin-api/get-
 export const GET_ALL_SIZES_API = BASE_URL + '/client-api/get-all-sizes/';
 export const GET_ALL_COLORS_API = BASE_URL + '/client-api/get-all-colors/';
 export const GET_ALL_VARIENTS_API = BASE_URL + '/client-api/get-all-variants/';
+export const GET_ALL_MORDER_STATUSES_API = BASE_URL + '/client-api/get-all-morder-statuses/';
 export const INV_API_GET_ENTER_DOC_DATA_URL = BASE_URL + '/inv/enter-doc/';
 export const GET_DOC_STOCK_ENTER_PPN_ENTRIES = BASE_URL + '/inv/enter-doc/get-doc-stock-enter-ppn-entries';
 export const DELETE_DOC_STOCK_EnterEntery = BASE_URL + '/inv/enter-doc/delete-doc-stock-enter-ppn-entry';
