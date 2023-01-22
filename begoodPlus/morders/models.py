@@ -350,8 +350,9 @@ def notify_order_status_update_post_save(instance, *args, **kwargs):
         name = instance.name or instance.client.businessName
         total_sell = instance.total_sell_price
         if settings.DEBUG:
-            send_morder_status_update_to_telegram(
-                edit_url=edit_url, status=status, name=name, total_price=total_sell, morder_id=instance.id)
+            pass
+            # send_morder_status_update_to_telegram(
+            #     edit_url=edit_url, status=status, name=name, total_price=total_sell, morder_id=instance.id)
         else:
             send_morder_status_update_to_telegram.delay(
                 edit_url=edit_url, status=status, name=name, total_price=total_sell, morder_id=instance.id)

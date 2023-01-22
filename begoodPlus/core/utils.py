@@ -1,3 +1,5 @@
+from base64 import urlsafe_b64decode, urlsafe_b64encode
+from uuid import UUID
 import docx
 from django.shortcuts import redirect
 from docx.oxml.ns import qn
@@ -596,3 +598,20 @@ def process_sheets_to_providers_docx(sheets, obj):
     obj.logs.append('finished merging data')
     # obj.logs.append(data)
     return data
+
+
+def uuid2slug(uuidstring):
+    if uuidstring:
+        if isinstance(uuidstring, str):
+            try:
+                return urlsafe_b64encode(bytearray.fromhex(uuidstring)).rstrip(b'=').decode('ascii')
+            except:
+                return urlsafe_b64encode(str.encode(uuidstring)).rstrip(b'=').decode('ascii')
+        else:
+            return urlsafe_b64encode(uuidstring.bytes).rstrip(b'=').decode('ascii')
+    else:
+        return '<error>'
+
+
+def slug2uuid(slug):
+    return str(UUID(bytes=urlsafe_b64decode(slug + '==')))
