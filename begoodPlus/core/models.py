@@ -517,12 +517,13 @@ class ProvidersDocxTask(models.Model):
         self.status = 'in_progress'
         self.logs = []
         self.save()
+        loaded_files = {}
         for url in urls:
             log = 'fetching sheet from url: ' + url
             self.logs.append(log)
             self.save()
-            sheet, sheetname = get_sheet_from_drive_url(
-                url, drive_service, drive_creds)
+            sheet, sheetname, loaded_files = get_sheet_from_drive_url(
+                url, drive_service, drive_creds, loaded_files)
             sheets.append(sheet)
             log = 'downloaded'
             self.logs.append(log)

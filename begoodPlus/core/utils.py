@@ -69,22 +69,26 @@ def get_drive_file(service, file_id):
         return str(e)
 
 
-def get_sheet_from_drive_url(url, drive_service, drive_creds=None):
+def get_sheet_from_drive_url(url, drive_service, drive_creds=None, loaded_files={}):
 
     fileId = url.split(
         'https://docs.google.com/spreadsheets/d/')[1].split('/edit')[0]
     sheetId = url.split('gid=')[1]
-    bytes_exel_file = get_drive_file(drive_service, fileId)
-    # conver bytes to in memory file
-    file = io.BytesIO(bytes_exel_file)
-    # process the file
-    all_sheets = pd.ExcelFile(file)
+    if loaded_files.get(fileId):
+        all_sheets = loaded_files.get(fileId)
+    else:
+        bytes_exel_file = get_drive_file(drive_service, fileId)
+        # conver bytes to in memory file
+        file = io.BytesIO(bytes_exel_file)
+        # process the file
+        all_sheets = pd.ExcelFile(file)
+        loaded_files[fileId] = all_sheets
     # f'https://docs.google.com/spreadsheets/d/{doc_id}/gviz/tq?tqx=out:csv&sheet={sheet_name}'
     # get sheetname from url
     sheetname = get_sheetname_from_driveurl(url, drive_creds)
     sheetname = sheetname[:31]
     print(all_sheets.sheet_names)
-    return all_sheets.parse(sheetname, header=0, dtype=str), sheetname
+    return all_sheets.parse(sheetname, header=0, dtype=str), sheetname, loaded_files
 
 
 def get_sheetname_from_driveurl(url, drive_creds=None):
