@@ -87,7 +87,7 @@ def get_sheet_from_drive_url(url, drive_service, drive_creds=None, loaded_files=
     # get sheetname from url
     sheetname = get_sheetname_from_driveurl(url, drive_creds)
     sheetname = sheetname[:31]
-    print(all_sheets.sheet_names)
+    # print(all_sheets.sheet_names)
     return all_sheets.parse(sheetname, header=0, dtype=str), sheetname, loaded_files
 
 
