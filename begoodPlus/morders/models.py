@@ -1,5 +1,9 @@
+from openpyxl.styles import Alignment
+import copy
+from oauth2client.service_account import ServiceAccountCredentials
+import gspread
 from ordered_model.models import OrderedModelBase
-from begoodPlus.secrects import SECRECT_CLIENT_SIDE_DOMAIN
+from begoodPlus.secrects import GOOGLE_SERVICE_ACCOUNT_FILE, SECRECT_CLIENT_SIDE_DOMAIN, ALL_MORDER_FILE_SPREEDSHEET_URL
 from django.conf import settings
 import reversion
 from decimal import Decimal
@@ -12,6 +16,7 @@ from multiprocessing.connection import Client
 import pandas as pd
 from django.db import models
 from django.contrib.auth.models import User
+from core.utils import number_to_spreedsheet_letter
 from morders.tasks import send_morder_status_update_to_telegram
 from catalogImages.models import CatalogImage
 from client.models import Client
@@ -122,6 +127,11 @@ class MOrderItem(models.Model):
 STATUS_CHOICES = [('new', 'חדש'), ('price_proposal', 'הצעת מחיר'), ('in_progress', 'סחורה הוזמנה'), ('in_progress2', 'מוכן לליקוט',), (
     'in_progress3', 'בהדפסה',), ('in_progress4', 'מוכן בבית דפוס'), ('in_progress5', 'ארוז מוכן למשלוח'), ('done', 'סופק'), ]
 
+LOCKED_CELL_COLOR = {
+    'backgroundColor': {'red': 0.9, 'green': 0.9, 'blue': 0.9},
+    'textFormat': {'fontSize': 12},
+}
+
 
 @reversion.register()
 class MOrder(models.Model):
@@ -158,9 +168,128 @@ class MOrder(models.Model):
         _('total sell price'), default=0)
     last_status_updated = models.CharField(
         _('last status updated'), max_length=100, blank=True, null=True)
+    gid = models.CharField(max_length=100, blank=True, null=True)
+    last_sheet_update = models.DateTimeField(
+        _('last sheet update'), null=True, blank=True)
 
     class Meta:
         ordering = ['-created']
+
+    def sync_with_spreedsheet(self):
+
+        scope = [
+            'https://www.googleapis.com/auth/spreadsheets',
+            'https://www.googleapis.com/auth/drive'
+        ]
+        creds = ServiceAccountCredentials.from_json_keyfile_name(
+            GOOGLE_SERVICE_ACCOUNT_FILE, scope)
+        gspred_client = gspread.authorize(creds)
+
+        # if self.spreed_sheet_url:
+        workbook = gspred_client.open_by_url(ALL_MORDER_FILE_SPREEDSHEET_URL)
+        if not self.gid:
+            # get data as exel to upload
+            self.morder_to_spreedsheet(workbook)
+        print(workbook)
+        pass
+        pass
+
+    def init_spreedsheet(self, ws: gspread.Worksheet, data):
+        # ws.update_cell(1, 1, 'מספר הזמנה')
+        # ws.update_cell(1, 2, 'תאריך הזמנה')
+        # ws.update_cell(1, 3, 'שם הלקוח')
+        # ws.update_cell(1, 4, 'הודעה')
+        # ws.update_cell(2, 1, data['id'])
+        # ws.update_cell(2, 2, data['date'])
+        # ws.update_cell(2, 3, data['name'])
+        # ws.update_cell(2, 4, data['message'])
+        # and another row (headers of the data: )
+        #  ['ברקוד	פריט	כמות כוללת	הערות	כמות נלקחת	מחיר מכירה	מע"מ	הדפסה?		רקמה?		ספקים'
+        # same as above but with one call
+        data_array = [
+            ['מספר הזמנה', 'תאריך הזמנה', 'שם הלקוח', 'הודעה'],
+            [data['id'], data['date'], data['name'], data['message']],
+            ['ברקוד', 'פריט', 'כמות כוללת', 'הערות', 'כמות נלקחת',
+                'מחיר מכירה', 'מע"מ', 'הדפסה?', '', 'רקמה?', '', 'ספקים'],
+        ]
+        # range from A1 to data_array dimensions
+        # get the longest row in data_array
+        longest_row_length = 0
+        for i, row in enumerate(data_array):
+            if len(row) > longest_row_length:
+                longest_row_length = len(row)
+        range = 'A1:' + \
+            number_to_spreedsheet_letter(
+                longest_row_length) + str(len(data_array))
+        ws.update(range, data_array, value_input_option='USER_ENTERED')
+        ws.format(range, LOCKED_CELL_COLOR)
+
+        pass
+
+    def morder_to_spreedsheet(self, wb: gspread.Spreadsheet):
+        order_data = self.get_exel_data()
+        name = order_data['name']
+        order_products = order_data['products']
+        all_products = {}
+        for order_product in order_products:
+            product_name = order_product['title']
+            if product_name not in all_products:
+                all_products[product_name] = {
+                    'entries': copy.deepcopy(order_product['entries']),
+                    'comment': (name + ': ' + order_product['comment'] + '\n') if order_product['comment'] else '',
+                    'barcode': order_product['barcode'],
+                    'total_quantity': 0,
+                    'details': [],
+                }
+            else:
+                # all_products[product_name] += product['entries']
+                entries = all_products[product_name]['entries']
+                for entry in order_product['entries'].keys():
+                    if entry in entries:
+                        entries[entry] += order_product['entries'][entry]
+                    else:
+                        entries[entry] = order_product['entries'][entry]
+                all_products[product_name]['entries'] = entries
+
+                all_products[product_name]['comment'] += (
+                    name + ': ' + order_product['comment'] + '\n') if order_product['comment'] else ''
+            all_products[product_name]['total_quantity'] += order_product['total_quantity']
+            all_products[product_name]['details'].append(
+                name + ' - ' + str(order_product['total_quantity']))
+            pass  # end loop on order products
+
+        headers = ['ברקוד', 'פריט', 'כמות כוללת', 'הערות',
+                   'כמות נלקחת', 'מחיר מכירה', 'מע"מ', 'הדפסה?', '', 'רקמה?', '', ]
+        try:
+            order_ws = wb.add_worksheet(
+                order_data['name'] + ' ' + str(order_data['id']), 0, 0)
+        except:
+            order_ws = wb.worksheet(
+                order_data['name'] + ' ' + str(order_data['id']))
+        sheetId = wb.id
+        batch_request = {
+            "requests": [
+                {
+                    "updateSheetProperties": {
+                        "properties": {
+                            "sheetId": sheetId,
+                            # "gridProperties": {
+                            #     "rowCount": 1,
+                            #     "columnCount": 1,
+                            # },
+                            "rightToLeft": True,
+                        },
+                        # "fields": "gridProperties(rowCount, columnCount),rightToLeft"
+                        "fields": "rightToLeft"
+                    },
+                }
+            ],
+        }
+        result1 = wb.batch_update(batch_request)
+        self.init_spreedsheet(order_ws, order_data)
+
+        raise Exception('my error')
+        pass
 
     def subtract_collected_inventory(self, user):
         collected_items = CollectedInventory.objects.filter(

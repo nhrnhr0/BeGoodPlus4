@@ -1,3 +1,4 @@
+from django.http import HttpRequest
 from .models import MorderStatus
 from ordered_model.admin import OrderedModelAdmin
 from django.utils.html import mark_safe
@@ -99,12 +100,24 @@ class MOrderAdmin(VersionAdmin):  # admin.ModelAdmin
     search_fields = ('id', 'name', 'phone', 'email', 'status', 'message', 'products__product__title',
                      'client__businessName', 'client__email', 'client__extraName', 'client__contactMan', 'client__user__username')
     list_select_related = ('client', 'client__user',)
-    actions = ('export_to_excel', 'export_to_signiture_doc')
+    actions = ('export_to_excel', 'export_to_signiture_doc',
+               'sync_with_spreedsheet')
+    # select_related = ('client', 'status2')
+
+    def get_queryset(self, request: HttpRequest):
+        return super().get_queryset(request).select_related('client', 'status2', 'client__user')
+
     formfield_overrides = {
         models.TextField: {'widget': Textarea(
             attrs={'rows': 2,
                    'cols': 20, })},  # 'style': 'height: 1em;'
     }
+
+    def sync_with_spreedsheet(self, request, queryset):
+        for morder in queryset:
+            morder.sync_with_spreedsheet()
+            messages.add_message(
+                request, messages.INFO, f'הזמנה {morder.id} סונכרנה')
 
     def export_to_signiture_doc(self, request, queryset):
         for morder in queryset:

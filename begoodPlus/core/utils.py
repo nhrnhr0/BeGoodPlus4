@@ -615,3 +615,12 @@ def uuid2slug(uuidstring):
 
 def slug2uuid(slug):
     return str(UUID(bytes=urlsafe_b64decode(slug + '==')))
+
+
+def number_to_spreedsheet_letter(number):
+    number = number - 1
+    letter = ''
+    while number >= 0:
+        letter = chr((number % 26) + ord('A')) + letter
+        number = number // 26 - 1
+    return letter
