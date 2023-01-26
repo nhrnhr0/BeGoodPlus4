@@ -1,3 +1,5 @@
+from .models import MorderStatus
+from ordered_model.admin import OrderedModelAdmin
 from django.utils.html import mark_safe
 from django.contrib import messages
 from reversion.admin import VersionAdmin
@@ -86,10 +88,10 @@ admin.site.register(ProviderRequest, ProviderRequestAdmin)
 class MOrderAdmin(VersionAdmin):  # admin.ModelAdmin
     model = MOrder
     fields = ('cart', 'total_sell_price', 'client', 'name', 'phone', 'email',
-              'status', 'message',)  # what is this for?
+              'status', 'status2', 'message',)  # what is this for?
     readonly_fields = ('created', 'total_sell_price', 'updated', 'get_edit_url',
-                       'view_morder_pdf_link', 'cart', 'client', 'status',)
-    list_display = ('id', 'client', 'name', 'status', 'status_msg', 'total_sell_price',
+                       'view_morder_pdf_link', 'cart', 'client', 'status', 'status2', )
+    list_display = ('id', 'client', 'name', 'status', 'status2', 'status_msg', 'total_sell_price',
                     'get_edit_url', 'view_morder_pdf_link', 'created', 'updated',)
     # list_editable = ('status_msg',)
     # filter_horizontal = ('products',)
@@ -568,3 +570,11 @@ class MOrderAdmin(VersionAdmin):  # admin.ModelAdmin
 
 
 admin.site.register(MOrder, MOrderAdmin)
+
+
+class MorderStatusAdmin(OrderedModelAdmin):
+    list_display = ('name', 'move_up_down_links')
+    # list_filter = ('name',)
+
+
+admin.site.register(MorderStatus, MorderStatusAdmin)

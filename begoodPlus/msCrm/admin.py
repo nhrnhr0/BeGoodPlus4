@@ -177,15 +177,17 @@ class MsCrmUserAdmin(AdminAdvancedFiltersMixin, admin.ModelAdmin):
         # data example:
         # +11234567890	John	Doe
         # data:
+        # name, phone ...
         data = []
-        data.append(['WhatsApp Number(with country code)',
-                    'First Name', 'Last Name', 'Other'])
+        # data.append(['WhatsApp Number(with country code)',
+        #             'First Name', 'Last Name', 'Other'])
+        data.append(['name', 'phone', 'Last Name', 'Other'])
         queryset = queryset.filter(want_whatsapp=True)
-        data.append(['+972524314139', 'אופיר', 'דאלי', ''])
+        data.append(['אופיר', '+972524314139', 'דאלי', ''])
         for obj in queryset:
             phone = obj.get_clean_phonenumber()
-            data.append([phone, obj.name.split(' ')[0],
-                        obj.name.split(' ')[-1], obj.name, ''])
+            data.append([obj.name.split(' ')[0],
+                         phone, obj.name.split(' ')[-1], obj.name, ''])
             # elif obj.phone.startswith('\u2066'):
             #    data.append(['+'+obj.phone[1:], obj.name.split(' ')[0], obj.name.split(' ')[-1], obj.name, ''])
             # else:

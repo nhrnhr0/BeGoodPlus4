@@ -1,3 +1,4 @@
+from ordered_model.models import OrderedModelBase
 from begoodPlus.secrects import SECRECT_CLIENT_SIDE_DOMAIN
 from django.conf import settings
 import reversion
@@ -135,6 +136,8 @@ class MOrder(models.Model):
     email = models.CharField(max_length=100, blank=True, null=True, default='')
     status = models.CharField(
         max_length=100, choices=STATUS_CHOICES, default='new')
+    status2 = models.ForeignKey(
+        to='MorderStatus', on_delete=models.SET_NULL, null=True, blank=True)
     status_msg = models.TextField(_('status message'), blank=True, null=True)
     # order_type = models.CharField(max_length=100, choices=[('Invoice', 'חשבונית מס'), ('RefundInvoice', 'חשבונית זיכוי'), (
     #     'PriceProposal', 'הצעת מחיר'), ('ShippingCertificate', 'תעודת משלוח'), ('ReturnCertificate', 'תעודת החזרה')], blank=True, null=True)
@@ -347,10 +350,24 @@ def notify_order_status_update_post_save(instance, *args, **kwargs):
         name = instance.name or instance.client.businessName
         total_sell = instance.total_sell_price
         if settings.DEBUG:
-            send_morder_status_update_to_telegram(
-                edit_url=edit_url, status=status, name=name, total_price=total_sell, morder_id=instance.id)
+            pass
+            # send_morder_status_update_to_telegram(
+            #     edit_url=edit_url, status=status, name=name, total_price=total_sell, morder_id=instance.id)
         else:
             send_morder_status_update_to_telegram.delay(
                 edit_url=edit_url, status=status, name=name, total_price=total_sell, morder_id=instance.id)
 
     # print('recalculate_total_price_post_save: ', instance.total_sell_price)
+
+
+class MorderStatus(OrderedModelBase):
+    name = models.CharField(max_length=100, unique=True,
+                            verbose_name=_('name'))
+    sort_order = models.PositiveIntegerField(editable=False, db_index=True)
+    order_field_name = "sort_order"
+
+    class Meta:
+        ordering = ("sort_order",)
+
+    def __str__(self):
+        return self.name

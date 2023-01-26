@@ -1,3 +1,5 @@
+from base64 import urlsafe_b64decode, urlsafe_b64encode
+from uuid import UUID
 import docx
 from django.shortcuts import redirect
 from docx.oxml.ns import qn
@@ -69,22 +71,26 @@ def get_drive_file(service, file_id):
         return str(e)
 
 
-def get_sheet_from_drive_url(url, drive_service, drive_creds=None):
+def get_sheet_from_drive_url(url, drive_service, drive_creds=None, loaded_files={}):
 
     fileId = url.split(
         'https://docs.google.com/spreadsheets/d/')[1].split('/edit')[0]
     sheetId = url.split('gid=')[1]
-    bytes_exel_file = get_drive_file(drive_service, fileId)
-    # conver bytes to in memory file
-    file = io.BytesIO(bytes_exel_file)
-    # process the file
-    all_sheets = pd.ExcelFile(file)
+    if loaded_files.get(fileId):
+        all_sheets = loaded_files.get(fileId)
+    else:
+        bytes_exel_file = get_drive_file(drive_service, fileId)
+        # conver bytes to in memory file
+        file = io.BytesIO(bytes_exel_file)
+        # process the file
+        all_sheets = pd.ExcelFile(file)
+        loaded_files[fileId] = all_sheets
     # f'https://docs.google.com/spreadsheets/d/{doc_id}/gviz/tq?tqx=out:csv&sheet={sheet_name}'
     # get sheetname from url
     sheetname = get_sheetname_from_driveurl(url, drive_creds)
     sheetname = sheetname[:31]
-    print(all_sheets.sheet_names)
-    return all_sheets.parse(sheetname, header=0, dtype=str), sheetname
+    # print(all_sheets.sheet_names)
+    return all_sheets.parse(sheetname, header=0, dtype=str), sheetname, loaded_files
 
 
 def get_sheetname_from_driveurl(url, drive_creds=None):
@@ -424,9 +430,10 @@ def generate_provider_docx(provider_data, provider_name):
     return document, True
 
 
-def merge_data_to_providers_dict(original_data, provider_name, product_name, color, size, varient, qyt):
+def merge_data_to_providers_dict(original_data, provider_name, product_name, color, size, varient, qyt, morder_id):
     # data: {
     # '$provider_name': {
+    # 'morders': [$morder_id1, $morder_id2, ...],
     # 'products': {
     # '$product_name': {
     # items = [
@@ -443,7 +450,10 @@ def merge_data_to_providers_dict(original_data, provider_name, product_name, col
     if provider_name not in original_data:
         original_data[provider_name] = {
             'products': {},
+            'morders': [],
         }
+    if morder_id not in original_data[provider_name]['morders']:
+        original_data[provider_name]['morders'].append(morder_id)
     if product_name not in original_data[provider_name]['products']:
         original_data[provider_name]['products'][product_name] = {
             'items': [],
@@ -466,25 +476,29 @@ def merge_data_to_providers_dict(original_data, provider_name, product_name, col
 
 def process_sheets_to_providers_docx(sheets, obj):
     # beutifly print each sheet to console
+
     all_sheets_data = []
     sheet_index = 1
     for sheet in sheets:
-        obj.logs.append('processing sheet: ' + str(sheet_index))
+        morders_id = str(int(float(sheet.iloc[0, 0])))
+        obj.logs.append('processing sheet: ' +
+                        str(sheet_index) + ' morder: ' + morders_id)
+
         sheet_index += 1
         rows_data = []
         current_row_data = None
         for idx, row in sheet.iterrows():
 
-            print(idx, ') ')
-            for i in range(len(sheet.columns)):
-                print(row[i], end=' ')
+            # print(idx, ') ')
+            # for i in range(len(sheet.columns)):
+            #     print(row[i], end=' ')
             if idx == 0 or idx == 1:
-                print('skip')
+                # print('skip')
                 continue
             # col[7] is the 'print?' column
             # if it has any value, it means we are on a header row
             if not pd.isna(row[7]):
-                print('header row')
+                # print('header row')
                 if current_row_data:
                     rows_data.append(current_row_data)
                 product_name = row[1]
@@ -507,6 +521,7 @@ def process_sheets_to_providers_docx(sheets, obj):
                     'header_anount': header_amount,
                     'header_provider_name': header_provider_name,
                     'has_child': False,
+                    'morder_id': morders_id,
                 }
                 continue
             else:
@@ -561,12 +576,14 @@ def process_sheets_to_providers_docx(sheets, obj):
             varient = ''
             qyt = row['header_anount']
             product_name = row['product_name']
+            morder_id = row['morder_id']
             if qyt <= 0:
                 continue
             data = merge_data_to_providers_dict(
-                data, provider_name, product_name, color, size, varient, qyt)
+                data, provider_name, product_name, color, size, varient, qyt, morder_id)
         else:
             product_name = row['product_name']
+            morder_id = row['morder_id']
             for child in row['childs']:
                 provider_name = child['product_provider_name'] if not pd.isna(
                     child['product_provider_name']) else ''
@@ -577,7 +594,24 @@ def process_sheets_to_providers_docx(sheets, obj):
                 if qyt <= 0:
                     continue
                 data = merge_data_to_providers_dict(
-                    data, provider_name, product_name, color, size, varient, qyt)
+                    data, provider_name, product_name, color, size, varient, qyt, morder_id)
     obj.logs.append('finished merging data')
     # obj.logs.append(data)
     return data
+
+
+def uuid2slug(uuidstring):
+    if uuidstring:
+        if isinstance(uuidstring, str):
+            try:
+                return urlsafe_b64encode(bytearray.fromhex(uuidstring)).rstrip(b'=').decode('ascii')
+            except:
+                return urlsafe_b64encode(str.encode(uuidstring)).rstrip(b'=').decode('ascii')
+        else:
+            return urlsafe_b64encode(uuidstring.bytes).rstrip(b'=').decode('ascii')
+    else:
+        return '<error>'
+
+
+def slug2uuid(slug):
+    return str(UUID(bytes=urlsafe_b64decode(slug + '==')))

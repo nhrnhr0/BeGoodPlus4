@@ -42,6 +42,14 @@ def create_signature_doc_from_morder(morder):
             image_url = CLOUDINARY_BASE_URL + product.product.cimage
             item.cimage = image_url
         item.price = product.price
+
+        if product.entries.all().count() == 0:
+            item.show_details = False
+        elif product.entries.all().count() == 1:
+            entry = product.entries.all()[0]
+            if entry.color.id == 76:
+                if entry.size.id == 108 or entry.size.id == 86:
+                    item.show_details = False
         item.save()
         for entry in product.entries.all():
 
