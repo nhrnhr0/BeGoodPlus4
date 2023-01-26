@@ -1,3 +1,5 @@
+from gspread.cell import Cell
+from gspread_formatting import *
 from openpyxl.styles import Alignment
 import copy
 from oauth2client.service_account import ServiceAccountCredentials
@@ -72,6 +74,8 @@ class MOrderItemEntry(models.Model):
         to=ProductSize, on_delete=models.SET_DEFAULT, default=108, null=True, blank=True)
     varient = models.ForeignKey(
         to=CatalogImageVarient, on_delete=models.CASCADE, null=True, blank=True)
+    sheets_taken_quantity = models.IntegerField(default=0)
+    sheets_provider = models.CharField(max_length=255, null=True, blank=True)
 
     def __str__(self):
         return str(self.quantity) + ' ' + str(self.color) + ' ' + str(self.size) + ' ' + str(self.varient)
@@ -189,12 +193,18 @@ class MOrder(models.Model):
         workbook = gspred_client.open_by_url(ALL_MORDER_FILE_SPREEDSHEET_URL)
         if not self.gid:
             # get data as exel to upload
-            self.morder_to_spreedsheet(workbook)
+            self.write_morder_to_spreedsheet(workbook)
         print(workbook)
         pass
         pass
 
     def init_spreedsheet(self, ws: gspread.Worksheet, data):
+        # validation_rule = DataValidationRule(
+        #     BooleanCondition('ONE_OF_LIST', ['1', '2', '3', '4']),
+        #     showCustomUi=True
+        # )
+        # cells_range = 'A1:A1000'
+        # set_data_validation_for_cell_range(ws, cells_range, validation_rule)
         # ws.update_cell(1, 1, 'מספר הזמנה')
         # ws.update_cell(1, 2, 'תאריך הזמנה')
         # ws.update_cell(1, 3, 'שם הלקוח')
@@ -226,7 +236,7 @@ class MOrder(models.Model):
 
         pass
 
-    def morder_to_spreedsheet(self, wb: gspread.Spreadsheet):
+    def write_morder_to_spreedsheet(self, wb: gspread.Spreadsheet):
         order_data = self.get_exel_data()
         name = order_data['name']
         order_products = order_data['products']
@@ -257,9 +267,7 @@ class MOrder(models.Model):
             all_products[product_name]['details'].append(
                 name + ' - ' + str(order_product['total_quantity']))
             pass  # end loop on order products
-
-        headers = ['ברקוד', 'פריט', 'כמות כוללת', 'הערות',
-                   'כמות נלקחת', 'מחיר מכירה', 'מע"מ', 'הדפסה?', '', 'רקמה?', '', ]
+        # get or create sheet:
         try:
             order_ws = wb.add_worksheet(
                 order_data['name'] + ' ' + str(order_data['id']), 0, 0)
@@ -272,7 +280,7 @@ class MOrder(models.Model):
                 {
                     "updateSheetProperties": {
                         "properties": {
-                            "sheetId": sheetId,
+                            "sheetId": order_ws.id,
                             # "gridProperties": {
                             #     "rowCount": 1,
                             #     "columnCount": 1,
@@ -285,11 +293,169 @@ class MOrder(models.Model):
                 }
             ],
         }
-        result1 = wb.batch_update(batch_request)
-        self.init_spreedsheet(order_ws, order_data)
 
+        wb.batch_update(batch_request)
+        self.init_spreedsheet(order_ws, order_data)
+        # write products to sheet:
+
+        self.write_products_to_spreedsheet(order_ws, order_data['products'])
         raise Exception('my error')
         pass
+
+    def write_products_to_spreedsheet(self, order_ws: gspread.Worksheet, order_products: dict, starting_row: int = 4):
+        # write products to sheet same as (export to exel from admin)
+        from gspread_formatting import Color
+        # add border bottom to header
+        pink_header_format = CellFormat(
+            backgroundColor=Color(1, 0.8, 1),
+            textFormat=TextFormat(bold=True, foregroundColor=Color(0, 0, 0)),
+            horizontalAlignment='RIGHT', borders=Borders(bottom=Border('SOLID', Color(0, 0, 0))))
+        # 'backgroundColor': {'red': 0.9, 'green': 0.9, 'blue': 0.9},'textFormat': {'fontSize': 12},
+        subtable_header_format = CellFormat(
+            backgroundColor=Color(0.9, 0.9, 0.9),
+            textFormat=TextFormat(
+                bold=True, foregroundColor=Color(0, 0, 0), fontSize=12),
+            horizontalAlignment='RIGHT',)
+        # more greenish
+        user_input_format = CellFormat(
+            backgroundColor=Color(0.75, 1, 0.75),
+            textFormat=TextFormat(bold=True, foregroundColor=Color(0, 0, 0)),
+            horizontalAlignment='CENTER',)
+
+        PINK_HEADER_FORMAT_CONST = 'PINK_FORMAT_HEADER'
+        SUBTABLE_HEADER_FORMAT_CONST = 'SUBTABLE_HEADER_FORMAT'
+        USER_INPUT_FORMAT_CONST = 'USER_INPUT_FORMAT'
+
+        all_formats = {
+            PINK_HEADER_FORMAT_CONST: pink_header_format,
+            SUBTABLE_HEADER_FORMAT_CONST: subtable_header_format,
+            USER_INPUT_FORMAT_CONST: user_input_format,
+
+        }
+        # cell_formats = [PINK_FORMAT_HEADER,
+        #                 SUBTABLE_HEADER_FORMAT, USER_INPUT_FORMAT]
+
+        all_providers = list(
+            map(lambda x: x[0], Provider.objects.all().values_list('name')))
+        providers_validation_rule = DataValidationRule(
+            BooleanCondition('ONE_OF_LIST', all_providers),
+            showCustomUi=True
+        )
+        # format_cell_range(order_ws, 'A1:J1', fmt)
+        current_row = starting_row
+        header_cells_to_update = []
+        formating_tasks = []
+        for order_product in order_products:
+            product_name = order_product['title']
+            barcode = order_product['barcode']
+            total_quantity = order_product['total_quantity']
+            comment = order_product['comment']
+            taken = ''
+            price = str(order_product['price']) + '₪'
+            not_include = 'לא כולל'
+            is_printing = 'כן' if order_product['prining'] else 'לא'
+            prining_comment = order_product['priningComment'] if order_product['prining'] else ''
+            is_embroidery = 'כן' if order_product['embroidery'] else 'לא'
+            embroidery_comment = order_product['embroideryComment'] if order_product['embroidery'] else ''
+            # order_ws.update_cells([
+            #     Cell(row=current_row, col=1, value=barcode),
+            #     Cell(row=current_row, col=2, value=product_name),
+            #     Cell(row=current_row, col=3, value=total_quantity),
+            #     Cell(row=current_row, col=4, value=comment),
+            #     Cell(row=current_row, col=5, value=taken),
+            #     Cell(row=current_row, col=6, value=price),
+            #     Cell(row=current_row, col=7, value=not_include),
+            #     Cell(row=current_row, col=8, value=is_printing),
+            #     Cell(row=current_row, col=9, value=prining_comment),
+            #     Cell(row=current_row, col=10, value=is_embroidery),
+            #     Cell(row=current_row, col=11, value=embroidery_comment),
+            # ])
+            header_cells_to_update.append(
+                Cell(row=current_row, col=1, value=barcode))
+            header_cells_to_update.append(
+                Cell(row=current_row, col=2, value=product_name))
+            header_cells_to_update.append(
+                Cell(row=current_row, col=3, value=total_quantity))
+            header_cells_to_update.append(
+                Cell(row=current_row, col=4, value=comment))
+            header_cells_to_update.append(
+                Cell(row=current_row, col=5, value=taken))
+            header_cells_to_update.append(
+                Cell(row=current_row, col=6, value=price))
+            header_cells_to_update.append(
+                Cell(row=current_row, col=7, value=not_include))
+            header_cells_to_update.append(
+                Cell(row=current_row, col=8, value=is_printing))
+            header_cells_to_update.append(
+                Cell(row=current_row, col=9, value=prining_comment))
+            header_cells_to_update.append(
+                Cell(row=current_row, col=10, value=is_embroidery))
+            header_cells_to_update.append(
+                Cell(row=current_row, col=11, value=embroidery_comment))
+            # format_cell_range(order_ws, 'A' + str(current_row) +
+            #                   ':K' + str(current_row), pink_header_format)
+            formating_tasks.append(
+                {'range': 'A' + str(current_row) + ':K' + str(current_row), 'format': PINK_HEADER_FORMAT_CONST})
+            # set background colors to #00FFCCFF
+
+            current_row += 1
+            entries = order_product['entries']
+            sorted_entries = sorted(
+                entries.items(), key=lambda x: (x[0][3], x[0][4]))
+            if len(sorted_entries) == 1 and sorted_entries[0][0][0].lower() == 'no color' and sorted_entries[0][0][1].lower() == 'one size':
+                continue
+            sorted_entries = dict(sorted_entries)
+            for entry in sorted_entries:
+                _color = entry[0]
+                size = entry[1]
+                varient = entry[2]
+                quantity = sorted_entries[entry]
+                # order_ws.update_cells([
+                #     Cell(row=current_row, col=1, value=_color),
+                #     Cell(row=current_row, col=2, value=size),
+                #     Cell(row=current_row, col=3, value=varient),
+                #     Cell(row=current_row, col=4, value=quantity),
+                # ])
+                header_cells_to_update.append(
+                    Cell(row=current_row, col=1, value=_color))
+                header_cells_to_update.append(
+                    Cell(row=current_row, col=2, value=size))
+                header_cells_to_update.append(
+                    Cell(row=current_row, col=3, value=varient))
+                header_cells_to_update.append(
+                    Cell(row=current_row, col=4, value=quantity))
+
+                # format_cell_range(order_ws, 'A' + str(current_row) + ':D' + str(current_row),
+                #                   subtable_header_format)
+                formating_tasks.append(
+                    {'range': 'A' + str(current_row) + ':D' + str(current_row), 'format':  SUBTABLE_HEADER_FORMAT_CONST})
+                # 5 taken
+                formating_tasks.append(
+                    {'range': 'E' + str(current_row) + ':E' + str(current_row), 'format':  USER_INPUT_FORMAT_CONST})
+                current_row += 1
+        pass
+        order_ws.update_cells(header_cells_to_update)
+        # for task in formating_tasks:
+        #     format_cell_range(order_ws, task['range'], task['format'])
+        # group formating tasks by the forrmat
+        formating_tasks_by_format = {}
+        for task in formating_tasks:
+            if task['format'] not in formating_tasks_by_format:
+                formating_tasks_by_format[task['format']] = []
+            formating_tasks_by_format[task['format']].append(task['range'])
+        full_format_list = []
+        for format_key in formating_tasks_by_format:
+            list_of_ranges = formating_tasks_by_format[format_key]
+            # change every item in list_of_ranges to a tuple with the all_formats[format_key]
+            list_of_ranges = [(range, all_formats[format_key])
+                              for range in list_of_ranges]
+            full_format_list.extend(list_of_ranges)
+        format_cell_ranges(order_ws, full_format_list)
+
+        # set validation for providers column (L)
+        # to the end of the table
+        set_data_validation_for_cell_range(
+            order_ws, 'L' + str(starting_row) + ':L' + str(current_row), providers_validation_rule)
 
     def subtract_collected_inventory(self, user):
         collected_items = CollectedInventory.objects.filter(

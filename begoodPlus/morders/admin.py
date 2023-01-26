@@ -284,8 +284,6 @@ class MOrderAdmin(VersionAdmin):  # admin.ModelAdmin
             order_ws_rows_counter += 1
             for product in order_products:
                 product_name = product['title']
-                # order_ws.cell(row=order_ws_rows_counter, column=1).value = product['barcode']
-                # order_ws.cell(row=order_ws_rows_counter, column=1).value = product['p']
                 order_ws.cell(row=order_ws_rows_counter,
                               column=1).value = product['barcode']
                 order_ws.cell(row=order_ws_rows_counter,
