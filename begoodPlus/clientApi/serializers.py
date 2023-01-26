@@ -1,5 +1,6 @@
 
 
+from morders.models import MorderStatus
 from catalogImages.models import CatalogImageVarient
 from django.db import models
 from campains.models import MonthCampain, CampainProduct
@@ -51,6 +52,12 @@ class VarientSerializer(serializers.ModelSerializer):
     class Meta:
         model = CatalogImageVarient
         fields = ('id', 'name')
+
+
+class MorderStatusSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MorderStatus
+        fields = ('id', 'name', 'sort_order')
 
 
 class ImageClientApi(serializers.ModelSerializer):

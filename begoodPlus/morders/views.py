@@ -1,3 +1,4 @@
+from morders.models import MorderStatus
 from django.db import models
 from django.db.models.functions import Length
 from django.db.models.functions import Concat
@@ -875,6 +876,8 @@ def api_get_order_data2(request, id):
 
 
 # @api_view(['GET', 'POST'])
+
+
 def api_get_order_data(request, id):
     if not request.user.is_superuser:
         return JsonResponse({'status': 'error'}, status=status.HTTP_403_FORBIDDEN)
@@ -885,7 +888,10 @@ def api_get_order_data(request, id):
     if request.method == 'POST':
         with reversion.create_revision():
             data = json.loads(request.body)
-            order.status = data['status']
+            # order.status = data['status']
+            if data['status2']:
+                order.status2 = MorderStatus.objects.get(id=data['status2'])
+
             order.message = data['message']
             order.email = data['email']
             order.name = data['name']

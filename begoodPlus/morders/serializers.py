@@ -228,7 +228,7 @@ class AdminMOrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = MOrder
-        fields = ('id', 'agent', 'agent_name', 'client', 'status', 'status_msg', 'created', 'updated', 'message', 'name', 'phone',
+        fields = ('id', 'agent', 'agent_name', 'client', 'status', 'status2', 'status_msg', 'created', 'updated', 'message', 'name', 'phone',
                   'email', 'client_businessName', 'products', 'freezeTakenInventory', 'isOrder', 'sendProviders', 'startCollecting')
 
 
