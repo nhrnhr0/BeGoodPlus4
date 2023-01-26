@@ -1,3 +1,5 @@
+import gspread
+from core.utils import get_gspred_client
 from google.oauth2.credentials import Credentials
 import google_auth_oauthlib
 from begoodPlus.secrects import FULL_DOMAIN
@@ -147,6 +149,8 @@ info = {
 def get_smartbee_info_from_dfs(client_info, items_table, sheet_name, docType):
     morder_id = client_info['מספר הזמנה'][0]
     try:
+        if isinstance(morder_id, str):
+            morder_id = int(morder_id)
         db_morder = MOrder.objects.get(id=morder_id)
         db_client = db_morder.client
         dealerNumber = db_client.privateCompany if db_client else '0'
@@ -187,13 +191,13 @@ def get_smartbee_info_from_dfs(client_info, items_table, sheet_name, docType):
                 continue_add_amounts = False
             product_name = row['פריט']
             amount_taken = row['כמות נלקחת']
-            if pd.isna(amount_taken):
+
+            if pd.isna(amount_taken) or amount_taken == '':
                 amount_taken = 0
                 continue_add_amounts = True
             else:
                 if str(amount_taken).lower() == 'v':
                     amount_taken = row['כמות כוללת']
-
             includeTax = row['מע"מ']
             if includeTax == 'כולל':
                 includeTaxBool = True
@@ -522,6 +526,78 @@ def credentials_to_dict(credentials):
 
 
 @csrf_exempt
+def sheetsurl_to_smartbee_async(request):
+    # TODO: add admin check
+    # credantials = request.session.get('credentials', None)
+    # drive_creds = Credentials(token=credantials['token'], refresh_token=credantials['refresh_token'], token_uri=credantials['token_uri'],
+    #                           client_id=credantials['client_id'], client_secret=credantials['client_secret'], scopes=credantials['scopes'],)
+    # drive_service = build_drive_service(drive_creds)
+    # sheet_url = 'https://docs.google.com/spreadsheets/d/19Uy_dsD90KXnSg-2JodmDZLogT9EMD5c_riqbcOJgts/edit#gid=546059056'
+    # fileId = '19Uy_dsD90KXnSg-2JodmDZLogT9EMD5c_riqbcOJgts'
+    # bytes_exel_file = get_drive_file(drive_service, fileId)
+    # # conver bytes to in memory file
+    # file = io.BytesIO(bytes_exel_file)
+    # # process the file
+    # all_sheets = pd.ExcelFile(file)
+    # # f'https://docs.google.com/spreadsheets/d/{doc_id}/gviz/tq?tqx=out:csv&sheet={sheet_name}'
+    # # get sheetname from url
+    # sheetname = get_sheetname_from_driveurl(sheet_url, drive_creds)
+
+    if(request.method == "POST"):
+        # read the url from the POST body:
+        url = request.POST.get('sheet_url')
+        print(url)
+        docType = request.POST.get('docType')
+        gspred_client = get_gspred_client()
+        workbook = None
+        try:
+            workbook = gspred_client.open_by_url(url)
+        # gspread.exceptions.APIError: {'code': 403, 'message': 'The caller does not have permission', 'status': 'PERMISSION_DENIED'}
+        except gspread.exceptions.APIError as e:
+            print(e)
+            return HttpResponse('error: ' + str(e), status=403,)
+
+        # get the sheet as a dataframe
+        # url = 'https://docs.google.com/spreadsheets/d/19Uy_dsD90KXnSg-2JodmDZLogT9EMD5c_riqbcOJgts/edit#gid=546059056'
+        gid = int(url.split('#gid=')[1])
+        worksheets = workbook.worksheets()
+        worksheet = None
+        for ws in worksheets:
+            if ws.id == gid:
+                worksheet = ws
+                break
+        if worksheet is None:
+            return HttpResponse('error: worksheet not found', status=404,)
+
+        # 2 first rows
+        all_values = worksheet.get_all_values()
+        data1 = all_values[0:2]
+        data2 = all_values[2:]
+        df = pd.DataFrame(data1[1:], columns=data1[0])
+        df2 = pd.DataFrame(data2[1:], columns=data2[0])
+        info = get_smartbee_info_from_dfs(df, df2, worksheet.title, 'invoice')
+        morder_id = df['מספר הזמנה'][0]
+        obj, errors = send_smartbe_info(
+            info=info, morder_id=int(morder_id) if morder_id else None)
+        ret = {
+            'status': 'ok',
+            'id': obj.id,
+            'result': obj.result,
+            'morder_id': obj.morder_id,
+        }
+        return JsonResponse(ret)
+
+    # order_id = None
+    # df = all_sheets.parse(sheet_name=sheetname)
+    # df2 = all_sheets.parse(
+    #     sheet_name=sheetname, skiprows=2, )
+    # info = get_smartbee_info_from_dfs(
+    #     df, df2, sheetname, 'invoice')
+    # obj, errors = send_smartbe_info(
+    #     info=info, morder_id=int(order_id) if order_id else None)
+
+
+@ csrf_exempt
 def sheetsurl_to_smartbee(request):
     if request.user.is_authenticated and request.user.is_superuser:
         if(request.method == "POST"):
@@ -600,6 +676,7 @@ def submit_exel_to_smartbee(request):
 
 
 def send_smartbe_info(info, morder_id):
+    from morders.models import MOrder
     smartbee_auth = SmartbeeTokens.get_or_create_token()
     headers = {"Authorization": "Bearer " + smartbee_auth.token}
     smartbee_response = requests.post(
@@ -610,7 +687,12 @@ def send_smartbe_info(info, morder_id):
         # self.save()
         data = smartbee_response.json()
         resultId = info['providerMsgId']
-        obj = SmartbeeResults.objects.create(morder_id=morder_id,
+
+        try:
+            morder_obj = MOrder.objects.get(id=morder_id)
+        except MOrder.DoesNotExist:
+            morder_obj = None
+        obj = SmartbeeResults.objects.create(morder=morder_obj,
                                              resultCodeId=data['resultCodeId'],
                                              result=data['result'],
                                              validationErrors=data['validationErrors'],
