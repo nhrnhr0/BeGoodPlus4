@@ -1,3 +1,7 @@
+from begoodPlus.secrects import GOOGLE_SERVICE_ACCOUNT_FILE, SECRECT_CLIENT_SIDE_DOMAIN, ALL_MORDER_FILE_SPREEDSHEET_URL
+from ordered_model.models import OrderedModelBase
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
 import docx
 from django.shortcuts import redirect
 from docx.oxml.ns import qn
@@ -592,3 +596,14 @@ def process_sheets_to_providers_docx(sheets, obj):
     obj.logs.append('finished merging data')
     # obj.logs.append(data)
     return data
+
+
+def get_gspred_client():
+    scope = [
+        'https://www.googleapis.com/auth/spreadsheets',
+        'https://www.googleapis.com/auth/drive'
+    ]
+    creds = ServiceAccountCredentials.from_json_keyfile_name(
+        GOOGLE_SERVICE_ACCOUNT_FILE, scope)
+    gspred_client = gspread.authorize(creds)
+    return gspred_client
