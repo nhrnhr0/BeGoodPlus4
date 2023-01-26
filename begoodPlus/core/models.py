@@ -1,3 +1,4 @@
+from core.utils import uuid2slug
 from django.core.files.base import ContentFile
 import io
 import zipfile
@@ -25,31 +26,12 @@ from django.dispatch import receiver
 from numpy import NaN
 import pandas as pd
 from rest_framework.authtoken.models import Token
-from base64 import urlsafe_b64decode, urlsafe_b64encode
-from uuid import UUID
 from productColor.models import ProductColor
 
 from productSize.models import ProductSize
 
 
 fs = FileSystemStorage()
-
-
-def uuid2slug(uuidstring):
-    if uuidstring:
-        if isinstance(uuidstring, str):
-            try:
-                return urlsafe_b64encode(bytearray.fromhex(uuidstring)).rstrip(b'=').decode('ascii')
-            except:
-                return urlsafe_b64encode(str.encode(uuidstring)).rstrip(b'=').decode('ascii')
-        else:
-            return urlsafe_b64encode(uuidstring.bytes).rstrip(b'=').decode('ascii')
-    else:
-        return '<error>'
-
-
-def slug2uuid(slug):
-    return str(UUID(bytes=urlsafe_b64decode(slug + '==')))
 
 
 # generate auth token for every new saved user
@@ -402,7 +384,7 @@ class SvelteCartModal(models.Model):
     uniqe_color.short_description = _('uniqe color')
 
     def turn_to_morder(self):
-        from morders.models import MOrder, MOrderItem, MOrderItemEntry
+        from morders.models import MOrder, MOrderItem, MOrderItemEntry, MorderStatus
         cart = self
         if self.user and self.user.is_authenticated:
             client = self.user.client
@@ -416,7 +398,15 @@ class SvelteCartModal(models.Model):
             email = self.email
         message = self.message if self.message != '' else ''
         agent = self.agent if self.agent != '' else ''
+        # STATUS_CHOICES = [('new', 'חדש'), ('price_proposal', 'הצעת מחיר'), ('in_progress', 'סחורה הוזמנה'), ('in_progress2', 'מוכן לליקוט',), (
+        #     'in_progress3', 'בהדפסה',), ('in_progress4', 'מוכן בבית דפוס'), ('in_progress5', 'ארוז מוכן למשלוח'), ('done', 'סופק'), ]
         status = 'price_proposal' if self.order_type == 'הצעת מחיר' else 'new'
+        try:
+            st = 'הצעת מחיר' if self.order_type == 'הצעת מחיר' else 'חדש'
+            status2 = MorderStatus.objects.get(name=st)
+        except:
+            status2 = None
+            pass
         products = self.productEntries.all()
         products_list = []
         for i in products:
@@ -478,7 +468,7 @@ class SvelteCartModal(models.Model):
             dbProduct.entries.set(dbEntries)
             dbProducts.append(dbProduct)
         morder = MOrder.objects.create(cart=cart, client=client, name=name,
-                                       phone=phone, email=email, status=status, message=message, agent=agent)
+                                       phone=phone, email=email, status=status, status2=status2, message=message, agent=agent)
         morder.products.add(*dbProducts)
         morder.save()
 
@@ -517,12 +507,13 @@ class ProvidersDocxTask(models.Model):
         self.status = 'in_progress'
         self.logs = []
         self.save()
+        loaded_files = {}
         for url in urls:
             log = 'fetching sheet from url: ' + url
             self.logs.append(log)
             self.save()
-            sheet, sheetname = get_sheet_from_drive_url(
-                url, drive_service, drive_creds)
+            sheet, sheetname, loaded_files = get_sheet_from_drive_url(
+                url, drive_service, drive_creds, loaded_files)
             sheets.append(sheet)
             log = 'downloaded'
             self.logs.append(log)

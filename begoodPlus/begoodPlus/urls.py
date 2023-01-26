@@ -26,7 +26,7 @@ from inventory.views import doc_stock_enter_provider_requests_api, get_stock_by_
 from clientApi.views import CustomAuthToken, get_all_varients_api, get_products_info, get_products_info2
 from inventory.views import add_doc_stock_enter_ppn, add_doc_stock_enter_ppn_entry, create_enter_doc, enter_doc_edit, delete_doc_stock_enter_ppn_entry, doc_stock_detail_api, doc_stock_list_api, get_all_inventory_api, get_all_warehouses_api, enter_doc_insert_inventory, enter_doc_remove_product, get_doc_stock_enter_ppn_entries, inventory_edit_entry, inventory_get_entry_history, inventory_manual_update_entry, search_ppn, search_warehouses, show_inventory_stock, get_product_inventory, doc_stock_list
 
-from clientApi.views import get_all_colors_api, get_all_sizes_api, main_page_api
+from clientApi.views import get_all_colors_api, get_all_sizes_api, main_page_api, get_all_morder_statuses_api
 from campains.views import admin_get_all_campains, admin_get_campain_products, get_user_campains
 from inventory.views import DocStockEnterViewSet, doc_stock_enter
 # from mcrm.views import , admin_upload_bulk_crm_exel, upload_crm_execl, upload_crm_execl2
@@ -291,6 +291,7 @@ urlpatterns = [
     path('client-api/get-all-sizes/', get_all_sizes_api),
     path('client-api/get-all-variants/', get_all_varients_api),
     path('client-api/get-all-colors/', get_all_colors_api),
+    path('client-api/get-all-morder-statuses/', get_all_morder_statuses_api),
     path('svelte/api/', include(svelteRouter.urls)),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('api/who-am-i/', whoAmI),

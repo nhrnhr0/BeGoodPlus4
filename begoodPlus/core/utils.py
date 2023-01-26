@@ -2,6 +2,8 @@ from begoodPlus.secrects import GOOGLE_SERVICE_ACCOUNT_FILE, SECRECT_CLIENT_SIDE
 from ordered_model.models import OrderedModelBase
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
+from base64 import urlsafe_b64decode, urlsafe_b64encode
+from uuid import UUID
 import docx
 from django.shortcuts import redirect
 from docx.oxml.ns import qn
@@ -73,22 +75,26 @@ def get_drive_file(service, file_id):
         return str(e)
 
 
-def get_sheet_from_drive_url(url, drive_service, drive_creds=None):
+def get_sheet_from_drive_url(url, drive_service, drive_creds=None, loaded_files={}):
 
     fileId = url.split(
         'https://docs.google.com/spreadsheets/d/')[1].split('/edit')[0]
     sheetId = url.split('gid=')[1]
-    bytes_exel_file = get_drive_file(drive_service, fileId)
-    # conver bytes to in memory file
-    file = io.BytesIO(bytes_exel_file)
-    # process the file
-    all_sheets = pd.ExcelFile(file)
+    if loaded_files.get(fileId):
+        all_sheets = loaded_files.get(fileId)
+    else:
+        bytes_exel_file = get_drive_file(drive_service, fileId)
+        # conver bytes to in memory file
+        file = io.BytesIO(bytes_exel_file)
+        # process the file
+        all_sheets = pd.ExcelFile(file)
+        loaded_files[fileId] = all_sheets
     # f'https://docs.google.com/spreadsheets/d/{doc_id}/gviz/tq?tqx=out:csv&sheet={sheet_name}'
     # get sheetname from url
     sheetname = get_sheetname_from_driveurl(url, drive_creds)
     sheetname = sheetname[:31]
-    print(all_sheets.sheet_names)
-    return all_sheets.parse(sheetname, header=0, dtype=str), sheetname
+    # print(all_sheets.sheet_names)
+    return all_sheets.parse(sheetname, header=0, dtype=str), sheetname, loaded_files
 
 
 def get_sheetname_from_driveurl(url, drive_creds=None):
@@ -598,6 +604,7 @@ def process_sheets_to_providers_docx(sheets, obj):
     return data
 
 
+
 def get_gspred_client():
     scope = [
         'https://www.googleapis.com/auth/spreadsheets',
@@ -607,3 +614,21 @@ def get_gspred_client():
         GOOGLE_SERVICE_ACCOUNT_FILE, scope)
     gspred_client = gspread.authorize(creds)
     return gspred_client
+
+
+
+def uuid2slug(uuidstring):
+    if uuidstring:
+        if isinstance(uuidstring, str):
+            try:
+                return urlsafe_b64encode(bytearray.fromhex(uuidstring)).rstrip(b'=').decode('ascii')
+            except:
+                return urlsafe_b64encode(str.encode(uuidstring)).rstrip(b'=').decode('ascii')
+        else:
+            return urlsafe_b64encode(uuidstring.bytes).rstrip(b'=').decode('ascii')
+    else:
+        return '<error>'
+
+
+def slug2uuid(slug):
+    return str(UUID(bytes=urlsafe_b64decode(slug + '==')))

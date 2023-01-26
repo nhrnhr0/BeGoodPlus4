@@ -6,6 +6,7 @@ import {
   apiAddNewProductToMorder,
   apiDeleteMOrderItem,
   apiGetAllColors,
+  apiGetAllMorderStatuses,
   apiGetAllSizes,
   apiGetAllVariants,
   apiGetMOrder,
@@ -29,7 +30,7 @@ let selectedProduct = undefined;
 async function load_order_from_server() {
   updateing = true;
   let resp = await apiGetMOrder(id);
-  console.log("resp:", resp);
+  // console.log("resp:", resp);
   data = serverData = JSON.parse(JSON.stringify(resp));
   headerData = [
     {
@@ -40,7 +41,7 @@ async function load_order_from_server() {
       email: data.email,
       message: data.message,
       phone: data.phone,
-      status: data.status,
+      status2: data.status2,
       status_msg: data.status_msg,
       client_id: data.client,
       client_name: data.client_businessName,
@@ -56,6 +57,7 @@ async function load_order_from_server() {
 let ALL_SIZES;
 let ALL_COLORS;
 let ALL_VERIENTS;
+let ALL_STATUSES;
 let updateing_to_server = false;
 
 onMount(async () => {
@@ -73,6 +75,7 @@ onMount(async () => {
   ALL_SIZES = await apiGetAllSizes();
   ALL_COLORS = await apiGetAllColors();
   ALL_VERIENTS = await apiGetAllVariants();
+  ALL_STATUSES = await apiGetAllMorderStatuses();
   await load_order_from_server();
   //ALL_PROVIDERS = await apiGetProviders();
 });
@@ -86,11 +89,11 @@ async function save_data() {
   data.email = headerData[0].email;
   data.message = headerData[0].message;
   data.phone = headerData[0].phone;
-  data.status = headerData[0].status;
+  // data.status = headerData[0].status;
+  data.status2 = headerData[0].status2;
   data.status_msg = headerData[0].status_msg;
   data.client = headerData[0].client_id;
   data.client_businessName = headerData[0].client_name;
-  console.log("save data: ", data);
   updateing_to_server = true;
   await apiSaveMOrder(data.id, data);
   updateing_to_server = false;
@@ -230,16 +233,16 @@ function add_entry_btn_clicked(e) {
 // }
 // [('new', 'חדש'), ('in_progress', 'סחורה הוזמנה'), ('in_progress2', 'מוכן לליקוט',), (
 //     'in_progress3', 'בהדפסה',), ('in_progress4', 'מוכן בבית דפוס'), ('in_progress5', 'ארוז מוכן למשלוח'), ('done', 'סופק'), ]
-const STATUS_OPTIONS = [
-  ["new", "חדש"],
-  ["price_proposal", "הצעת מחיר"],
-  ["in_progress", "סחורה הוזמנה"],
-  ["in_progress2", "מוכן לליקוט"],
-  ["in_progress3", "בהדפסה"],
-  ["in_progress4", "מוכן בבית דפוס"],
-  ["in_progress5", "ארוז מוכן למשלוח"],
-  ["done", "סופק"],
-];
+// const STATUS_OPTIONS = [
+//   ["new", "חדש"],
+//   ["price_proposal", "הצעת מחיר"],
+//   ["in_progress", "סחורה הוזמנה"],
+//   ["in_progress2", "מוכן לליקוט"],
+//   ["in_progress3", "בהדפסה"],
+//   ["in_progress4", "מוכן בבית דפוס"],
+//   ["in_progress5", "ארוז מוכן למשלוח"],
+//   ["done", "סופק"],
+// ];
 
 function new_product_btn_click() {
   var href = "/admin/catalogImages/catalogimage/add/";
@@ -315,10 +318,12 @@ function new_product_btn_click() {
             />
           </td>
           <td class="header-cell">
-            <select class="status-select" bind:value={headerData[0].status}>
-              {#each STATUS_OPTIONS as opt}
-                <option value={opt[0]} selected={opt[0] == headerData[0].status}
-                  >{opt[1]}</option
+            <select class="status-select" bind:value={headerData[0].status2}>
+              {#each ALL_STATUSES as opt}
+                <option
+                  value={opt.id}
+                  selected={opt.name == headerData[0].status2}
+                  >{opt.name}</option
                 >
               {/each}
             </select>
