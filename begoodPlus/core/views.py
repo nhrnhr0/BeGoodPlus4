@@ -174,7 +174,8 @@ def get_smartbee_info_from_dfs(client_info, items_table, sheet_name, docType):
     for idx, row in items_table.iterrows():
         # print(row)
         # are we on a main row?
-        if not pd.isna(row['רקמה?']):
+        is_sub_row = pd.isna(row['רקמה?']) or row['רקמה?'] == ''
+        if not is_sub_row:  # is a header row
             if(product_name != ''):
                 print('product_name: ', product_name)
                 product_obj = CatalogImage.objects.filter(
@@ -218,7 +219,10 @@ def get_smartbee_info_from_dfs(client_info, items_table, sheet_name, docType):
                 if not pd.isna(amount_taken_temp):
                     # if type is str, we need to convert it to int
                     if type(amount_taken_temp) == str:
-                        amount_taken_temp = int(amount_taken_temp)
+                        if amount_taken_temp == '':
+                            amount_taken_temp = 0
+                        else:
+                            amount_taken_temp = int(amount_taken_temp)
                     amount_taken += amount_taken_temp
             last_row_was_a_header = False
 
