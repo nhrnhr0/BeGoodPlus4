@@ -233,9 +233,14 @@ def get_smartbee_info_from_dfs(client_info, items_table, sheet_name, docType):
     })
     # make sure all amount_taken is int
     for product in res_products:
+        if product['amount_taken'] == '':
+            product['amount_taken'] = 0
         if type(product['amount_taken']) == str:
             product['amount_taken'] = int(product['amount_taken'])
     res_products = list(filter(lambda x: x['amount_taken'] > 0, res_products))
+    # filter price = '' or <= 0 and remove them
+    res_products = list(filter(lambda x: x['price'] != '' and float(
+        x['price'].replace('₪', '')) > 0, res_products))
     paymentItems = []
     for prod in res_products:
         description = prod['product_name']
@@ -579,6 +584,8 @@ def sheetsurl_to_smartbee_async(request):
         morder_id = df['מספר הזמנה'][0]
         obj, errors = send_smartbe_info(
             info=info, morder_id=int(morder_id) if morder_id else None)
+        if errors:
+            return JsonResponse({'status': 'error', 'errors': errors})
         ret = {
             'status': 'ok',
             'id': obj.id,
