@@ -227,7 +227,7 @@ class MOrder(models.Model):
         # update last update time in spreedsheet E2
 
         errors = self.spreedsheet_data_to_morder(sheets_data)
-        ws.update_cell(2, 5, now.strftime('%d/%m/%Y %H:%M'))
+        ws.update_cell(2, 5, now.strftime('%d/%m/%Y %H:%M:%S'))
         ws.update_cell(2, 6, str(errors))
         return errors
 
