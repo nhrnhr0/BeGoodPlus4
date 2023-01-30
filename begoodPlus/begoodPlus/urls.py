@@ -17,7 +17,7 @@ Including another URLconf
 
 from core.views import clear_drive_creds, oauth2callback
 from msCrm.views import ms_crm_upload_task
-from core.views import admin_upload_docs_page, providers_docx_task, sheetsurl_to_smartbee, sheetsurl_to_providers_docx
+from core.views import admin_upload_docs_page, providers_docx_task, sheetsurl_to_smartbee, sheetsurl_to_smartbee_async, sheetsurl_to_providers_docx
 
 from docsSignature.views import api_get_doc_signature, api_sign_on_doc
 from core.views import admin_upload_docs_page
@@ -100,7 +100,7 @@ urlpatterns = [
          providers_docx_task, name='providers_docx_task'),
     path('ms-crm-upload-task/<int:task_id>/',
          ms_crm_upload_task, name='ms_crm_upload_task'),
-    path('sheetsurl-to-smartbee/', sheetsurl_to_smartbee),
+    path('sheetsurl-to-smartbee/', sheetsurl_to_smartbee_async),
     path('sign-on-doc/<uuid:uuid>/', api_sign_on_doc),
     path('api-signature/<uuid:uuid>/', api_get_doc_signature),
     path('api-edit-doc-signature/<uuid:uuid>',
