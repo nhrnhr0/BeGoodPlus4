@@ -115,7 +115,7 @@ class MOrderAdmin(VersionAdmin):  # admin.ModelAdmin
 
     def sync_with_spreedsheet(self, request, queryset):
         for morder in queryset:
-            morder.sync_with_spreedsheet()
+            morder.morder_to_spreedsheet()
             messages.add_message(
                 request, messages.INFO, f'הזמנה {morder.id} סונכרנה')
 
