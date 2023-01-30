@@ -191,12 +191,158 @@ class MOrder(models.Model):
 
         # if self.spreed_sheet_url:
         workbook = gspred_client.open_by_url(ALL_MORDER_FILE_SPREEDSHEET_URL)
-        if not self.gid:
+        if self.gid:
             # get data as exel to upload
-            self.write_morder_to_spreedsheet(workbook)
+            sheets_data = self.read_morder_from_spreedsheet(
+                workbook.worksheet(self.gid))
+        else:
+            ws = MOrder.get_or_create_sheet(
+                workbook, self.name + ' ' + str(self.id))
+            self.gid = ws.id
+            self.save()
+            sheets_data = self.read_morder_from_spreedsheet(ws)
+        print(sheets_data)
+
+        self.sync_spreedsheet_data(sheets_data)
+        self.write_morder_to_spreedsheet(workbook)
         print(workbook)
+    pass
+
+    def sync_spreedsheet_data(self, sheets_data):
+        # sheets_data = [['מספר הזמנה', 'תאריך הזמנה', 'שם הלקוח', 'הודעה', '', '', '', '', '', '', '', ''], ['262', '27_10_2022', 'ש.א מכולת', '', '', '', '', '', '', '', '', ''], ['ברקוד', 'פריט', 'כמות כוללת', 'הערות', 'כמות נלקחת', 'מחיר מכירה', 'מע"מ', 'הדפסה?', '', 'רקמה?', '', 'ספקים'], ['"676525047815"', 'מכנס בנאים משולב כותנה ולייקרה', '9', '', '', '100.00₪', 'לא כולל', 'לא', '', 'לא', '', ''], ['אפור כהה', 'S', '', '4', '', '', '', '', '', '', '', ''], ['אפור כהה', 'M', '', '3', '', '', '', '', '', '', '', ''], ['אפור כהה', 'L', '', '2', '', '', '', '', '', '', '', ''], ['', 'מנעול 25 מ"מ', '0', '', '', '1.00₪', 'לא כולל', 'לא', '', 'לא', '', ''], ['', 'פיתוח גלופה', '0', '', '', '100.00₪', 'לא כולל', 'לא', '', 'לא', '', ''], ['"676525009592"', 'חולצת טריקו שרוול ארוך', '18', '', '', '19.00₪', 'לא כולל', 'לא', '', 'לא', '', ''],['כחול כהה', 'S', '', '6', '', '', '', '', '', '', '', ''], ['כחול כהה', 'M', '', '6', '', '', '', '', '', '', '', ''], ['כחול כהה', 'L', '', '6', '', '', '', '', '', '', '', ''], ['8011222022116', 'סט 3 קופסאות קליפר', '6', '', '', '19.00₪', 'לא כולל', 'לא', '', 'לא', '', ''], ['8710002569451', 'צולה כבד קטן', '3', '', '', '11.00₪', 'לא כולל', 'לא', '', 'לא', '', ''], ['7290004469634', 'כוס ילדים + ידית', '6', '', '', '3.50₪', 'לא כולל', 'לא', '', 'לא', '', '']]
+        # first 2 rows are user data (1st the headers and 2cend the data)
+        # third row is headers for the items
+        # the rest are the items (each row can be main row or sub row)
+        # determine by the J column (if it is not empty it is main row)
+        # if it is empty it is sub row
+        order_number = sheets_data[1][0]
+        order_date = sheets_data[1][1]
+        customer_name = sheets_data[1][2]
+        order_message = sheets_data[1][3]
+
+        def is_header_row(row):
+            return not str(row[9]) == ''
+        errors = []
+        all_products = {}
+        # all_products = {product.title: {'title': product.title, 'price': product.price, 'vat': product.vat, 'provider': product.provider, entries: [{size: 'S',varient:'', quantity: 1, provider: 'ספק 1', 'taken':'v'}, {size: 'M',varient:'', quantity: 1, provider: 'ספק 1', 'taken':3}]}]}}
+        for row in sheets_data[3:]:
+            is_header = is_header_row(row)
+            if is_header:
+                product = {}
+                product['title'] = row[1]
+                product['price'] = row[5]
+                product['vat'] = row[6]
+                product['provider'] = row[11]
+                product['entries'] = []
+                product['main_quantity'] = row[2]
+                product['main_taken'] = row[3]
+                product['main_provider'] = row[11]
+                all_products[product['title']] = product
+            else:
+                entry = {}
+                entry['color'] = row[0]
+                entry['size'] = row[1]
+                entry['varient'] = row[2]
+                entry['quantity'] = row[3]
+                entry['taken'] = row[4]
+                entry['provider'] = row[11]
+                all_products[product['title']]['entries'].append(entry)
+
+        for product in all_products.values():
+            # get or create the product from the order
+            qs = self.products.filter(product__title=product['title'])
+            if qs.exists():
+                order_product = qs.first()
+            else:
+                catalogImage = CatalogImage.objects.filter(
+                    title=product['title']).first()
+                if catalogImage:
+                    order_product = MOrderItem.objects.create(
+                        price=product['price'], product=catalogImage)
+                    self.products.add(order_product)
+                else:
+                    order_product = None
+            if order_product:
+                if product['entries']:
+                    for entry in product['entries']:
+                        # get or create the entry from the order
+                        if entry['varient']:
+                            qs = order_product.entries.filter(
+                                color__name=entry['color'], size__size=entry['size'], varient__name=entry['varient'])
+                        else:
+                            qs = order_product.entries.filter(
+                                color__name=entry['color'], size__size=entry['size'], )
+
+                        if qs.exists():
+                            order_entry = qs.first()
+                        else:
+                            clrObj = Color.objects.filter(
+                                name=entry['color']).first()
+                            if not clrObj:
+                                errors.append(
+                                    f'הצבע {entry["color"]} לא קיים במערכת' + '\n' + f'פריט {product["title"]}')
+                                continue
+                            sizeObj = ProductSize.objects.filter(
+                                size=entry['size']).first()
+                            if not sizeObj:
+                                errors.append(
+                                    f'הגודל {entry["size"]} לא קיים במערכת' + '\n' + f'פריט {product["title"]}')
+                                continue
+                            if entry['varient']:
+                                varientObj = CatalogImageVarient.objects.filter(
+                                    name=entry['varient']).first()
+                                if not varientObj:
+                                    errors.append(
+                                        f'המודל {entry["varient"]} לא קיים במערכת' + '\n' + f'פריט {product["title"]}')
+                                    continue
+
+                            order_entry = MOrderItemEntry.objects.create(
+                                color=clrObj, size=sizeObj, varient=varientObj)
+                            order_product.entries.add(order_entry)
+                        order_entry.quantity = entry['quantity']
+                        order_entry.sheets_taken_quantity = entry['taken']
+                        order_entry.sheets_provider = entry['provider']
+                    if len(order_product['entries']) == 0:
+                        order_entry.quantity = product['main_quantity']
+                        order_entry.sheets_taken_quantity = product['main_taken']
+                        order_entry.sheets_provider = product['main_provider']
+
+                    order_entry.save()
+        print(all_products)
+
         pass
-        pass
+
+    def read_morder_from_spreedsheet(self, worksheet: gspread.Worksheet):
+        data = worksheet.get_all_values()
+        print(data)
+        return data
+
+    def get_or_create_sheet(wb, title):
+        try:
+            return wb.worksheet(title)
+        except:
+            order_ws = wb.add_worksheet(title=title, rows=0, cols=0)
+            sheetId = wb.id
+            batch_request = {
+                "requests": [
+                    {
+                        "updateSheetProperties": {
+                            "properties": {
+                                "sheetId": order_ws.id,
+                                # "gridProperties": {
+                                #     "rowCount": 1,
+                                #     "columnCount": 1,
+                                # },
+                                "rightToLeft": True,
+                            },
+                            # "fields": "gridProperties(rowCount, columnCount),rightToLeft"
+                            "fields": "rightToLeft"
+                        },
+                    }
+                ],
+            }
+            wb.batch_update(batch_request)
+            return order_ws
 
     def init_spreedsheet(self, ws: gspread.Worksheet, data):
         # validation_rule = DataValidationRule(
@@ -268,33 +414,15 @@ class MOrder(models.Model):
                 name + ' - ' + str(order_product['total_quantity']))
             pass  # end loop on order products
         # get or create sheet:
-        try:
-            order_ws = wb.add_worksheet(
-                order_data['name'] + ' ' + str(order_data['id']), 0, 0)
-        except:
-            order_ws = wb.worksheet(
-                order_data['name'] + ' ' + str(order_data['id']))
-        sheetId = wb.id
-        batch_request = {
-            "requests": [
-                {
-                    "updateSheetProperties": {
-                        "properties": {
-                            "sheetId": order_ws.id,
-                            # "gridProperties": {
-                            #     "rowCount": 1,
-                            #     "columnCount": 1,
-                            # },
-                            "rightToLeft": True,
-                        },
-                        # "fields": "gridProperties(rowCount, columnCount),rightToLeft"
-                        "fields": "rightToLeft"
-                    },
-                }
-            ],
-        }
+        # try:
+        #     order_ws = wb.add_worksheet(
+        #         order_data['name'] + ' ' + str(order_data['id']), 0, 0)
+        # except:
+        #     order_ws = wb.worksheet(
+        #         order_data['name'] + ' ' + str(order_data['id']))
+        order_ws = MOrder.get_or_create_sheet(
+            wb, order_data['name'] + ' ' + str(order_data['id']))
 
-        wb.batch_update(batch_request)
         self.init_spreedsheet(order_ws, order_data)
         # write products to sheet:
 
@@ -629,7 +757,7 @@ class MOrder(models.Model):
 #     pass
 
 
-@receiver(pre_save, sender=MOrder, dispatch_uid="recalculate_total_price")
+@ receiver(pre_save, sender=MOrder, dispatch_uid="recalculate_total_price")
 def recalculate_total_price_pre_save(sender, instance, **kwargs):
     if instance.pk:
         new_price = instance.prop_totalPrice
@@ -637,7 +765,7 @@ def recalculate_total_price_pre_save(sender, instance, **kwargs):
             instance.total_sell_price = new_price
 
 
-@receiver(post_save, sender=MOrder, dispatch_uid="notify_order_status_update")
+@ receiver(post_save, sender=MOrder, dispatch_uid="notify_order_status_update")
 def notify_order_status_update_post_save(instance, *args, **kwargs):
     if instance.total_sell_price > 0:
         edit_url = SECRECT_CLIENT_SIDE_DOMAIN + instance.get_edit_order_url()
