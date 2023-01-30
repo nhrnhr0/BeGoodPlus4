@@ -40,8 +40,8 @@ import reversion
 
 
 def spreedsheet_to_morder_view(request):
-    # if not request.user.is_superuser:
-    #     return JsonResponse({'error': 'You are not authorized to perform this action'}, status=status.HTTP_401_UNAUTHORIZED)
+    if not request.user.is_superuser:
+        return JsonResponse({'error': 'You are not authorized to perform this action'}, status=status.HTTP_401_UNAUTHORIZED)
 
     if request.method == 'POST':
         morder_id = request.POST.get('morder_id', None)
