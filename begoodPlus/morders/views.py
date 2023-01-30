@@ -39,6 +39,21 @@ from docx.enum.table import WD_TABLE_DIRECTION
 import reversion
 
 
+def spreedsheet_to_morder_view(request):
+    if not request.user.is_superuser:
+        return JsonResponse({'error': 'You are not authorized to perform this action'}, status=status.HTTP_401_UNAUTHORIZED)
+
+    if request.method == 'POST':
+        morder_id = request.POST.get('morder_id', None)
+        sheets_gid = request.POST.get('sheets_gid', None)
+        morder = MOrder.objects.get(id=morder_id)
+        errors = morder.spreedsheet_to_morder(sheets_gid)
+        if errors:
+            return JsonResponse({'error': errors}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return JsonResponse({'status': 'success'}, status=status.HTTP_200_OK)
+
+
 def request_provider_info_admin(request, ppn_id):
     if not request.user.is_superuser:
         return HttpResponseRedirect('/admin/login/?next=' + request.path)
@@ -920,6 +935,10 @@ def api_get_order_data(request, id):
                 p.price = product['price']
                 p.providers.set(product['providers'])
                 p.ergent = product['ergent']
+                if p.ergent == 'false':
+                    p.ergent = False
+                elif p.ergent == 'true':
+                    p.ergent = True
                 p.prining = product['prining']
                 p.embroidery = product['embroidery']
                 p.embroideryComment = product.get('embroideryComment', '')
@@ -962,18 +981,19 @@ def api_get_order_data(request, id):
                         if qyt > 0:
                             e.quantity = qyt
                             e.save()
-                            dups = p.entries.filter(
-                                Q(color=e.color) and
-                                Q(size=e.size) and
-                                Q(varient=e.varient) and
-                                Q(morder_item=p) and
-                                ~Q(id=e.id)
-                            )
-                            if dups.count() != 0:
-                                print('delete all dups: ', dups)
-                                dups.delete()
+                            # dups = p.entries.filter(
+                            #     Q(color=e.color) and
+                            #     Q(size=e.size) and
+                            #     Q(varient=e.varient) and
+                            #     Q(morder_item=p) and
+                            #     ~Q(id=e.id)
+                            # )
+                            # if dups.count() != 0:
+                            #     print('delete all dups: ', dups)
+                            #     dups.delete()
                         else:
-                            e.delete()
+                            # e.delete()
+                            pass
                     else:
                         if qyt > 0:
                             existing_entry = p.entries.filter(
@@ -1006,6 +1026,8 @@ def api_get_order_data(request, id):
             reversion.set_user(user)
             reversion.set_comment(
                 'סטטוס: ' + str(order.status) + ' - סה"כ: ' + str(order.total_sell_price) + '₪')
+
+            order.morder_to_spreedsheet()
         return JsonResponse({'status': 'ok'}, status=status.HTTP_200_OK)
 
     data = AdminMOrderSerializer(order).data

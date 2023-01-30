@@ -32,6 +32,20 @@ from googleapiclient.discovery import build
 
 from catalogAlbum.models import CatalogAlbum, TopLevelCategory
 from catalogImages.models import CatalogImage
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
+from begoodPlus.secrects import GOOGLE_SERVICE_ACCOUNT_FILE
+
+
+def get_gspread_client():
+    scope = [
+        'https://www.googleapis.com/auth/spreadsheets',
+        'https://www.googleapis.com/auth/drive'
+    ]
+    creds = ServiceAccountCredentials.from_json_keyfile_name(
+        GOOGLE_SERVICE_ACCOUNT_FILE, scope)
+    gspred_client = gspread.authorize(creds)
+    return gspred_client
 
 
 def build_drive_service(cred):
@@ -632,3 +646,12 @@ def uuid2slug(uuidstring):
 
 def slug2uuid(slug):
     return str(UUID(bytes=urlsafe_b64decode(slug + '==')))
+
+
+def number_to_spreedsheet_letter(number):
+    number = number - 1
+    letter = ''
+    while number >= 0:
+        letter = chr((number % 26) + ord('A')) + letter
+        number = number // 26 - 1
+    return letter
