@@ -101,7 +101,7 @@ def get_sheet_from_drive_url(url, drive_service, drive_creds=None, loaded_files=
         # conver bytes to in memory file
         # if it's a string (error) return it
         if isinstance(bytes_exel_file, str):
-            return bytes_exel_file
+            return bytes_exel_file, None, None
         file = io.BytesIO(bytes_exel_file)
         # process the file
         all_sheets = pd.ExcelFile(file)
