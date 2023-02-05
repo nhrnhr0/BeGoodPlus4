@@ -514,6 +514,12 @@ class ProvidersDocxTask(models.Model):
             self.save()
             sheet, sheetname, loaded_files = get_sheet_from_drive_url(
                 url, drive_service, drive_creds, loaded_files)
+            # if returned (str, None, None) then there was an error add the error to the log
+            if sheetname == None and loaded_files == None and type(sheet) == str:
+                self.logs.append('error: ' + sheet)
+                self.save()
+                return
+
             sheets.append(sheet)
             log = 'downloaded'
             self.logs.append(log)
