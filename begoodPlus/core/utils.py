@@ -99,6 +99,9 @@ def get_sheet_from_drive_url(url, drive_service, drive_creds=None, loaded_files=
     else:
         bytes_exel_file = get_drive_file(drive_service, fileId)
         # conver bytes to in memory file
+        # if it's a string (error) return it
+        if isinstance(bytes_exel_file, str):
+            return bytes_exel_file
         file = io.BytesIO(bytes_exel_file)
         # process the file
         all_sheets = pd.ExcelFile(file)
@@ -618,7 +621,6 @@ def process_sheets_to_providers_docx(sheets, obj):
     return data
 
 
-
 def get_gspred_client():
     scope = [
         'https://www.googleapis.com/auth/spreadsheets',
@@ -628,7 +630,6 @@ def get_gspred_client():
         GOOGLE_SERVICE_ACCOUNT_FILE, scope)
     gspred_client = gspread.authorize(creds)
     return gspred_client
-
 
 
 def uuid2slug(uuidstring):
