@@ -23,7 +23,6 @@
     "@rollup/plugin-node-resolve": "^10.0.0",
     "@rollup/plugin-replace": "^3.0.0",
     "carbon-components-svelte": "^0.61.1",
-    "node-sass": "^7.0.3",
     "rollup": "^2.3.4",
     "rollup-plugin-css-only": "^3.1.0",
     "rollup-plugin-livereload": "^2.0.0",
@@ -39,6 +38,7 @@
     "npm-watch": "^0.11.0",
     "pivot-table-js": "^1.0.9",
     "pivottable": "^2.23.0",
+    "sass": "^1.58.3",
     "sirv-cli": "^1.0.0",
     "svelte-markdown": "^0.2.3",
     "tabulator-tables": "^5.1.7"

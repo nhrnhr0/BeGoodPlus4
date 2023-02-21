@@ -285,7 +285,7 @@ function new_product_btn_click() {
           <th>דואר אלקטרוני</th>
           <th>הודעה</th>
           <th>טלפון</th>
-          <th>סטטוס</th>
+          <th>2סטטוס</th>
           <th>שם העסק</th>
           <th>סוכן</th>
         </tr>
