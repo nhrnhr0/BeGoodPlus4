@@ -21,7 +21,11 @@ def update_morders_status2_based_on_status(apps, schema_editor):
                 try:
                     obj = MorderStatus.objects.get(name=new_status)
                 except MorderStatus.DoesNotExist:
-                    last_ordered = MorderStatus.objects.last().sort_order
+                    last_obj = MorderStatus.objects.last()
+                    if last_obj:
+                        last_ordered = last_obj.sort_order
+                    else:
+                        last_ordered = 1
                     obj = MorderStatus.objects.create(
                         name=new_status, sort_order=last_ordered+1)
                 order.status2 = obj

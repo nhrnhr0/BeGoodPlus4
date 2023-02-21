@@ -106,6 +106,9 @@ class MOrderAdmin(VersionAdmin):  # admin.ModelAdmin
                    'cols': 20, })},  # 'style': 'height: 1em;'
     }
 
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('client', 'client__user', 'status2')
+
     def export_to_signiture_doc(self, request, queryset):
         for morder in queryset:
             sigObj = create_signature_doc_from_morder(morder)
