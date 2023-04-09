@@ -61,6 +61,10 @@ class CatalogImage(models.Model):
     whatsapp_text = models.TextField(verbose_name=_(
         'whatsapp text'), blank=True, null=True)
 
+    @property
+    def has_free_text(self):
+        return self.free_text != None and self.free_text != '' and self.free_text != ' '
+
     def desc(self):
         return self.description[0:30]
     desc.short_description = _('short description')
@@ -126,6 +130,15 @@ class CatalogImage(models.Model):
     ]
     discount = models.CharField(
         max_length=50, choices=DISCOUNT_TYPES, default=NO_DISCOUNT, null=True, blank=True)
+
+    def free_text_display(self):
+        # div with truncating text and title with full text
+        truncating_size = 7
+        if len(self.free_text) > truncating_size:
+            return mark_safe(f'<div title="{self.free_text}">{self.free_text[0:truncating_size]}..</div>')
+        else:
+            return mark_safe(self.free_text)
+    free_text_display.short_description = 'טקסט חופשי'
 
     def is_main_public_album_set(self):
         return self.main_public_album != None
