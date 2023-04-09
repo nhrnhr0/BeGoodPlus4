@@ -81,13 +81,14 @@ def upload_mscrm_business_select_to_intrests_exel(request):
             xls = pd.ExcelFile(file)
             df1 = pd.read_excel(xls, sheetName, header=0, dtype=str)
             logger = ImportMsCrmUserTask.objects.create()
-            if settings.DEBUG:
-                # upload_mscrm_business_select_to_intrests_exel_task(df1, logger)
-                Thread(target=upload_mscrm_business_select_to_intrests_exel_task,
-                       args=(df1, logger)).start()
-            else:
-                upload_mscrm_business_select_to_intrests_exel_task.delay(
-                    df1, logger)
+            Thread(target=upload_mscrm_business_select_to_intrests_exel_task,
+                   args=(df1, logger)).start()
+            # # if settings.DEBUG:
+            # #     # upload_mscrm_business_select_to_intrests_exel_task(df1, logger)
+
+            # # else:
+            # #     upload_mscrm_business_select_to_intrests_exel_task.delay(
+            #         df1, logger)
             return redirect(reverse('ms_crm_upload_task', args=(logger.id,)))
             # messages.add_message(request, messages.INFO, '{} מספר מספרי טלפון חדשים ו{} מספר מספרי טלפון קיימים'.format(
             #     new_phone_count, existing_phone_count))
