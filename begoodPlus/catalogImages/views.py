@@ -401,13 +401,14 @@ class AlbumImagesApiView(APIView, CurserResultsSetPagination):
             qs = qs.filter(Q(is_active=True) and ~Q(main_public_album=None) and ~Q(
                 main_public_album__topLevelCategory=None))
             qs = qs.distinct()
+            qs = qs.filter(is_active=True)
         else:
             qs = qs.prefetch_related('catalogImage', 'catalogImage__albums').select_related(
                 'catalogImage__main_public_album', 'catalogImage__main_public_album__topLevelCategory')
             qs = qs.filter(Q(catalogImage__is_active=True) and ~Q(catalogImage__main_public_album=None) and ~Q(
                 catalogImage__main_public_album__topLevelCategory=None))
             qs = qs.distinct()
-
+            qs = qs.filter(catalogImage__is_active=True)
         qs = self.paginate_queryset(qs, self.request)
         # return all the catalogImages of the qs
         return qs
