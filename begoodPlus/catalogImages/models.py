@@ -134,6 +134,8 @@ class CatalogImage(models.Model):
     def free_text_display(self):
         # div with truncating text and title with full text
         truncating_size = 7
+        if self.free_text == None:
+            return ''
         if len(self.free_text) > truncating_size:
             return mark_safe(f'<div title="{self.free_text}">{self.free_text[0:truncating_size]}..</div>')
         else:
