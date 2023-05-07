@@ -54,7 +54,7 @@ class MOrderSignature(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    related_omrder = models.ForeignKey(
+    related_omrder = models.OneToOneField(
         MOrder, on_delete=models.SET_NULL, null=True)
     client_name = models.CharField(max_length=100)
     status = models.CharField(
