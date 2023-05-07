@@ -29,9 +29,10 @@ def create_signature_doc_from_morder(morder):
     client_name = morder.name
     related_omrder = morder
 
-    signatureObj = MOrderSignature.objects.create(
-        client_name=client_name, related_omrder=related_omrder)
-    signatureObj.save()
+    signatureObj, __ = MOrderSignature.objects.get_or_create(
+        related_omrder=related_omrder,
+        defaults={"client_name": client_name},
+    )
     for product in morder.products.all():
 
         item_name = product.product.title
