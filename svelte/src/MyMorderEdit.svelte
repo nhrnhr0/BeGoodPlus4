@@ -259,6 +259,28 @@ function new_product_btn_click() {
   win.focus();
   return false;
 }
+
+function handleImageUploadSim(e) {
+  let file = e.target.files[0];
+  let reader = new FileReader();
+  reader.readAsDataURL(file);
+  reader.onload = function () {
+    let image = reader.result;
+    simImage = image;
+  };
+}
+let simImage;
+let SimDescriptionNew;
+function addNewSimBtnClicked(e) {
+  e.preventDefault();
+  simulations.push({
+    cimage: simImage,
+    description: SimDescriptionNew,
+  });
+  data.simulations = [...data.simulations];
+  simImage = "";
+  SimDescriptionNew = "";
+}
 </script>
 
 <svelte:head>
@@ -596,7 +618,80 @@ function new_product_btn_click() {
       </button>
     </div>
   </div>
-
+  <!-- simulation -->
+  <div class="table-wraper">
+    <table class="simulation">
+      {#each data?.simulations || [] as sim, i}
+        <tr data-idx={i} class:deleted={sim.deleted}>
+          <td>
+            <input type="number" bind:value={sim.order} />
+          </td>
+          <td>
+            <img src={sim.cimage} class="sim-img" />
+          </td>
+          <td>
+            <div class="sim-description">
+              <textarea
+                name="sim-{i}"
+                id=""
+                cols="50"
+                rows="5"
+                placeholder="תיאור הדמייה"
+                bind:value={sim.description}
+              />
+            </div>
+          </td>
+          <td>
+            <div class="delete-action">
+              <button
+                type="button"
+                on:click={() => {
+                  sim.deleted = !sim.deleted;
+                }}
+              >
+                {#if !sim.deleted}
+                  מחק
+                {:else}
+                  שחזר
+                {/if}
+              </button>
+            </div>
+          </td>
+        </tr>
+      {/each}
+      <tr>
+        <td colspan="2"> הדמייה חדשה: </td>
+      </tr>
+      <tr>
+        <td colspan="1" class="sim-image-td">
+          <input
+            type="file"
+            id="selectedFileSim"
+            on:change={handleImageUploadSim}
+            accept="image/png, image/gif, image/jpeg"
+          />
+          <img width="50px" height="50px" src={simImage} class="sim-img" />
+        </td>
+        <td colspan="1">
+          <div class="sim-description">
+            <textarea
+              name="sim-new"
+              id=""
+              cols="50"
+              rows="5"
+              placeholder="תיאור הדמייה"
+              bind:value={SimDescriptionNew}
+            />
+          </div>
+        </td>
+        <td>
+          <button type="button" on:click={addNewSimBtnClicked}
+            >הוסף הדמייה</button
+          >
+        </td>
+      </tr>
+    </table>
+  </div>
   <div class="update-btn-wraper">
     <Button
       class="update-btn"
@@ -737,6 +832,53 @@ table.product-table {
       }
     }
     background-color: #a7a7a786;
+  }
+}
+
+// simulation
+.table-wraper {
+  overflow-x: auto;
+  margin-bottom: 20px;
+}
+table.simulation {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #ccc;
+  margin-top: 20px;
+  tr {
+    border: 1px solid #ccc;
+    // display: flex;
+    // flex-direction: row;
+    // justify-content: space-between;
+    // align-items: center;
+
+    td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      img {
+        width: 100%;
+        height: auto;
+
+        &.sim-img {
+          max-width: 350px;
+          width: auto;
+          height: auto;
+          // height: 100px;
+        }
+      }
+
+      &.sim-image-td {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      }
+    }
+
+    &.deleted {
+      background-color: #f10101;
+      color: #fff;
+    }
   }
 }
 </style>

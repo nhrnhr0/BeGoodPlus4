@@ -1,3 +1,5 @@
+from uuid import uuid4
+from docsSignature.models import MOrderSignatureSimulation
 from morders.models import MorderStatus
 from django.db import models
 from django.db.models.functions import Length
@@ -16,7 +18,7 @@ import zipfile
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from matplotlib.pyplot import annotate
-
+from docsSignature.views import save_image_to_cloudinary
 from catalogImages.models import CatalogImage
 from inventory.models import PPN, WarehouseStock
 from provider.models import Provider
@@ -992,6 +994,37 @@ def api_get_order_data(request, id):
 
                     # print('e2', e, 'save')
                     p.save()
+
+            for sim in data['simulations']:
+                if sim.get('deleted'):
+                    if sim.get('id'):
+                        try:
+                            sim_to_delete = MOrderSignatureSimulation.objects.get(
+                                id=sim['id'])
+                            sim_to_delete.delete()
+                        except:
+                            pass
+                    continue
+                if sim.get('id') != None:
+                    sim_obj = MOrderSignatureSimulation.objects.get(
+                        id=sim['id'])
+                else:
+                    sigModal = order.mordersignature
+                    sim_obj = MOrderSignatureSimulation()
+                    sim_obj.save()
+                    sigModal.simulations.add(sim_obj)
+                sim_obj.description = sim.get('description', '')
+                sim_obj.order = sim.get('order', 1)
+                if sim.get('cimage') and sim['cimage'].startswith('data:image'):
+                    # image data;str
+                    image_data = sim['cimage']
+                    # save the image to cloudinary and get the url
+                    url = save_image_to_cloudinary(
+                        image_data, str(sim_obj.id) + str(uuid4()), 'simulations')
+                    # update the item's cimage field
+                    sim_obj.cimage = url
+                sim_obj.save()
+                pass
 
             # recalculate total price
             order.save()

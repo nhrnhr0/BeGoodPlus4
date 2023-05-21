@@ -55,7 +55,7 @@ class MOrderSignature(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     related_omrder = models.OneToOneField(
-        MOrder, on_delete=models.SET_NULL, null=True)
+        MOrder, on_delete=models.SET_NULL, null=True, related_name='mordersignature')
     client_name = models.CharField(max_length=100)
     status = models.CharField(
         max_length=100, choices=DOC_STATUS_OPTIONS, default='Draft')
