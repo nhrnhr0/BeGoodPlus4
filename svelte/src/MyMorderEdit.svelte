@@ -273,6 +273,9 @@ let simImage;
 let SimDescriptionNew;
 function addNewSimBtnClicked(e) {
   e.preventDefault();
+  if (!data?.simulations) {
+    data.simulations = [];
+  }
   data.simulations.push({
     cimage: simImage,
     description: SimDescriptionNew,
