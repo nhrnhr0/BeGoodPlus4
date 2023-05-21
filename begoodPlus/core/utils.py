@@ -1,3 +1,7 @@
+from begoodPlus.secrects import GOOGLE_SERVICE_ACCOUNT_FILE, SECRECT_CLIENT_SIDE_DOMAIN, ALL_MORDER_FILE_SPREEDSHEET_URL
+from ordered_model.models import OrderedModelBase
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
 from base64 import urlsafe_b64decode, urlsafe_b64encode
 from uuid import UUID
 import docx
@@ -28,6 +32,20 @@ from googleapiclient.discovery import build
 
 from catalogAlbum.models import CatalogAlbum, TopLevelCategory
 from catalogImages.models import CatalogImage
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
+from begoodPlus.secrects import GOOGLE_SERVICE_ACCOUNT_FILE
+
+
+def get_gspread_client():
+    scope = [
+        'https://www.googleapis.com/auth/spreadsheets',
+        'https://www.googleapis.com/auth/drive'
+    ]
+    creds = ServiceAccountCredentials.from_json_keyfile_name(
+        GOOGLE_SERVICE_ACCOUNT_FILE, scope)
+    gspred_client = gspread.authorize(creds)
+    return gspred_client
 
 
 def build_drive_service(cred):
@@ -81,6 +99,9 @@ def get_sheet_from_drive_url(url, drive_service, drive_creds=None, loaded_files=
     else:
         bytes_exel_file = get_drive_file(drive_service, fileId)
         # conver bytes to in memory file
+        # if it's a string (error) return it
+        if isinstance(bytes_exel_file, str):
+            return bytes_exel_file, None, None
         file = io.BytesIO(bytes_exel_file)
         # process the file
         all_sheets = pd.ExcelFile(file)
@@ -600,6 +621,17 @@ def process_sheets_to_providers_docx(sheets, obj):
     return data
 
 
+def get_gspred_client():
+    scope = [
+        'https://www.googleapis.com/auth/spreadsheets',
+        'https://www.googleapis.com/auth/drive'
+    ]
+    creds = ServiceAccountCredentials.from_json_keyfile_name(
+        GOOGLE_SERVICE_ACCOUNT_FILE, scope)
+    gspred_client = gspread.authorize(creds)
+    return gspred_client
+
+
 def uuid2slug(uuidstring):
     if uuidstring:
         if isinstance(uuidstring, str):
@@ -615,3 +647,12 @@ def uuid2slug(uuidstring):
 
 def slug2uuid(slug):
     return str(UUID(bytes=urlsafe_b64decode(slug + '==')))
+
+
+def number_to_spreedsheet_letter(number):
+    number = number - 1
+    letter = ''
+    while number >= 0:
+        letter = chr((number % 26) + ord('A')) + letter
+        number = number // 26 - 1
+    return letter
