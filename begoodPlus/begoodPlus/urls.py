@@ -17,7 +17,7 @@ Including another URLconf
 
 from core.views import clear_drive_creds, oauth2callback
 from msCrm.views import ms_crm_upload_task
-from core.views import admin_upload_docs_page, providers_docx_task, sheetsurl_to_smartbee, sheetsurl_to_providers_docx
+from core.views import admin_upload_docs_page, providers_docx_task, sheetsurl_to_smartbee, sheetsurl_to_smartbee_async, sheetsurl_to_providers_docx
 
 from docsSignature.views import api_get_doc_signature, api_sign_on_doc
 from core.views import admin_upload_docs_page
@@ -37,7 +37,7 @@ from catalogImages.views import AlbumImagesApiView, admin_api_get_product_cost_p
 from clientApi.views import ColorsClientViewSet, ImageClientViewSet, SizesClientViewSet, LogoClientViewSet, get_album_images
 from clientApi.views import AlbumClientViewSet
 from catalogImageDetail.views import SvelteCatalogImageDetailViewSet
-from morders.views import api_edit_order_add_product, api_edit_order_delete_product, api_get_order_data, api_get_order_data2, create_provider_docs, dashboard_orders_collection_smartbee, edit_morder, get_all_orders, dashboard_orders_collection_collect_save, get_order_detail_to_collect, list_orders_to_collect, load_all_provider_request_admin, morder_edit_order_add_product_entries, api_delete_order_data_item, morder_edit_order_add_product_entries_2, morder_edit_order_add_provider_entries, provider_request_update_entry_admin, request_provider_info_admin, view_morder_pdf, view_morder_stock_document
+from morders.views import api_edit_order_add_product, api_edit_order_delete_product, api_get_order_data, api_get_order_data2, create_provider_docs, dashboard_orders_collection_smartbee, edit_morder, get_all_orders, dashboard_orders_collection_collect_save, get_order_detail_to_collect, list_orders_to_collect, load_all_provider_request_admin, morder_edit_order_add_product_entries, api_delete_order_data_item, morder_edit_order_add_product_entries_2, morder_edit_order_add_provider_entries, provider_request_update_entry_admin, request_provider_info_admin, view_morder_pdf, view_morder_stock_document, spreedsheet_to_morder_view
 
 
 from packingType.views import SvelteApiPackingTypeViewSet
@@ -91,6 +91,7 @@ clientRouter.register(r'logos', LogoClientViewSet)
 # from rest_framework.authtoken.views import obtain_auth_token
 # from rest_framework_simplejwt.views import (TokenObtainPairView,TokenRefreshView,)
 urlpatterns = [
+    path('spreedsheet-to-morder/', spreedsheet_to_morder_view),
     path('clear-drive-creds/', clear_drive_creds),
     path('oauth2callback/', oauth2callback, name='oauth2callback'),
     path('get-shareable-cart/<uuid:uuid>/', get_shareable_cart),
@@ -99,7 +100,7 @@ urlpatterns = [
          providers_docx_task, name='providers_docx_task'),
     path('ms-crm-upload-task/<int:task_id>/',
          ms_crm_upload_task, name='ms_crm_upload_task'),
-    path('sheetsurl-to-smartbee/', sheetsurl_to_smartbee),
+    path('sheetsurl-to-smartbee/', sheetsurl_to_smartbee_async),
     path('sign-on-doc/<uuid:uuid>/', api_sign_on_doc),
     path('api-signature/<uuid:uuid>/', api_get_doc_signature),
     path('api-edit-doc-signature/<uuid:uuid>',
