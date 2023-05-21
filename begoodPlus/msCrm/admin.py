@@ -3,12 +3,16 @@ from django.contrib import admin
 from numpy import integer
 
 from catalogAlbum.models import CatalogAlbum
-from .models import LeadSubmit, MsCrmBusinessSelectToIntrests, MsCrmBusinessTypeSelect, MsCrmIntrest, MsCrmIntrestsGroups, MsCrmUser
+from .models import LeadSubmit, MsCrmBusinessSelectToIntrests, MsCrmBusinessTypeSelect, MsCrmIntrest, MsCrmIntrestsGroups, MsCrmUser, MsCrmMessage
 from advanced_filters.admin import AdminAdvancedFiltersMixin
 from django.http import HttpResponse
 import io
 import xlsxwriter
 from django.utils.html import mark_safe
+from django_admin_multiple_choice_list_filter.list_filters import MultipleChoiceListFilter
+from django.shortcuts import redirect, render
+from django.urls import path, reverse
+import pickle
 
 
 class LeadSubmitAdmin(admin.ModelAdmin):
@@ -52,11 +56,24 @@ admin.site.register(MsCrmBusinessSelectToIntrests,
                     MsCrmBusinessSelectToIntrestAdmin)
 
 
+class StatusListFilter(MultipleChoiceListFilter):
+    title = 'businessSelect'
+    parameter_name = 'businessSelect__in'
+
+    def lookups(self, request, model_admin):
+        z  = MsCrmBusinessTypeSelect.objects.values_list('id','name').distinct()
+        #print(z)
+        return z
+from django import forms
+
+class MessageStoreForm(forms.Form):
+    message = forms.CharField(widget=forms.Textarea,required=False)
+
 # Register your models here.
 class MsCrmUserAdmin(AdminAdvancedFiltersMixin, admin.ModelAdmin):
     list_display = ('id', 'name', 'businessName', 'businessSelect', 'businessTypeCustom',
                     'phone', 'email', 'address', 'want_emails', 'want_whatsapp', 'created_at', 'updated_at')
-    list_filter = ('created_at', 'updated_at', 'businessSelect',
+    list_filter = ('created_at', 'updated_at',StatusListFilter,
                    'want_emails', 'want_whatsapp')
 
     def get_queryset(self, request):
@@ -71,7 +88,14 @@ class MsCrmUserAdmin(AdminAdvancedFiltersMixin, admin.ModelAdmin):
     ordering = ('-created_at',)
     filter_horizontal = ('intrests', 'clients',)
     actions = ['export_xlsx_for_whatsapp', 'download_full_CRM', ]
-
+    
+    def get_urls(self):
+        urls = super().get_urls()
+        new_urls = [
+            path("generate-xlxs/", self.generate_xlxs),
+        ]
+        return new_urls + urls
+    
     def download_full_CRM(self, request, queryset):
         output = io.BytesIO()
         workbook = xlsxwriter.Workbook(output)
@@ -167,7 +191,13 @@ class MsCrmUserAdmin(AdminAdvancedFiltersMixin, admin.ModelAdmin):
         response['Content-Disposition'] = 'attachment; filename=%s' % filename
         return response
 
-    def export_xlsx_for_whatsapp(self, request, queryset):
+    def generate_xlxs(self, request):
+        #print('hi')
+        #print(request)
+        message = request.POST['message']
+        qs = request.session['query_data']
+        queryset  = MsCrmUser.objects.filter(id__in = qs)
+        print(message)
         output = io.BytesIO()
         workbook = xlsxwriter.Workbook(output)
         worksheet = workbook.add_worksheet()
@@ -181,13 +211,16 @@ class MsCrmUserAdmin(AdminAdvancedFiltersMixin, admin.ModelAdmin):
         data = []
         # data.append(['WhatsApp Number(with country code)',
         #             'First Name', 'Last Name', 'Other'])
+        if message.strip() != "":
+            MsCrmMessage.objects.create(message = message)
         data.append(['name', 'phone', 'Last Name', 'Other'])
         queryset = queryset.filter(want_whatsapp=True)
+
         data.append(['אופיר', '+972524314139', 'דאלי', ''])
         for obj in queryset:
             phone = obj.get_clean_phonenumber()
             data.append([obj.name.split(' ')[0],
-                         phone, obj.name.split(' ')[-1], obj.name, ''])
+                        phone, obj.name.split(' ')[-1], obj.name, ''])
             # elif obj.phone.startswith('\u2066'):
             #    data.append(['+'+obj.phone[1:], obj.name.split(' ')[0], obj.name.split(' ')[-1], obj.name, ''])
             # else:
@@ -213,8 +246,21 @@ class MsCrmUserAdmin(AdminAdvancedFiltersMixin, admin.ModelAdmin):
             content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         )
         response['Content-Disposition'] = 'attachment; filename=%s' % filename
-
         return response
+       
+    def export_xlsx_for_whatsapp(self, request, queryset):
+
+        print(request.method,queryset)
+        if request.method == "POST":
+            qs_id = [qs.id for qs in queryset]
+            request.session['query_data'] = qs_id
+            form = MessageStoreForm()
+
+            context = {"form": form}
+            return render(request, "admin/message_send.html", context)
+        else:
+            print(request.method)
+    
     export_xlsx_for_whatsapp.short_description = "Export as XLSX for Whatsapp"
 
 
@@ -239,3 +285,12 @@ class MsCrmIntrestAdmin(admin.ModelAdmin):
 
 
 admin.site.register(MsCrmIntrest, MsCrmIntrestAdmin)
+
+
+class MsCrmMessageAdmin(admin.ModelAdmin):
+    list_display = ('id', 'message','created_at')
+    list_filter = ('businessSelect',)
+    search_fields = ('businessSelect','message')
+    ordering = ('-id',)
+
+admin.site.register(MsCrmMessage, MsCrmMessageAdmin)

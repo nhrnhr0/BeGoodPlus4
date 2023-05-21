@@ -178,3 +178,14 @@ class LeadSubmit(models.Model):
     phone = models.CharField(max_length=100, verbose_name=_('phone'))
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+class MsCrmMessage(models.Model):
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    businessSelect = models.ManyToManyField(MsCrmBusinessTypeSelect)
+    class Meta():
+        ordering = ['id', ]
+
+    def __str__(self):
+        return self.message

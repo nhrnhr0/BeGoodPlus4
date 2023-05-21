@@ -132,6 +132,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'cloudinary_storage',
     'cloudinary',
+    'django_admin_multiple_choice_list_filter'
 
     # 'debug_toolbar', # TODO: remove in production
 ]
