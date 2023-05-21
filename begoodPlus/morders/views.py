@@ -1029,7 +1029,12 @@ def api_get_order_data(request, id):
                     sim_obj = MOrderSignatureSimulation.objects.get(
                         id=sim['id'])
                 else:
-                    sigModal = order.mordersignature
+                    try:
+                        sigModal = order.mordersignature
+                    except:
+                        from docsSignature.utils import create_signature_doc_from_morder
+                        create_signature_doc_from_morder(order)
+                        sigModal = order.mordersignature
                     sim_obj = MOrderSignatureSimulation()
                     sim_obj.save()
                     sigModal.simulations.add(sim_obj)
