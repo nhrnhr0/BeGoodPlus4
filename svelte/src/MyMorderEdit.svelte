@@ -273,7 +273,7 @@ let simImage;
 let SimDescriptionNew;
 function addNewSimBtnClicked(e) {
   e.preventDefault();
-  simulations.push({
+  data.simulations.push({
     cimage: simImage,
     description: SimDescriptionNew,
   });
