@@ -274,6 +274,9 @@ let SimDescriptionNew;
 function addNewSimBtnClicked(e) {
   e.preventDefault();
   debugger;
+  if (data == undefined) {
+    data = {};
+  }
   if (!data?.simulations) {
     data.simulations = [];
   }
