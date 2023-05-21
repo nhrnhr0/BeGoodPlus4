@@ -228,17 +228,20 @@ class AdminMOrderSerializer(serializers.ModelSerializer):
     simulations = serializers.SerializerMethodField('get_simulations')
 
     def get_simulations(self, obj):
-        sigModal = obj.mordersignature
         ret = []
-        if sigModal:
-            for sim in sigModal.simulations.all():
-                ret.append({
-                    'id': sim.id,
-                    'description': sim.description,
-                    'cimage': sim.cimage,
-                    'order': sim.order,
-                })
+        try:
+            sigModal = obj.mordersignature
 
+            if sigModal:
+                for sim in sigModal.simulations.all():
+                    ret.append({
+                        'id': sim.id,
+                        'description': sim.description,
+                        'cimage': sim.cimage,
+                        'order': sim.order,
+                    })
+        except:
+            pass
         return ret
 
     class Meta:
