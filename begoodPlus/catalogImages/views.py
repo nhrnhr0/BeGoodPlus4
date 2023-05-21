@@ -103,11 +103,15 @@ class SlimCatalogImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = CatalogImage
         fields = ('id', 'title', 'cimage', 'price', 'new_price',
-                  'main_public_album__slug', 'main_public_album_top__slug', 'link')
+                  'main_public_album__slug', 'main_public_album_top__slug', 'link', 'out_of_stock')
     #main_album = serializers.SerializerMethodField('_get_main_album')
     new_price = serializers.SerializerMethodField('_get_new_price')
     price = serializers.SerializerMethodField('_get_price')
     link = serializers.SerializerMethodField('_get_link')
+    out_of_stock = serializers.SerializerMethodField('_get_out_of_stock')
+
+    def _get_out_of_stock(self, obj):
+        return obj.out_of_stock
 
     def _get_link(self, obj):
         return '/main?' + 'top=' + obj.main_public_album.topLevelCategory.slug + '&album=' + obj.main_public_album.slug + '&product_id=' + str(obj.id)
@@ -397,13 +401,14 @@ class AlbumImagesApiView(APIView, CurserResultsSetPagination):
             qs = qs.filter(Q(is_active=True) and ~Q(main_public_album=None) and ~Q(
                 main_public_album__topLevelCategory=None))
             qs = qs.distinct()
+            qs = qs.filter(is_active=True)
         else:
             qs = qs.prefetch_related('catalogImage', 'catalogImage__albums').select_related(
                 'catalogImage__main_public_album', 'catalogImage__main_public_album__topLevelCategory')
             qs = qs.filter(Q(catalogImage__is_active=True) and ~Q(catalogImage__main_public_album=None) and ~Q(
                 catalogImage__main_public_album__topLevelCategory=None))
             qs = qs.distinct()
-
+            qs = qs.filter(catalogImage__is_active=True)
         qs = self.paginate_queryset(qs, self.request)
         # return all the catalogImages of the qs
         return qs

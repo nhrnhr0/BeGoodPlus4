@@ -225,11 +225,26 @@ class AdminMOrderSerializer(serializers.ModelSerializer):
     agent_name = serializers.CharField(
         source='agent.username', read_only=False, default='')
     #client_id = serializers.IntegerField(source='client.user.id', read_only=False)
+    simulations = serializers.SerializerMethodField('get_simulations')
+
+    def get_simulations(self, obj):
+        sigModal = obj.mordersignature
+        ret = []
+        if sigModal:
+            for sim in sigModal.simulations.all():
+                ret.append({
+                    'id': sim.id,
+                    'description': sim.description,
+                    'cimage': sim.cimage,
+                    'order': sim.order,
+                })
+
+        return ret
 
     class Meta:
         model = MOrder
         fields = ('id', 'agent', 'agent_name', 'client', 'status', 'status2', 'status_msg', 'created', 'updated', 'message', 'name', 'phone',
-                  'email', 'client_businessName', 'products', 'freezeTakenInventory', 'isOrder', 'sendProviders', 'startCollecting')
+                  'email', 'client_businessName', 'products', 'freezeTakenInventory', 'isOrder', 'sendProviders', 'startCollecting', 'simulations',)
 
 
 class MOrderCollectionSerializer(serializers.ModelSerializer):

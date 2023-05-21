@@ -1,3 +1,4 @@
+from color.models import Color
 from morders.models import MorderStatus
 from rest_framework.reverse import reverse
 from rest_framework.decorators import api_view
@@ -125,7 +126,7 @@ def get_all_sizes_api(request):
 
 
 def get_all_colors_api(request):
-    colors = ColorClientApi(ProductColor.objects.all(), many=True).data
+    colors = ColorClientApi(Color.objects.all(), many=True).data
     return JsonResponse(colors, safe=False)
 
 

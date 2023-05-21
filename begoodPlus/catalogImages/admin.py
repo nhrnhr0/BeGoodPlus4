@@ -1,3 +1,4 @@
+from typing import Any
 from django.contrib import admin
 from advanced_filters.admin import AdminAdvancedFiltersMixin
 from django.http.response import HttpResponse
@@ -31,9 +32,9 @@ admin.site.register(CatalogImageVarient, CatalogImageVarientAdmin)
 
 class tableInline(admin.TabularInline):
     model = CatalogImage.detailTabel.through
-    #fields = ['',]
-    #fields = ['id', 'provider']
-    #readonly_fields = ['provider']
+    # fields = ['',]
+    # fields = ['id', 'provider']
+    # readonly_fields = ['provider']
     fields = ['id', 'provider', 'dis_colors', 'dis_sizes', 'dis_cost_price',
               'dis_client_price', 'dis_recomended_price', 'providerMakat']
     readonly_fields = ['id', 'provider', 'dis_colors', 'dis_sizes',
@@ -97,8 +98,8 @@ class tableInline(admin.TabularInline):
 
 class albumsInline(admin.TabularInline):
     model = ThroughImage
-    #fields = ['id','provider','dis_colors','dis_sizes', 'dis_cost_price', 'dis_client_price', 'dis_recomended_price']
-    #readonly_fields = ['id','provider','dis_colors', 'dis_sizes', 'dis_cost_price', 'dis_client_price', 'dis_recomended_price']
+    # fields = ['id','provider','dis_colors','dis_sizes', 'dis_cost_price', 'dis_client_price', 'dis_recomended_price']
+    # readonly_fields = ['id','provider','dis_colors', 'dis_sizes', 'dis_cost_price', 'dis_client_price', 'dis_recomended_price']
     extra = 1
 # Register your models here.
 
@@ -109,31 +110,80 @@ class ppnInline(admin.TabularInline):
     extra = 0
 
 
+class FreeTextListFilter(admin.SimpleListFilter):
+    # Human-readable title which will be displayed in the
+    # right admin sidebar just above the filter options.
+    title = _('free text')
+
+    # Parameter for the filter that will be used in the URL query.
+    parameter_name = 'free_text'
+
+    def lookups(self, request, model_admin):
+        """
+        Returns a list of tuples. The first element in each
+        tuple is the coded value for the option that will
+        appear in the URL query. The second element is the
+        human-readable name for the option that will appear
+        in the right sidebar.
+        """
+        return (
+            ('yes', _('has free text')),
+            ('no', _('no free text')),
+        )
+
+    def queryset(self, request: Any, queryset):
+        # based on value, return filtered queryset
+        # if no:
+        #   is_null, is blank or is having only spaces
+        # if yes:
+        #   is not null and is not blank and is not having only spaces
+        # if all:
+        #   return all
+        yes_qs = queryset.exclude(free_text__isnull=True).exclude(
+            free_text__exact='').exclude(free_text__regex=r'^\s+$')
+        if self.value() == 'yes':
+            return yes_qs
+        elif self.value() == 'no':
+            return queryset.exclude(id__in=yes_qs)
+        else:
+            return queryset
+
+
 class CatalogImageAdmin(AdminAdvancedFiltersMixin, admin.ModelAdmin):
-    list_display = ('id', 'render_thumbnail', 'title', 'barcode', 'cost_price_dis', 'client_price_dis', 'recomended_price_dis', 'get_albums',
+    list_display = ('id', 'render_thumbnail', 'title', 'barcode', 'free_text_display', 'cost_price_dis', 'client_price_dis', 'recomended_price_dis', 'get_albums',
                     'cost_price', 'client_price', 'recomended_price', 'date_created', 'date_modified', 'is_main_public_album_set', 'is_active', 'show_sizes_popup', 'has_physical_barcode',)
     list_editable = ('cost_price', 'client_price', 'recomended_price',)
     list_display_links = ('title',)
-    actions = ['download_images_csv', 'download_images_exel_slim', 'download_images_exel_warehouse', 'turn_sizes_popup_active', 'turn_sizes_popup_inactive',
+    actions = ['turn_on_is_active', 'turn_off_is_active', 'download_images_csv', 'download_images_exel_slim', 'download_images_exel_warehouse', 'turn_sizes_popup_active', 'turn_sizes_popup_inactive',
                'upload_images_to_cloudinary_bool_active', 'upload_images_to_cloudinary_bool_inactive', 'turn_can_tag_active', 'turn_can_tag_inactive', 'turn_out_of_stock_inactive', 'turn_out_of_stock_active']
     inlines = (albumsInline, tableInline, ppnInline)
     readonly_fields = ('id', 'render_thumbnail',
                        'render_image', 'is_main_public_album_set')
     search_fields = ('title', 'description', 'barcode',
                      'detailTabel__providerMakat')
-    list_filter = ('albums', 'providers', 'sizes', 'colors',)
+    list_filter = (FreeTextListFilter, 'albums',
+                   'providers', 'sizes', 'colors', )
     filter_horizontal = ('colors', 'sizes', 'providers',
                          'varients')  # 'detailTabel'
     list_per_page = 50
     exclude = ('detailTabel',)
     advanced_filter_fields = (
         'title', 'description', 'sizes__size', 'colors__name', 'provides__name', 'varients__name',
-        'barcode', 'cost_price', 'client_price', 'recomended_price', 'albums__title', 'show_sizes_popup',
-        ('packingTypeProvider__name', 'שיטת אריזה מהספק'), ('packingTypeClient__name', 'שיטת אריזה ללקוח'), 'date_created', 'date_modified', 'can_tag', 'out_of_stock', 'is_active', 'has_physical_barcode', 'cimage',)
+        'barcode', 'cost_price', 'client_price', 'recomended_price',
+        ('albums__title', 'כותרת אלבום'), 'show_sizes_popup',
+        ('packingTypeProvider__name', 'שיטת אריזה מהספק'), ('packingTypeClient__name', 'שיטת אריזה ללקוח'), 'date_created', 'date_modified', 'can_tag', 'out_of_stock', 'is_active', 'has_physical_barcode', 'cimage', 'free_text', 'whatsapp_text',)
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
         return qs.prefetch_related('albums', 'detailTabel').select_related('packingTypeProvider', 'packingTypeClient', 'main_public_album', )
+
+    def turn_on_is_active(self, request, queryset):
+        queryset.update(is_active=True)
+    turn_on_is_active.short_description = _('turn is active')
+
+    def turn_off_is_active(self, request, queryset):
+        queryset.update(is_active=False)
+    turn_off_is_active.short_description = _('turn is not active')
 
     def turn_out_of_stock_active(modeladmin, request, queryset):
         queryset.update(out_of_stock=True)
@@ -183,7 +233,7 @@ class CatalogImageAdmin(AdminAdvancedFiltersMixin, admin.ModelAdmin):
         title_style.alignment = alignment_center
         value_style.alignment = alignment_center
         title_style.font.bold = True
-        #writer.writerow(['id', 'title', 'description', 'cimage', 'cost_price', 'packingTypeClient'])
+        # writer.writerow(['id', 'title', 'description', 'cimage', 'cost_price', 'packingTypeClient'])
         i = 1
         ws.write(0, 0, 'id', title_style)
         ws.write(0, 1, 'כותרת', title_style)

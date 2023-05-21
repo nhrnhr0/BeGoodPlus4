@@ -384,6 +384,8 @@ class SvelteCartModal(models.Model):
     uniqe_color.short_description = _('uniqe color')
 
     def turn_to_morder(self):
+        from docsSignature.utils import create_signature_doc_from_morder
+
         from morders.models import MOrder, MOrderItem, MOrderItemEntry, MorderStatus
         cart = self
         if self.user and self.user.is_authenticated:
@@ -471,6 +473,9 @@ class SvelteCartModal(models.Model):
                                        phone=phone, email=email, status=status, status2=status2, message=message, agent=agent)
         morder.products.add(*dbProducts)
         morder.save()
+
+        # Create Signature for created morder
+        create_signature_doc_from_morder(morder)
 
     def __str__(self):
         # Return a string that represents the instance

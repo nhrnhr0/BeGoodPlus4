@@ -197,6 +197,14 @@ class MOrder(models.Model):
     last_sheet_update = models.DateTimeField(
         _('last sheet update'), null=True, blank=True)
 
+    # save
+    def save(self, *args, **kwargs):
+        from docsSignature.utils import create_signature_doc_from_morder
+
+        create_signature_doc_from_morder(self)
+
+        super().save(*args, **kwargs)
+
     class Meta:
         ordering = ['-created']
 
@@ -852,11 +860,12 @@ class MOrder(models.Model):
         return mark_safe(html)
 
     def get_status_display(self):
-        status = self.status
+        status = self.status2
+        return status
         # STATUS_CHOICES = [('new', 'חדש'), ('price_proposal',....
-        for choice in STATUS_CHOICES:
-            if choice[0] == status:
-                return choice[1]
+        # for choice in STATUS_CHOICES:
+        #     if choice[0] == status:
+        #         return choice[1]
 
     def get_edit_order_url(self):
         return reverse('admin_edit_order', args=(self.pk,))
