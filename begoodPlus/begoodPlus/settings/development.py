@@ -6,7 +6,7 @@ from django.urls import path, include, re_path
 
 DEBUG = True
 COMPRESS_ENABLED = False
-
+DATA_UPLOAD_MAX_MEMORY_SIZE = 52428800
 # drive auth
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 

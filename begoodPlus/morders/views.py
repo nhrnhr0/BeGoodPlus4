@@ -992,7 +992,10 @@ def api_get_order_data(request, id):
 
                     # print('e2', e, 'save')
                     p.save()
+
+            # recalculate total price
             order.save()
+
             # _ord = MOrder.objects.get(id=order.id)
             # total_price = 0
             # for item in _ord.products.all():
