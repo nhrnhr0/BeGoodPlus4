@@ -273,6 +273,7 @@ let simImage;
 let SimDescriptionNew;
 function addNewSimBtnClicked(e) {
   e.preventDefault();
+  debugger;
   if (!data?.simulations) {
     data.simulations = [];
   }
