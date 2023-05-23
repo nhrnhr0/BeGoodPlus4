@@ -212,7 +212,12 @@ class MsCrmUserAdmin(AdminAdvancedFiltersMixin, admin.ModelAdmin):
         # data.append(['WhatsApp Number(with country code)',
         #             'First Name', 'Last Name', 'Other'])
         if message.strip() != "":
-            MsCrmMessage.objects.create(message = message)
+            z = queryset.values_list('businessSelect_id').distinct()
+            entries = MsCrmBusinessTypeSelect.objects.filter(id__in=z)
+            #print(entries)
+            crm_user_message = MsCrmMessage.objects.create(message = message)
+            for i in entries:
+                crm_user_message.businessSelect.add(i)
         data.append(['name', 'phone', 'Last Name', 'Other'])
         queryset = queryset.filter(want_whatsapp=True)
 
