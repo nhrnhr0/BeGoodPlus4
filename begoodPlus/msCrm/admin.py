@@ -260,8 +260,15 @@ class MsCrmUserAdmin(AdminAdvancedFiltersMixin, admin.ModelAdmin):
             qs_id = [qs.id for qs in queryset]
             request.session['query_data'] = qs_id
             form = MessageStoreForm()
+            z = queryset.values_list('businessSelect_id').distinct()
+            entries = MsCrmBusinessTypeSelect.objects.filter(id__in=z)
+            list_data = []
+            for i in entries:
+                data = MsCrmMessage.objects.filter(businessSelect__in  = [i]).last()
+                #print(data,'data')
+                list_data.append(data)
 
-            context = {"form": form}
+            context = {"form": form,'list_data':list_data}
             return render(request, "admin/message_send.html", context)
         else:
             print(request.method)
