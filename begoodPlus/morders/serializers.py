@@ -234,12 +234,21 @@ class AdminMOrderSerializer(serializers.ModelSerializer):
 
             if sigModal:
                 for sim in sigModal.simulations.all():
-                    ret.append({
+                    row = {
                         'id': sim.id,
                         'description': sim.description,
                         'cimage': sim.cimage,
                         'order': sim.order,
-                    })
+                    }
+                    row['products'] = {}
+                    for prod in sim.products.all():
+                        itm = prod.item
+                        row['products'][itm.id] = {
+                            'img': itm.product.cimage,
+                            'title': itm.product.title,
+                            'amount': prod.amount,
+                        }
+                    ret.append(row)
         except:
             pass
         return ret

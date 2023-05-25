@@ -1,5 +1,7 @@
 import uuid
 from django.db import models
+from morders.models import MOrderItem
+from morders.models import MOrderItemEntry
 from begoodPlus.secrects import SECRECT_CLIENT_SIDE_DOMAIN
 from catalogImages.models import CatalogImageVarient
 from color.models import Color
@@ -41,10 +43,18 @@ class MOrderSignatureItem(models.Model):
         ordering = ['order']
 
 
+class MOrderSignatureSimulationConnectedItem(models.Model):
+    item = models.ForeignKey(
+        MOrderItem, on_delete=models.SET_NULL, null=True, blank=True)
+    amount = models.IntegerField(default=1)
+
+
 class MOrderSignatureSimulation(models.Model):
     description = models.TextField()
     cimage = models.CharField(max_length=350, blank=True, null=True)
     order = models.IntegerField(default=1)
+    products = models.ManyToManyField(
+        to=MOrderSignatureSimulationConnectedItem)
 
     class Meta:
         ordering = ['order']
