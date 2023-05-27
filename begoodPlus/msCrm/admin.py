@@ -72,7 +72,7 @@ class MessageStoreForm(forms.Form):
 # Register your models here.
 class MsCrmUserAdmin(AdminAdvancedFiltersMixin, admin.ModelAdmin):
     list_display = ('id', 'name', 'businessName', 'businessSelect', 'businessTypeCustom',
-                    'phone', 'email', 'address', 'want_emails', 'want_whatsapp', 'created_at', 'updated_at')
+                    'phone', 'email', 'address', 'want_emails', 'want_whatsapp', 'created_at', 'updated_at','get_message')
     list_filter = ('created_at', 'updated_at',StatusListFilter,
                    'want_emails', 'want_whatsapp')
 
@@ -89,6 +89,16 @@ class MsCrmUserAdmin(AdminAdvancedFiltersMixin, admin.ModelAdmin):
     filter_horizontal = ('intrests', 'clients',)
     actions = ['export_xlsx_for_whatsapp', 'download_full_CRM', ]
     
+    def get_message(self, obj):
+        message = MsCrmMessage.objects.filter(businessSelect__in  = [obj.businessSelect]).last()
+        print(message)
+        if message:
+            return message.message
+        else:
+            return ""
+
+    get_message.short_description = "Message"
+
     def get_urls(self):
         urls = super().get_urls()
         new_urls = [
