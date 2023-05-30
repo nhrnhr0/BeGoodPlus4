@@ -439,7 +439,7 @@ def sheetsurl_to_providers_docx(request):
         task = ProvidersDocxTask.objects.create(
             links=urls)
         Thread(target=sheetsurl_to_providers_docx_task,
-               args=(task.id, drive_service, drive_creds)).start()
+               args=(task.id,)).start()
 
         return redirect('providers_docx_task', task_id=task.id)
     else:

@@ -506,7 +506,7 @@ class ProvidersDocxTask(models.Model):
         ret = dict(ProvidersDocxTaskStatusChoices)[self.status]
         return ret
 
-    def process_sheetsurl_to_providers_docx(self, drive_service, drive_creds):
+    def process_sheetsurl_to_providers_docx(self):
         # try:
         sheets = []
         urls = self.links

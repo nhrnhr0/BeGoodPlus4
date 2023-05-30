@@ -22,11 +22,10 @@ from core.models import SvelteCartModal, SvelteContactFormModal, UserProductPhot
 
 
 @shared_task
-def sheetsurl_to_providers_docx_task(providersDocxTask_id, drive_service, drive_creds):
+def sheetsurl_to_providers_docx_task(providersDocxTask_id):
     from core.models import ProvidersDocxTask
     providersDocxTask = ProvidersDocxTask.objects.get(id=providersDocxTask_id)
-    providersDocxTask.process_sheetsurl_to_providers_docx(
-        drive_service, drive_creds)
+    providersDocxTask.process_sheetsurl_to_providers_docx()
 
 
 @shared_task
