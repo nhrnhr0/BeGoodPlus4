@@ -1,3 +1,4 @@
+import re
 from django.http import HttpRequest
 from .models import MorderStatus
 from ordered_model.admin import OrderedModelAdmin
@@ -92,8 +93,8 @@ class MOrderAdmin(VersionAdmin):  # admin.ModelAdmin
               'status', 'status2', 'message',)  # what is this for?
     readonly_fields = ('created', 'total_sell_price', 'updated', 'get_edit_url',
                        'view_morder_pdf_link', 'cart', 'client', 'status', 'status2', )
-    list_display = ('id', 'client', 'name', 'status', 'status2', 'status_msg', 'total_sell_price',
-                    'get_edit_url', 'view_morder_pdf_link', 'created', 'updated',)
+    list_display = ('id', 'client', 'name', 'status2', 'status_msg', 'total_sell_price',
+                    'get_edit_url', 'view_morder_pdf_link', 'get_googlesheets_link', 'created', 'updated',)
     # list_editable = ('status_msg',)
     # filter_horizontal = ('products',)
     list_filter = ('status', 'created', 'updated',)
@@ -104,6 +105,16 @@ class MOrderAdmin(VersionAdmin):  # admin.ModelAdmin
                'sync_with_spreedsheet')
     # select_related = ('client', 'status2')
 
+    def get_googlesheets_link(self, obj):
+        import re
+        from begoodPlus.secrects import ALL_MORDER_FILE_SPREEDSHEET_URL
+        if obj.gid:
+            # relpace with regex #gid=XXXXX with #gid=obj.gid
+            url = re.sub(r'#gid=\d+', f'#gid={obj.gid}',
+                         ALL_MORDER_FILE_SPREEDSHEET_URL)
+            return mark_safe(f'< a href="{url}" target="_blank">קישור לsheets</a>')
+        return None
+
     def get_queryset(self, request: HttpRequest):
         return super().get_queryset(request).select_related('client', 'status2', 'client__user')
 
@@ -112,7 +123,6 @@ class MOrderAdmin(VersionAdmin):  # admin.ModelAdmin
             attrs={'rows': 2,
                    'cols': 20, })},  # 'style': 'height: 1em;'
     }
-
 
     def get_queryset(self, request):
         return super().get_queryset(request).select_related('client', 'client__user', 'status2')

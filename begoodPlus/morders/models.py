@@ -1,5 +1,5 @@
 import pytz
-from core.utils import get_gspread_client
+from core.gspred import get_gspread_client
 from gspread.cell import Cell
 from gspread_formatting import *
 from openpyxl.styles import Alignment
@@ -238,6 +238,11 @@ class MOrder(models.Model):
         ws.update_cell(2, 5, now.strftime('%d/%m/%Y %H:%M:%S'))
         ws.update_cell(2, 6, str(errors))
         return errors
+
+    def morder_to_spreedsheet_thread(self):
+        import threading
+        t = threading.Thread(target=self.morder_to_spreedsheet)
+        t.start()
 
     def morder_to_spreedsheet(self):
         gspred_client = get_gspread_client()

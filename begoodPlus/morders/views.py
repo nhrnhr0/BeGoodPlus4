@@ -1089,7 +1089,7 @@ def api_get_order_data(request, id):
             reversion.set_comment(
                 'סטטוס: ' + str(order.status) + ' - סה"כ: ' + str(order.total_sell_price) + '₪')
 
-            # order.morder_to_spreedsheet()
+            order.morder_to_spreedsheet_thread()
         return JsonResponse({'status': 'ok'}, status=status.HTTP_200_OK)
 
     data = AdminMOrderSerializer(order).data
