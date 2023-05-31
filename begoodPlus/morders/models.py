@@ -1,3 +1,4 @@
+from begoodPlus.secrects import FULL_DOMAIN
 import pytz
 from core.gspred import get_gspread_client
 from gspread.cell import Cell
@@ -196,8 +197,9 @@ class MOrder(models.Model):
     gid = models.CharField(max_length=100, blank=True, null=True)
     last_sheet_update = models.DateTimeField(
         _('last sheet update'), null=True, blank=True)
-
+    export_to_suppliers = models.BooleanField(default=False)
     # save
+
     def save(self, *args, **kwargs):
         from docsSignature.utils import create_signature_doc_from_morder
 
@@ -271,7 +273,22 @@ class MOrder(models.Model):
 
         def is_header_row(row):
             return not str(row[9]) == ''
+        if(sheets_data[0][6] == 'סטטוס'):
+            new_status = sheets_data[1][6]
+            if not self.status2.name == new_status and not new_status == '':
+                status_obj, created = MorderStatus.objects.get_or_create(
+                    name=new_status)
+                self.status2 = status_obj
 
+        # I1 = לקחת לספקים?
+        # I2 = <has any>
+        if(sheets_data[0][8] == 'לקחת לספקים?'):
+            new_export_to_suppliers = sheets_data[1][8]
+            if new_export_to_suppliers != None and new_export_to_suppliers != '':
+                self.export_to_suppliers = True
+            else:
+                self.export_to_suppliers = False
+            # export_to_suppliers
         all_products = {}
         # all_products = {product.title: {'title': product.title, 'price': product.price, 'vat': product.vat, 'provider': product.provider, entries: [{size: 'S',varient:'', quantity: 1, provider: 'ספק 1', 'taken':'v'}, {size: 'M',varient:'', quantity: 1, provider: 'ספק 1', 'taken':3}]}]}}
         for row in sheets_data[3:]:
@@ -331,7 +348,8 @@ class MOrder(models.Model):
                     except:
                         errors.append(
                             f'ספק {product["main_provider"]} לא תקין' + f' פריט {product["title"]}')
-                    order_entry.save()
+                    if order_entry:
+                        order_entry.save()
                 else:
                     for entry in product['entries']:
                         # get or create the entry from the order
@@ -438,10 +456,12 @@ class MOrder(models.Model):
         #  ['ברקוד	פריט	כמות כוללת	הערות	כמות נלקחת	מחיר מכירה	מע"מ	הדפסה?		רקמה?		ספקים'
         # same as above but with one call
         current_time = datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+        # =HYPERLINK("https://testing.boost-pop.com/morders/edit-order/517", "517")
         data_array = [
-            ['מספר הזמנה', 'תאריך הזמנה', 'שם הלקוח', 'הודעה', 'עדכון אחרון'],
+            ['מספר הזמנה', 'תאריך הזמנה', 'שם הלקוח', 'הודעה',
+                'עדכון אחרון', 'שגיאות', 'סטטוס', 'קישור לאדמין'],
             [data['id'], data['date'], data['name'],
-                data['message'], current_time],
+                data['message'], current_time, '', data['status'], data['admin_link']],
             ['ברקוד', 'פריט', 'כמות כוללת', 'הערות', 'כמות נלקחת',
                 'מחיר מכירה', 'מע"מ', 'הדפסה?', '', 'רקמה?', '', 'ספקים'],
         ]
@@ -454,16 +474,33 @@ class MOrder(models.Model):
         headers_range = 'A1:' + \
             number_to_spreedsheet_letter(
                 longest_row_length) + str(len(data_array))
-        ws.update(headers_range, data_array, value_input_option='USER_ENTERED')
+        ws.update(headers_range, data_array,
+                  value_input_option='USER_ENTERED')
+
         ws.format(headers_range, LOCKED_CELL_COLOR)
 
         # reset all the other cells to blank data and format them
         all_other_cells_range = 'A4:' + \
             'M' + str(len(data_array) + 1000)
         ws.update(all_other_cells_range, [[''] * longest_row_length] * 1000)
-        ws.format(all_other_cells_range, BLANK_CELL_COLOR)
+        # ws.format(all_other_cells_range, BLANK_CELL_COLOR)
         # clear all data validation
         set_data_validation_for_cell_range(ws, all_other_cells_range, None)
+
+        all_statuses = list(
+            MorderStatus.objects.all().values_list('name', flat=True))
+        status_validation_rule = DataValidationRule(
+            BooleanCondition('ONE_OF_LIST', all_statuses),
+            showCustomUi=True
+        )
+        set_data_validation_for_cell_range(
+            ws, 'G2:G2', status_validation_rule)
+
+        # create a title at I1 cell: "לקחת לספקים?"
+        ws.update_cell(1, 9, 'לקחת לספקים?')
+        # create a checkbox at I2 cell
+
+        ws.update_cell(2, 9, data['export_to_suppliers'])
         pass
 
     def write_morder_to_spreedsheet(self, wb: gspread.Spreadsheet):
@@ -656,8 +693,8 @@ class MOrder(models.Model):
 
                 # format_cell_range(order_ws, 'A' + str(current_row) + ':D' + str(current_row),
                 #                   subtable_header_format)
-                formating_tasks.append(
-                    {'range': 'A' + str(current_row) + ':D' + str(current_row), 'format':  SUBTABLE_HEADER_FORMAT_CONST})
+                # formating_tasks.append(
+                #     {'range': 'A' + str(current_row) + ':D' + str(current_row), 'format':  SUBTABLE_HEADER_FORMAT_CONST})
                 # 5 taken
                 formating_tasks.append(
                     {'range': 'E' + str(current_row) + ':E' + str(current_row), 'format':  USER_INPUT_FORMAT_CONST})
@@ -819,6 +856,9 @@ class MOrder(models.Model):
             'message': self.message if self.message != None else '',
             'date': self.created.strftime('%d_%m_%Y'),
             'id': self.id,
+            'status': self.status2.name if self.status2 != None else '',
+            'admin_link': self.get_edit_url_without_html(base_url=FULL_DOMAIN),
+            'export_to_suppliers': self.export_to_suppliers,
         }
         return data
 
@@ -830,8 +870,16 @@ class MOrder(models.Model):
         link = reverse('view_morder_pdf', args=(self.pk,))
         return mark_safe('<a href="{}">{}</a>'.format(link, 'הצג הזמנה'))
 
-    def get_edit_url(self):
+    def get_edit_url_without_html(self, base_url=None):
         link = reverse('admin_edit_order', args=(self.pk,))
+        if base_url:
+            return base_url + link
+        return link
+
+    def get_edit_url(self, base_url=None):
+        link = reverse('admin_edit_order', args=(self.pk,))
+        if base_url:
+            return base_url + link
         return mark_safe('<a href="{}">{}</a>'.format(link, 'ערוך'))
 
     def products_display(self):

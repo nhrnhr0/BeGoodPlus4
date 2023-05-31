@@ -94,7 +94,7 @@ class MOrderAdmin(VersionAdmin):  # admin.ModelAdmin
     readonly_fields = ('created', 'total_sell_price', 'updated', 'get_edit_url',
                        'view_morder_pdf_link', 'cart', 'client', 'status', 'status2', )
     list_display = ('id', 'client', 'name', 'status2', 'status_msg', 'total_sell_price',
-                    'get_edit_url', 'view_morder_pdf_link', 'get_googlesheets_link', 'created', 'updated',)
+                    'get_edit_url', 'view_morder_pdf_link', 'get_googlesheets_link', 'created', 'updated', 'export_to_suppliers')
     # list_editable = ('status_msg',)
     # filter_horizontal = ('products',)
     list_filter = ('status', 'created', 'updated',)
@@ -112,7 +112,7 @@ class MOrderAdmin(VersionAdmin):  # admin.ModelAdmin
             # relpace with regex #gid=XXXXX with #gid=obj.gid
             url = re.sub(r'#gid=\d+', f'#gid={obj.gid}',
                          ALL_MORDER_FILE_SPREEDSHEET_URL)
-            return mark_safe(f'< a href="{url}" target="_blank">קישור לsheets</a>')
+            return mark_safe(f'<a href="{url}" target="_blank">קישור לsheets</a>')
         return None
 
     def get_queryset(self, request: HttpRequest):

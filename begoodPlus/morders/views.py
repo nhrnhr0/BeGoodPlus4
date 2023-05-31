@@ -1093,5 +1093,4 @@ def api_get_order_data(request, id):
         return JsonResponse({'status': 'ok'}, status=status.HTTP_200_OK)
 
     data = AdminMOrderSerializer(order).data
-
     return JsonResponse(data, status=status.HTTP_200_OK)
