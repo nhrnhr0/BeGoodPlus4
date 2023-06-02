@@ -4,6 +4,18 @@ from django.db import migrations, models
 import django.db.models.deletion
 
 
+def data_migration_0009(apps, schema_editor):
+    MOrder = apps.get_model('morders', 'MOrder')
+    MOrderSignature = apps.get_model('docsSignature', 'MOrderSignature')
+    orders = MOrder.objects.all()
+    for order in orders:
+        latest_sig = MOrderSignature.objects.filter(
+            related_omrder=order).order_by("-id").first()
+        if latest_sig:
+            MOrderSignature.objects.filter(
+                related_omrder=order).exclude(id=latest_sig.id).delete()
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -12,9 +24,16 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        # Run python script
+        migrations.RunPython(
+            code=data_migration_0009,
+            reverse_code=migrations.RunPython.noop
+        ),
+
         migrations.AlterField(
             model_name='mordersignature',
             name='related_omrder',
-            field=models.OneToOneField(null=True, on_delete=django.db.models.deletion.SET_NULL, to='morders.morder'),
+            field=models.OneToOneField(
+                null=True, on_delete=django.db.models.deletion.SET_NULL, to='morders.morder'),
         ),
     ]
