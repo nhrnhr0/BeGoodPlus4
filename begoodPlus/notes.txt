@@ -21,6 +21,8 @@ docker cp msdb_04-01-2022-21_01_01.sql postgres:/tmp/db.sql
         \q
 PGPASSWORD=password psql -h localhost -U postgres -d testdb5 < /tmp/db.sql 
 
+PGPASSWORD=9ueT860383t psql -h localhost -U postgres -d testdb5 < /home/ubuntu/msdb_02-06-2023-10_04_55.sql
+
 
 # dump database:
 PGPASSWORD=password pg_dump -h localhost -U postgres -d testdb5 > /tmp/db.sql
