@@ -1,4 +1,5 @@
 from uuid import uuid4
+from docsSignature.models import MOrderSignatureSimulationConnectedItem
 from docsSignature.models import MOrderSignatureSimulation
 from morders.models import MorderStatus
 from django.db import models
@@ -1048,6 +1049,26 @@ def api_get_order_data(request, id):
                         image_data, str(sim_obj.id) + str(uuid4()), 'simulations')
                     # update the item's cimage field
                     sim_obj.cimage = url
+
+                # iterate over the products and save them
+                # sim.products = {product['id']: {'amount': Int}...]
+                # sim.products = {MOrderItem: {'amount': Int},...]
+                keys = sim.get('products', {}).keys()
+                for key in keys:
+                    obj = MOrderItem.objects.get(id=key)
+                    amount = sim['products'][key]['amount']
+                    # if exists update
+                    # sim_obj.products.all().item.id
+                    try:
+                        item = sim_obj.products.get(item__id=key)
+                        item.amount = amount
+                        item.save()
+                    except:
+                        new_obj = MOrderSignatureSimulationConnectedItem.objects.create(
+                            item=obj, amount=amount)
+                        sim_obj.products.add(
+                            new_obj)
+
                 sim_obj.save()
                 pass
 
@@ -1068,9 +1089,8 @@ def api_get_order_data(request, id):
             reversion.set_comment(
                 'סטטוס: ' + str(order.status) + ' - סה"כ: ' + str(order.total_sell_price) + '₪')
 
-            order.morder_to_spreedsheet()
+            order.start_morder_to_spreedsheet_thread()
         return JsonResponse({'status': 'ok'}, status=status.HTTP_200_OK)
 
     data = AdminMOrderSerializer(order).data
-
     return JsonResponse(data, status=status.HTTP_200_OK)

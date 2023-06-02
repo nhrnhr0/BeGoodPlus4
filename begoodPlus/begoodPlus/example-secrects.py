@@ -37,7 +37,7 @@ DB_PORT = '5432'
 
 SECRECT_BASE_MY_DOMAIN = '127.0.0.1:8000'  # 'ms-global.co.il' # 'boost-pop.com'
 # 'https://catalog.boost-pop.com' # 'https://catalog.ms-global.co.il'
-FULL_DOMAIN = 'http://127.0.0.1:8000'
+FULL_DOMAIN = 'https://testing.boost-pop.com'  # 'http://127.0.0.1:8000'
 MAPS_API_KEY = ''
 
 # 'https://catalog.boost-pop.com' # 'https://catalog.ms-global.co.il'

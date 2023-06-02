@@ -14,6 +14,10 @@ from client.models import Client
 class MsCrmBusinessTypeSelect(models.Model):
     name = models.CharField(max_length=100, unique=True)
     order = models.IntegerField(default=0)
+    last_message_date = models.DateTimeField(
+        null=True, blank=True, verbose_name=_('last message date'))
+    last_message = models.TextField(
+        null=True, blank=True, verbose_name=_('last message'))
 
     class Meta():
         ordering = ['order', ]
@@ -178,3 +182,17 @@ class LeadSubmit(models.Model):
     phone = models.CharField(max_length=100, verbose_name=_('phone'))
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+
+class MsCrmMessage(models.Model):
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    businessSelect = models.ManyToManyField(
+        MsCrmBusinessTypeSelect, related_name='ms_crm_messages')
+
+    class Meta():
+        ordering = ['id', ]
+
+    def __str__(self):
+        return self.message

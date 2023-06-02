@@ -1,5 +1,5 @@
 import gspread
-from core.utils import get_gspred_client
+from core.gspred import get_gspread_client
 from google.oauth2.credentials import Credentials
 import google_auth_oauthlib
 from begoodPlus.secrects import FULL_DOMAIN
@@ -94,20 +94,23 @@ def clear_drive_creds(request):
 
 def admin_upload_docs_page(request):
     if request.user.is_authenticated and request.user.is_superuser:
-        creds = request.session.get('credentials')
-        if creds:
-            credsObj = Credentials(token=creds['token'], refresh_token=creds['refresh_token'], token_uri=creds['token_uri'],
-                                   client_id=creds['client_id'], client_secret=creds['client_secret'], scopes=creds['scopes'])
-            if credsObj.expired:
-                credsObj.refresh(Request())
-                request.session['credentials'] = credentials_to_dict(credsObj)
-            if credsObj.valid and not credsObj.expired:
-                return render(request, 'adminUploadDocs.html', context={})
-        request.session['next'] = reverse('admin_upload_docs_page')
-        return request_dride_auth()
-
+        return render(request, 'adminUploadDocs.html', context={})
     else:
         return redirect('/admin/login/?next=' + reverse('admin_upload_docs_page'))
+    #     creds = request.session.get('credentials')
+    #     if creds:
+    #         credsObj = Credentials(token=creds['token'], refresh_token=creds['refresh_token'], token_uri=creds['token_uri'],
+    #                                client_id=creds['client_id'], client_secret=creds['client_secret'], scopes=creds['scopes'])
+    #         if credsObj.expired:
+    #             credsObj.refresh(Request())
+    #             request.session['credentials'] = credentials_to_dict(credsObj)
+    #         if credsObj.valid and not credsObj.expired:
+    #             return render(request, 'adminUploadDocs.html', context={})
+    #     request.session['next'] = reverse('admin_upload_docs_page')
+    #     return request_dride_auth()
+
+    # else:
+    #     return redirect('/admin/login/?next=' + reverse('admin_upload_docs_page'))
 
 
 '''
@@ -424,10 +427,10 @@ def sheetsurl_to_providers_docx(request):
         if credantials:
             drive_creds = Credentials(token=credantials['token'], refresh_token=credantials['refresh_token'], token_uri=credantials['token_uri'],
                                       client_id=credantials['client_id'], client_secret=credantials['client_secret'], scopes=credantials['scopes'],)
-        if not credantials or drive_creds.expired:
-            return redirect('admin_upload_docs_page')
-
-        drive_service = build_drive_service(drive_creds)
+        # if not credantials or drive_creds.expired:
+        #     return redirect('admin_upload_docs_page')
+        drive_creds = None
+        drive_service = None  # build_drive_service(drive_creds)
         logs = []
         # get sheets urls from urls in request.POST['urls']
         urls = request.POST['urls'].splitlines()
@@ -436,7 +439,7 @@ def sheetsurl_to_providers_docx(request):
         task = ProvidersDocxTask.objects.create(
             links=urls)
         Thread(target=sheetsurl_to_providers_docx_task,
-               args=(task.id, drive_service, drive_creds)).start()
+               args=(task.id,)).start()
 
         return redirect('providers_docx_task', task_id=task.id)
     else:
@@ -557,7 +560,7 @@ def sheetsurl_to_smartbee_async(request):
         url = request.POST.get('sheet_url')
         print(url)
         docType = request.POST.get('docType')
-        gspred_client = get_gspred_client()
+        gspred_client = get_gspread_client()
         workbook = None
         try:
             workbook = gspred_client.open_by_url(url)

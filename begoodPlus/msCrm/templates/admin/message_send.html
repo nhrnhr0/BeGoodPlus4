@@ -1,0 +1,97 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<h2>Message History Table</h2>
+
+<table>
+  <tr>
+    <th>Sr No </th>
+    <th>Message</th>
+    <th>Group</th>
+    <th>Timestamp</th>
+  </tr>
+  {% for i in list_data %}
+  <tr>
+    <td>{{ forloop.counter }}</td>
+    <td>{{ i.message}}</td>
+    <td>{% for z in  i.businessSelect.all %} {{ z.name }} {% endfor %} </td>
+    <td>{{ i.created_at }}</td>
+  </tr>
+  {% endfor %}
+</table>
+
+<form  method="POST" id = "message_form" action = "/admin/msCrm/mscrmuser/generate-xlxs/" enctype="multipart/form-data">
+    {{ form.as_p }}
+    {% csrf_token %}
+    <button id = "submit" type = "submit" >Save Message</button>
+    <button id = "skip" type = "submit" >Skip Message</button>
+    <a href = "/admin/msCrm/mscrmuser/" type = "submit" >Return to mscrmuser</a>
+</form>
+
+<script src="https://code.jquery.com/jquery-3.7.0.min.js" integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
+{% comment %} <script>
+
+    $("#click_button").click(function(){
+        /*
+        message = $('#id_message').val();
+        const xhr = new XMLHttpRequest();
+        var data =  {
+            'message':message,
+            }
+        xhr.open("POST", "/admin/msCrm/mscrmuser/generate-xlxs/");
+
+        xhr.send();
+        xhr.send(data)
+        xhr.onreadystatechange = function () {
+        if (this.readyState === this.DONE) {
+            console.log(this.responseUR);
+            this.abort();
+        }
+        };
+
+        
+        message = $('#id_message').val();
+        var csrfmiddlewaretoken = $('input[name="csrfmiddlewaretoken"]').val();
+        var data =  {
+        'message':message,
+        }
+        $.post('/admin/msCrm/mscrmuser/generate-xlxs/',data, function(data){ 
+            console.log(data)
+            const blob = new Blob([data],{ type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+            const downloadUrl = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = downloadUrl;
+            a.download = "file.xlsx";
+            document.body.appendChild(a);
+            a.click();
+                    
+        window.location = '/admin/msCrm/mscrmuser/';
+        
+       });
+*/
+    z = $('#message_form').submit()
+       //alert('done')
+
+       /*
+    if (z){
+        if (window.confirm('If you click "ok" you would be redirected to mscrmuser. Cancel will load this page ')) 
+    {
+        window.location = '/admin/msCrm/mscrmuser/';
+    };
+    }
+    */
+ 
+}); 
+
+
+
+
+</script> {% endcomment %}
+<script>
+$("#skip").click(function(event){
+    event.preventDefault();  
+    $('#id_message').val(""); 
+    $('#submit').click()
+}); 
+</script>
+{% endblock %}

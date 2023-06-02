@@ -1,5 +1,6 @@
+from begoodPlus.secrects import FULL_DOMAIN
 import pytz
-from core.utils import get_gspread_client
+from core.gspred import get_gspread_client
 from gspread.cell import Cell
 from gspread_formatting import *
 from openpyxl.styles import Alignment
@@ -7,7 +8,7 @@ import copy
 
 import gspread
 from ordered_model.models import OrderedModelBase
-from begoodPlus.secrects import SECRECT_CLIENT_SIDE_DOMAIN, ALL_MORDER_FILE_SPREEDSHEET_URL
+from begoodPlus.secrects import SECRECT_CLIENT_SIDE_DOMAIN, ALL_MORDER_FILE_SPREEDSHEET_URL, ALL_PRICE_PROPOSAL_SPREEADSHEET_URL
 from django.conf import settings
 import reversion
 from decimal import Decimal
@@ -194,10 +195,13 @@ class MOrder(models.Model):
     last_status_updated = models.CharField(
         _('last status updated'), max_length=100, blank=True, null=True)
     gid = models.CharField(max_length=100, blank=True, null=True)
+    price_proposal_sheetid = models.CharField(
+        max_length=100, blank=True, null=True)
     last_sheet_update = models.DateTimeField(
         _('last sheet update'), null=True, blank=True)
-
+    export_to_suppliers = models.BooleanField(default=False)
     # save
+
     def save(self, *args, **kwargs):
         from docsSignature.utils import create_signature_doc_from_morder
 
@@ -226,7 +230,7 @@ class MOrder(models.Model):
             sheets_data = self.read_morder_from_spreedsheet(ws)
 
         else:
-            ws = MOrder.get_or_create_sheet(
+            ws = MOrder.get_or_create_order_sheet(
                 workbook, self.name + ' ' + str(self.id))
             self.gid = ws.id
             self.save()
@@ -239,14 +243,70 @@ class MOrder(models.Model):
         ws.update_cell(2, 6, str(errors))
         return errors
 
+    def start_morder_to_spreedsheet_thread(self):
+        import threading
+        t = threading.Thread(target=self.morder_to_spreedsheet)
+        t.start()
+
     def morder_to_spreedsheet(self):
         gspred_client = get_gspread_client()
         self.last_sheet_update = datetime.datetime.now()
-        # if self.spreed_sheet_url:
-        workbook = gspred_client.open_by_url(ALL_MORDER_FILE_SPREEDSHEET_URL)
-        self.write_morder_to_spreedsheet(workbook)
+        if self.status2.name == 'הצעת מחיר':
+            workbook = gspred_client.open_by_url(
+                ALL_PRICE_PROPOSAL_SPREEADSHEET_URL)
+            self.write_morder_to_price_prop_spreedsheet(
+                gspred_client, workbook)
+        else:
+            # if self.spreed_sheet_url:
+            workbook = gspred_client.open_by_url(
+                ALL_MORDER_FILE_SPREEDSHEET_URL)
+            self.write_morder_to_spreedsheet(workbook)
 
     pass
+
+    def get_data_to_price_proposal_spreedsheet(self):
+        # get the product name, total amount and product.product.cost_price
+        ret = []
+        for p in self.products.select_related('product').all():
+            ret.append(
+                [p.product.title, p.prop_totalEntriesQuantity, p.product.cost_price])
+        return ret
+
+    def write_morder_to_price_prop_spreedsheet(self, gspred_client, workbook):
+        #
+        worksheet = self.get_or_create_price_proposal_sheet(
+            gspred_client, workbook)
+        self.price_proposal_sheetid = worksheet.id
+
+        data = self.get_data_to_price_proposal_spreedsheet()
+        admin_edit_link = self.get_edit_url_without_html(base_url=FULL_DOMAIN)
+
+        # print(data)  # ['פנדה מונביסו', Decimal('15040.00'), 220.0]...
+        # Col A from offset 4:
+        # product name
+        # Col B from offset 4:
+        # amount
+        # Col C from offset 4:
+        # cost price
+        # write data to spreedsheet
+        worksheet.update('A5:C', data)
+        # H2 - admin edit link
+        worksheet.update('H2', admin_edit_link)
+
+        # A2 client name
+        worksheet.update('A2', self.name)
+        # B2 client phone
+        worksheet.update('B2', self.phone)
+
+        if self.client:
+            # C2 client contact name
+            worksheet.update('C2', self.client.businessName)
+            # D2 client email
+            worksheet.update('D2', self.client.email)
+            # E2 client address
+            worksheet.update('E2', self.client.address)
+
+        self.save()
 
     def spreedsheet_data_to_morder(self, sheets_data):
         # sheets_data = [['מספר הזמנה', 'תאריך הזמנה', 'שם הלקוח', 'הודעה', '', '', '', '', '', '', '', ''], ['262', '27_10_2022', 'ש.א מכולת', '', '', '', '', '', '', '', '', ''], ['ברקוד', 'פריט', 'כמות כוללת', 'הערות', 'כמות נלקחת', 'מחיר מכירה', 'מע"מ', 'הדפסה?', '', 'רקמה?', '', 'ספקים'], ['"676525047815"', 'מכנס בנאים משולב כותנה ולייקרה', '9', '', '', '100.00₪', 'לא כולל', 'לא', '', 'לא', '', ''], ['אפור כהה', 'S', '', '4', '', '', '', '', '', '', '', ''], ['אפור כהה', 'M', '', '3', '', '', '', '', '', '', '', ''], ['אפור כהה', 'L', '', '2', '', '', '', '', '', '', '', ''], ['', 'מנעול 25 מ"מ', '0', '', '', '1.00₪', 'לא כולל', 'לא', '', 'לא', '', ''], ['', 'פיתוח גלופה', '0', '', '', '100.00₪', 'לא כולל', 'לא', '', 'לא', '', ''], ['"676525009592"', 'חולצת טריקו שרוול ארוך', '18', '', '', '19.00₪', 'לא כולל', 'לא', '', 'לא', '', ''],['כחול כהה', 'S', '', '6', '', '', '', '', '', '', '', ''], ['כחול כהה', 'M', '', '6', '', '', '', '', '', '', '', ''], ['כחול כהה', 'L', '', '6', '', '', '', '', '', '', '', ''], ['8011222022116', 'סט 3 קופסאות קליפר', '6', '', '', '19.00₪', 'לא כולל', 'לא', '', 'לא', '', ''], ['8710002569451', 'צולה כבד קטן', '3', '', '', '11.00₪', 'לא כולל', 'לא', '', 'לא', '', ''], ['7290004469634', 'כוס ילדים + ידית', '6', '', '', '3.50₪', 'לא כולל', 'לא', '', 'לא', '', '']]
@@ -266,7 +326,22 @@ class MOrder(models.Model):
 
         def is_header_row(row):
             return not str(row[9]) == ''
+        if(sheets_data[0][6] == 'סטטוס'):
+            new_status = sheets_data[1][6]
+            if not self.status2.name == new_status and not new_status == '':
+                status_obj, created = MorderStatus.objects.get_or_create(
+                    name=new_status)
+                self.status2 = status_obj
 
+        # I1 = לקחת לספקים?
+        # I2 = <has any>
+        if(sheets_data[0][8] == 'לקחת לספקים?'):
+            new_export_to_suppliers = sheets_data[1][8]
+            if new_export_to_suppliers != None and new_export_to_suppliers != '':
+                self.export_to_suppliers = True
+            else:
+                self.export_to_suppliers = False
+            # export_to_suppliers
         all_products = {}
         # all_products = {product.title: {'title': product.title, 'price': product.price, 'vat': product.vat, 'provider': product.provider, entries: [{size: 'S',varient:'', quantity: 1, provider: 'ספק 1', 'taken':'v'}, {size: 'M',varient:'', quantity: 1, provider: 'ספק 1', 'taken':3}]}]}}
         for row in sheets_data[3:]:
@@ -326,7 +401,8 @@ class MOrder(models.Model):
                     except:
                         errors.append(
                             f'ספק {product["main_provider"]} לא תקין' + f' פריט {product["title"]}')
-                    order_entry.save()
+                    if order_entry:
+                        order_entry.save()
                 else:
                     for entry in product['entries']:
                         # get or create the entry from the order
@@ -387,7 +463,7 @@ class MOrder(models.Model):
         # print(data)
         return data
 
-    def get_or_create_sheet(wb, title):
+    def get_or_create_order_sheet(wb, title):
         try:
             return wb.worksheet(title)
         except:
@@ -414,6 +490,35 @@ class MOrder(models.Model):
             wb.batch_update(batch_request)
             return order_ws
 
+    def get_or_create_price_proposal_sheet(self, gspred_client, wb, title=None):
+        if not title:
+            if self.price_proposal_sheetid:
+                for ws in wb.worksheets():
+                    if str(ws.id) == self.price_proposal_sheetid:
+                        return ws
+            title = str(self.id) + ' ' + self.name
+        try:
+            return wb.worksheet(title)
+        except:
+            spreedsheet_id = wb.id
+            baseSheetId = wb.worksheet('בסיס להצעת מחיר').id
+            request_body = {
+                'requests': {
+                    'duplicateSheet': {
+                        'sourceSheetId': baseSheetId,
+                        'newSheetName': title,
+                    },
+                },
+            }
+            from core.gspred import get_google_service
+            service = get_google_service()
+            # service.spreadsheets().batchUpdate
+            response = service.spreadsheets().batchUpdate(
+                spreadsheetId=spreedsheet_id,
+                body=request_body
+            ).execute()
+            return wb.worksheet(title)
+
     def init_spreedsheet(self, ws: gspread.Worksheet, data):
         # validation_rule = DataValidationRule(
         #     BooleanCondition('ONE_OF_LIST', ['1', '2', '3', '4']),
@@ -433,10 +538,12 @@ class MOrder(models.Model):
         #  ['ברקוד	פריט	כמות כוללת	הערות	כמות נלקחת	מחיר מכירה	מע"מ	הדפסה?		רקמה?		ספקים'
         # same as above but with one call
         current_time = datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+        # =HYPERLINK("https://testing.boost-pop.com/morders/edit-order/517", "517")
         data_array = [
-            ['מספר הזמנה', 'תאריך הזמנה', 'שם הלקוח', 'הודעה', 'עדכון אחרון'],
+            ['מספר הזמנה', 'תאריך הזמנה', 'שם הלקוח', 'הודעה',
+                'עדכון אחרון', 'שגיאות', 'סטטוס', 'קישור לאדמין'],
             [data['id'], data['date'], data['name'],
-                data['message'], current_time],
+                data['message'], current_time, '', data['status'], data['admin_link']],
             ['ברקוד', 'פריט', 'כמות כוללת', 'הערות', 'כמות נלקחת',
                 'מחיר מכירה', 'מע"מ', 'הדפסה?', '', 'רקמה?', '', 'ספקים'],
         ]
@@ -449,16 +556,35 @@ class MOrder(models.Model):
         headers_range = 'A1:' + \
             number_to_spreedsheet_letter(
                 longest_row_length) + str(len(data_array))
-        ws.update(headers_range, data_array, value_input_option='USER_ENTERED')
+        ws.update(headers_range, data_array,
+                  value_input_option='USER_ENTERED')
+
         ws.format(headers_range, LOCKED_CELL_COLOR)
 
         # reset all the other cells to blank data and format them
         all_other_cells_range = 'A4:' + \
             'M' + str(len(data_array) + 1000)
         ws.update(all_other_cells_range, [[''] * longest_row_length] * 1000)
-        ws.format(all_other_cells_range, BLANK_CELL_COLOR)
+        # ws.format(all_other_cells_range, BLANK_CELL_COLOR)
         # clear all data validation
         set_data_validation_for_cell_range(ws, all_other_cells_range, None)
+
+        all_statuses = list(
+            MorderStatus.objects.all().values_list('name', flat=True))
+        status_validation_rule = DataValidationRule(
+            BooleanCondition('ONE_OF_LIST', all_statuses),
+            showCustomUi=True
+        )
+        set_data_validation_for_cell_range(
+            ws, 'G2:G2', status_validation_rule)
+
+        # create a title at I1 cell: "לקחת לספקים?"
+        ws.update_cell(1, 9, 'לקחת לספקים?')
+        # create a checkbox at I2 cell
+        if data['export_to_suppliers']:
+            ws.update_cell(2, 9, data['export_to_suppliers'])
+        else:
+            ws.update_cell(2, 9, '')
         pass
 
     def write_morder_to_spreedsheet(self, wb: gspread.Spreadsheet):
@@ -499,13 +625,16 @@ class MOrder(models.Model):
         # except:
         #     order_ws = wb.worksheet(
         #         order_data['name'] + ' ' + str(order_data['id']))
-        order_ws = MOrder.get_or_create_sheet(
+        order_ws = MOrder.get_or_create_order_sheet(
             wb, order_data['name'] + ' ' + str(order_data['id']))
+
+        self.gid = order_ws.id
 
         self.init_spreedsheet(order_ws, order_data)
         # write products to sheet:
 
         self.write_products_to_spreedsheet(order_ws, order_data['products'])
+        self.save()
         # raise Exception('my error')
         pass
 
@@ -560,6 +689,8 @@ class MOrder(models.Model):
             comment = order_product['comment']
             taken = list(order_product['entries'].values())[0]['taken'] if len(
                 order_product['entries']) == 1 else ''
+            if taken == '0' or taken == 0:
+                taken = ''
             provider = list(order_product['entries'].values())[0]['provider'] if len(
                 order_product['entries']) == 1 else ''
             price = str(order_product['price']) + '₪'
@@ -617,6 +748,7 @@ class MOrder(models.Model):
             sorted_entries = sorted(
                 entries.items(), key=lambda x: (x[0][3], x[0][4]))
 
+            # if there is only one entry and it is no color and one size, don't show child table
             if len(sorted_entries) == 1 and sorted_entries[0][0][0].lower() == 'no color' and sorted_entries[0][0][1].lower() == 'one size':
                 providers_data_validetions_tasks.append(
                     {'range': 'L' + str(current_row-1), })
@@ -629,6 +761,9 @@ class MOrder(models.Model):
                 varient = entry[2]
                 quantity = sorted_entries[entry]['qyt']
                 taken = sorted_entries[entry]['taken']
+                if taken == '0' or taken == 0:
+                    taken = ''
+
                 provider = sorted_entries[entry]['provider']
                 # order_ws.update_cells([
                 #     Cell(row=current_row, col=1, value=_color),
@@ -651,8 +786,8 @@ class MOrder(models.Model):
 
                 # format_cell_range(order_ws, 'A' + str(current_row) + ':D' + str(current_row),
                 #                   subtable_header_format)
-                formating_tasks.append(
-                    {'range': 'A' + str(current_row) + ':D' + str(current_row), 'format':  SUBTABLE_HEADER_FORMAT_CONST})
+                # formating_tasks.append(
+                #     {'range': 'A' + str(current_row) + ':D' + str(current_row), 'format':  SUBTABLE_HEADER_FORMAT_CONST})
                 # 5 taken
                 formating_tasks.append(
                     {'range': 'E' + str(current_row) + ':E' + str(current_row), 'format':  USER_INPUT_FORMAT_CONST})
@@ -814,6 +949,9 @@ class MOrder(models.Model):
             'message': self.message if self.message != None else '',
             'date': self.created.strftime('%d_%m_%Y'),
             'id': self.id,
+            'status': self.status2.name if self.status2 != None else '',
+            'admin_link': self.get_edit_url_without_html(base_url=FULL_DOMAIN),
+            'export_to_suppliers': self.export_to_suppliers,
         }
         return data
 
@@ -825,8 +963,16 @@ class MOrder(models.Model):
         link = reverse('view_morder_pdf', args=(self.pk,))
         return mark_safe('<a href="{}">{}</a>'.format(link, 'הצג הזמנה'))
 
-    def get_edit_url(self):
+    def get_edit_url_without_html(self, base_url=None):
         link = reverse('admin_edit_order', args=(self.pk,))
+        if base_url:
+            return base_url + link
+        return link
+
+    def get_edit_url(self, base_url=None):
+        link = reverse('admin_edit_order', args=(self.pk,))
+        if base_url:
+            return base_url + link
         return mark_safe('<a href="{}">{}</a>'.format(link, 'ערוך'))
 
     def products_display(self):

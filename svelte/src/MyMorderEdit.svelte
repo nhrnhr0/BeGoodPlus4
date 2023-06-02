@@ -288,6 +288,8 @@ function addNewSimBtnClicked(e) {
   simImage = "";
   SimDescriptionNew = "";
 }
+
+let current_selected_sim_idx = -1;
 </script>
 
 <svelte:head>
@@ -476,6 +478,55 @@ function addNewSimBtnClicked(e) {
                   }
                 }}>מחק</button
               >
+
+              {#if current_selected_sim_idx != -1}
+                <button
+                  type="button"
+                  class="btn connect-btn"
+                  class:active={data &&
+                    data?.simulations &&
+                    current_selected_sim_idx != -1 &&
+                    data.simulations[current_selected_sim_idx].products &&
+                    data.simulations[current_selected_sim_idx].products[
+                      product.id
+                    ]}
+                  on:click={() => {
+                    //data.simulations[current_selected_sim_idx].products = {product_id: amount:Int}
+                    // set data.simulations[current_selected_sim_idx].products = [...data.simulations[current_selected_sim_idx].products, newData];
+                    // if it already exists, remove it
+                    if (
+                      data.simulations[current_selected_sim_idx].products &&
+                      data.simulations[current_selected_sim_idx].products[
+                        product.id
+                      ]
+                    ) {
+                      delete data.simulations[current_selected_sim_idx]
+                        .products[product.id];
+                      data.simulations = [...data.simulations];
+                    } else {
+                      console.log(product);
+                      debugger;
+                      let total_amount = product.entries.reduce(
+                        (acc, curr) => acc + curr.quantity,
+                        0
+                      );
+                      if (
+                        !data.simulations[current_selected_sim_idx].products
+                      ) {
+                        data.simulations[current_selected_sim_idx].products =
+                          {};
+                      }
+                      data.simulations[current_selected_sim_idx].products[
+                        product.id
+                      ] = {
+                        amount: total_amount,
+                        title: product.product.title,
+                        img: product.product.cimage,
+                      };
+                    }
+                  }}>חבר מוצר להדמייה</button
+                >
+              {/if}
             </td>
           </tr>
           <tr class="details">
@@ -648,6 +699,55 @@ function addNewSimBtnClicked(e) {
               />
             </div>
           </td>
+          <td>
+            <!-- button to connect items to the sim -->
+            <button
+              type="button"
+              on:click={() => {
+                if (current_selected_sim_idx == i) {
+                  current_selected_sim_idx = -1;
+                } else {
+                  current_selected_sim_idx = i;
+                }
+              }}
+              class="connect-btn"
+              class:active={current_selected_sim_idx == i}
+            >
+              קשר מוצרים
+            </button>
+            <!-- table of the products and thire total abount -->
+            <!-- header: שם מוצר, כמות -->
+            <table class="product-table simulation-table">
+              <thead>
+                <tr>
+                  <th>שם מוצר</th>
+                  <th>כמות</th>
+                </tr>
+              </thead>
+              <tbody>
+                {#each Object.keys(sim.products || {}) as product_idx}
+                  <tr>
+                    <td>
+                      <img
+                        src="{CLOUDINARY_BASE_URL}{sim.products[product_idx]
+                          .img}"
+                        width="25px"
+                        height="25px"
+                      />
+                      {sim.products[product_idx].title}</td
+                    >
+                    <td>
+                      <input
+                        type="number"
+                        bind:value={sim.products[product_idx].amount}
+                        Width="min-content"
+                      />
+                    </td>
+                  </tr>
+                {/each}
+              </tbody>
+            </table></td
+          >
           <td>
             <div class="delete-action">
               <button
@@ -861,18 +961,22 @@ table.simulation {
 
     td {
       border: 1px solid #ccc;
-      padding: 10px;
-      img {
-        width: 100%;
+      // padding: 10px;
+      img.sim-img {
+        max-width: 350px;
+        width: auto;
         height: auto;
-
-        &.sim-img {
-          max-width: 350px;
-          width: auto;
-          height: auto;
-          // height: 100px;
-        }
       }
+      input {
+        width: 100px;
+      }
+      // img {
+      //   // width: 100%;
+      //   // height: auto;
+      //   &.sim-img {
+      //     // height: 100px;
+      //   }
+      // }
 
       &.sim-image-td {
         display: flex;
@@ -886,6 +990,17 @@ table.simulation {
       background-color: #f10101;
       color: #fff;
     }
+  }
+}
+
+.connect-btn {
+  background-color: #fff;
+  border: 1px solid #ccc;
+  padding: 5px;
+  border-radius: 5px;
+  cursor: pointer;
+  &.active {
+    background-color: #ccc;
   }
 }
 </style>
