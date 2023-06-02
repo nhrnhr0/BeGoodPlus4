@@ -611,17 +611,6 @@ def process_sheets_to_providers_docx(sheets, obj):
     return data
 
 
-def get_gspred_client():
-    scope = [
-        'https://www.googleapis.com/auth/spreadsheets',
-        'https://www.googleapis.com/auth/drive'
-    ]
-    creds = ServiceAccountCredentials.from_json_keyfile_name(
-        GOOGLE_SERVICE_ACCOUNT_FILE, scope)
-    gspred_client = gspread.authorize(creds)
-    return gspred_client
-
-
 def uuid2slug(uuidstring):
     if uuidstring:
         if isinstance(uuidstring, str):

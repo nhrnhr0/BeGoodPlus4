@@ -8,7 +8,7 @@ import copy
 
 import gspread
 from ordered_model.models import OrderedModelBase
-from begoodPlus.secrects import SECRECT_CLIENT_SIDE_DOMAIN, ALL_MORDER_FILE_SPREEDSHEET_URL
+from begoodPlus.secrects import SECRECT_CLIENT_SIDE_DOMAIN, ALL_MORDER_FILE_SPREEDSHEET_URL, ALL_PRICE_PROPOSAL_SPREEADSHEET_URL
 from django.conf import settings
 import reversion
 from decimal import Decimal
@@ -195,6 +195,8 @@ class MOrder(models.Model):
     last_status_updated = models.CharField(
         _('last status updated'), max_length=100, blank=True, null=True)
     gid = models.CharField(max_length=100, blank=True, null=True)
+    price_proposal_sheetid = models.CharField(
+        max_length=100, blank=True, null=True)
     last_sheet_update = models.DateTimeField(
         _('last sheet update'), null=True, blank=True)
     export_to_suppliers = models.BooleanField(default=False)
@@ -228,7 +230,7 @@ class MOrder(models.Model):
             sheets_data = self.read_morder_from_spreedsheet(ws)
 
         else:
-            ws = MOrder.get_or_create_sheet(
+            ws = MOrder.get_or_create_order_sheet(
                 workbook, self.name + ' ' + str(self.id))
             self.gid = ws.id
             self.save()
@@ -241,7 +243,7 @@ class MOrder(models.Model):
         ws.update_cell(2, 6, str(errors))
         return errors
 
-    def morder_to_spreedsheet_thread(self):
+    def start_morder_to_spreedsheet_thread(self):
         import threading
         t = threading.Thread(target=self.morder_to_spreedsheet)
         t.start()
@@ -249,11 +251,62 @@ class MOrder(models.Model):
     def morder_to_spreedsheet(self):
         gspred_client = get_gspread_client()
         self.last_sheet_update = datetime.datetime.now()
-        # if self.spreed_sheet_url:
-        workbook = gspred_client.open_by_url(ALL_MORDER_FILE_SPREEDSHEET_URL)
-        self.write_morder_to_spreedsheet(workbook)
+        if self.status2.name == 'הצעת מחיר':
+            workbook = gspred_client.open_by_url(
+                ALL_PRICE_PROPOSAL_SPREEADSHEET_URL)
+            self.write_morder_to_price_prop_spreedsheet(
+                gspred_client, workbook)
+        else:
+            # if self.spreed_sheet_url:
+            workbook = gspred_client.open_by_url(
+                ALL_MORDER_FILE_SPREEDSHEET_URL)
+            self.write_morder_to_spreedsheet(workbook)
 
     pass
+
+    def get_data_to_price_proposal_spreedsheet(self):
+        # get the product name, total amount and product.product.cost_price
+        ret = []
+        for p in self.products.select_related('product').all():
+            ret.append(
+                [p.product.title, p.prop_totalEntriesQuantity, p.product.cost_price])
+        return ret
+
+    def write_morder_to_price_prop_spreedsheet(self, gspred_client, workbook):
+        #
+        worksheet = self.get_or_create_price_proposal_sheet(
+            gspred_client, workbook)
+        self.price_proposal_sheetid = worksheet.id
+
+        data = self.get_data_to_price_proposal_spreedsheet()
+        admin_edit_link = self.get_edit_url_without_html(base_url=FULL_DOMAIN)
+
+        # print(data)  # ['פנדה מונביסו', Decimal('15040.00'), 220.0]...
+        # Col A from offset 4:
+        # product name
+        # Col B from offset 4:
+        # amount
+        # Col C from offset 4:
+        # cost price
+        # write data to spreedsheet
+        worksheet.update('A5:C', data)
+        # H2 - admin edit link
+        worksheet.update('H2', admin_edit_link)
+
+        # A2 client name
+        worksheet.update('A2', self.name)
+        # B2 client phone
+        worksheet.update('B2', self.phone)
+
+        if self.client:
+            # C2 client contact name
+            worksheet.update('C2', self.client.businessName)
+            # D2 client email
+            worksheet.update('D2', self.client.email)
+            # E2 client address
+            worksheet.update('E2', self.client.address)
+
+        self.save()
 
     def spreedsheet_data_to_morder(self, sheets_data):
         # sheets_data = [['מספר הזמנה', 'תאריך הזמנה', 'שם הלקוח', 'הודעה', '', '', '', '', '', '', '', ''], ['262', '27_10_2022', 'ש.א מכולת', '', '', '', '', '', '', '', '', ''], ['ברקוד', 'פריט', 'כמות כוללת', 'הערות', 'כמות נלקחת', 'מחיר מכירה', 'מע"מ', 'הדפסה?', '', 'רקמה?', '', 'ספקים'], ['"676525047815"', 'מכנס בנאים משולב כותנה ולייקרה', '9', '', '', '100.00₪', 'לא כולל', 'לא', '', 'לא', '', ''], ['אפור כהה', 'S', '', '4', '', '', '', '', '', '', '', ''], ['אפור כהה', 'M', '', '3', '', '', '', '', '', '', '', ''], ['אפור כהה', 'L', '', '2', '', '', '', '', '', '', '', ''], ['', 'מנעול 25 מ"מ', '0', '', '', '1.00₪', 'לא כולל', 'לא', '', 'לא', '', ''], ['', 'פיתוח גלופה', '0', '', '', '100.00₪', 'לא כולל', 'לא', '', 'לא', '', ''], ['"676525009592"', 'חולצת טריקו שרוול ארוך', '18', '', '', '19.00₪', 'לא כולל', 'לא', '', 'לא', '', ''],['כחול כהה', 'S', '', '6', '', '', '', '', '', '', '', ''], ['כחול כהה', 'M', '', '6', '', '', '', '', '', '', '', ''], ['כחול כהה', 'L', '', '6', '', '', '', '', '', '', '', ''], ['8011222022116', 'סט 3 קופסאות קליפר', '6', '', '', '19.00₪', 'לא כולל', 'לא', '', 'לא', '', ''], ['8710002569451', 'צולה כבד קטן', '3', '', '', '11.00₪', 'לא כולל', 'לא', '', 'לא', '', ''], ['7290004469634', 'כוס ילדים + ידית', '6', '', '', '3.50₪', 'לא כולל', 'לא', '', 'לא', '', '']]
@@ -410,7 +463,7 @@ class MOrder(models.Model):
         # print(data)
         return data
 
-    def get_or_create_sheet(wb, title):
+    def get_or_create_order_sheet(wb, title):
         try:
             return wb.worksheet(title)
         except:
@@ -436,6 +489,35 @@ class MOrder(models.Model):
             }
             wb.batch_update(batch_request)
             return order_ws
+
+    def get_or_create_price_proposal_sheet(self, gspred_client, wb, title=None):
+        if not title:
+            if self.price_proposal_sheetid:
+                for ws in wb.worksheets():
+                    if str(ws.id) == self.price_proposal_sheetid:
+                        return ws
+            title = str(self.id) + ' ' + self.name
+        try:
+            return wb.worksheet(title)
+        except:
+            spreedsheet_id = wb.id
+            baseSheetId = wb.worksheet('בסיס להצעת מחיר').id
+            request_body = {
+                'requests': {
+                    'duplicateSheet': {
+                        'sourceSheetId': baseSheetId,
+                        'newSheetName': title,
+                    },
+                },
+            }
+            from core.gspred import get_google_service
+            service = get_google_service()
+            # service.spreadsheets().batchUpdate
+            response = service.spreadsheets().batchUpdate(
+                spreadsheetId=spreedsheet_id,
+                body=request_body
+            ).execute()
+            return wb.worksheet(title)
 
     def init_spreedsheet(self, ws: gspread.Worksheet, data):
         # validation_rule = DataValidationRule(
@@ -541,7 +623,7 @@ class MOrder(models.Model):
         # except:
         #     order_ws = wb.worksheet(
         #         order_data['name'] + ' ' + str(order_data['id']))
-        order_ws = MOrder.get_or_create_sheet(
+        order_ws = MOrder.get_or_create_order_sheet(
             wb, order_data['name'] + ' ' + str(order_data['id']))
 
         self.init_spreedsheet(order_ws, order_data)

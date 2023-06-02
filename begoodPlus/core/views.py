@@ -1,5 +1,5 @@
 import gspread
-from core.utils import get_gspred_client
+from core.gspred import get_gspread_client
 from google.oauth2.credentials import Credentials
 import google_auth_oauthlib
 from begoodPlus.secrects import FULL_DOMAIN
@@ -560,7 +560,7 @@ def sheetsurl_to_smartbee_async(request):
         url = request.POST.get('sheet_url')
         print(url)
         docType = request.POST.get('docType')
-        gspred_client = get_gspred_client()
+        gspred_client = get_gspread_client()
         workbook = None
         try:
             workbook = gspred_client.open_by_url(url)

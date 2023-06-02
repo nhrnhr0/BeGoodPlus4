@@ -478,6 +478,8 @@ class SvelteCartModal(models.Model):
         # Create Signature for created morder
         create_signature_doc_from_morder(morder)
 
+        morder.start_morder_to_spreedsheet_thread()
+
     def __str__(self):
         # Return a string that represents the instance
         return f"{self.created_date.strftime('%Y-%m-%d %H:%M:%S')} - {self.name} - {self.cart_count()}"

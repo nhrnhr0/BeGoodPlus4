@@ -15,6 +15,18 @@ def get_gspread_client():
     return gspred_client
 
 
+def get_google_service():
+    scope = [
+        'https://www.googleapis.com/auth/spreadsheets',
+        'https://www.googleapis.com/auth/drive'
+    ]
+    from googleapiclient.discovery import build
+    creds = ServiceAccountCredentials.from_json_keyfile_name(
+        GOOGLE_SERVICE_ACCOUNT_FILE, scope)
+    service = build('sheets', 'v4', credentials=creds)
+    return service
+
+
 def gspread_fetch_sheet_from_url(url):
     # url =  https://docs.google.com/spreadsheets/d/16xOKmrX2cPUlTvqInQdNVDJYAzntZWYaQFd4Gte8kiI/edit#gid=428174964
     # return sheet,title
