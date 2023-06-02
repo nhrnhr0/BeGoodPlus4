@@ -204,8 +204,10 @@ class MOrder(models.Model):
 
     def save(self, *args, **kwargs):
         from docsSignature.utils import create_signature_doc_from_morder
-
-        create_signature_doc_from_morder(self)
+        try:
+            create_signature_doc_from_morder(self)
+        except Exception as e:
+            print(e)
 
         super().save(*args, **kwargs)
 
@@ -245,12 +247,14 @@ class MOrder(models.Model):
 
     def start_morder_to_spreedsheet_thread(self):
         import threading
+        print('starting thread')
         t = threading.Thread(target=self.morder_to_spreedsheet)
         t.start()
 
     def morder_to_spreedsheet(self):
         gspred_client = get_gspread_client()
         self.last_sheet_update = datetime.datetime.now()
+        print('morder to spreedsheet')
         if self.status2.name == 'הצעת מחיר':
             workbook = gspred_client.open_by_url(
                 ALL_PRICE_PROPOSAL_SPREEADSHEET_URL)
@@ -1043,7 +1047,7 @@ def notify_order_status_update_post_save(instance, *args, **kwargs):
             #     edit_url=edit_url, status=status, name=name, total_price=total_sell, morder_id=instance.id)
         else:
             send_morder_status_update_to_telegram.delay(
-                edit_url=edit_url, status=status, name=name, total_price=total_sell, morder_id=instance.id)
+                edit_url=edit_url, status=status.name, name=name, total_price=total_sell, morder_id=instance.id)
 
     # print('recalculate_total_price_post_save: ', instance.total_sell_price)
 

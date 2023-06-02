@@ -897,6 +897,7 @@ def api_get_order_data2(request, id):
 
 
 def api_get_order_data(request, id):
+    print('api_get_order_data', id)
     if not request.user.is_superuser:
         return JsonResponse({'status': 'error'}, status=status.HTTP_403_FORBIDDEN)
 
@@ -909,7 +910,7 @@ def api_get_order_data(request, id):
             # order.status = data['status']
             if data['status2']:
                 order.status2 = MorderStatus.objects.get(id=data['status2'])
-
+            print('status: ', data['status2'])
             order.message = data['message']
             order.email = data['email']
             order.name = data['name']
@@ -1015,7 +1016,7 @@ def api_get_order_data(request, id):
 
                     # print('e2', e, 'save')
                     p.save()
-
+            print('done saving order items, move to simulations')
             for sim in data['simulations']:
                 if sim.get('deleted'):
                     if sim.get('id'):
@@ -1071,10 +1072,14 @@ def api_get_order_data(request, id):
 
                 sim_obj.save()
                 pass
-
+            print('done saving simulations')
             # recalculate total price
-            order.save()
+            try:
+                order.save()
+            except Exception as e:
+                return JsonResponse({'error': str(e)}, status=400)
 
+            print('done saving order')
             # _ord = MOrder.objects.get(id=order.id)
             # total_price = 0
             # for item in _ord.products.all():
@@ -1088,8 +1093,10 @@ def api_get_order_data(request, id):
             reversion.set_user(user)
             reversion.set_comment(
                 'סטטוס: ' + str(order.status) + ' - סה"כ: ' + str(order.total_sell_price) + '₪')
-
+            print('done saving order revisions, send to spreadsheet')
             order.start_morder_to_spreedsheet_thread()
+            print('done sending to spreadsheet thread')
+
         return JsonResponse({'status': 'ok'}, status=status.HTTP_200_OK)
 
     data = AdminMOrderSerializer(order).data
