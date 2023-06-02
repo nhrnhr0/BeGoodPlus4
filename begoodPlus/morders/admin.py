@@ -1,3 +1,5 @@
+import re
+from django.http import HttpRequest
 from .models import MorderStatus
 from ordered_model.admin import OrderedModelAdmin
 from django.utils.html import mark_safe
@@ -88,18 +90,60 @@ admin.site.register(ProviderRequest, ProviderRequestAdmin)
 class MOrderAdmin(VersionAdmin):  # admin.ModelAdmin
     model = MOrder
     fields = ('cart', 'total_sell_price', 'client', 'name', 'phone', 'email',
-              'status', 'status2', 'message',)  # what is this for?
+              'status', 'status2', 'message', 'gid', 'price_proposal_sheetid', 'export_to_suppliers',)  # what is this for?
     readonly_fields = ('created', 'total_sell_price', 'updated', 'get_edit_url',
                        'view_morder_pdf_link', 'cart', 'client', 'status', 'status2', )
-    list_display = ('id', 'client', 'name', 'status', 'status2', 'status_msg', 'total_sell_price',
-                    'get_edit_url', 'view_morder_pdf_link', 'created', 'updated',)
+    list_display = ('id', 'client', 'name', 'status2', 'status_msg', 'total_sell_price',
+                    'get_edit_url', 'view_morder_pdf_link', 'get_googlesheets_links', 'created', 'updated', 'export_to_suppliers')
     # list_editable = ('status_msg',)
     # filter_horizontal = ('products',)
     list_filter = ('status', 'created', 'updated',)
     search_fields = ('id', 'name', 'phone', 'email', 'status', 'message', 'products__product__title',
                      'client__businessName', 'client__email', 'client__extraName', 'client__contactMan', 'client__user__username')
     list_select_related = ('client', 'client__user',)
-    actions = ('export_to_excel', 'export_to_signiture_doc')
+    actions = ('export_to_excel', 'export_to_signiture_doc',
+               'sync_with_spreedsheet')
+    # select_related = ('client', 'status2')
+
+    def get_googlesheets_links(self, obj):
+        res1 = self.get_priceproposal_sheet_link(obj)
+        res2 = self.get_googlesheets_link(obj)
+        ret = ''
+        if res1:
+            ret += res1
+        if res2:
+            if ret:
+                ret += '<br/>'
+            ret += res2
+        if not ret:
+            return '-'
+        return mark_safe(ret)
+
+    def get_priceproposal_sheet_link(self, obj):
+        from begoodPlus.secrects import ALL_PRICE_PROPOSAL_SPREEADSHEET_URL
+        if obj.price_proposal_sheetid:
+            # ALL_PRICE_PROPOSAL_SPREEADSHEET_URL = 'https://docs.google.com/spreadsheets/d/1fRipiJMZpk-53017Te94jhrqzWEVlTl4dw6XN6Vs3VQ/edit#gid=215639457'  # dev
+            import re
+            url = re.sub(r'#gid=\d+', f'#gid={obj.price_proposal_sheetid}',
+                         ALL_PRICE_PROPOSAL_SPREEADSHEET_URL)
+            return mark_safe(f'<a href="{url}" target="_blank">קישור להצעת מחיר </a>')
+        return None
+    get_priceproposal_sheet_link.short_description = _('Price Proposal Sheet')
+
+    def get_googlesheets_link(self, obj):
+        import re
+        from begoodPlus.secrects import ALL_MORDER_FILE_SPREEDSHEET_URL
+        if obj.gid:
+            # relpace with regex #gid=XXXXX with #gid=obj.gid
+            url = re.sub(r'#gid=\d+', f'#gid={obj.gid}',
+                         ALL_MORDER_FILE_SPREEDSHEET_URL)
+            return mark_safe(f'<a href="{url}" target="_blank">קישור הזמנה בSHEETS</a>')
+        return None
+    get_googlesheets_link.short_description = _('Google Sheets Orders')
+
+    def get_queryset(self, request: HttpRequest):
+        return super().get_queryset(request).select_related('client', 'status2', 'client__user')
+
     formfield_overrides = {
         models.TextField: {'widget': Textarea(
             attrs={'rows': 2,
@@ -108,6 +152,12 @@ class MOrderAdmin(VersionAdmin):  # admin.ModelAdmin
 
     def get_queryset(self, request):
         return super().get_queryset(request).select_related('client', 'client__user', 'status2')
+
+    def sync_with_spreedsheet(self, request, queryset):
+        for morder in queryset:
+            morder.morder_to_spreedsheet()
+            messages.add_message(
+                request, messages.INFO, f'הזמנה {morder.id} סונכרנה')
 
     def export_to_signiture_doc(self, request, queryset):
         for morder in queryset:
@@ -274,8 +324,6 @@ class MOrderAdmin(VersionAdmin):  # admin.ModelAdmin
             order_ws_rows_counter += 1
             for product in order_products:
                 product_name = product['title']
-                # order_ws.cell(row=order_ws_rows_counter, column=1).value = product['barcode']
-                # order_ws.cell(row=order_ws_rows_counter, column=1).value = product['p']
                 order_ws.cell(row=order_ws_rows_counter,
                               column=1).value = product['barcode']
                 order_ws.cell(row=order_ws_rows_counter,

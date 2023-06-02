@@ -252,6 +252,7 @@ def serialize_doc_signature(obj):
         'user_info_phone': obj.user_info_phone,
         'user_info_id': obj.user_info_id,
     }
+    # TODO: read the sim from Morder and not Signature
     for sim in obj.simulations.all():
         ret['simulations'].append({
             'id': sim.id,
