@@ -897,6 +897,7 @@ def api_get_order_data2(request, id):
 
 
 def api_get_order_data(request, id):
+    from docsSignature.utils import create_signature_doc_from_morder, create_signature_doc_from_morder_thread
     print('api_get_order_data', id)
     if not request.user.is_superuser:
         return JsonResponse({'status': 'error'}, status=status.HTTP_403_FORBIDDEN)
@@ -1034,7 +1035,7 @@ def api_get_order_data(request, id):
                     try:
                         sigModal = order.mordersignature
                     except:
-                        from docsSignature.utils import create_signature_doc_from_morder
+
                         create_signature_doc_from_morder(order)
                         sigModal = order.mordersignature
                     sim_obj = MOrderSignatureSimulation()
@@ -1076,6 +1077,7 @@ def api_get_order_data(request, id):
             # recalculate total price
             try:
                 order.save()
+                create_signature_doc_from_morder_thread(order)
             except Exception as e:
                 return JsonResponse({'error': str(e)}, status=400)
 

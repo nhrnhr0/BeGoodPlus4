@@ -205,7 +205,8 @@ class MOrder(models.Model):
     def save(self, *args, **kwargs):
         from docsSignature.utils import create_signature_doc_from_morder
         try:
-            create_signature_doc_from_morder(self)
+            # create_signature_doc_from_morder(self)
+            pass
         except Exception as e:
             print(e)
 
@@ -1036,6 +1037,7 @@ def recalculate_total_price_pre_save(sender, instance, **kwargs):
 
 @ receiver(post_save, sender=MOrder, dispatch_uid="notify_order_status_update")
 def notify_order_status_update_post_save(instance, *args, **kwargs):
+    print('notify_order_status_update_post_save: ', instance.total_sell_price)
     if instance.total_sell_price > 0:
         edit_url = SECRECT_CLIENT_SIDE_DOMAIN + instance.get_edit_order_url()
         status = instance.get_status_display()
@@ -1048,7 +1050,7 @@ def notify_order_status_update_post_save(instance, *args, **kwargs):
         else:
             send_morder_status_update_to_telegram.delay(
                 edit_url=edit_url, status=status.name, name=name, total_price=total_sell, morder_id=instance.id)
-
+    print('done notify_order_status_update_post_save: ', instance.total_sell_price)
     # print('recalculate_total_price_post_save: ', instance.total_sell_price)
 
 
