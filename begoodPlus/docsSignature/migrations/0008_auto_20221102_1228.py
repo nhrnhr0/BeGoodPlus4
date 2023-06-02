@@ -3,6 +3,18 @@
 from django.db import migrations, models
 
 
+def data_migration_0008(apps, schema_editor):
+    MOrder = apps.get_model('morders', 'MOrder')
+    MOrderSignature = apps.get_model('docsSignature', 'MOrderSignature')
+    orders = MOrder.objects.all()
+    for order in orders:
+        latest_sig = MOrderSignature.objects.filter(
+            related_omrder=order).order_by("-id").first()
+        if latest_sig:
+            MOrderSignature.objects.filter(
+                related_omrder=order).exclude(id=latest_sig.id).delete()
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -27,5 +39,10 @@ class Migration(migrations.Migration):
             model_name='mordersignaturesimulation',
             name='order',
             field=models.IntegerField(default=1),
+        ),
+        # Run python script
+        migrations.RunPython(
+            code=data_migration_0008,
+            reverse_code=migrations.RunPython.noop
         ),
     ]
