@@ -689,6 +689,8 @@ class MOrder(models.Model):
             comment = order_product['comment']
             taken = list(order_product['entries'].values())[0]['taken'] if len(
                 order_product['entries']) == 1 else ''
+            if taken == '0' or taken == 0:
+                taken = ''
             provider = list(order_product['entries'].values())[0]['provider'] if len(
                 order_product['entries']) == 1 else ''
             price = str(order_product['price']) + '₪'
@@ -746,6 +748,7 @@ class MOrder(models.Model):
             sorted_entries = sorted(
                 entries.items(), key=lambda x: (x[0][3], x[0][4]))
 
+            # if there is only one entry and it is no color and one size, don't show child table
             if len(sorted_entries) == 1 and sorted_entries[0][0][0].lower() == 'no color' and sorted_entries[0][0][1].lower() == 'one size':
                 providers_data_validetions_tasks.append(
                     {'range': 'L' + str(current_row-1), })
@@ -758,6 +761,9 @@ class MOrder(models.Model):
                 varient = entry[2]
                 quantity = sorted_entries[entry]['qyt']
                 taken = sorted_entries[entry]['taken']
+                if taken == '0' or taken == 0:
+                    taken = ''
+
                 provider = sorted_entries[entry]['provider']
                 # order_ws.update_cells([
                 #     Cell(row=current_row, col=1, value=_color),
