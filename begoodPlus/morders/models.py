@@ -581,8 +581,10 @@ class MOrder(models.Model):
         # create a title at I1 cell: "לקחת לספקים?"
         ws.update_cell(1, 9, 'לקחת לספקים?')
         # create a checkbox at I2 cell
-
-        ws.update_cell(2, 9, data['export_to_suppliers'])
+        if data['export_to_suppliers']:
+            ws.update_cell(2, 9, data['export_to_suppliers'])
+        else:
+            ws.update_cell(2, 9, '')
         pass
 
     def write_morder_to_spreedsheet(self, wb: gspread.Spreadsheet):
@@ -626,10 +628,13 @@ class MOrder(models.Model):
         order_ws = MOrder.get_or_create_order_sheet(
             wb, order_data['name'] + ' ' + str(order_data['id']))
 
+        self.gid = order_ws.id
+
         self.init_spreedsheet(order_ws, order_data)
         # write products to sheet:
 
         self.write_products_to_spreedsheet(order_ws, order_data['products'])
+        self.save()
         # raise Exception('my error')
         pass
 
