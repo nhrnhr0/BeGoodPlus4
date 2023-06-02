@@ -1,3 +1,6 @@
+from uuid import uuid4
+from docsSignature.models import MOrderSignatureSimulationConnectedItem
+from docsSignature.models import MOrderSignatureSimulation
 from morders.models import MorderStatus
 from django.db import models
 from django.db.models.functions import Length
@@ -16,7 +19,7 @@ import zipfile
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from matplotlib.pyplot import annotate
-
+from docsSignature.views import save_image_to_cloudinary
 from catalogImages.models import CatalogImage
 from inventory.models import PPN, WarehouseStock
 from provider.models import Provider
@@ -37,6 +40,21 @@ from django.template.loader import get_template
 from productSize.models import ProductSize
 from docx.enum.table import WD_TABLE_DIRECTION
 import reversion
+
+
+def spreedsheet_to_morder_view(request):
+    if not request.user.is_superuser:
+        return JsonResponse({'error': 'You are not authorized to perform this action'}, status=status.HTTP_401_UNAUTHORIZED)
+
+    if request.method == 'POST':
+        morder_id = request.POST.get('morder_id', None)
+        sheets_gid = request.POST.get('sheets_gid', None)
+        morder = MOrder.objects.get(id=morder_id)
+        errors = morder.spreedsheet_to_morder(sheets_gid)
+        if errors:
+            return JsonResponse({'error': errors}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return JsonResponse({'status': 'success'}, status=status.HTTP_200_OK)
 
 
 def request_provider_info_admin(request, ppn_id):
@@ -920,6 +938,10 @@ def api_get_order_data(request, id):
                 p.price = product['price']
                 p.providers.set(product['providers'])
                 p.ergent = product['ergent']
+                if p.ergent == 'false':
+                    p.ergent = False
+                elif p.ergent == 'true':
+                    p.ergent = True
                 p.prining = product['prining']
                 p.embroidery = product['embroidery']
                 p.embroideryComment = product.get('embroideryComment', '')
@@ -962,18 +984,19 @@ def api_get_order_data(request, id):
                         if qyt > 0:
                             e.quantity = qyt
                             e.save()
-                            dups = p.entries.filter(
-                                Q(color=e.color) and
-                                Q(size=e.size) and
-                                Q(varient=e.varient) and
-                                Q(morder_item=p) and
-                                ~Q(id=e.id)
-                            )
-                            if dups.count() != 0:
-                                print('delete all dups: ', dups)
-                                dups.delete()
+                            # dups = p.entries.filter(
+                            #     Q(color=e.color) and
+                            #     Q(size=e.size) and
+                            #     Q(varient=e.varient) and
+                            #     Q(morder_item=p) and
+                            #     ~Q(id=e.id)
+                            # )
+                            # if dups.count() != 0:
+                            #     print('delete all dups: ', dups)
+                            #     dups.delete()
                         else:
-                            e.delete()
+                            # e.delete()
+                            pass
                     else:
                         if qyt > 0:
                             existing_entry = p.entries.filter(
@@ -992,7 +1015,66 @@ def api_get_order_data(request, id):
 
                     # print('e2', e, 'save')
                     p.save()
+
+            for sim in data['simulations']:
+                if sim.get('deleted'):
+                    if sim.get('id'):
+                        try:
+                            sim_to_delete = MOrderSignatureSimulation.objects.get(
+                                id=sim['id'])
+                            sim_to_delete.delete()
+                        except:
+                            pass
+                    continue
+                if sim.get('id') != None:
+                    sim_obj = MOrderSignatureSimulation.objects.get(
+                        id=sim['id'])
+                else:
+                    try:
+                        sigModal = order.mordersignature
+                    except:
+                        from docsSignature.utils import create_signature_doc_from_morder
+                        create_signature_doc_from_morder(order)
+                        sigModal = order.mordersignature
+                    sim_obj = MOrderSignatureSimulation()
+                    sim_obj.save()
+                    sigModal.simulations.add(sim_obj)
+                sim_obj.description = sim.get('description', '')
+                sim_obj.order = sim.get('order', 1)
+                if sim.get('cimage') and sim['cimage'].startswith('data:image'):
+                    # image data;str
+                    image_data = sim['cimage']
+                    # save the image to cloudinary and get the url
+                    url = save_image_to_cloudinary(
+                        image_data, str(sim_obj.id) + str(uuid4()), 'simulations')
+                    # update the item's cimage field
+                    sim_obj.cimage = url
+
+                # iterate over the products and save them
+                # sim.products = {product['id']: {'amount': Int}...]
+                # sim.products = {MOrderItem: {'amount': Int},...]
+                keys = sim.get('products', {}).keys()
+                for key in keys:
+                    obj = MOrderItem.objects.get(id=key)
+                    amount = sim['products'][key]['amount']
+                    # if exists update
+                    # sim_obj.products.all().item.id
+                    try:
+                        item = sim_obj.products.get(item__id=key)
+                        item.amount = amount
+                        item.save()
+                    except:
+                        new_obj = MOrderSignatureSimulationConnectedItem.objects.create(
+                            item=obj, amount=amount)
+                        sim_obj.products.add(
+                            new_obj)
+
+                sim_obj.save()
+                pass
+
+            # recalculate total price
             order.save()
+
             # _ord = MOrder.objects.get(id=order.id)
             # total_price = 0
             # for item in _ord.products.all():
@@ -1006,8 +1088,9 @@ def api_get_order_data(request, id):
             reversion.set_user(user)
             reversion.set_comment(
                 'סטטוס: ' + str(order.status) + ' - סה"כ: ' + str(order.total_sell_price) + '₪')
+
+            order.start_morder_to_spreedsheet_thread()
         return JsonResponse({'status': 'ok'}, status=status.HTTP_200_OK)
 
     data = AdminMOrderSerializer(order).data
-
     return JsonResponse(data, status=status.HTTP_200_OK)

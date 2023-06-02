@@ -1,3 +1,4 @@
+from core.gspred import gspread_fetch_sheet_from_url
 from core.utils import uuid2slug
 from django.core.files.base import ContentFile
 import io
@@ -384,6 +385,8 @@ class SvelteCartModal(models.Model):
     uniqe_color.short_description = _('uniqe color')
 
     def turn_to_morder(self):
+        from docsSignature.utils import create_signature_doc_from_morder
+
         from morders.models import MOrder, MOrderItem, MOrderItemEntry, MorderStatus
         cart = self
         if self.user and self.user.is_authenticated:
@@ -472,6 +475,11 @@ class SvelteCartModal(models.Model):
         morder.products.add(*dbProducts)
         morder.save()
 
+        # Create Signature for created morder
+        create_signature_doc_from_morder(morder)
+
+        morder.start_morder_to_spreedsheet_thread()
+
     def __str__(self):
         # Return a string that represents the instance
         return f"{self.created_date.strftime('%Y-%m-%d %H:%M:%S')} - {self.name} - {self.cart_count()}"
@@ -500,7 +508,7 @@ class ProvidersDocxTask(models.Model):
         ret = dict(ProvidersDocxTaskStatusChoices)[self.status]
         return ret
 
-    def process_sheetsurl_to_providers_docx(self, drive_service, drive_creds):
+    def process_sheetsurl_to_providers_docx(self):
         # try:
         sheets = []
         urls = self.links
@@ -512,8 +520,13 @@ class ProvidersDocxTask(models.Model):
             log = 'fetching sheet from url: ' + url
             self.logs.append(log)
             self.save()
-            sheet, sheetname, loaded_files = get_sheet_from_drive_url(
-                url, drive_service, drive_creds, loaded_files)
+            sheet, sheetname = gspread_fetch_sheet_from_url(url)
+            # if returned (str, None, None) then there was an error add the error to the log
+            if sheetname == None and loaded_files == None and type(sheet) == str:
+                self.logs.append('error: ' + sheet)
+                self.save()
+                return
+
             sheets.append(sheet)
             log = 'downloaded'
             self.logs.append(log)

@@ -1,3 +1,7 @@
+from begoodPlus.secrects import GOOGLE_SERVICE_ACCOUNT_FILE, SECRECT_CLIENT_SIDE_DOMAIN, ALL_MORDER_FILE_SPREEDSHEET_URL
+from ordered_model.models import OrderedModelBase
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
 from base64 import urlsafe_b64decode, urlsafe_b64encode
 from uuid import UUID
 import docx
@@ -28,6 +32,9 @@ from googleapiclient.discovery import build
 
 from catalogAlbum.models import CatalogAlbum, TopLevelCategory
 from catalogImages.models import CatalogImage
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
+from begoodPlus.secrects import GOOGLE_SERVICE_ACCOUNT_FILE
 
 
 def build_drive_service(cred):
@@ -81,6 +88,9 @@ def get_sheet_from_drive_url(url, drive_service, drive_creds=None, loaded_files=
     else:
         bytes_exel_file = get_drive_file(drive_service, fileId)
         # conver bytes to in memory file
+        # if it's a string (error) return it
+        if isinstance(bytes_exel_file, str):
+            return bytes_exel_file, None, None
         file = io.BytesIO(bytes_exel_file)
         # process the file
         all_sheets = pd.ExcelFile(file)
@@ -480,24 +490,26 @@ def process_sheets_to_providers_docx(sheets, obj):
     all_sheets_data = []
     sheet_index = 1
     for sheet in sheets:
-        morders_id = str(int(float(sheet.iloc[0, 0])))
+        values = sheet.get_all_values()
+        morders_id = str(int(float(values[1][0])))
         obj.logs.append('processing sheet: ' +
                         str(sheet_index) + ' morder: ' + morders_id)
 
         sheet_index += 1
         rows_data = []
         current_row_data = None
-        for idx, row in sheet.iterrows():
+        sheet_data = values[3:]
+        for idx, row in enumerate(sheet_data):
 
             # print(idx, ') ')
             # for i in range(len(sheet.columns)):
             #     print(row[i], end=' ')
-            if idx == 0 or idx == 1:
-                # print('skip')
-                continue
+            # if idx == 0 or idx == 1:
+            #     # print('skip')
+            #     continue
             # col[7] is the 'print?' column
             # if it has any value, it means we are on a header row
-            if not pd.isna(row[7]):
+            if not pd.isna(row[7]) and row[7] != '':
                 # print('header row')
                 if current_row_data:
                     rows_data.append(current_row_data)
@@ -508,13 +520,12 @@ def process_sheets_to_providers_docx(sheets, obj):
                 header_taken_amount = row[4]
                 if str(header_taken_amount).lower() == 'v':
                     header_taken_amount = header_total_amount
-                elif pd.isna(header_taken_amount):
+                elif pd.isna(header_taken_amount) or header_taken_amount == '':
                     header_taken_amount = 0
                 else:
                     header_taken_amount = int(float(header_taken_amount))
 
-                header_provider_name = row[11] if len(
-                    sheet.columns) > 11 else ''
+                header_provider_name = row[11] if len(row) > 11 else ''
                 header_amount = header_total_amount - header_taken_amount
                 current_row_data = {
                     'product_name': product_name,
@@ -529,16 +540,16 @@ def process_sheets_to_providers_docx(sheets, obj):
                 product_color = row[0]
                 product_size = row[1]
                 product_varient = row[2]
-                product_total_amount = int(float(row[3]))
+                product_total_amount = int(
+                    float(row[3] if row[3] != '' else 0))
                 product_taken_amount = row[4]
                 if str(product_taken_amount).lower() == 'v':
                     product_taken_amount = int(float(row[3]))
-                elif pd.isna(product_taken_amount):
+                elif pd.isna(product_taken_amount) or product_taken_amount == '':
                     product_taken_amount = 0
                 else:
                     product_taken_amount = int(float(product_taken_amount))
-                product_provider_name = row[11] if len(
-                    sheet.columns) > 11 else ''
+                product_provider_name = row[11] if len(row) > 11 else ''
                 obj.logs.append('row: ' + str(idx) + ' processing product: ' + str(product_name) + ' color: ' + str(product_color) + ' size: ' + str(product_size) +
                                 ' varient: ' + str(product_varient) + ' total_amount: ' + str(product_total_amount) + ' taken_amount: ' + str(product_taken_amount))
                 print(product_taken_amount, product_total_amount)
@@ -615,3 +626,12 @@ def uuid2slug(uuidstring):
 
 def slug2uuid(slug):
     return str(UUID(bytes=urlsafe_b64decode(slug + '==')))
+
+
+def number_to_spreedsheet_letter(number):
+    number = number - 1
+    letter = ''
+    while number >= 0:
+        letter = chr((number % 26) + ord('A')) + letter
+        number = number // 26 - 1
+    return letter
