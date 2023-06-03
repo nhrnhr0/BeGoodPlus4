@@ -1050,6 +1050,7 @@ def notify_order_status_update_post_save(instance, *args, **kwargs):
         else:
             # send_morder_status_update_to_telegram.delay(
             #     edit_url=edit_url, status=status.name, name=name, total_price=total_sell, morder_id=instance.id)
+            pass
     print('done notify_order_status_update_post_save: ', instance.total_sell_price)
     # print('recalculate_total_price_post_save: ', instance.total_sell_price)
 
