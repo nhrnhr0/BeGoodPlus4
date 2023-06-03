@@ -303,13 +303,13 @@ class MOrder(models.Model):
         # B2 client phone
         worksheet.update('B2', self.phone)
 
-        if self.client:
-            # C2 client contact name
-            worksheet.update('C2', self.client.businessName)
-            # D2 client email
-            worksheet.update('D2', self.client.email)
-            # E2 client address
-            worksheet.update('E2', self.client.address)
+        # if self.client:
+        #     # C2 client contact name
+        #     worksheet.update('C2', self.client.businessName)
+        #     # D2 client email
+        #     worksheet.update('D2', self.client.email)
+        #     # E2 client address
+        #     worksheet.update('E2', self.client.address)
 
         self.save()
 
@@ -1048,8 +1048,8 @@ def notify_order_status_update_post_save(instance, *args, **kwargs):
             # send_morder_status_update_to_telegram(
             #     edit_url=edit_url, status=status, name=name, total_price=total_sell, morder_id=instance.id)
         else:
-            # send_morder_status_update_to_telegram.delay(
-            #     edit_url=edit_url, status=status.name, name=name, total_price=total_sell, morder_id=instance.id)
+            send_morder_status_update_to_telegram.delay(
+                edit_url=edit_url, status=status.name, name=name, total_price=total_sell, morder_id=instance.id)
             pass
     print('done notify_order_status_update_post_save: ', instance.total_sell_price)
     # print('recalculate_total_price_post_save: ', instance.total_sell_price)
