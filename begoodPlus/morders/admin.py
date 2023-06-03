@@ -94,7 +94,7 @@ class MOrderAdmin(VersionAdmin):  # admin.ModelAdmin
     readonly_fields = ('created', 'total_sell_price', 'updated', 'get_edit_url',
                        'view_morder_pdf_link', 'get_signiture_link', 'cart', 'client', 'status', 'status2', )
     list_display = ('id', 'client', 'name', 'status2', 'status_msg', 'total_sell_price',
-                    'get_edit_url', 'view_morder_pdf_link', 'get_googlesheets_links', 'created', 'updated', 'export_to_suppliers')
+                    'get_edit_url', 'view_morder_pdf_link', 'get_googlesheets_links', 'get_signiture_link', 'created', 'updated', 'export_to_suppliers')
     # list_editable = ('status_msg',)
     # filter_horizontal = ('products',)
     list_filter = ('status', 'created', 'updated',)
@@ -107,15 +107,10 @@ class MOrderAdmin(VersionAdmin):  # admin.ModelAdmin
 
     def get_signiture_link(self, obj):
         if obj.mordersignature:
-            res1 = obj.mordersignature.get_admin_url()
-            res2 = obj.mordersignature.get_client_sign_url()
+            res1 = obj.mordersignature.get_client_sign_url()
         ret = ''
         if res1:
-            ret += res1
-        if res2:
-            if ret:
-                ret += '<br/>'
-            ret += res2
+            ret = '<a href="%s" target="_blank">Client Signiture</a>' % res1
         if not ret:
             return '-'
         return mark_safe(ret)
