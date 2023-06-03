@@ -20,7 +20,6 @@ class LeadSubmitAdmin(admin.ModelAdmin):
     list_display = ('id', 'businessType', 'bussiness_name',
                     'address', 'name', 'phone', 'created_at', 'updated_at',)
 
-
     #filter_horizontal= ('businessType',)
 admin.site.register(LeadSubmit, LeadSubmitAdmin)
 
@@ -74,10 +73,11 @@ class MessageStoreForm(forms.Form):
 # Register your models here.
 
 
-class MsCrmUserAdmin(AdminAdvancedFiltersMixin, admin.ModelAdmin):
+# AdminAdvancedFiltersMixin
+class MsCrmUserAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'businessName', 'businessSelect', 'businessTypeCustom',
                     'phone', 'email', 'address', 'want_emails', 'want_whatsapp', 'created_at', 'updated_at', 'get_last_message_date', 'get_last_message')
-    list_filter = ('created_at', 'updated_at', StatusListFilter,
+    list_filter = (StatusListFilter, 'created_at', 'updated_at',
                    'want_emails', 'want_whatsapp')
 
     def get_queryset(self, request):
@@ -286,7 +286,10 @@ class MsCrmUserAdmin(AdminAdvancedFiltersMixin, admin.ModelAdmin):
                 data = MsCrmMessage.objects.filter(
                     businessSelect__in=[i]).last()
                 # print(data,'data')
-                list_data.append(data)
+                # make sure that the data is not already in the list
+                if data not in list_data:
+                    list_data.append(data)
+                # list_data.append(data)
 
             context = {"form": form, 'list_data': list_data}
             return render(request, "admin/message_send.html", context)

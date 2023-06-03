@@ -14,7 +14,7 @@
   <tr>
     <td>{{ forloop.counter }}</td>
     <td>{{ i.message}}</td>
-    <td>{% for z in  i.businessSelect.all %} {{ z.name }} {% endfor %} </td>
+    <td><ul>{% for z in  i.businessSelect.all %}<li> {{ z.name }}</li>  {% endfor %} </ul></td>
     <td>{{ i.created_at }}</td>
   </tr>
   {% endfor %}
