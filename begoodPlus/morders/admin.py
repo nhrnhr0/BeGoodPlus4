@@ -92,7 +92,7 @@ class MOrderAdmin(VersionAdmin):  # admin.ModelAdmin
     fields = ('cart', 'total_sell_price', 'client', 'name', 'phone', 'email',
               'status', 'status2', 'message', 'gid', 'price_proposal_sheetid', 'export_to_suppliers',)  # what is this for?
     readonly_fields = ('created', 'total_sell_price', 'updated', 'get_edit_url',
-                       'view_morder_pdf_link', 'cart', 'client', 'status', 'status2', )
+                       'view_morder_pdf_link', 'get_signiture_link', 'cart', 'client', 'status', 'status2', )
     list_display = ('id', 'client', 'name', 'status2', 'status_msg', 'total_sell_price',
                     'get_edit_url', 'view_morder_pdf_link', 'get_googlesheets_links', 'created', 'updated', 'export_to_suppliers')
     # list_editable = ('status_msg',)
@@ -104,6 +104,22 @@ class MOrderAdmin(VersionAdmin):  # admin.ModelAdmin
     actions = ('export_to_excel', 'export_to_signiture_doc',
                'sync_with_spreedsheet')
     # select_related = ('client', 'status2')
+
+    def get_signiture_link(self, obj):
+        if obj.mordersignature:
+            res1 = obj.mordersignature.get_admin_url()
+            res2 = obj.mordersignature.get_client_sign_url()
+        ret = ''
+        if res1:
+            ret += res1
+        if res2:
+            if ret:
+                ret += '<br/>'
+            ret += res2
+        if not ret:
+            return '-'
+        return mark_safe(ret)
+    get_signiture_link.short_description = _('Signiture')
 
     def get_googlesheets_links(self, obj):
         res1 = self.get_priceproposal_sheet_link(obj)
