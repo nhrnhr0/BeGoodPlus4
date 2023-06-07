@@ -522,12 +522,14 @@ class ProvidersDocxTask(models.Model):
             log = 'fetching sheet from url: ' + url
             self.logs.append(log)
             self.save()
-            sheet, sheetname = gspread_fetch_sheet_from_url(url)
-            # if returned (str, None, None) then there was an error add the error to the log
-            if sheetname == None and loaded_files == None and type(sheet) == str:
-                self.logs.append('error: ' + sheet)
+
+            try:
+                sheet, sheetname = gspread_fetch_sheet_from_url(url)
+            except Exception as e:
+                log = 'error: ' + str(e)
+                self.logs.append(log)
                 self.save()
-                return
+                continue
 
             sheets.append(sheet)
             self.doc_names.append(sheetname)

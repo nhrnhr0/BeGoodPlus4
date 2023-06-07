@@ -39,5 +39,7 @@ def gspread_fetch_sheet_from_url(url):
         if sheet.id == int(gid):
             ret = sheet
             break
+    if ret == None:
+        raise Exception('no sheet found')
     title = ret.title
     return ret, title
