@@ -46,6 +46,8 @@ async function load_order_from_server() {
       client_id: data.client,
       client_name: data.client_businessName,
       agent: data.agent_name,
+      sheets_price_prop_link: data.sheets_price_prop_link,
+      sheets_order_link: data.sheets_order_link,
     },
   ];
   //productsData = data.products;
@@ -301,6 +303,8 @@ let current_selected_sim_idx = -1;
 <!-- headerData table -->
 <MorderAddProductEntryPopup {ALL_COLORS} {ALL_SIZES} {ALL_VERIENTS} />
 <main>
+  <!-- href to back to  /admin/morders/morder/ -->
+  <a href="/admin/morders/morder/" class="back-btn">חזרה להזמנות</a>
   {#if headerData}
     <div class="created">
       נוצר ב{new Date(headerData[0].created).toLocaleString("Israel")}
@@ -319,6 +323,7 @@ let current_selected_sim_idx = -1;
           <th>סטטוס</th>
           <th>שם העסק</th>
           <th>סוכן</th>
+          <th>קישורים</th>
         </tr>
       </thead>
       <tbody>
@@ -366,6 +371,19 @@ let current_selected_sim_idx = -1;
           </td>
           <td class="header-cell">{headerData[0].client_name}</td>
           <td class="header-cell">{headerData[0].agent}</td>
+          <td class="header-cell">
+            {#if headerData[0].sheets_price_prop_link}
+              <a href={headerData[0].sheets_price_prop_link} target="_blank">
+                הצעת מחיר
+              </a>
+              <br />
+            {/if}
+            {#if headerData[0].sheets_order_link}
+              <a href={headerData[0].sheets_order_link} target="_blank">
+                הזמנה
+              </a>
+            {/if}
+          </td>
         </tr>
       </tbody>
     </table>

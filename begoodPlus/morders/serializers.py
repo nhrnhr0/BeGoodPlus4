@@ -3,6 +3,7 @@
 from email.policy import default
 from django.http import JsonResponse
 from rest_framework import serializers
+from begoodPlus.secrects import ALL_MORDER_FILE_SPREEDSHEET_URL
 from catalogImages.models import CatalogImage
 from inventory.models import WarehouseStock
 from inventory.serializers import WarehouseStockSerializer
@@ -252,11 +253,22 @@ class AdminMOrderSerializer(serializers.ModelSerializer):
         except:
             pass
         return ret
+    sheets_order_link = serializers.SerializerMethodField(
+        '_get_sheets_order_link', read_only=True)
+
+    def _get_sheets_order_link(self, obj):
+        return obj.get_sheets_order_link()
+    sheets_price_prop_link = serializers.SerializerMethodField(
+        '_get_sheets_price_prop_link', read_only=True)
+
+    def _get_sheets_price_prop_link(self, obj):
+        return obj.get_sheets_price_prop_link()
 
     class Meta:
         model = MOrder
         fields = ('id', 'agent', 'agent_name', 'client', 'status', 'status2', 'status_msg', 'created', 'updated', 'message', 'name', 'phone',
-                  'email', 'client_businessName', 'products', 'freezeTakenInventory', 'isOrder', 'sendProviders', 'startCollecting', 'simulations',)
+                  'email', 'client_businessName', 'products', 'freezeTakenInventory', 'isOrder', 'sendProviders', 'startCollecting', 'simulations', 'sheets_order_link',
+                  'sheets_price_prop_link',  'export_to_suppliers',)
 
 
 class MOrderCollectionSerializer(serializers.ModelSerializer):

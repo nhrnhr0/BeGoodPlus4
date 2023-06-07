@@ -1,3 +1,4 @@
+import re
 from begoodPlus.secrects import FULL_DOMAIN
 import pytz
 from core.gspred import get_gspread_client
@@ -202,6 +203,59 @@ class MOrder(models.Model):
     export_to_suppliers = models.BooleanField(default=False)
     # save
 
+    def update_sell_price_from_price_proposal_sheet(self, sheet_id=None):
+        #
+        if not sheet_id:
+            sheet_id = self.price_proposal_sheetid
+        if not sheet_id:
+            return ['sheet_id is None']
+        gspred_client = get_gspread_client()
+        workbook = gspred_client.open_by_url(
+            ALL_PRICE_PROPOSAL_SPREEADSHEET_URL)
+
+        ws = list(filter(lambda ws: ws.id == int(
+            sheet_id), workbook.worksheets()))
+
+        if not ws:
+            return ['sheet_id ' + sheet_id + ' not found in ' + str(workbook.worksheets())]
+        ws = ws[0]
+        ROW_OFFSET = 5
+        PRODUCT_NAME_COL = 1
+        SELL_PRICE_COL = 8
+        erorrs = []
+        for row in range(ROW_OFFSET, ws.row_count):
+            product_name = ws.cell(row, PRODUCT_NAME_COL).value
+            sell_price = ws.cell(row, SELL_PRICE_COL).value
+            if not product_name:
+                break
+            try:
+                product = self.products.get(product__title=product_name)
+                product.price = sell_price
+                product.save()
+            except Exception as e:
+                print(e)
+                erorrs.append(
+                    f'error in  {product_name} \n' + str(e))
+        return erorrs
+
+    def get_sheets_order_link(self):
+        ret = ''
+        if self.gid:
+            ret = ALL_MORDER_FILE_SPREEDSHEET_URL
+
+            ret = re.sub(r'#gid=\d+', f'#gid={self.gid}',
+                         ALL_MORDER_FILE_SPREEDSHEET_URL)
+        return ret
+
+    def get_sheets_price_prop_link(self):
+        ret = ''
+        if self.price_proposal_sheetid:
+            ret = ALL_PRICE_PROPOSAL_SPREEADSHEET_URL
+            ret = re.sub(r'#gid=\d+', f'#gid={self.price_proposal_sheetid}',
+                         ALL_PRICE_PROPOSAL_SPREEADSHEET_URL)
+
+        return ret
+
     def save(self, *args, **kwargs):
         from docsSignature.utils import create_signature_doc_from_morder
         try:
@@ -256,12 +310,11 @@ class MOrder(models.Model):
         gspred_client = get_gspread_client()
         self.last_sheet_update = datetime.datetime.now()
         print('morder to spreedsheet')
-        if self.status2.name == 'הצעת מחיר':
-            workbook = gspred_client.open_by_url(
-                ALL_PRICE_PROPOSAL_SPREEADSHEET_URL)
-            self.write_morder_to_price_prop_spreedsheet(
-                gspred_client, workbook)
-        else:
+        workbook = gspred_client.open_by_url(
+            ALL_PRICE_PROPOSAL_SPREEADSHEET_URL)
+        self.write_morder_to_price_prop_spreedsheet(
+            gspred_client, workbook)
+        if self.status2.name != 'הצעת מחיר':
             # if self.spreed_sheet_url:
             workbook = gspred_client.open_by_url(
                 ALL_MORDER_FILE_SPREEDSHEET_URL)
@@ -274,11 +327,10 @@ class MOrder(models.Model):
         ret = []
         for p in self.products.select_related('product').all():
             ret.append(
-                [p.product.title, p.prop_totalEntriesQuantity, p.product.cost_price])
+                [p.product.title, p.prop_totalEntriesQuantity, p.product.cost_price, p.price])
         return ret
 
     def write_morder_to_price_prop_spreedsheet(self, gspred_client, workbook):
-        #
         worksheet = self.get_or_create_price_proposal_sheet(
             gspred_client, workbook)
         self.price_proposal_sheetid = worksheet.id
@@ -294,14 +346,53 @@ class MOrder(models.Model):
         # Col C from offset 4:
         # cost price
         # write data to spreedsheet
-        worksheet.update('A5:C', data)
+
+        # data = [title, amount, cost, price]
+        # A title
+        # B amount
+        # C cost
+        # H price
+        a_to_c = list(map(lambda x: x[:3], data))
+        worksheet.update('A5:C', a_to_c)
+
+        # update col H price
+        h = list(map(lambda x: [int(x[3]) if int(
+            x[3]) == float(x[3]) else float(x[3])], data))
+        worksheet.update('H5:H', h)
+
         # H2 - admin edit link
+
         worksheet.update('H2', admin_edit_link)
 
         # A2 client name
         worksheet.update('A2', self.name)
         # B2 client phone
         worksheet.update('B2', self.phone)
+
+        # if self.status2.name != 'הצעת מחיר':
+        # we color the spreedsheet
+        if self.status2.name != 'הצעת מחיר':
+            # color the spreedsheet
+            body = {
+                "requests": [
+                    {
+                        "updateSheetProperties": {
+                            "properties": {
+                                "sheetId": worksheet.id,
+                                # "title": title, # In this case, I think that this might not be required to be used.
+                                "tabColor": {
+                                    "red": 0.4,
+                                    "green": 1,
+                                    "blue": 0.4
+                                }
+                            },
+                            "fields": "tabColor"
+                        }
+                    }
+                ]
+            }
+            res = workbook.batch_update(body)
+            # print(res)
 
         # if self.client:
         #     # C2 client contact name
@@ -501,7 +592,8 @@ class MOrder(models.Model):
                 for ws in wb.worksheets():
                     if str(ws.id) == self.price_proposal_sheetid:
                         return ws
-            title = str(self.id) + ' ' + self.name
+            title = str(self.id) + ' ' + self.name + \
+                ' ' + self.created.strftime('%Y_%m_%d')
         try:
             return wb.worksheet(title)
         except:
@@ -631,7 +723,7 @@ class MOrder(models.Model):
         #     order_ws = wb.worksheet(
         #         order_data['name'] + ' ' + str(order_data['id']))
         order_ws = MOrder.get_or_create_order_sheet(
-            wb, order_data['name'] + ' ' + str(order_data['id']))
+            wb, order_data['name'] + ' ' + str(order_data['id']) + ' ' + order_data['date'])
 
         self.gid = order_ws.id
 
@@ -801,7 +893,8 @@ class MOrder(models.Model):
                     {'range': 'L' + str(current_row)})
                 current_row += 1
         pass
-        order_ws.update_cells(sheet_cells_to_update)
+        if len(sheet_cells_to_update) > 0:
+            order_ws.update_cells(sheet_cells_to_update)
 
         # execute_formatting_tasks:
         # @param worksheet_for_formatting: the worksheet to apply the formatting to
@@ -819,7 +912,8 @@ class MOrder(models.Model):
                 list_of_ranges = [(range, all_formats[format_key])
                                   for range in list_of_ranges]
                 full_format_list.extend(list_of_ranges)
-            format_cell_ranges(worksheet_for_formatting, full_format_list)
+            if len(full_format_list) > 0:
+                format_cell_ranges(worksheet_for_formatting, full_format_list)
         execute_formatting_tasks(order_ws, formating_tasks)
 
         # set validation for providers column (L)
@@ -833,8 +927,9 @@ class MOrder(models.Model):
         #            validation rule).
         ranges = [(r['range'], providers_validation_rule)
                   for r in providers_data_validetions_tasks]
-        set_data_validation_for_cell_ranges(
-            order_ws, ranges)
+        if len(ranges) > 0:
+            set_data_validation_for_cell_ranges(
+                order_ws, ranges)
 
     def subtract_collected_inventory(self, user):
         collected_items = CollectedInventory.objects.filter(
@@ -952,7 +1047,7 @@ class MOrder(models.Model):
             'name': self.name if self.name != None else self.client.business_name if self.client.business_name != None else '',
             'products': products,
             'message': self.message if self.message != None else '',
-            'date': self.created.strftime('%d_%m_%Y'),
+            'date': self.created.strftime('%Y_%m_%d'),
             'id': self.id,
             'status': self.status2.name if self.status2 != None else '',
             'admin_link': self.get_edit_url_without_html(base_url=FULL_DOMAIN),

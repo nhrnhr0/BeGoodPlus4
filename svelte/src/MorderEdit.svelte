@@ -69,6 +69,8 @@ async function load_order_from_server() {
       client_id: data.client,
       client_name: data.client_businessName,
       agent: data.agent_name,
+      sheets_price_prop_link: data.sheets_price_prop_link,
+      sheets_order_link: data.sheets_order_link,
     },
   ];
   productsData = data.products;
@@ -243,6 +245,8 @@ onMount(async () => {
       },
       { title: "שם לקוח", field: "client_name" },
       { title: "סוכן", field: "agent" },
+      { title: "הצעת מחיר", field: "sheets_price_prop_link" },
+      { title: "הזמנה", field: "sheets_order_link" },
     ],
   });
 
@@ -483,6 +487,7 @@ function addNewProductFormSubmit(e) {
   {#if updateing}
     <Loading withOverlay={false} />
   {:else}
+    hey
     <div id="headers-table" />
     <hr />
     <div id="products-table" />

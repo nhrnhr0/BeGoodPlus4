@@ -423,14 +423,6 @@ def request_dride_auth():
 
 def sheetsurl_to_providers_docx(request):
     if request.user.is_authenticated and request.user.is_superuser:
-        credantials = request.session.get('credentials')
-        if credantials:
-            drive_creds = Credentials(token=credantials['token'], refresh_token=credantials['refresh_token'], token_uri=credantials['token_uri'],
-                                      client_id=credantials['client_id'], client_secret=credantials['client_secret'], scopes=credantials['scopes'],)
-        # if not credantials or drive_creds.expired:
-        #     return redirect('admin_upload_docs_page')
-        drive_creds = None
-        drive_service = None  # build_drive_service(drive_creds)
         logs = []
         # get sheets urls from urls in request.POST['urls']
         urls = request.POST['urls'].splitlines()

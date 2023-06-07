@@ -1,3 +1,6 @@
+from django.db.models import F, Func, Value, CharField
+from django.db.models import CharField, Value as V
+from django.db.models.functions import Concat
 from django import forms
 from django.conf import settings
 from django.contrib import admin
@@ -61,9 +64,19 @@ class StatusListFilter(MultipleChoiceListFilter):
     parameter_name = 'businessSelect__in'
 
     def lookups(self, request, model_admin):
-        z = MsCrmBusinessTypeSelect.objects.values_list(
-            'id', 'name').distinct()
-        # print(z)
+        # id: xx
+        # display: name (last_message_date)
+        z = MsCrmBusinessTypeSelect.objects.annotate(
+            formatted_date=Func(
+                F('last_message_date'),
+                Value('DD-MM-YYYY'),
+                function='to_char',
+                output_field=CharField()
+            )
+        ).annotate(
+            display=Concat('name', Value(' ('), 'formatted_date', Value(')')),
+        ).values_list('id', 'display').distinct()
+
         return z
 
 

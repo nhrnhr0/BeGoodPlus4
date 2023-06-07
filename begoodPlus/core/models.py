@@ -1,3 +1,4 @@
+from core.tasks import send_providers_docx_to_telegram_task
 from core.gspred import gspread_fetch_sheet_from_url
 from core.utils import uuid2slug
 from django.core.files.base import ContentFile
@@ -21,7 +22,6 @@ from json2html import *
 from django.core.files.storage import FileSystemStorage
 
 
-from django.conf import settings
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from numpy import NaN
@@ -503,6 +503,7 @@ class ProvidersDocxTask(models.Model):
     status = models.CharField(
         max_length=20, choices=ProvidersDocxTaskStatusChoices, default='new')
     progress = models.IntegerField(default=0)
+    doc_names = models.JSONField(blank=True, null=True)
 
     def status_str_display(self):
         ret = dict(ProvidersDocxTaskStatusChoices)[self.status]
@@ -516,6 +517,7 @@ class ProvidersDocxTask(models.Model):
         self.logs = []
         self.save()
         loaded_files = {}
+        self.doc_names = []
         for url in urls:
             log = 'fetching sheet from url: ' + url
             self.logs.append(log)
@@ -528,6 +530,7 @@ class ProvidersDocxTask(models.Model):
                 return
 
             sheets.append(sheet)
+            self.doc_names.append(sheetname)
             log = 'downloaded'
             self.logs.append(log)
             self.save()
@@ -578,6 +581,10 @@ class ProvidersDocxTask(models.Model):
         self.docx = ContentFile(zip_buffer.getvalue(
         ), 'providers - ' + str(self.created_date) + '.zip')
         self.save()
+
+        # send providers file to telegram
+        send_providers_docx_to_telegram(self.docx.path)
+
         return {'zip': zip_buffer}
         # except Exception as e:
         #     print(e)
@@ -585,3 +592,14 @@ class ProvidersDocxTask(models.Model):
         #     self.logs.append(str(e))
         #     self.save()
         #     return {'error': str(e)}
+
+
+def send_providers_docx_to_telegram(docx_path):
+    # send providers file to telegram
+    try:
+        if settings.DEBUG:
+            send_providers_docx_to_telegram_task(docx_path)
+        else:
+            send_providers_docx_to_telegram_task.delay(docx_path)
+    except Exception as e:
+        print(e)
