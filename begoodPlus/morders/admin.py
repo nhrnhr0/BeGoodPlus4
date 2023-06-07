@@ -87,7 +87,8 @@ class ProviderRequestAdmin(admin.ModelAdmin):
 admin.site.register(ProviderRequest, ProviderRequestAdmin)
 
 
-class MOrderAdmin(VersionAdmin):  # admin.ModelAdmin
+class MOrderAdmin(VersionAdmin):  #
+    change_list_template = 'admin/morders/change_list.html'
     model = MOrder
     fields = ('cart', 'total_sell_price', 'client', 'name', 'phone', 'email',
               'status', 'status2', 'message', 'gid', 'price_proposal_sheetid', 'export_to_suppliers',)  # what is this for?
@@ -97,13 +98,25 @@ class MOrderAdmin(VersionAdmin):  # admin.ModelAdmin
                     'get_edit_url', 'view_morder_pdf_link', 'get_googlesheets_links', 'get_signiture_link', 'created', 'updated', 'export_to_suppliers')
     # list_editable = ('status_msg',)
     # filter_horizontal = ('products',)
-    list_filter = ('status', 'created', 'updated',)
+    list_filter = ('status2', 'created', 'updated', 'export_to_suppliers')
     search_fields = ('id', 'name', 'phone', 'email', 'status', 'message', 'products__product__title',
                      'client__businessName', 'client__email', 'client__extraName', 'client__contactMan', 'client__user__username')
     list_select_related = ('client', 'client__user',)
     actions = ('export_to_excel', 'export_to_signiture_doc',
-               'sync_with_spreedsheet')
+               'sync_with_spreedsheet', 'set_export_to_providers_true', 'set_export_to_providers_false')
+
     # select_related = ('client', 'status2')
+    def set_export_to_providers_true(self, request, queryset):
+        queryset.update(export_to_suppliers=True)
+        for morder in queryset:
+            morder.start_morder_to_spreedsheet_thread()
+    set_export_to_providers_true.short_description = 'הכנס לספקים'
+
+    def set_export_to_providers_false(self, request, queryset):
+        queryset.update(export_to_suppliers=False)
+        for morder in queryset:
+            morder.start_morder_to_spreedsheet_thread()
+    set_export_to_providers_false.short_description = 'הוצא מספקים'
 
     def get_signiture_link(self, obj):
         if obj.mordersignature:
@@ -153,7 +166,7 @@ class MOrderAdmin(VersionAdmin):  # admin.ModelAdmin
     get_googlesheets_link.short_description = _('Google Sheets Orders')
 
     def get_queryset(self, request: HttpRequest):
-        return super().get_queryset(request).select_related('client', 'status2', 'client__user')
+        return super().get_queryset(request).select_related('client', 'status2', 'client__user', 'mordersignature')
 
     formfield_overrides = {
         models.TextField: {'widget': Textarea(

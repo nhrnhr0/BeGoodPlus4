@@ -1,4 +1,7 @@
+from threading import Thread
 from uuid import uuid4
+from core.models import ProvidersDocxTask
+from core.tasks import sheetsurl_to_providers_docx_task
 from docsSignature.models import MOrderSignatureSimulationConnectedItem
 from docsSignature.models import MOrderSignatureSimulation
 from morders.models import MorderStatus
@@ -51,6 +54,21 @@ def spreedsheet_to_morder_view(request):
         sheets_gid = request.POST.get('sheets_gid', None)
         morder = MOrder.objects.get(id=morder_id)
         errors = morder.spreedsheet_to_morder(sheets_gid)
+        if errors:
+            return JsonResponse({'error': errors}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return JsonResponse({'status': 'success'}, status=status.HTTP_200_OK)
+
+
+def update_sell_price_from_price_proposal_sheet_view(request):
+    if not request.user.is_superuser:
+        return JsonResponse({'error': 'You are not authorized to perform this action'}, status=status.HTTP_401_UNAUTHORIZED)
+
+    if request.method == 'POST':
+        morder_id = request.POST.get('morder_id', None)
+        sheet_id = request.POST.get('sheet_id', None)
+        morder = MOrder.objects.get(id=morder_id)
+        errors = morder.update_sell_price_from_price_proposal_sheet(sheet_id)
         if errors:
             return JsonResponse({'error': errors}, status=status.HTTP_400_BAD_REQUEST)
         else:
@@ -125,6 +143,27 @@ def provider_request_update_entry_admin(request):
     else:
         data = AdminProviderResuestSerializerWithMOrder(obj).data
         return JsonResponse({'status': 'success', 'data': data}, status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+def morders_create_providers_docx(request):
+    if not request.user.is_superuser:
+        return JsonResponse({'error': 'You are not authorized to perform this action'}, status=status.HTTP_401_UNAUTHORIZED)
+    else:
+        # set request.ids to a list of Morder ids with export_to_suppliers=True
+        morders = MOrder.objects.filter(
+            export_to_suppliers=True)
+        urls = []
+        for morder in morders:
+            url = morder.get_sheets_order_link()
+            if url:
+                urls.append(url)
+
+        task = ProvidersDocxTask.objects.create(
+            links=urls)
+        Thread(target=sheetsurl_to_providers_docx_task,
+               args=(task.id,)).start()
+        return JsonResponse({'status': 'success', 'task_id': task.id}, status=status.HTTP_200_OK)
 
 
 def create_provider_docs(request):

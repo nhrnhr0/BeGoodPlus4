@@ -49,6 +49,19 @@
         </div>
         <div class="container">
             <div class="label">
+                שמות קבצים:
+            </div>
+            <div class="value">
+                <ul>
+                {%for doc_name in task.doc_names%}
+                    <li>{{doc_name}}
+                    </li>
+                {%endfor%}
+                </ul>
+            </div>
+        </div>
+        <div class="container">
+            <div class="label">
                     לוגים:
                 </div>
                 <div class="value logs">
@@ -94,6 +107,7 @@
     }
     main .container .value {
         font-size: 18px;
+        
     }
     .logs {
         direction: ltr;
