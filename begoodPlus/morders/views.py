@@ -948,14 +948,16 @@ def api_get_order_data(request, id):
         with reversion.create_revision():
             data = json.loads(request.body)
             # order.status = data['status']
+            new_status = None
             if data['status2']:
-                order.status2 = MorderStatus.objects.get(id=data['status2'])
+                new_status = MorderStatus.objects.get(id=data['status2'])
             print('status: ', data['status2'])
             order.message = data['message']
             order.email = data['email']
             order.name = data['name']
             order.phone = data['phone']
             order.status_msg = data['status_msg']
+            order.export_to_suppliers = data['export_to_suppliers']
             for product in data['products']:
                 '''
                     'id':258
@@ -1113,6 +1115,16 @@ def api_get_order_data(request, id):
                 sim_obj.save()
                 pass
             print('done saving simulations')
+
+            price_prop_sync = True
+            orders_sync = True
+            if new_status:
+                if new_status.name == 'בוטל' and order.gid == None:
+                    orders_sync = False
+                if new_status.name == 'הצעת מחיר' and order.gid == None:
+                    orders_sync = False
+                order.status2 = new_status
+
             # recalculate total price
             try:
                 order.save()
@@ -1129,13 +1141,15 @@ def api_get_order_data(request, id):
             #     total_price += totalEntriesQuantity * item.price
             # _ord.total_sell_price = total_price
             # _ord.save()
+
             user = request.user._wrapped if hasattr(
                 request.user, '_wrapped') else request.user
             reversion.set_user(user)
             reversion.set_comment(
-                'סטטוס: ' + str(order.status) + ' - סה"כ: ' + str(order.total_sell_price) + '₪')
+                'סטטוס: ' + str(order.status2.name) + ' - סה"כ: ' + str(order.total_sell_price) + '₪')
             print('done saving order revisions, send to spreadsheet')
-            order.start_morder_to_spreedsheet_thread()
+            order.start_morder_to_spreedsheet_thread(
+                price_prop_sync, orders_sync)
             print('done sending to spreadsheet thread')
 
         return JsonResponse({'status': 'ok'}, status=status.HTTP_200_OK)

@@ -174,15 +174,16 @@ def send_question_notification(question_id):
 
 
 @shared_task
-def turn_to_morder_task(cart_id):
+def turn_to_morder_and_send_telegram_notification_task(cart_id):
     from core.models import SvelteCartModal
     cart = SvelteCartModal.objects.get(id=cart_id)
-    cart.turn_to_morder()
+    morder = cart.turn_to_morder()
+    send_cart_notification(cart_id, morder.id)
     print('done')
 
 
 @shared_task
-def send_cart_notification(cart_id):
+def send_cart_notification(cart_id, morder_id=None):
     from core.models import SvelteCartModal
     print('=================== send_cart_email is running ==========================')
     cart = SvelteCartModal.objects.get(id=cart_id)
@@ -198,7 +199,11 @@ def send_cart_notification(cart_id):
             s = str(cart.user.client.businessName)
         else:
             s = str(cart.user)
-    subject = str(cart.id) + ') ' + s
+    if morder_id:
+        subject = str(morder_id) + ') ' + s
+    else:
+        subject = str(cart.id) + ') ' + s
+
     html_message = render_to_string(
         'emails/cart_template.html', {'cart': cart})
     plain_message = strip_tags(html_message)

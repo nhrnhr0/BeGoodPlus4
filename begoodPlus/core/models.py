@@ -478,7 +478,14 @@ class SvelteCartModal(models.Model):
         # Create Signature for created morder
         create_signature_doc_from_morder(morder)
 
-        morder.start_morder_to_spreedsheet_thread()
+        sync_price_prop = True
+        sync_order = True
+        if morder.status2.name == 'הצעת מחיר':
+            sync_order = False
+
+        morder.start_morder_to_spreedsheet_thread(sync_price_prop, sync_order)
+
+        return morder
 
     def __str__(self):
         # Return a string that represents the instance

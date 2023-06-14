@@ -1,3 +1,4 @@
+from colorfield.fields import ColorField
 import re
 from begoodPlus.secrects import FULL_DOMAIN
 import pytz
@@ -300,22 +301,25 @@ class MOrder(models.Model):
         ws.update_cell(2, 6, str(errors))
         return errors
 
-    def start_morder_to_spreedsheet_thread(self):
+    def start_morder_to_spreedsheet_thread(self, sync_price_proposal=True, sync_order=True):
         import threading
         print('starting thread')
-        t = threading.Thread(target=self.morder_to_spreedsheet)
+        t = threading.Thread(target=self.morder_to_spreedsheet, args=(
+            sync_price_proposal, sync_order))
+
         t.start()
 
-    def morder_to_spreedsheet(self):
+    def morder_to_spreedsheet(self, sync_price_proposal=True, sync_order=True):
         gspred_client = get_gspread_client()
         self.last_sheet_update = datetime.datetime.now()
         print('morder to spreedsheet')
-        workbook = gspred_client.open_by_url(
-            ALL_PRICE_PROPOSAL_SPREEADSHEET_URL)
-        self.write_morder_to_price_prop_spreedsheet(
-            gspred_client, workbook)
-        if self.status2.name != 'הצעת מחיר':
-            # if self.spreed_sheet_url:
+
+        if sync_price_proposal:
+            workbook = gspred_client.open_by_url(
+                ALL_PRICE_PROPOSAL_SPREEADSHEET_URL)
+            self.write_morder_to_price_prop_spreedsheet(
+                gspred_client, workbook)
+        if sync_order:
             workbook = gspred_client.open_by_url(
                 ALL_MORDER_FILE_SPREEDSHEET_URL)
             self.write_morder_to_spreedsheet(workbook)
@@ -363,6 +367,7 @@ class MOrder(models.Model):
         # H2 - admin edit link
 
         worksheet.update('H2', admin_edit_link)
+        worksheet.update('I2', self.status2.name)
 
         # A2 client name
         worksheet.update('A2', self.name)
@@ -371,7 +376,13 @@ class MOrder(models.Model):
 
         # if self.status2.name != 'הצעת מחיר':
         # we color the spreedsheet
-        if self.status2.name != 'הצעת מחיר':
+        if self.status2:
+            # change hex to rgb
+            rgb = tuple(
+                int(self.status2.color[1:][i:i+2], 16) for i in (0, 2, 4))
+            # rbg = (255, 255, 255)
+            # change to 0-1
+            rgb = tuple(map(lambda x: x/255, rgb))
             # color the spreedsheet
             body = {
                 "requests": [
@@ -381,10 +392,10 @@ class MOrder(models.Model):
                                 "sheetId": worksheet.id,
                                 # "title": title, # In this case, I think that this might not be required to be used.
                                 "tabColor": {
-                                    "red": 0.4,
-                                    "green": 1,
-                                    "blue": 0.4
-                                }
+                                    "red": rgb[0],
+                                    "green": rgb[1],
+                                    "blue": rgb[2]
+                                },
                             },
                             "fields": "tabColor"
                         }
@@ -616,7 +627,7 @@ class MOrder(models.Model):
             ).execute()
             return wb.worksheet(title)
 
-    def init_spreedsheet(self, ws: gspread.Worksheet, data):
+    def init_spreedsheet(self, ws: gspread.Worksheet, data, wb):
         # validation_rule = DataValidationRule(
         #     BooleanCondition('ONE_OF_LIST', ['1', '2', '3', '4']),
         #     showCustomUi=True
@@ -682,7 +693,63 @@ class MOrder(models.Model):
             ws.update_cell(2, 9, data['export_to_suppliers'])
         else:
             ws.update_cell(2, 9, '')
-        pass
+
+        # set the color of the sheet tab
+        # if status = חדש:
+            #  grey
+        # if export_to_suppliers = True:
+            #  Yellow
+        # if status = סופק:
+            #  Green
+        # if status = בוטל:
+            #  Red
+
+        GRAY_COLOR = {
+            "red": 0.8,
+            "green": 0.8,
+            "blue": 0.8
+        }
+        YELLOW_COLOR = {
+            "red": 1,
+            "green": 1,
+            "blue": 0
+        }
+        GREEN_COLOR = {
+            "red": 0,
+            "green": 1,
+            "blue": 0
+        }
+        RED_COLOR = {
+            "red": 1,
+            "green": 0,
+            "blue": 0
+        }
+        sheet_color = GRAY_COLOR
+
+        if data['export_to_suppliers']:
+            sheet_color = YELLOW_COLOR
+        else:
+            if data['status'] == 'סופק':
+                sheet_color = GREEN_COLOR
+            elif data['status'] == 'בוטל':
+                sheet_color = RED_COLOR
+
+        body = {
+            "requests": [
+                {
+                    "updateSheetProperties": {
+                        "properties": {
+                            "sheetId": ws.id,
+                            # "title": title, # In this case, I think that this might not be required to be used.
+                            "tabColor": sheet_color
+                        },
+                        "fields": "tabColor"
+                    }
+                }
+            ]
+        }
+        res = wb.batch_update(body)
+        print(res)
 
     def write_morder_to_spreedsheet(self, wb: gspread.Spreadsheet):
         order_data = self.get_exel_data()
@@ -727,7 +794,7 @@ class MOrder(models.Model):
 
         self.gid = order_ws.id
 
-        self.init_spreedsheet(order_ws, order_data)
+        self.init_spreedsheet(order_ws, order_data, wb)
         # write products to sheet:
 
         self.write_products_to_spreedsheet(order_ws, order_data['products'])
@@ -1151,9 +1218,16 @@ def notify_order_status_update_post_save(instance, *args, **kwargs):
 
 
 class MorderStatus(OrderedModelBase):
+    COLOR_PALETTE = [
+        ('#FFFFFF', 'white', ),
+        ('#000000', 'black', ),
+        ('#FFFFFF00', 'transparent', ),
+    ]
     name = models.CharField(max_length=100, unique=True,
                             verbose_name=_('name'))
     sort_order = models.PositiveIntegerField(editable=False, db_index=True)
+    color = ColorField(verbose_name=_(
+        'color'), default='#FF12E2FF', format='hexa', samples=COLOR_PALETTE)
     order_field_name = "sort_order"
 
     class Meta:
