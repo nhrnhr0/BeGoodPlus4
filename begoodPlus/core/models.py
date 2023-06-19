@@ -478,7 +478,14 @@ class SvelteCartModal(models.Model):
         # Create Signature for created morder
         create_signature_doc_from_morder(morder)
 
-        morder.start_morder_to_spreedsheet_thread()
+        sync_price_prop = True
+        sync_order = True
+        if morder.status2.name == 'הצעת מחיר':
+            sync_order = False
+
+        morder.start_morder_to_spreedsheet_thread(sync_price_prop, sync_order)
+
+        return morder
 
     def __str__(self):
         # Return a string that represents the instance
@@ -549,22 +556,28 @@ class ProvidersDocxTask(models.Model):
         #     print(sheet.iloc[0, 0])
         #     morders_ids.append(str(int(float(sheet.iloc[0, 0]))))
         docs_data = []
-        for provider_name in info.keys():
-            doc, seccsess = generate_provider_docx(
-                info[provider_name], provider_name)
-            # if doc is string then there was an error
-            if type(doc) == str:
-                return {'error': {
-                    'provider_name': provider_name,
-                    'product_name': doc
-                }}
-            # docs.append(doc)
-            if seccsess:
-                docs_data.append({
-                    'doc': doc,
-                    'provider_name': provider_name,
-                    'morders_ids': info[provider_name].get('morders', '')
-                })
+        with_private_file = [False, True]
+        for is_file_private in with_private_file:
+            for provider_name in info.keys():
+                doc, seccsess = generate_provider_docx(
+                    info[provider_name], provider_name, is_file_private)
+                # if doc is string then there was an error
+                if type(doc) == str:
+                    return {'error': {
+                        'provider_name': provider_name,
+                        'product_name': doc
+                    }}
+                # docs.append(doc)
+                if seccsess:
+                    prov_name = provider_name
+                    if is_file_private:
+                        prov_name = 'private_' + prov_name
+
+                    docs_data.append({
+                        'doc': doc,
+                        'provider_name': prov_name,
+                        'morders_ids': info[provider_name].get('morders', '')
+                    })
 
         zip_buffer = io.BytesIO()
         with zipfile.ZipFile(zip_buffer, "a", zipfile.ZIP_DEFLATED, False) as zip_file:

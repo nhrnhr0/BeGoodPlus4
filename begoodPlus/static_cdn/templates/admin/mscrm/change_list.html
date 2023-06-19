@@ -94,6 +94,7 @@
 
 <!-- script to query all the #changelist-filter ul.mulitple-choice lis and put them in #list-of-selected-buisness-->
 <script>
+    console.log('looping through all the selected buisnesses');
     let selectedBuisnessContainer = document.querySelector('#list-of-selected-buisness');
     let selectedBuisness = document.querySelectorAll('#changelist-filter ul.mulitple-choice li.selected a:first-child');
     let selectedBuisnessHTML = '<ul>'
@@ -101,8 +102,10 @@
     selectedBuisness.forEach((buisness) => {
         selectedBuisnessHTML += '<li>' + buisness.innerText + '</li>'
     });
+    
 
     selectedBuisnessHTML += '</ul>'
+    console.log(selectedBuisnessHTML);
     selectedBuisnessContainer.innerHTML = selectedBuisnessHTML;
 
 </script>

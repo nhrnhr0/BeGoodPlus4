@@ -109,13 +109,13 @@ class MOrderAdmin(VersionAdmin):  #
     def set_export_to_providers_true(self, request, queryset):
         queryset.update(export_to_suppliers=True)
         for morder in queryset:
-            morder.start_morder_to_spreedsheet_thread()
+            morder.start_morder_to_spreedsheet_thread(True, True)
     set_export_to_providers_true.short_description = 'הכנס לספקים'
 
     def set_export_to_providers_false(self, request, queryset):
         queryset.update(export_to_suppliers=False)
         for morder in queryset:
-            morder.start_morder_to_spreedsheet_thread()
+            morder.start_morder_to_spreedsheet_thread(True, True)
     set_export_to_providers_false.short_description = 'הוצא מספקים'
 
     def get_signiture_link(self, obj):
@@ -648,7 +648,10 @@ admin.site.register(MOrder, MOrderAdmin)
 
 
 class MorderStatusAdmin(OrderedModelAdmin):
-    list_display = ('name', 'move_up_down_links')
+    list_display = ('name', 'color_display', 'move_up_down_links')
+
+    def color_display(self, obj):
+        return mark_safe(f'<div style="width: 20px; height: 20px; background-color: {obj.color};"></div>')
     # list_filter = ('name',)
 
 

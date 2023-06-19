@@ -1,4 +1,5 @@
 
+from productColor.models import ProductColor
 from django.db.models.signals import m2m_changed
 from datetime import datetime
 from email.policy import default
@@ -42,6 +43,7 @@ class CatalogImageVarient(models.Model):
 
     def __str__(self):
         return self.name
+
 
 # Create your models here.
 
@@ -93,7 +95,7 @@ class CatalogImage(models.Model):
         'amount in single pack'), blank=False, null=False, default=0)
     amountCarton = models.IntegerField(verbose_name=_(
         'amount in carton'), blank=False, null=False, default=0)
-    colors = models.ManyToManyField(to=Color, verbose_name=_('colors'))
+    colors = models.ManyToManyField(to=ProductColor, verbose_name=_('colors'))
     sizes = models.ManyToManyField(to=ProductSize, verbose_name=_('sizes'))
     varients = models.ManyToManyField(
         to=CatalogImageVarient, verbose_name=_('varients'), blank=True)
@@ -209,6 +211,11 @@ class CatalogImage(models.Model):
             return CLOUDINARY_BASE_URL + self.cimage
         else:
             ''
+
+    def get_small_cloundinary_url(self):
+        # https://res.cloudinary.com/ms-global/image/upload/w_70,h_53,c_scale,q_auto/v1635672398/site/products/%D7%90%D7%95%D7%96%D7%A0%D7%99%D7%AA_%D7%A9%D7%9C%D7%98_%D7%A7%D7%A4%D7%99%D7%A6%D7%99%D7%AA_-_RETRACTABLE-removebg-preview_Gu4wwDw_Irp1D1a_By59SKw.png
+        if self.cimage and self.cimage != '':
+            return CLOUDINARY_BASE_URL + 'w_25,h_25,c_scale,q_auto/' + self.cimage
 
     def optimize_image(image, size, *args, **kwargs):
         desired_size = 500

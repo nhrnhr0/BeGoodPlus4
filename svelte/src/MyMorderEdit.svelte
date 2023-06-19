@@ -32,6 +32,7 @@ async function load_order_from_server() {
   let resp = await apiGetMOrder(id);
   // console.log("resp:", resp);
   data = serverData = JSON.parse(JSON.stringify(resp));
+  console.log("data:", data);
   headerData = [
     {
       created: data.created,
@@ -48,10 +49,11 @@ async function load_order_from_server() {
       agent: data.agent_name,
       sheets_price_prop_link: data.sheets_price_prop_link,
       sheets_order_link: data.sheets_order_link,
+      export_to_suppliers: data.export_to_suppliers,
     },
   ];
   //productsData = data.products;
-
+  console.log("headerData:", headerData);
   //groupedProducts = group the productsData by product field (ID: int)
   updateing = false;
 }
@@ -96,6 +98,7 @@ async function save_data() {
   data.status_msg = headerData[0].status_msg;
   data.client = headerData[0].client_id;
   data.client_businessName = headerData[0].client_name;
+  data.export_to_suppliers = headerData[0].export_to_suppliers;
   updateing_to_server = true;
   await apiSaveMOrder(data.id, data);
   updateing_to_server = false;
@@ -323,6 +326,7 @@ let current_selected_sim_idx = -1;
           <th>סטטוס</th>
           <th>שם העסק</th>
           <th>סוכן</th>
+          <th>לקחת ספקים?</th>
           <th>קישורים</th>
         </tr>
       </thead>
@@ -372,6 +376,13 @@ let current_selected_sim_idx = -1;
           <td class="header-cell">{headerData[0].client_name}</td>
           <td class="header-cell">{headerData[0].agent}</td>
           <td class="header-cell">
+            <!-- big checkbox -->
+            <input
+              style="width: 20px; height: 20px;"
+              type="checkbox"
+              bind:checked={headerData[0].export_to_suppliers}
+            />
+          </td><td class="header-cell">
             {#if headerData[0].sheets_price_prop_link}
               <a href={headerData[0].sheets_price_prop_link} target="_blank">
                 הצעת מחיר
