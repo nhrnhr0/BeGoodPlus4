@@ -957,7 +957,7 @@ def api_get_order_data(request, id):
             order.name = data['name']
             order.phone = data['phone']
             order.status_msg = data['status_msg']
-            order.export_to_suppliers = data['export_to_suppliers']
+            order.export_to_suppliers = data.get('export_to_suppliers', False)
             for product in data['products']:
                 '''
                     'id':258

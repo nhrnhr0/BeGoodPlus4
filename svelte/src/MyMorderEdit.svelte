@@ -32,6 +32,7 @@ async function load_order_from_server() {
   let resp = await apiGetMOrder(id);
   // console.log("resp:", resp);
   data = serverData = JSON.parse(JSON.stringify(resp));
+  console.log("data:", data);
   headerData = [
     {
       created: data.created,
@@ -48,10 +49,11 @@ async function load_order_from_server() {
       agent: data.agent_name,
       sheets_price_prop_link: data.sheets_price_prop_link,
       sheets_order_link: data.sheets_order_link,
+      export_to_suppliers: data.export_to_suppliers,
     },
   ];
   //productsData = data.products;
-
+  console.log("headerData:", headerData);
   //groupedProducts = group the productsData by product field (ID: int)
   updateing = false;
 }

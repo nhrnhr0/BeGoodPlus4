@@ -1,3 +1,7 @@
+import aiohttp
+import asyncio
+import requests
+from io import BytesIO
 from begoodPlus.secrects import GOOGLE_SERVICE_ACCOUNT_FILE, SECRECT_CLIENT_SIDE_DOMAIN, ALL_MORDER_FILE_SPREEDSHEET_URL
 from ordered_model.models import OrderedModelBase
 import gspread
@@ -156,7 +160,7 @@ def set_cell_border(cell, **kwargs):
                     element.set(qn('w:{}'.format(key)), str(edge_data[key]))
 
 
-def add_table_to_doc(document, data):
+async def add_table_to_doc(document: Document, data, first_col_is_image=False):
     # , style="ColorfulList-Accent5"
     # First row are table headers!
     # https://github.com/python-openxml/python-docx/issues/149
@@ -180,33 +184,43 @@ def add_table_to_doc(document, data):
         table.cell(
             0, data.shape[-1] - j - 1).paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
     # data rows
-    for i in range(data.shape[0]):
-        for j in range(data.shape[-1]):
-            txt = str(data.values[data.shape[0] -
-                                  i - 1, data.shape[-1] - j - 1])
-            if txt == 'nan' or txt == '0' or txt == 'ON COLOR' or txt == '0.0':
-                txt = ''
-            table.cell(i + 1,
-                       j).text = txt.replace('.0', '')
-            table.cell(i + 1,
-                       j).paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
-            cell = table.cell(i + 1, j)
-            set_cell_border(
-                cell,
-                top={"sz": 12, "color": "#000000", "val": "single"},
-                bottom={"sz": 12, "color": "#000000", "val": "single"},
-                left={"sz": 12, "color": "#000000", "val": "single"},
-                right={"sz": 12, "color": "#000000", "val": "single"},
-            )
-            # if it's the last 3 columns, then align right
-            has_modal = 'מודל' in data.columns.tolist()
-            headers_len = data.shape[-1] - \
-                3 if has_modal else data.shape[-1] - 2
+    # iterate over rows
 
-            if j >= headers_len:
-                table.cell(i + 1,
-                           j).paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.RIGHT
+    async with aiohttp.ClientSession() as session:
+        tasks = []
+        for i in range(data.shape[0]):
+            # iterate over columns
+            for j in range(data.shape[-1]):
+                txt = str(data.values[data.shape[0] -
+                                      i - 1, data.shape[-1] - j - 1])
+                if txt == 'nan' or txt == '0' or txt == 'ON COLOR' or txt == '0.0':
+                    txt = ''
+                cell = table.cell(i + 1, j)
 
+                # if j is the last column, then it's the image column
+                if first_col_is_image and j == data.shape[-1] - 1:
+                    tasks.append(asyncio.ensure_future(
+                        insert_image_from_url_to_cell(session, txt, cell)))
+                else:
+                    cell.text = txt.replace('.0', '')
+                    cell.paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
+                set_cell_border(
+                    cell,
+                    top={"sz": 12, "color": "#000000", "val": "single"},
+                    bottom={"sz": 12, "color": "#000000", "val": "single"},
+                    left={"sz": 12, "color": "#000000", "val": "single"},
+                    right={"sz": 12, "color": "#000000", "val": "single"},
+                )
+                # if it's the last 3 columns, then align right
+                has_modal = 'מודל' in data.columns.tolist()
+                headers_len = data.shape[-1] - \
+                    3 if has_modal else data.shape[-1] - 2
+
+                if j >= headers_len:
+                    table.cell(i + 1,
+                               j).paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.RIGHT
+        print('tasks: ', len(tasks))
+        await asyncio.gather(*tasks)
     # for i, column in enumerate(data):
     #     for row in range(data.shape[0]):
     #         table.cell(row, i).text = str(data[column][row])
@@ -222,7 +236,17 @@ def add_table_to_doc(document, data):
     return table
 
 
-def generate_provider_docx(provider_data, provider_name):
+async def insert_image_from_url_to_cell(session, url, cell):
+    print('downloading image', url)
+    async with session.get(url) as resp:
+        response = await resp.content.read()
+        paragraph = cell.paragraphs[0]
+        run = paragraph.add_run()
+        binary_img = BytesIO(response)
+        run.add_picture(binary_img, width=Cm(1.5), height=Cm(1.5))
+
+
+def generate_provider_docx(provider_data, provider_name, private_docx=False):
     pd.option_context('expand_frame_repr', False, 'display.max_rows', None)
     document = Document()
 
@@ -250,6 +274,11 @@ def generate_provider_docx(provider_data, provider_name):
                     'מודל': str(item['verient']),
                     'כמות': item['qty'],
                 })
+                if private_docx:
+                    # convert product_data['orders'] list to string
+
+                    entries[-1]['order'] = str(
+                        '\n'.join(item['orders']))
 
     # document = Document()
     # crete pivot table
@@ -261,10 +290,12 @@ def generate_provider_docx(provider_data, provider_name):
     # if df is empty, then return
     if df.empty:
         return {}, False
+    original_df = df.copy()
     df = df.pivot_table(index=indexs, columns=[column],
                         values=value, aggfunc='sum')
     df = df.fillna(0)
     df = df.astype(int)
+
     df = df.reset_index()
 
     options = ProductSize.objects.all().order_by(
@@ -308,7 +339,7 @@ def generate_provider_docx(provider_data, provider_name):
 
             indexs = row.index.to_list()
             indexs = list(filter(lambda x: x not in [
-                'מוצר', 'מודל', 'צבע'], indexs))
+                'order', 'מוצר', 'מודל', 'צבע'], indexs))
             for size in option:
                 if size in indexs and row.get(size) != 0:
                     found += 1
@@ -329,12 +360,15 @@ def generate_provider_docx(provider_data, provider_name):
                 **{size: row.get('ONE SIZE' if size == 'one size' else size, '') for size in best_option}
             }
         else:
+            selected_option = ['ONE SIZE']
             d = {
                 'מוצר': product_name,
                 'מודל': row['מודל'],
                 'צבע': row['צבע'],
                 'ONE SIZE': row.get('ONE SIZE', '0')
             }
+
+            # d['order'] = row['order']
         options_dfs[best_option_idx] = options_dfs[best_option_idx].append(
             d, ignore_index=True)
     # base = ['מוצר', 'צבע', 'מודל']
@@ -385,7 +419,7 @@ def generate_provider_docx(provider_data, provider_name):
             cols = value.columns.to_list()
             # remove 'מוצר', 'מודל', 'צבע' from cols
             cols = list(filter(lambda x: x not in [
-                'מוצר', 'מודל', 'צבע'], cols))
+                'order', 'מוצר', 'מודל', 'צבע'], cols))
             # iterate over all cols and remove all rows that have 0 in all cols from the start and the end but not in the middle
             cols.sort(
                 key=lambda x: ProductSize.objects.get(size=x).code)
@@ -410,11 +444,37 @@ def generate_provider_docx(provider_data, provider_name):
             p = document.add_heading(label, level=2)
             p.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
+            # temp_origianl_df = original_df.copy()
+            # temp_origianl_df.reset_index(drop=True)
+
+            if private_docx:
+                for size in cols:
+                    for i in range(len(original_df)):
+                        item = original_df.iloc[i]
+                        if item['מוצר'] == value['מוצר'][0] and item['מודל'] == value['מודל'][0] and item['צבע'] == value['צבע'][0] and item['מידה'] == size:
+                            value[size] = '[' + str(value[size][0]) + ']' + '\n' + \
+                                str(item['order'])
+            # if private_docx:
+            #     lbls = lbls + ['order']
             base = ['מוצר', 'צבע', 'מודל']
-            # if 'ONE SIZE' in value.columns:
-            #     base = ['מוצר', ]
             lbls = base + cols[::-1]  # all_options[key][:: -1]
+            if private_docx:
+                lbls = ['image'] + lbls
+
+                # product_name = value['מוצר'][0]
+                # iterate over and download all the images
+                for product_name in value['מוצר']:
+                    pic = ''
+                    try:
+                        obj = CatalogImage.objects.get(title=product_name)
+                        pic = obj.get_small_cloundinary_url()
+                    except:
+                        pass
+                    # add 'image' as the first col for every value['מוצר'] == product_name
+                    value.loc[value['מוצר'] == product_name, 'image'] = pic
+
             value = value.reindex(labels=lbls, axis=1)
+
             # if all the col of מודל are empty strings then remove the col
             models = pd.Series(value.get('מודל'), dtype='str').str.strip()
             found_model = False
@@ -428,7 +488,8 @@ def generate_provider_docx(provider_data, provider_name):
                 except:
                     pass
 
-            add_table_to_doc(document, value.dropna(axis=0, how='all'))
+            asyncio.run(add_table_to_doc(document, value.dropna(
+                axis=0, how='all'), private_docx))
     # changing the page margins
     margin = 1
     sections = document.sections
@@ -440,12 +501,16 @@ def generate_provider_docx(provider_data, provider_name):
     return document, True
 
 
-def merge_data_to_providers_dict(original_data, provider_name, product_name, color, size, varient, qyt, morder_id):
+def merge_data_to_providers_dict(original_data, provider_name, product_name, color, size, varient, qyt, morder_id, order_info):
     # data: {
     # '$provider_name': {
     # 'morders': [$morder_id1, $morder_id2, ...],
     # 'products': {
     # '$product_name': {
+    # 'orders': [{
+    # 'cleint_name': '$client_name',
+    # 'qyt': '$qyt',
+    # } ...],
     # items = [
     # {
     # 'color': '$product_color',
@@ -457,30 +522,55 @@ def merge_data_to_providers_dict(original_data, provider_name, product_name, col
     # }
     # }
     # }
+
+    # if the provider is not in the dict then add it
+    # 'provider_name': {
+    # 'morders': [],
+    # 'products': {
+    # 'product_name': {
+    # 'items': [],
+    # }
+    # }
     if provider_name not in original_data:
         original_data[provider_name] = {
             'products': {},
             'morders': [],
         }
+
+    # if the morder is not in the morders list then add it
     if morder_id not in original_data[provider_name]['morders']:
         original_data[provider_name]['morders'].append(morder_id)
+
+    # if the product is not in the products dict then add it with empty items list
     if product_name not in original_data[provider_name]['products']:
         original_data[provider_name]['products'][product_name] = {
             'items': [],
         }
+
+    # if the client is not in the orders list then add it
+    # client name, qyt, morder_id
+    # order_info = ['str','str','str']
+    # original_data[provider_name]['products'][product_name]['orders'] = original_data[provider_name]['products'][product_name]['orders'] + order_info
+
     found = False
     for item in original_data[provider_name]['products'][product_name]['items']:
         if item['color'] == color and item['size'] == size and item['verient'] == varient:
             item['qty'] += qyt
             found = True
+
             break
     if not found:
-        original_data[provider_name]['products'][product_name]['items'].append({
+        item = {
             'color': color,
             'size': size,
             'verient': varient,
             'qty': qyt,
-        })
+        }
+        original_data[provider_name]['products'][product_name]['items'].append(
+            item)
+    if item.get('orders', None) is None:
+        item['orders'] = []
+    item['orders'].append(order_info)
     return original_data
 
 
@@ -498,6 +588,11 @@ def process_sheets_to_providers_docx(sheets, obj):
         sheet_index += 1
         rows_data = []
         current_row_data = None
+        # A2 order ID
+        # C2 client name
+        order_id = values[1][0]
+        client_name = values[1][2]
+
         sheet_data = values[3:]
         for idx, row in enumerate(sheet_data):
 
@@ -511,6 +606,7 @@ def process_sheets_to_providers_docx(sheets, obj):
             # if it has any value, it means we are on a header row
             if not pd.isna(row[7]) and row[7] != '':
                 # print('header row')
+
                 if current_row_data:
                     rows_data.append(current_row_data)
                 product_name = row[1]
@@ -527,12 +623,14 @@ def process_sheets_to_providers_docx(sheets, obj):
 
                 header_provider_name = row[11] if len(row) > 11 else ''
                 header_amount = header_total_amount - header_taken_amount
+                # order: ['{order_id}) client_name - {header_amount}']
                 current_row_data = {
                     'product_name': product_name,
                     'header_anount': header_amount,
                     'header_provider_name': header_provider_name,
                     'has_child': False,
                     'morder_id': morders_id,
+                    'order': '(' + str(order_id) + ') ' + str(client_name) + '\n' + 'כמות: ' + str(header_amount),
                 }
                 continue
             else:
@@ -557,13 +655,17 @@ def process_sheets_to_providers_docx(sheets, obj):
                 current_row_data['has_child'] = True
                 if(current_row_data.get('childs') == None):
                     current_row_data['childs'] = []
+                order_str = '(' + str(order_id) + ') ' + str(client_name) + '\n' + \
+                    'כמות: ' + str(product_total_amount - product_taken_amount)
                 current_row_data['childs'].append({
                     'product_color': product_color,
                     'product_size': product_size,
                     'product_varient': product_varient,
                     'product_amount': product_total_amount - product_taken_amount,
                     'product_provider_name': product_provider_name,
+                    'order': order_str
                 })
+
                 continue
         # adding the last row
         if current_row_data:
@@ -579,33 +681,34 @@ def process_sheets_to_providers_docx(sheets, obj):
     obj.logs.append('merging data')
     # obj.logs.append(all_sheets_data)
     for row in all_sheets_data:
+
+        product_name = row['product_name']
+        morder_id = row['morder_id']
         if not row['has_child']:
             provider_name = row['header_provider_name'] if not pd.isna(
                 row['header_provider_name']) else ''
             size = 'ONE SIZE'
             color = 'NO COLOR'
             varient = ''
+            order_info = row['order']
             qyt = row['header_anount']
-            product_name = row['product_name']
-            morder_id = row['morder_id']
             if qyt <= 0:
                 continue
             data = merge_data_to_providers_dict(
-                data, provider_name, product_name, color, size, varient, qyt, morder_id)
+                data, provider_name, product_name, color, size, varient, qyt, morder_id, order_info)
         else:
-            product_name = row['product_name']
-            morder_id = row['morder_id']
             for child in row['childs']:
                 provider_name = child['product_provider_name'] if not pd.isna(
                     child['product_provider_name']) else ''
                 size = child['product_size']
                 color = child['product_color']
                 varient = child['product_varient']
+                order_info = child['order']
                 qyt = child['product_amount']
                 if qyt <= 0:
                     continue
                 data = merge_data_to_providers_dict(
-                    data, provider_name, product_name, color, size, varient, qyt, morder_id)
+                    data, provider_name, product_name, color, size, varient, qyt, morder_id, order_info)
     obj.logs.append('finished merging data')
     # obj.logs.append(data)
     return data
