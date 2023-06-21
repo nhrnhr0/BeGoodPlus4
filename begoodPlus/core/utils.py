@@ -451,8 +451,10 @@ def generate_provider_docx(provider_data, provider_name, private_docx=False):
                 for size in cols:
                     for i in range(len(original_df)):
                         item = original_df.iloc[i]
-                        if item['מוצר'] == value['מוצר'][0] and item['מודל'] == value['מודל'][0] and item['צבע'] == value['צבע'][0] and item['מידה'] == size:
-                            value[size] = '[' + str(value[size][0]) + ']' + '\n' + \
+                        if item['מוצר'] in value['מוצר'].values and item['מודל'] in value['מודל'].values and item['צבע'] in value['צבע'].values and item['מידה'] == size:
+                            idx = value[(value['מוצר'] == item['מוצר']) & (
+                                value['מודל'] == item['מודל']) & (value['צבע'] == item['צבע'])].index[0]
+                            value[size][idx] = '[' + str(value[size][idx]) + ']' + '\n' + \
                                 str(item['order'])
             # if private_docx:
             #     lbls = lbls + ['order']
