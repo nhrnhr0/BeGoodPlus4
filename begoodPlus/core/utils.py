@@ -165,6 +165,8 @@ def add_table_to_doc(document, data):
     table.direction = WD_TABLE_DIRECTION.RTL
     table.autofit = True
     table.allow_autofit = True
+    table.style = 'TableGrid'
+    table.direction = WD_TABLE_DIRECTION.RTL
 
     # widths = (Inches(3), Inches(3),)
     # for row in table.rows:
@@ -191,6 +193,8 @@ def add_table_to_doc(document, data):
             table.cell(i + 1,
                        j).paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
             cell = table.cell(i + 1, j)
+
+            #Setting borders
             set_cell_border(
                 cell,
                 top={"sz": 12, "color": "#000000", "val": "single"},
@@ -221,7 +225,7 @@ def add_table_to_doc(document, data):
     # table.rows[0].cells[0].width = Inches(5.0)
     return table
 
-
+#generating docs from sheet
 def generate_provider_docx(provider_data, provider_name):
     pd.option_context('expand_frame_repr', False, 'display.max_rows', None)
     document = Document()
