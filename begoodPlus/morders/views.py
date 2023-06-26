@@ -72,6 +72,9 @@ def update_sell_price_from_price_proposal_sheet_view(request):
         if errors:
             return JsonResponse({'error': errors}, status=status.HTTP_400_BAD_REQUEST)
         else:
+            # sync the new prices to the orders spreedsheet as well
+            morder.start_morder_to_spreedsheet_thread(False, True)
+
             return JsonResponse({'status': 'success'}, status=status.HTTP_200_OK)
 
 
