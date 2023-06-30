@@ -376,33 +376,47 @@ class MOrder(models.Model):
 
         # if self.status2.name != 'הצעת מחיר':
         # we color the spreedsheet
+        #         kkkkkkk
+        GREEN_COLOR = {
+            "red": 0,
+            "green": 1,
+            "blue": 0
+        }
+        RED_COLOR = {
+            "red": 1,
+            "green": 0,
+            "blue": 0
+        }
         if self.status2:
-            # change hex to rgb
-            rgb = tuple(
-                int(self.status2.color[1:][i:i+2], 16) for i in (0, 2, 4))
-            # rbg = (255, 255, 255)
-            # change to 0-1
-            rgb = tuple(map(lambda x: x/255, rgb))
-            # color the spreedsheet
-            body = {
-                "requests": [
-                    {
-                        "updateSheetProperties": {
-                            "properties": {
-                                "sheetId": worksheet.id,
-                                # "title": title, # In this case, I think that this might not be required to be used.
-                                "tabColor": {
-                                    "red": rgb[0],
-                                    "green": rgb[1],
-                                    "blue": rgb[2]
+            # if status2.name == 'חדש':
+            #     color = GREEN_COLOR
+            # elif status2.name == 'בוטל':
+            #     color = RED_COLOR
+            # else:
+            #     do nothing
+            if self.status2.name == 'בוטל':
+                color = RED_COLOR
+            elif self.status2.name == 'חדש':
+                color = GREEN_COLOR
+            else:
+                color = None
+            if color:
+                body = {
+                    "requests": [
+                        {
+                            "updateSheetProperties": {
+                                "properties": {
+                                    "sheetId": worksheet.id,
+                                    # "title": title, # In this case, I think that this might not be required to be used.
+                                    "tabColor": color,
                                 },
-                            },
-                            "fields": "tabColor"
+                                "fields": "tabColor"
+                            }
                         }
-                    }
-                ]
-            }
-            res = workbook.batch_update(body)
+                    ]
+                }
+                workbook.batch_update(body)
+
             # print(res)
 
         # if self.client:
@@ -703,52 +717,36 @@ class MOrder(models.Model):
             #  Green
         # if status = בוטל:
             #  Red
+        # kkkkkkk
 
-        GRAY_COLOR = {
-            "red": 0.8,
-            "green": 0.8,
-            "blue": 0.8
-        }
-        YELLOW_COLOR = {
-            "red": 1,
-            "green": 1,
-            "blue": 0
-        }
-        GREEN_COLOR = {
-            "red": 0,
-            "green": 1,
-            "blue": 0
-        }
-        RED_COLOR = {
-            "red": 1,
-            "green": 0,
-            "blue": 0
-        }
-        sheet_color = GRAY_COLOR
+        if self.status2:
+            # change hex to rgb
 
-        if data['export_to_suppliers']:
-            sheet_color = YELLOW_COLOR
-        else:
-            if data['status'] == 'סופק':
-                sheet_color = GREEN_COLOR
-            elif data['status'] == 'בוטל':
-                sheet_color = RED_COLOR
-
-        body = {
-            "requests": [
-                {
-                    "updateSheetProperties": {
-                        "properties": {
-                            "sheetId": ws.id,
-                            # "title": title, # In this case, I think that this might not be required to be used.
-                            "tabColor": sheet_color
-                        },
-                        "fields": "tabColor"
+            rgb = tuple(
+                int(self.status2.color[1:][i:i+2], 16) for i in (0, 2, 4))
+            # rbg = (255, 255, 255)
+            # change to 0-1
+            rgb = tuple(map(lambda x: x/255, rgb))
+            # color the spreedsheet
+            body = {
+                "requests": [
+                    {
+                        "updateSheetProperties": {
+                            "properties": {
+                                "sheetId": ws.id,
+                                # "title": title, # In this case, I think that this might not be required to be used.
+                                "tabColor": {
+                                    "red": rgb[0],
+                                    "green": rgb[1],
+                                    "blue": rgb[2]
+                                },
+                            },
+                            "fields": "tabColor"
+                        }
                     }
-                }
-            ]
-        }
-        res = wb.batch_update(body)
+                ]
+            }
+            res = wb.batch_update(body)
         print(res)
 
     def write_morder_to_spreedsheet(self, wb: gspread.Spreadsheet):
