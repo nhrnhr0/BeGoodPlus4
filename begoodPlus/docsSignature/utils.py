@@ -9,8 +9,18 @@ from morders.models import MOrder
 from docsSignature.models import MOrderSignature, MOrderSignatureItem, MOrderSignatureItemDetail
 
 
-def create_signature_doc_from_morder(morder):
+def create_signature_doc_from_morder_thread(morder):
+    # create thread to create_signature_doc_from_morder
+    # code:
+    print('start create_signature_doc_from_morder_thread')
+    import threading
+    t = threading.Thread(
+        target=create_signature_doc_from_morder, args=(morder,))
+    t.start()
 
+
+def create_signature_doc_from_morder(morder):
+    print('start create_signature_doc_from_morder')
     # copy the name or client.name as client_name
     # copy the morder.id as related_order
     # copy products as items:
@@ -29,9 +39,13 @@ def create_signature_doc_from_morder(morder):
     client_name = morder.name
     related_omrder = morder
 
-    signatureObj = MOrderSignature.objects.create(
-        client_name=client_name, related_omrder=related_omrder)
-    signatureObj.save()
+    signatureObj, created = MOrderSignature.objects.get_or_create(
+        related_omrder=related_omrder,
+        defaults={"client_name": client_name},
+    )
+    if not created:
+        signatureObj.items.clear()
+
     for product in morder.products.all():
 
         item_name = product.product.title
@@ -66,5 +80,5 @@ def create_signature_doc_from_morder(morder):
             item.details.add(detail)
         item.save()
         signatureObj.items.add(item)
-    pass
+    print('done create_signature_doc_from_morder')
     return signatureObj

@@ -1,3 +1,5 @@
+from core.tasks import send_providers_docx_to_telegram_task
+from core.gspred import gspread_fetch_sheet_from_url
 from core.utils import uuid2slug
 from django.core.files.base import ContentFile
 import io
@@ -20,7 +22,6 @@ from json2html import *
 from django.core.files.storage import FileSystemStorage
 
 
-from django.conf import settings
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from numpy import NaN
@@ -384,6 +385,8 @@ class SvelteCartModal(models.Model):
     uniqe_color.short_description = _('uniqe color')
 
     def turn_to_morder(self):
+        from docsSignature.utils import create_signature_doc_from_morder
+
         from morders.models import MOrder, MOrderItem, MOrderItemEntry, MorderStatus
         cart = self
         if self.user and self.user.is_authenticated:
@@ -472,6 +475,18 @@ class SvelteCartModal(models.Model):
         morder.products.add(*dbProducts)
         morder.save()
 
+        # Create Signature for created morder
+        create_signature_doc_from_morder(morder)
+
+        sync_price_prop = True
+        sync_order = True
+        if morder.status2.name == 'הצעת מחיר':
+            sync_order = False
+
+        morder.start_morder_to_spreedsheet_thread(sync_price_prop, sync_order)
+
+        return morder
+
     def __str__(self):
         # Return a string that represents the instance
         return f"{self.created_date.strftime('%Y-%m-%d %H:%M:%S')} - {self.name} - {self.cart_count()}"
@@ -495,12 +510,13 @@ class ProvidersDocxTask(models.Model):
     status = models.CharField(
         max_length=20, choices=ProvidersDocxTaskStatusChoices, default='new')
     progress = models.IntegerField(default=0)
+    doc_names = models.JSONField(blank=True, null=True)
 
     def status_str_display(self):
         ret = dict(ProvidersDocxTaskStatusChoices)[self.status]
         return ret
 
-    def process_sheetsurl_to_providers_docx(self, drive_service, drive_creds):
+    def process_sheetsurl_to_providers_docx(self):
         # try:
         sheets = []
         urls = self.links
@@ -508,13 +524,22 @@ class ProvidersDocxTask(models.Model):
         self.logs = []
         self.save()
         loaded_files = {}
+        self.doc_names = []
         for url in urls:
             log = 'fetching sheet from url: ' + url
             self.logs.append(log)
             self.save()
-            sheet, sheetname, loaded_files = get_sheet_from_drive_url(
-                url, drive_service, drive_creds, loaded_files)
+
+            try:
+                sheet, sheetname = gspread_fetch_sheet_from_url(url)
+            except Exception as e:
+                log = 'error: ' + str(e)
+                self.logs.append(log)
+                self.save()
+                continue
+
             sheets.append(sheet)
+            self.doc_names.append(sheetname)
             log = 'downloaded'
             self.logs.append(log)
             self.save()
@@ -531,22 +556,28 @@ class ProvidersDocxTask(models.Model):
         #     print(sheet.iloc[0, 0])
         #     morders_ids.append(str(int(float(sheet.iloc[0, 0]))))
         docs_data = []
-        for provider_name in info.keys():
-            doc, seccsess = generate_provider_docx(
-                info[provider_name], provider_name)
-            # if doc is string then there was an error
-            if type(doc) == str:
-                return {'error': {
-                    'provider_name': provider_name,
-                    'product_name': doc
-                }}
-            # docs.append(doc)
-            if seccsess:
-                docs_data.append({
-                    'doc': doc,
-                    'provider_name': provider_name,
-                    'morders_ids': info[provider_name].get('morders', '')
-                })
+        with_private_file = [False, True]
+        for is_file_private in with_private_file:
+            for provider_name in info.keys():
+                doc, seccsess = generate_provider_docx(
+                    info[provider_name], provider_name, is_file_private)
+                # if doc is string then there was an error
+                if type(doc) == str:
+                    return {'error': {
+                        'provider_name': provider_name,
+                        'product_name': doc
+                    }}
+                # docs.append(doc)
+                if seccsess:
+                    prov_name = provider_name
+                    if is_file_private:
+                        prov_name = 'private_' + prov_name
+
+                    docs_data.append({
+                        'doc': doc,
+                        'provider_name': prov_name,
+                        'morders_ids': info[provider_name].get('morders', '')
+                    })
 
         zip_buffer = io.BytesIO()
         with zipfile.ZipFile(zip_buffer, "a", zipfile.ZIP_DEFLATED, False) as zip_file:
@@ -565,6 +596,10 @@ class ProvidersDocxTask(models.Model):
         self.docx = ContentFile(zip_buffer.getvalue(
         ), 'providers - ' + str(self.created_date) + '.zip')
         self.save()
+
+        # send providers file to telegram
+        send_providers_docx_to_telegram(self.docx.path)
+
         return {'zip': zip_buffer}
         # except Exception as e:
         #     print(e)
@@ -572,3 +607,14 @@ class ProvidersDocxTask(models.Model):
         #     self.logs.append(str(e))
         #     self.save()
         #     return {'error': str(e)}
+
+
+def send_providers_docx_to_telegram(docx_path):
+    # send providers file to telegram
+    try:
+        if settings.DEBUG:
+            send_providers_docx_to_telegram_task(docx_path)
+        else:
+            send_providers_docx_to_telegram_task.delay(docx_path)
+    except Exception as e:
+        print(e)

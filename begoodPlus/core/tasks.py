@@ -3,7 +3,7 @@ import datetime
 from django.template.loader import render_to_string
 from begoodPlus.celery import telegram_bot
 import telegram
-from begoodPlus.secrects import TELEGRAM_CHAT_ID_CARTS, MAIN_EMAIL_RECEIVER, TELEGRAM_CHAT_ID_LEADS, TELEGRAM_CHAT_ID_PRODUCT_PHOTO, TELEGRAM_CHAT_ID_QUESTIONS
+from begoodPlus.secrects import TELEGRAM_CHAT_ID_CARTS, MAIN_EMAIL_RECEIVER, TELEGRAM_CHAT_ID_LEADS, TELEGRAM_CHAT_ID_PRODUCT_PHOTO, TELEGRAM_CHAT_ID_QUESTIONS, TELEGRAM_CHAT_ID_PROVIDERS_DOCX
 from django.conf import settings
 from django.utils.html import strip_tags
 from django.core import mail
@@ -18,15 +18,24 @@ from celery import shared_task
 import time
 
 from client.models import UserQuestion, UserSessionLogger
-from core.models import SvelteCartModal, SvelteContactFormModal, UserProductPhoto
 
 
 @shared_task
-def sheetsurl_to_providers_docx_task(providersDocxTask_id, drive_service, drive_creds):
+def sheetsurl_to_providers_docx_task(providersDocxTask_id):
     from core.models import ProvidersDocxTask
     providersDocxTask = ProvidersDocxTask.objects.get(id=providersDocxTask_id)
-    providersDocxTask.process_sheetsurl_to_providers_docx(
-        drive_service, drive_creds)
+    providersDocxTask.process_sheetsurl_to_providers_docx()
+
+
+@shared_task
+def send_providers_docx_to_telegram_task(docx_path):
+    from morders.models import MOrder
+    print('=================== send_providers_docx_to_telegram_task is running ==========================')
+    chat_id = TELEGRAM_CHAT_ID_PROVIDERS_DOCX
+    if chat_id:
+        doc = open(docx_path, 'rb')
+        telegram_bot.send_document(
+            chat_id=chat_id, document=doc)
 
 
 @shared_task
@@ -62,6 +71,7 @@ def close_inactive_user_sessions():
 
 @shared_task
 def send_cantacts_notificatios(contacts_id):
+    from core.models import SvelteContactFormModal
     contact_info = SvelteContactFormModal.objects.get(id=contacts_id)
     info = {
         'user': contact_info.user,
@@ -100,6 +110,7 @@ def send_cantacts_notificatios(contacts_id):
 
 @shared_task
 def product_photo_send_notification(user_product_photo):
+    from core.models import UserProductPhoto
     obj = UserProductPhoto.objects.get(id=user_product_photo)
     chat_id = TELEGRAM_CHAT_ID_PRODUCT_PHOTO
     caption = '<b> משתמש: </b> ' + str(obj.user) + '\n<b> הודעה: </b> ' + obj.description + \
@@ -163,14 +174,17 @@ def send_question_notification(question_id):
 
 
 @shared_task
-def turn_to_morder_task(cart_id):
+def turn_to_morder_and_send_telegram_notification_task(cart_id):
+    from core.models import SvelteCartModal
     cart = SvelteCartModal.objects.get(id=cart_id)
-    cart.turn_to_morder()
+    morder = cart.turn_to_morder()
+    send_cart_notification(cart_id, morder.id)
     print('done')
 
 
 @shared_task
-def send_cart_notification(cart_id):
+def send_cart_notification(cart_id, morder_id=None):
+    from core.models import SvelteCartModal
     print('=================== send_cart_email is running ==========================')
     cart = SvelteCartModal.objects.get(id=cart_id)
     # subject = to the current date and time if the cart
@@ -185,7 +199,11 @@ def send_cart_notification(cart_id):
             s = str(cart.user.client.businessName)
         else:
             s = str(cart.user)
-    subject = str(cart.id) + ') ' + s
+    if morder_id:
+        subject = str(morder_id) + ') ' + s
+    else:
+        subject = str(cart.id) + ') ' + s
+
     html_message = render_to_string(
         'emails/cart_template.html', {'cart': cart})
     plain_message = strip_tags(html_message)
@@ -198,6 +216,8 @@ def send_cart_notification(cart_id):
     # sending telegram message
     # for chat_id in self.chat_ids:
     chat_id = TELEGRAM_CHAT_ID_CARTS
+    if not chat_id:
+        return
     telegram_message = '* ' + subject + ' *' + '\n'
     telegram_message += 'סטטוס: * ' + cart.order_type + ' * \n'
     if cart.agent:

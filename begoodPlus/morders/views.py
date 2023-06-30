@@ -1,3 +1,9 @@
+from threading import Thread
+from uuid import uuid4
+from core.models import ProvidersDocxTask
+from core.tasks import sheetsurl_to_providers_docx_task
+from docsSignature.models import MOrderSignatureSimulationConnectedItem
+from docsSignature.models import MOrderSignatureSimulation
 from morders.models import MorderStatus
 from django.db import models
 from django.db.models.functions import Length
@@ -16,7 +22,7 @@ import zipfile
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from matplotlib.pyplot import annotate
-
+from docsSignature.views import save_image_to_cloudinary
 from catalogImages.models import CatalogImage
 from inventory.models import PPN, WarehouseStock
 from provider.models import Provider
@@ -37,6 +43,39 @@ from django.template.loader import get_template
 from productSize.models import ProductSize
 from docx.enum.table import WD_TABLE_DIRECTION
 import reversion
+
+
+def spreedsheet_to_morder_view(request):
+    if not request.user.is_superuser:
+        return JsonResponse({'error': 'You are not authorized to perform this action'}, status=status.HTTP_401_UNAUTHORIZED)
+
+    if request.method == 'POST':
+        morder_id = request.POST.get('morder_id', None)
+        sheets_gid = request.POST.get('sheets_gid', None)
+        morder = MOrder.objects.get(id=morder_id)
+        errors = morder.spreedsheet_to_morder(sheets_gid)
+        if errors:
+            return JsonResponse({'error': errors}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return JsonResponse({'status': 'success'}, status=status.HTTP_200_OK)
+
+
+def update_sell_price_from_price_proposal_sheet_view(request):
+    if not request.user.is_superuser:
+        return JsonResponse({'error': 'You are not authorized to perform this action'}, status=status.HTTP_401_UNAUTHORIZED)
+
+    if request.method == 'POST':
+        morder_id = request.POST.get('morder_id', None)
+        sheet_id = request.POST.get('sheet_id', None)
+        morder = MOrder.objects.get(id=morder_id)
+        errors = morder.update_sell_price_from_price_proposal_sheet(sheet_id)
+        if errors:
+            return JsonResponse({'error': errors}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            # sync the new prices to the orders spreedsheet as well
+            morder.start_morder_to_spreedsheet_thread(False, True)
+
+            return JsonResponse({'status': 'success'}, status=status.HTTP_200_OK)
 
 
 def request_provider_info_admin(request, ppn_id):
@@ -107,6 +146,27 @@ def provider_request_update_entry_admin(request):
     else:
         data = AdminProviderResuestSerializerWithMOrder(obj).data
         return JsonResponse({'status': 'success', 'data': data}, status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+def morders_create_providers_docx(request):
+    if not request.user.is_superuser:
+        return JsonResponse({'error': 'You are not authorized to perform this action'}, status=status.HTTP_401_UNAUTHORIZED)
+    else:
+        # set request.ids to a list of Morder ids with export_to_suppliers=True
+        morders = MOrder.objects.filter(
+            export_to_suppliers=True)
+        urls = []
+        for morder in morders:
+            url = morder.get_sheets_order_link()
+            if url:
+                urls.append(url)
+
+        task = ProvidersDocxTask.objects.create(
+            links=urls)
+        Thread(target=sheetsurl_to_providers_docx_task,
+               args=(task.id,)).start()
+        return JsonResponse({'status': 'success', 'task_id': task.id}, status=status.HTTP_200_OK)
 
 
 def create_provider_docs(request):
@@ -879,6 +939,8 @@ def api_get_order_data2(request, id):
 
 
 def api_get_order_data(request, id):
+    from docsSignature.utils import create_signature_doc_from_morder, create_signature_doc_from_morder_thread
+    print('api_get_order_data', id)
     if not request.user.is_superuser:
         return JsonResponse({'status': 'error'}, status=status.HTTP_403_FORBIDDEN)
 
@@ -889,14 +951,16 @@ def api_get_order_data(request, id):
         with reversion.create_revision():
             data = json.loads(request.body)
             # order.status = data['status']
+            new_status = None
             if data['status2']:
-                order.status2 = MorderStatus.objects.get(id=data['status2'])
-
+                new_status = MorderStatus.objects.get(id=data['status2'])
+            print('status: ', data['status2'])
             order.message = data['message']
             order.email = data['email']
             order.name = data['name']
             order.phone = data['phone']
             order.status_msg = data['status_msg']
+            order.export_to_suppliers = data.get('export_to_suppliers', False)
             for product in data['products']:
                 '''
                     'id':258
@@ -920,6 +984,10 @@ def api_get_order_data(request, id):
                 p.price = product['price']
                 p.providers.set(product['providers'])
                 p.ergent = product['ergent']
+                if p.ergent == 'false':
+                    p.ergent = False
+                elif p.ergent == 'true':
+                    p.ergent = True
                 p.prining = product['prining']
                 p.embroidery = product['embroidery']
                 p.embroideryComment = product.get('embroideryComment', '')
@@ -962,18 +1030,19 @@ def api_get_order_data(request, id):
                         if qyt > 0:
                             e.quantity = qyt
                             e.save()
-                            dups = p.entries.filter(
-                                Q(color=e.color) and
-                                Q(size=e.size) and
-                                Q(varient=e.varient) and
-                                Q(morder_item=p) and
-                                ~Q(id=e.id)
-                            )
-                            if dups.count() != 0:
-                                print('delete all dups: ', dups)
-                                dups.delete()
+                            # dups = p.entries.filter(
+                            #     Q(color=e.color) and
+                            #     Q(size=e.size) and
+                            #     Q(varient=e.varient) and
+                            #     Q(morder_item=p) and
+                            #     ~Q(id=e.id)
+                            # )
+                            # if dups.count() != 0:
+                            #     print('delete all dups: ', dups)
+                            #     dups.delete()
                         else:
-                            e.delete()
+                            # e.delete()
+                            pass
                     else:
                         if qyt > 0:
                             existing_entry = p.entries.filter(
@@ -992,7 +1061,81 @@ def api_get_order_data(request, id):
 
                     # print('e2', e, 'save')
                     p.save()
-            order.save()
+            print('done saving order items, move to simulations')
+            for sim in data['simulations']:
+                if sim.get('deleted'):
+                    if sim.get('id'):
+                        try:
+                            sim_to_delete = MOrderSignatureSimulation.objects.get(
+                                id=sim['id'])
+                            sim_to_delete.delete()
+                        except:
+                            pass
+                    continue
+                if sim.get('id') != None:
+                    sim_obj = MOrderSignatureSimulation.objects.get(
+                        id=sim['id'])
+                else:
+                    try:
+                        sigModal = order.mordersignature
+                    except:
+
+                        create_signature_doc_from_morder(order)
+                        sigModal = order.mordersignature
+                    sim_obj = MOrderSignatureSimulation()
+                    sim_obj.save()
+                    sigModal.simulations.add(sim_obj)
+                sim_obj.description = sim.get('description', '')
+                sim_obj.order = sim.get('order', 1)
+                if sim.get('cimage') and sim['cimage'].startswith('data:image'):
+                    # image data;str
+                    image_data = sim['cimage']
+                    # save the image to cloudinary and get the url
+                    url = save_image_to_cloudinary(
+                        image_data, str(sim_obj.id) + str(uuid4()), 'simulations')
+                    # update the item's cimage field
+                    sim_obj.cimage = url
+
+                # iterate over the products and save them
+                # sim.products = {product['id']: {'amount': Int}...]
+                # sim.products = {MOrderItem: {'amount': Int},...]
+                keys = sim.get('products', {}).keys()
+                for key in keys:
+                    obj = MOrderItem.objects.get(id=key)
+                    amount = sim['products'][key]['amount']
+                    # if exists update
+                    # sim_obj.products.all().item.id
+                    try:
+                        item = sim_obj.products.get(item__id=key)
+                        item.amount = amount
+                        item.save()
+                    except:
+                        new_obj = MOrderSignatureSimulationConnectedItem.objects.create(
+                            item=obj, amount=amount)
+                        sim_obj.products.add(
+                            new_obj)
+
+                sim_obj.save()
+                pass
+            print('done saving simulations')
+
+            price_prop_sync = True
+            orders_sync = True
+            if new_status:
+                if new_status.name == 'בוטל' and order.gid == None:
+                    orders_sync = False
+                if new_status.name == 'הצעת מחיר' and order.gid == None:
+                    orders_sync = False
+                order.status2 = new_status
+
+            # recalculate total price
+            try:
+                order.save()
+                create_signature_doc_from_morder_thread(order)
+            except Exception as e:
+                return JsonResponse({'error': str(e)}, status=400)
+
+            print('done saving order')
             # _ord = MOrder.objects.get(id=order.id)
             # total_price = 0
             # for item in _ord.products.all():
@@ -1001,13 +1144,18 @@ def api_get_order_data(request, id):
             #     total_price += totalEntriesQuantity * item.price
             # _ord.total_sell_price = total_price
             # _ord.save()
+
             user = request.user._wrapped if hasattr(
                 request.user, '_wrapped') else request.user
             reversion.set_user(user)
             reversion.set_comment(
-                'סטטוס: ' + str(order.status) + ' - סה"כ: ' + str(order.total_sell_price) + '₪')
+                'סטטוס: ' + str(order.status2.name) + ' - סה"כ: ' + str(order.total_sell_price) + '₪')
+            print('done saving order revisions, send to spreadsheet')
+            order.start_morder_to_spreedsheet_thread(
+                price_prop_sync, orders_sync)
+            print('done sending to spreadsheet thread')
+
         return JsonResponse({'status': 'ok'}, status=status.HTTP_200_OK)
 
     data = AdminMOrderSerializer(order).data
-
     return JsonResponse(data, status=status.HTTP_200_OK)

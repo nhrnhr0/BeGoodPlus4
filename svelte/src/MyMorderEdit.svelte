@@ -32,6 +32,7 @@ async function load_order_from_server() {
   let resp = await apiGetMOrder(id);
   // console.log("resp:", resp);
   data = serverData = JSON.parse(JSON.stringify(resp));
+  console.log("data:", data);
   headerData = [
     {
       created: data.created,
@@ -46,10 +47,13 @@ async function load_order_from_server() {
       client_id: data.client,
       client_name: data.client_businessName,
       agent: data.agent_name,
+      sheets_price_prop_link: data.sheets_price_prop_link,
+      sheets_order_link: data.sheets_order_link,
+      export_to_suppliers: data.export_to_suppliers,
     },
   ];
   //productsData = data.products;
-
+  console.log("headerData:", headerData);
   //groupedProducts = group the productsData by product field (ID: int)
   updateing = false;
 }
@@ -94,6 +98,7 @@ async function save_data() {
   data.status_msg = headerData[0].status_msg;
   data.client = headerData[0].client_id;
   data.client_businessName = headerData[0].client_name;
+  data.export_to_suppliers = headerData[0].export_to_suppliers;
   updateing_to_server = true;
   await apiSaveMOrder(data.id, data);
   updateing_to_server = false;
@@ -259,6 +264,37 @@ function new_product_btn_click() {
   win.focus();
   return false;
 }
+
+function handleImageUploadSim(e) {
+  let file = e.target.files[0];
+  let reader = new FileReader();
+  reader.readAsDataURL(file);
+  reader.onload = function () {
+    let image = reader.result;
+    simImage = image;
+  };
+}
+let simImage;
+let SimDescriptionNew;
+function addNewSimBtnClicked(e) {
+  e.preventDefault();
+  debugger;
+  if (data == undefined) {
+    data = {};
+  }
+  if (!data?.simulations) {
+    data.simulations = [];
+  }
+  data.simulations.push({
+    cimage: simImage,
+    description: SimDescriptionNew,
+  });
+  data.simulations = [...data.simulations];
+  simImage = "";
+  SimDescriptionNew = "";
+}
+
+let current_selected_sim_idx = -1;
 </script>
 
 <svelte:head>
@@ -270,6 +306,8 @@ function new_product_btn_click() {
 <!-- headerData table -->
 <MorderAddProductEntryPopup {ALL_COLORS} {ALL_SIZES} {ALL_VERIENTS} />
 <main>
+  <!-- href to back to  /admin/morders/morder/ -->
+  <a href="/admin/morders/morder/" class="back-btn">חזרה להזמנות</a>
   {#if headerData}
     <div class="created">
       נוצר ב{new Date(headerData[0].created).toLocaleString("Israel")}
@@ -288,6 +326,8 @@ function new_product_btn_click() {
           <th>סטטוס</th>
           <th>שם העסק</th>
           <th>סוכן</th>
+          <th>לקחת ספקים?</th>
+          <th>קישורים</th>
         </tr>
       </thead>
       <tbody>
@@ -335,6 +375,26 @@ function new_product_btn_click() {
           </td>
           <td class="header-cell">{headerData[0].client_name}</td>
           <td class="header-cell">{headerData[0].agent}</td>
+          <td class="header-cell">
+            <!-- big checkbox -->
+            <input
+              style="width: 20px; height: 20px;"
+              type="checkbox"
+              bind:checked={headerData[0].export_to_suppliers}
+            />
+          </td><td class="header-cell">
+            {#if headerData[0].sheets_price_prop_link}
+              <a href={headerData[0].sheets_price_prop_link} target="_blank">
+                הצעת מחיר
+              </a>
+              <br />
+            {/if}
+            {#if headerData[0].sheets_order_link}
+              <a href={headerData[0].sheets_order_link} target="_blank">
+                הזמנה
+              </a>
+            {/if}
+          </td>
         </tr>
       </tbody>
     </table>
@@ -447,6 +507,55 @@ function new_product_btn_click() {
                   }
                 }}>מחק</button
               >
+
+              {#if current_selected_sim_idx != -1}
+                <button
+                  type="button"
+                  class="btn connect-btn"
+                  class:active={data &&
+                    data?.simulations &&
+                    current_selected_sim_idx != -1 &&
+                    data.simulations[current_selected_sim_idx].products &&
+                    data.simulations[current_selected_sim_idx].products[
+                      product.id
+                    ]}
+                  on:click={() => {
+                    //data.simulations[current_selected_sim_idx].products = {product_id: amount:Int}
+                    // set data.simulations[current_selected_sim_idx].products = [...data.simulations[current_selected_sim_idx].products, newData];
+                    // if it already exists, remove it
+                    if (
+                      data.simulations[current_selected_sim_idx].products &&
+                      data.simulations[current_selected_sim_idx].products[
+                        product.id
+                      ]
+                    ) {
+                      delete data.simulations[current_selected_sim_idx]
+                        .products[product.id];
+                      data.simulations = [...data.simulations];
+                    } else {
+                      console.log(product);
+                      debugger;
+                      let total_amount = product.entries.reduce(
+                        (acc, curr) => acc + curr.quantity,
+                        0
+                      );
+                      if (
+                        !data.simulations[current_selected_sim_idx].products
+                      ) {
+                        data.simulations[current_selected_sim_idx].products =
+                          {};
+                      }
+                      data.simulations[current_selected_sim_idx].products[
+                        product.id
+                      ] = {
+                        amount: total_amount,
+                        title: product.product.title,
+                        img: product.product.cimage,
+                      };
+                    }
+                  }}>חבר מוצר להדמייה</button
+                >
+              {/if}
             </td>
           </tr>
           <tr class="details">
@@ -596,7 +705,129 @@ function new_product_btn_click() {
       </button>
     </div>
   </div>
-
+  <!-- simulation -->
+  <div class="table-wraper">
+    <table class="simulation">
+      {#each data?.simulations || [] as sim, i}
+        <tr data-idx={i} class:deleted={sim.deleted}>
+          <td>
+            <input type="number" bind:value={sim.order} />
+          </td>
+          <td>
+            <img src={sim.cimage} class="sim-img" />
+          </td>
+          <td>
+            <div class="sim-description">
+              <textarea
+                name="sim-{i}"
+                id=""
+                cols="50"
+                rows="5"
+                placeholder="תיאור הדמייה"
+                bind:value={sim.description}
+              />
+            </div>
+          </td>
+          <td>
+            <!-- button to connect items to the sim -->
+            <button
+              type="button"
+              on:click={() => {
+                if (current_selected_sim_idx == i) {
+                  current_selected_sim_idx = -1;
+                } else {
+                  current_selected_sim_idx = i;
+                }
+              }}
+              class="connect-btn"
+              class:active={current_selected_sim_idx == i}
+            >
+              קשר מוצרים
+            </button>
+            <!-- table of the products and thire total abount -->
+            <!-- header: שם מוצר, כמות -->
+            <table class="product-table simulation-table">
+              <thead>
+                <tr>
+                  <th>שם מוצר</th>
+                  <th>כמות</th>
+                </tr>
+              </thead>
+              <tbody>
+                {#each Object.keys(sim.products || {}) as product_idx}
+                  <tr>
+                    <td>
+                      <img
+                        src="{CLOUDINARY_BASE_URL}{sim.products[product_idx]
+                          .img}"
+                        width="25px"
+                        height="25px"
+                      />
+                      {sim.products[product_idx].title}</td
+                    >
+                    <td>
+                      <input
+                        type="number"
+                        bind:value={sim.products[product_idx].amount}
+                        Width="min-content"
+                      />
+                    </td>
+                  </tr>
+                {/each}
+              </tbody>
+            </table></td
+          >
+          <td>
+            <div class="delete-action">
+              <button
+                type="button"
+                on:click={() => {
+                  sim.deleted = !sim.deleted;
+                }}
+              >
+                {#if !sim.deleted}
+                  מחק
+                {:else}
+                  שחזר
+                {/if}
+              </button>
+            </div>
+          </td>
+        </tr>
+      {/each}
+      <tr>
+        <td colspan="2"> הדמייה חדשה: </td>
+      </tr>
+      <tr>
+        <td colspan="1" class="sim-image-td">
+          <input
+            type="file"
+            id="selectedFileSim"
+            on:change={handleImageUploadSim}
+            accept="image/png, image/gif, image/jpeg"
+          />
+          <img width="50px" height="50px" src={simImage} class="sim-img" />
+        </td>
+        <td colspan="1">
+          <div class="sim-description">
+            <textarea
+              name="sim-new"
+              id=""
+              cols="50"
+              rows="5"
+              placeholder="תיאור הדמייה"
+              bind:value={SimDescriptionNew}
+            />
+          </div>
+        </td>
+        <td>
+          <button type="button" on:click={addNewSimBtnClicked}
+            >הוסף הדמייה</button
+          >
+        </td>
+      </tr>
+    </table>
+  </div>
   <div class="update-btn-wraper">
     <Button
       class="update-btn"
@@ -737,6 +968,68 @@ table.product-table {
       }
     }
     background-color: #a7a7a786;
+  }
+}
+
+// simulation
+.table-wraper {
+  overflow-x: auto;
+  margin-bottom: 20px;
+}
+table.simulation {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #ccc;
+  margin-top: 20px;
+  tr {
+    border: 1px solid #ccc;
+    // display: flex;
+    // flex-direction: row;
+    // justify-content: space-between;
+    // align-items: center;
+
+    td {
+      border: 1px solid #ccc;
+      // padding: 10px;
+      img.sim-img {
+        max-width: 350px;
+        width: auto;
+        height: auto;
+      }
+      input {
+        width: 100px;
+      }
+      // img {
+      //   // width: 100%;
+      //   // height: auto;
+      //   &.sim-img {
+      //     // height: 100px;
+      //   }
+      // }
+
+      &.sim-image-td {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      }
+    }
+
+    &.deleted {
+      background-color: #f10101;
+      color: #fff;
+    }
+  }
+}
+
+.connect-btn {
+  background-color: #fff;
+  border: 1px solid #ccc;
+  padding: 5px;
+  border-radius: 5px;
+  cursor: pointer;
+  &.active {
+    background-color: #ccc;
   }
 }
 </style>

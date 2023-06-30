@@ -3,6 +3,7 @@
 from email.policy import default
 from django.http import JsonResponse
 from rest_framework import serializers
+from begoodPlus.secrects import ALL_MORDER_FILE_SPREEDSHEET_URL
 from catalogImages.models import CatalogImage
 from inventory.models import WarehouseStock
 from inventory.serializers import WarehouseStockSerializer
@@ -119,7 +120,7 @@ class AdminMOrderItemSerializer(serializers.ModelSerializer):
         # product = CatalogImage.objects.get(id=obj.product.id)
         # serializer = CatalogImageSerializer(product, many=False, context=serializer_context)
         # return serializer.data
-        product = CatalogImage.objects.get(id=obj.product.id)
+        product = obj.product
         return {
             'id': product.id,
             'title': product.title,
@@ -137,43 +138,43 @@ class AdminMOrderItemSerializer(serializers.ModelSerializer):
         kwargs['context'] = self.get_serializer_context()
         return serializer_class(*args, **kwargs)
 
-    def get_available_inventory(self, obj):
-        # all the available stock in all the warhoused and sum the quantity for every product, size,color,varient, ppn__has_phisical_barcode,ppn__provider__name,ppn__barcode
-        stock = WarehouseStock.objects.select_related('size', 'color', 'verient', 'ppn', 'product').values('size', 'color', 'verient', 'ppn__has_phisical_barcode', 'ppn__provider__name',) \
-            .order_by('size', 'color', 'verient', 'ppn__has_phisical_barcode', 'ppn__provider__name',) \
-            .filter(ppn__product=obj.product) \
-            .annotate(total=Sum('quantity'))
-        # get all the orders for this product frozen
-        taken_in_other_orders = TakenInventory.objects.select_related('orderItem', 'size', 'color', 'varient', 'provider').filter(~Q(orderItem=obj), Q(orderItem__product__id=obj.product.id), Q(orderItem__morder__freezeTakenInventory=True), Q(orderItem__morder__archive=False)).annotate(total=Sum('quantity')).values('size', 'color', 'varient', 'has_physical_barcode', 'provider__name',) \
-            .order_by('size', 'color', 'varient', 'has_physical_barcode', 'provider__name',) \
-            .annotate(total=Sum('quantity'))
-        # frozzenOrders = MOrder.objects.filter(freezeTakenInventory=True)
-        # for order in frozzenOrders:
-        #     taken = order.taken.filter(product=obj.product)
-        # obj <MOrderItem: גרבי כותנה | 444.00₪>
-        # stock
-        # {'size': 117, 'color': 77, 'verient': None, 'ppn__barcode': '', 'ppn__has_phisical_barcode': False, 'ppn__provider__name': 'המלביש', 'total': 20},
-        # {'size': 118, 'color': 77, 'verient': None, 'ppn__barcode': '', 'ppn__has_phisical_barcode': False, 'ppn__provider__name': 'המלביש', 'total': 20},
-        # {'size': 117, 'color': 78, 'verient': None, 'ppn__barcode': '', 'ppn__has_phisical_barcode': False, 'ppn__provider__name': 'המלביש', 'total': 10},
-        # taken
-        # {'size': 117, 'color': 77, 'varient': None, 'barcode': '', 'has_physical_barcode': False, 'provider__name': 'המלביש', 'total': 1},
-        # {'size': 118, 'color': 77, 'varient': None, 'barcode': '', 'has_physical_barcode': False, 'provider__name': 'המלביש', 'total': 3},
-        for s in stock:
-            s['taken'] = obj.taken.filter(has_physical_barcode=s['ppn__has_phisical_barcode'], size=s['size'],
-                                          color=s['color'], varient=s['verient']).aggregate(Sum('quantity'))['quantity__sum'] or 0
-            s['total_with_freeze'] = s['total']
-            frozen_inventory = taken_in_other_orders.filter(
-                has_physical_barcode=s['ppn__has_phisical_barcode'], size=s['size'], color=s['color'], varient=s['verient']).aggregate(Sum('quantity'))['quantity__sum'] or 0
-            #toOrder          = taken.filter(barcode=s['ppn__barcode'],has_physical_barcode=s['ppn__has_phisical_barcode'], size=s['size'], color=s['color'], varient=s['verient']).aggregate(Sum('toOrder'))
-            s['frozen'] = frozen_inventory
-            s['total'] = s['total'] - frozen_inventory
-            #s['toOrder'] = TakenInventory.objects.select_related('product', 'size', 'color', 'varient', 'provider').filter(product=obj,color=s['color'],size=s['size'],varient=s['verient'],barcode=s['ppn__barcode'],has_physical_barcode=s['ppn__has_phisical_barcode'],provider__name=s['ppn__provider__name']).aggregate(Sum('toOrder'))['toOrder__sum'] or 0
+    # def get_available_inventory(self, obj):
+    #     # all the available stock in all the warhoused and sum the quantity for every product, size,color,varient, ppn__has_phisical_barcode,ppn__provider__name,ppn__barcode
+    #     stock = WarehouseStock.objects.select_related('size', 'color', 'verient', 'ppn', 'product').values('size', 'color', 'verient', 'ppn__has_phisical_barcode', 'ppn__provider__name',) \
+    #         .order_by('size', 'color', 'verient', 'ppn__has_phisical_barcode', 'ppn__provider__name',) \
+    #         .filter(ppn__product=obj.product) \
+    #         .annotate(total=Sum('quantity'))
+    #     # get all the orders for this product frozen
+    #     taken_in_other_orders = TakenInventory.objects.select_related('orderItem', 'size', 'color', 'varient', 'provider').filter(~Q(orderItem=obj), Q(orderItem__product__id=obj.product.id), Q(orderItem__morder__freezeTakenInventory=True), Q(orderItem__morder__archive=False)).annotate(total=Sum('quantity')).values('size', 'color', 'varient', 'has_physical_barcode', 'provider__name',) \
+    #         .order_by('size', 'color', 'varient', 'has_physical_barcode', 'provider__name',) \
+    #         .annotate(total=Sum('quantity'))
+    #     # frozzenOrders = MOrder.objects.filter(freezeTakenInventory=True)
+    #     # for order in frozzenOrders:
+    #     #     taken = order.taken.filter(product=obj.product)
+    #     # obj <MOrderItem: גרבי כותנה | 444.00₪>
+    #     # stock
+    #     # {'size': 117, 'color': 77, 'verient': None, 'ppn__barcode': '', 'ppn__has_phisical_barcode': False, 'ppn__provider__name': 'המלביש', 'total': 20},
+    #     # {'size': 118, 'color': 77, 'verient': None, 'ppn__barcode': '', 'ppn__has_phisical_barcode': False, 'ppn__provider__name': 'המלביש', 'total': 20},
+    #     # {'size': 117, 'color': 78, 'verient': None, 'ppn__barcode': '', 'ppn__has_phisical_barcode': False, 'ppn__provider__name': 'המלביש', 'total': 10},
+    #     # taken
+    #     # {'size': 117, 'color': 77, 'varient': None, 'barcode': '', 'has_physical_barcode': False, 'provider__name': 'המלביש', 'total': 1},
+    #     # {'size': 118, 'color': 77, 'varient': None, 'barcode': '', 'has_physical_barcode': False, 'provider__name': 'המלביש', 'total': 3},
+    #     for s in stock:
+    #         s['taken'] = obj.taken.filter(has_physical_barcode=s['ppn__has_phisical_barcode'], size=s['size'],
+    #                                       color=s['color'], varient=s['verient']).aggregate(Sum('quantity'))['quantity__sum'] or 0
+    #         s['total_with_freeze'] = s['total']
+    #         frozen_inventory = taken_in_other_orders.filter(
+    #             has_physical_barcode=s['ppn__has_phisical_barcode'], size=s['size'], color=s['color'], varient=s['verient']).aggregate(Sum('quantity'))['quantity__sum'] or 0
+    #         #toOrder          = taken.filter(barcode=s['ppn__barcode'],has_physical_barcode=s['ppn__has_phisical_barcode'], size=s['size'], color=s['color'], varient=s['verient']).aggregate(Sum('toOrder'))
+    #         s['frozen'] = frozen_inventory
+    #         s['total'] = s['total'] - frozen_inventory
+    #         #s['toOrder'] = TakenInventory.objects.select_related('product', 'size', 'color', 'varient', 'provider').filter(product=obj,color=s['color'],size=s['size'],varient=s['verient'],barcode=s['ppn__barcode'],has_physical_barcode=s['ppn__has_phisical_barcode'],provider__name=s['ppn__provider__name']).aggregate(Sum('toOrder'))['toOrder__sum'] or 0
 
-            # taken=Subquery(obj.taken.filter(size=OuterRef('size'), color=OuterRef('color'), varient=OuterRef('verient'), barcode=OuterRef('ppn__barcode'), has_physical_barcode=OuterRef('ppn__has_phisical_barcode'), provider__name=OuterRef('ppn__provider__name'),output_field='quantity')))
-        #data = WarehouseStockSerializer(stock, many=True).data
-        #data = django_serializers.serialize('json', stock, fields=('size', 'color', 'verient','ppn__barcode', 'ppn__has_phisical_barcode', 'total'))
-        ret = list(stock)
-        return ret
+    #         # taken=Subquery(obj.taken.filter(size=OuterRef('size'), color=OuterRef('color'), varient=OuterRef('verient'), barcode=OuterRef('ppn__barcode'), has_physical_barcode=OuterRef('ppn__has_phisical_barcode'), provider__name=OuterRef('ppn__provider__name'),output_field='quantity')))
+    #     #data = WarehouseStockSerializer(stock, many=True).data
+    #     #data = django_serializers.serialize('json', stock, fields=('size', 'color', 'verient','ppn__barcode', 'ppn__has_phisical_barcode', 'total'))
+    #     ret = list(stock)
+    #     return ret
 
     def get_sizes(self, obj):
         ids = obj.product.sizes.values_list('id', flat=True)
@@ -225,11 +226,49 @@ class AdminMOrderSerializer(serializers.ModelSerializer):
     agent_name = serializers.CharField(
         source='agent.username', read_only=False, default='')
     #client_id = serializers.IntegerField(source='client.user.id', read_only=False)
+    simulations = serializers.SerializerMethodField('get_simulations')
+
+    def get_simulations(self, obj):
+        ret = []
+        try:
+            sigModal = obj.mordersignature
+
+            if sigModal:
+                for sim in sigModal.simulations.all():
+                    row = {
+                        'id': sim.id,
+                        'description': sim.description,
+                        'cimage': sim.cimage,
+                        'order': sim.order,
+                    }
+                    row['products'] = {}
+                    for prod in sim.products.all():
+                        itm = prod.item
+                        row['products'][itm.id] = {
+                            'img': itm.product.cimage,
+                            'title': itm.product.title,
+                            'amount': prod.amount,
+                        }
+                    ret.append(row)
+        except:
+            pass
+        return ret
+    sheets_order_link = serializers.SerializerMethodField(
+        '_get_sheets_order_link', read_only=True)
+
+    def _get_sheets_order_link(self, obj):
+        return obj.get_sheets_order_link()
+    sheets_price_prop_link = serializers.SerializerMethodField(
+        '_get_sheets_price_prop_link', read_only=True)
+
+    def _get_sheets_price_prop_link(self, obj):
+        return obj.get_sheets_price_prop_link()
 
     class Meta:
         model = MOrder
         fields = ('id', 'agent', 'agent_name', 'client', 'status', 'status2', 'status_msg', 'created', 'updated', 'message', 'name', 'phone',
-                  'email', 'client_businessName', 'products', 'freezeTakenInventory', 'isOrder', 'sendProviders', 'startCollecting')
+                  'email', 'client_businessName', 'products', 'freezeTakenInventory', 'isOrder', 'sendProviders', 'startCollecting', 'simulations', 'sheets_order_link',
+                  'sheets_price_prop_link',  'export_to_suppliers',)
 
 
 class MOrderCollectionSerializer(serializers.ModelSerializer):
