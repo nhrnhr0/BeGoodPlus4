@@ -636,12 +636,14 @@ class MOrder(models.Model):
         # print(data)
         return data
 
-    def get_or_create_order_sheet(wb, title):
+    def get_or_create_order_sheet(wb: gspread.Spreadsheet, title: str):
         try:
             return wb.worksheet(title)
         except:
-            order_ws = wb.add_worksheet(title=title, rows=0, cols=0)
+            order_ws = wb.add_worksheet(title=title, rows=0, cols=0, index=0)
+
             sheetId = wb.id
+            # adding from the right
             batch_request = {
                 "requests": [
                     {
@@ -653,6 +655,7 @@ class MOrder(models.Model):
                                 #     "columnCount": 1,
                                 # },
                                 "rightToLeft": True,
+
                             },
                             # "fields": "gridProperties(rowCount, columnCount),rightToLeft"
                             "fields": "rightToLeft"
@@ -676,11 +679,13 @@ class MOrder(models.Model):
         except:
             spreedsheet_id = wb.id
             baseSheetId = wb.worksheet('בסיס להצעת מחיר').id
+            # create a copy in the same spreedsheet secound from the right (last)
             request_body = {
                 'requests': {
                     'duplicateSheet': {
                         'sourceSheetId': baseSheetId,
                         'newSheetName': title,
+                        'insertSheetIndex': len(wb.worksheets()) - 1,
                     },
                 },
             }
