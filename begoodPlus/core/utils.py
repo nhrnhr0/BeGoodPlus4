@@ -166,10 +166,13 @@ async def add_table_to_doc(document: Document, data, first_col_is_image=False):
     # https://github.com/python-openxml/python-docx/issues/149
     table = document.add_table(
         rows=(data.shape[0]+1), cols=data.shape[1], style="Light Shading")
-    table.direction = WD_TABLE_DIRECTION.RTL
-    table.autofit = True
-    table.allow_autofit = True
+    # table.direction = WD_TABLE_DIRECTION.RTL
+    # table.autofit = True
+    # table.allow_autofit = True
 
+    table.style = 'TableGrid'
+    # table.direction = WD_TABLE_DIRECTION.RTL
+    table.allow_autofit = False
     # widths = (Inches(3), Inches(3),)
     # for row in table.rows:
     #     for idx, width in enumerate(widths):
@@ -236,14 +239,16 @@ async def add_table_to_doc(document: Document, data, first_col_is_image=False):
     return table
 
 
+
 async def insert_image_from_url_to_cell(session, url, cell):
     print('downloading image', url)
-    async with session.get(url) as resp:
-        response = await resp.content.read()
-        paragraph = cell.paragraphs[0]
-        run = paragraph.add_run()
-        binary_img = BytesIO(response)
-        run.add_picture(binary_img, width=Cm(1.5), height=Cm(1.5))
+    if url:
+        async with session.get(url) as resp:
+            response = await resp.content.read()
+            paragraph = cell.paragraphs[0]
+            run = paragraph.add_run()
+            binary_img = BytesIO(response)
+            run.add_picture(binary_img, width=Cm(1.5), height=Cm(1.5))
 
 
 def generate_provider_docx(provider_data, provider_name, private_docx=False):
@@ -386,8 +391,9 @@ def generate_provider_docx(provider_data, provider_name, private_docx=False):
     lang_default = rpr_default.xpath('w:lang')[0]
     lang_default.set(docx.oxml.shared.qn('w:val'), 'HE-IL')
 
-    rtlstyle = document.styles.add_style('rtl', WD_STYLE_TYPE.PARAGRAPH)
-    rtlstyle.font.rtl = True
+    #Comment for rtl
+    # rtlstyle = document.styles.add_style('rtl', WD_STYLE_TYPE.PARAGRAPH)
+    # rtlstyle.font.rtl = True
     p = document.add_heading(
         'לכבוד: ' + provider_name + ' \t\t תאריך: ' + date_time, level=1)
     p.alignment = WD_ALIGN_PARAGRAPH.RIGHT
