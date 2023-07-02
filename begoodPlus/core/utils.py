@@ -239,7 +239,6 @@ async def add_table_to_doc(document: Document, data, first_col_is_image=False):
     return table
 
 
-
 async def insert_image_from_url_to_cell(session, url, cell):
     print('downloading image', url)
     if url:
@@ -391,7 +390,7 @@ def generate_provider_docx(provider_data, provider_name, private_docx=False):
     lang_default = rpr_default.xpath('w:lang')[0]
     lang_default.set(docx.oxml.shared.qn('w:val'), 'HE-IL')
 
-    #Comment for rtl
+    # Comment for rtl
     # rtlstyle = document.styles.add_style('rtl', WD_STYLE_TYPE.PARAGRAPH)
     # rtlstyle.font.rtl = True
     p = document.add_heading(
