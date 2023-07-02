@@ -162,12 +162,13 @@ def add_table_to_doc(document, data):
     # https://github.com/python-openxml/python-docx/issues/149
     table = document.add_table(
         rows=(data.shape[0]+1), cols=data.shape[1], style="Light Shading")
-    table.direction = WD_TABLE_DIRECTION.RTL
-    table.autofit = True
-    table.allow_autofit = True
-    table.style = 'TableGrid'
-    table.direction = WD_TABLE_DIRECTION.RTL
+    # table.direction = WD_TABLE_DIRECTION.RTL
+    # table.autofit = True
+    # table.allow_autofit = True
 
+    table.style = 'TableGrid'
+    # table.direction = WD_TABLE_DIRECTION.RTL
+    table.allow_autofit = False
     # widths = (Inches(3), Inches(3),)
     # for row in table.rows:
     #     for idx, width in enumerate(widths):
@@ -356,8 +357,9 @@ def generate_provider_docx(provider_data, provider_name):
     lang_default = rpr_default.xpath('w:lang')[0]
     lang_default.set(docx.oxml.shared.qn('w:val'), 'HE-IL')
 
-    rtlstyle = document.styles.add_style('rtl', WD_STYLE_TYPE.PARAGRAPH)
-    rtlstyle.font.rtl = True
+    #Comment for rtl
+    # rtlstyle = document.styles.add_style('rtl', WD_STYLE_TYPE.PARAGRAPH)
+    # rtlstyle.font.rtl = True
     p = document.add_heading(
         'לכבוד: ' + provider_name + ' \t\t תאריך: ' + date_time, level=1)
     p.alignment = WD_ALIGN_PARAGRAPH.RIGHT
