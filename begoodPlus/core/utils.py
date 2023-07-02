@@ -242,12 +242,15 @@ async def add_table_to_doc(document: Document, data, first_col_is_image=False):
 async def insert_image_from_url_to_cell(session, url, cell):
     print('downloading image', url)
     if url:
-        async with session.get(url) as resp:
-            response = await resp.content.read()
-            paragraph = cell.paragraphs[0]
-            run = paragraph.add_run()
-            binary_img = BytesIO(response)
-            run.add_picture(binary_img, width=Cm(1.5), height=Cm(1.5))
+        try:
+            async with session.get(url) as resp:
+                response = await resp.content.read()
+                paragraph = cell.paragraphs[0]
+                run = paragraph.add_run()
+                binary_img = BytesIO(response)
+                run.add_picture(binary_img, width=Cm(1.5), height=Cm(1.5))
+        except Exception as e:
+            print('failed to download image', e)
 
 
 def generate_provider_docx(provider_data, provider_name, private_docx=False):
