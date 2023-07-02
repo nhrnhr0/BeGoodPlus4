@@ -1041,7 +1041,7 @@ def api_get_order_data(request, id):
                             #     print('delete all dups: ', dups)
                             #     dups.delete()
                         else:
-                            # e.delete()
+                            e.delete()
                             pass
                     else:
                         if qyt > 0:
@@ -1130,6 +1130,8 @@ def api_get_order_data(request, id):
 
             # recalculate total price
             try:
+                order.recalculate_total_price()
+                order.notify_order_status_update()
                 order.save()
                 create_signature_doc_from_morder_thread(order)
             except Exception as e:

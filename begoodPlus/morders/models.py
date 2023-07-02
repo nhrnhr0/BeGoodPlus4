@@ -10,7 +10,7 @@ import copy
 
 import gspread
 from ordered_model.models import OrderedModelBase
-from begoodPlus.secrects import SECRECT_CLIENT_SIDE_DOMAIN, ALL_MORDER_FILE_SPREEDSHEET_URL, ALL_PRICE_PROPOSAL_SPREEADSHEET_URL
+from begoodPlus.secrects import SECRECT_BASE_MY_DOMAIN, SECRECT_CLIENT_SIDE_DOMAIN, ALL_MORDER_FILE_SPREEDSHEET_URL, ALL_PRICE_PROPOSAL_SPREEADSHEET_URL
 from django.conf import settings
 import reversion
 from decimal import Decimal
@@ -24,7 +24,6 @@ import pandas as pd
 from django.db import models
 from django.contrib.auth.models import User
 from core.utils import number_to_spreedsheet_letter
-from morders.tasks import send_morder_status_update_to_telegram
 from catalogImages.models import CatalogImage
 from client.models import Client
 from color.models import Color
@@ -202,7 +201,63 @@ class MOrder(models.Model):
     last_sheet_update = models.DateTimeField(
         _('last sheet update'), null=True, blank=True)
     export_to_suppliers = models.BooleanField(default=False)
+    last_notify_order_status = models.CharField(
+        max_length=100, blank=True, null=True)
+    last_notify_order_total_price = models.FloatField(
+        _('last notify order total price'), default=0)
     # save
+
+    def recalculate_total_price(self):
+        if self.pk:
+            # new_price = self.prop_totalPrice
+            # if self.total_sell_price != new_price:
+            #     self.total_sell_price = new_price
+            # pass
+
+            # we iterete over all products
+            # for each product we sum the total amount and multiply it by the price
+            # we sum all the products total price
+            # we compare the total price to self.total_sell_price
+            total_price = 0
+            for product in self.products.all():
+                # product.price
+                # sum(product.entries.all().quantity)
+                total_price += product.price * \
+                    sum(product.entries.all().values_list('quantity', flat=True))
+            if self.total_sell_price != total_price:
+                self.total_sell_price = total_price
+
+    def notify_order_status_update(self):
+        from morders.tasks import send_morder_status_update_to_telegram
+        print('notify_order_status_update_post_save: ', self.total_sell_price)
+        if self.total_sell_price > 0:
+            # we compare self.total_sell_price to self
+            # kkkkkkkkk
+            edit_url = SECRECT_BASE_MY_DOMAIN + self.get_edit_order_url()
+            status = self.get_status_display()
+            name = self.name or self.client.businessName
+            total_sell = self.total_sell_price
+
+            # we check if last_notify_order_status is not the same as status
+            # or last_notify_order_total_price is not the same as total_sell_price
+            if self.last_notify_order_status != status.name or self.last_notify_order_total_price != total_sell:
+                if settings.DEBUG:
+                    pass
+                    print('send_morder_status_update_to_telegram')
+                    # send_morder_status_update_to_telegram(
+                    #     edit_url=edit_url, status=status, name=name, total_price=total_sell, morder_id=self.id)
+                else:
+                    send_morder_status_update_to_telegram.delay(
+                        edit_url=edit_url, status=status.name, name=name, total_price=total_sell, morder_id=self.id)
+                    pass
+                self.last_notify_order_status = status.name
+                self.last_notify_order_total_price = total_sell
+                self.save()
+            else:
+                print('no need to send notification')
+                pass
+        print('done notify_order_status_update_post_save: ', self.total_sell_price)
+        pass
 
     def update_sell_price_from_price_proposal_sheet(self, sheet_id=None):
         #
@@ -374,9 +429,6 @@ class MOrder(models.Model):
         # B2 client phone
         worksheet.update('B2', self.phone)
 
-        # if self.status2.name != 'הצעת מחיר':
-        # we color the spreedsheet
-        #         kkkkkkk
         GREEN_COLOR = {
             "red": 0,
             "green": 1,
@@ -584,12 +636,14 @@ class MOrder(models.Model):
         # print(data)
         return data
 
-    def get_or_create_order_sheet(wb, title):
+    def get_or_create_order_sheet(wb: gspread.Spreadsheet, title: str):
         try:
             return wb.worksheet(title)
         except:
-            order_ws = wb.add_worksheet(title=title, rows=0, cols=0)
+            order_ws = wb.add_worksheet(title=title, rows=0, cols=0, index=0)
+
             sheetId = wb.id
+            # adding from the right
             batch_request = {
                 "requests": [
                     {
@@ -601,6 +655,7 @@ class MOrder(models.Model):
                                 #     "columnCount": 1,
                                 # },
                                 "rightToLeft": True,
+
                             },
                             # "fields": "gridProperties(rowCount, columnCount),rightToLeft"
                             "fields": "rightToLeft"
@@ -624,11 +679,13 @@ class MOrder(models.Model):
         except:
             spreedsheet_id = wb.id
             baseSheetId = wb.worksheet('בסיס להצעת מחיר').id
+            # create a copy in the same spreedsheet secound from the right (last)
             request_body = {
                 'requests': {
                     'duplicateSheet': {
                         'sourceSheetId': baseSheetId,
                         'newSheetName': title,
+                        'insertSheetIndex': len(wb.worksheets()) - 1,
                     },
                 },
             }
@@ -707,17 +764,6 @@ class MOrder(models.Model):
             ws.update_cell(2, 9, data['export_to_suppliers'])
         else:
             ws.update_cell(2, 9, '')
-
-        # set the color of the sheet tab
-        # if status = חדש:
-            #  grey
-        # if export_to_suppliers = True:
-            #  Yellow
-        # if status = סופק:
-            #  Green
-        # if status = בוטל:
-            #  Red
-        # kkkkkkk
 
         if self.status2:
             # change hex to rgb
@@ -1185,34 +1231,6 @@ class MOrder(models.Model):
 # def check_for_status_update(sender, instance, *args, **kwargs):
 
 #     pass
-
-
-@ receiver(pre_save, sender=MOrder, dispatch_uid="recalculate_total_price")
-def recalculate_total_price_pre_save(sender, instance, **kwargs):
-    if instance.pk:
-        new_price = instance.prop_totalPrice
-        if instance.total_sell_price != new_price:
-            instance.total_sell_price = new_price
-
-
-@ receiver(post_save, sender=MOrder, dispatch_uid="notify_order_status_update")
-def notify_order_status_update_post_save(instance, *args, **kwargs):
-    print('notify_order_status_update_post_save: ', instance.total_sell_price)
-    if instance.total_sell_price > 0:
-        edit_url = SECRECT_CLIENT_SIDE_DOMAIN + instance.get_edit_order_url()
-        status = instance.get_status_display()
-        name = instance.name or instance.client.businessName
-        total_sell = instance.total_sell_price
-        if settings.DEBUG:
-            pass
-            # send_morder_status_update_to_telegram(
-            #     edit_url=edit_url, status=status, name=name, total_price=total_sell, morder_id=instance.id)
-        else:
-            send_morder_status_update_to_telegram.delay(
-                edit_url=edit_url, status=status.name, name=name, total_price=total_sell, morder_id=instance.id)
-            pass
-    print('done notify_order_status_update_post_save: ', instance.total_sell_price)
-    # print('recalculate_total_price_post_save: ', instance.total_sell_price)
 
 
 class MorderStatus(OrderedModelBase):

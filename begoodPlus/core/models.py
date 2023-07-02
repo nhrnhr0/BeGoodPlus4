@@ -386,7 +386,6 @@ class SvelteCartModal(models.Model):
 
     def turn_to_morder(self):
         from docsSignature.utils import create_signature_doc_from_morder
-
         from morders.models import MOrder, MOrderItem, MOrderItemEntry, MorderStatus
         cart = self
         if self.user and self.user.is_authenticated:
@@ -482,9 +481,8 @@ class SvelteCartModal(models.Model):
         sync_order = True
         if morder.status2.name == 'הצעת מחיר':
             sync_order = False
-
         morder.start_morder_to_spreedsheet_thread(sync_price_prop, sync_order)
-
+        morder.notify_order_status_update()
         return morder
 
     def __str__(self):
