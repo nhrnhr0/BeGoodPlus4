@@ -87,7 +87,7 @@ class ProviderRequestAdmin(admin.ModelAdmin):
 admin.site.register(ProviderRequest, ProviderRequestAdmin)
 
 
-class MOrderAdmin(VersionAdmin):  #
+class MOrderAdmin(admin.ModelAdmin):  #
     change_list_template = 'admin/morders/change_list.html'
     model = MOrder
     fields = ('cart', 'total_sell_price', 'client', 'name', 'phone', 'email',
@@ -105,7 +105,14 @@ class MOrderAdmin(VersionAdmin):  #
     actions = ('export_to_excel', 'export_to_signiture_doc',
                'sync_with_spreedsheet', 'set_export_to_providers_true', 'set_export_to_providers_false')
 
+    def get_queryset(self, request):
+        qs = super(MOrderAdmin, self).get_queryset(request)
+        qs = qs.select_related('client', 'status2',
+                               'mordersignature', 'client__user')
+        return qs
+
     # select_related = ('client', 'status2')
+
     def set_export_to_providers_true(self, request, queryset):
         queryset.update(export_to_suppliers=True)
         for morder in queryset:
@@ -165,17 +172,11 @@ class MOrderAdmin(VersionAdmin):  #
         return None
     get_googlesheets_link.short_description = _('Google Sheets Orders')
 
-    def get_queryset(self, request: HttpRequest):
-        return super().get_queryset(request).select_related('client', 'status2', 'client__user', 'mordersignature')
-
     formfield_overrides = {
         models.TextField: {'widget': Textarea(
             attrs={'rows': 2,
                    'cols': 20, })},  # 'style': 'height: 1em;'
     }
-
-    def get_queryset(self, request):
-        return super().get_queryset(request).select_related('client', 'client__user', 'status2')
 
     def sync_with_spreedsheet(self, request, queryset):
         for morder in queryset:
