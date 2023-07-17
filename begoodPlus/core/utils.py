@@ -1,3 +1,4 @@
+import time
 import aiohttp
 import asyncio
 import requests
@@ -591,6 +592,7 @@ def process_sheets_to_providers_docx(sheets, obj):
     sheet_index = 1
     for sheet in sheets:
         values = sheet.get_all_values()
+        time.sleep(0.5)
         morders_id = str(int(float(values[1][0])))
         obj.logs.append('processing sheet: ' +
                         str(sheet_index) + ' morder: ' + morders_id)

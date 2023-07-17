@@ -479,7 +479,7 @@ class SvelteCartModal(models.Model):
 
         sync_price_prop = True
         sync_order = True
-        if morder.status2.name == 'הצעת מחיר':
+        if morder.status2.name == 'הצעת מחיר' or morder.status2.name == 'הצעת מחיר נשלחה':
             sync_order = False
         morder.start_morder_to_spreedsheet_thread(sync_price_prop, sync_order)
         morder.notify_order_status_update()
@@ -523,13 +523,15 @@ class ProvidersDocxTask(models.Model):
         self.save()
         loaded_files = {}
         self.doc_names = []
+        last_sh = None
         for url in urls:
             log = 'fetching sheet from url: ' + url
             self.logs.append(log)
             self.save()
 
             try:
-                sheet, sheetname = gspread_fetch_sheet_from_url(url)
+                sheet, sheetname, last_sh = gspread_fetch_sheet_from_url(
+                    url, last_sh)
             except Exception as e:
                 log = 'error: ' + str(e)
                 self.logs.append(log)
