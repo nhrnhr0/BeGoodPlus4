@@ -27,9 +27,15 @@ let serverData = undefined;
 let data = undefined;
 let selectedProduct = undefined;
 //let productsData;
-async function load_order_from_server() {
-  updateing = true;
+async function get_order_from_server() {
   let resp = await apiGetMOrder(id);
+  return resp;
+}
+async function load_order_from_server(resp = undefined) {
+  updateing = true;
+  if (resp == undefined) {
+    resp = await get_order_from_server();
+  }
   // console.log("resp:", resp);
   data = serverData = JSON.parse(JSON.stringify(resp));
   console.log("data:", data);
@@ -76,11 +82,24 @@ onMount(async () => {
     color: "#FFFFFF00",
     code: "00",
   };
-  ALL_SIZES = await apiGetAllSizes();
-  ALL_COLORS = await apiGetAllColors();
-  ALL_VERIENTS = await apiGetAllVariants();
-  ALL_STATUSES = await apiGetAllMorderStatuses();
-  await load_order_from_server();
+  // ALL_SIZES = await apiGetAllSizes();
+  // ALL_COLORS = await apiGetAllColors();
+  // ALL_VERIENTS = await apiGetAllVariants();
+  // ALL_STATUSES = await apiGetAllMorderStatuses();
+  let promises = [
+    apiGetAllSizes(),
+    apiGetAllColors(),
+    apiGetAllVariants(),
+    apiGetAllMorderStatuses(),
+    get_order_from_server(),
+  ];
+  let results = await Promise.all(promises);
+  ALL_SIZES = results[0];
+  ALL_COLORS = results[1];
+  ALL_VERIENTS = results[2];
+  ALL_STATUSES = results[3];
+  let resp = results[4];
+  await load_order_from_server(resp);
   //ALL_PROVIDERS = await apiGetProviders();
 });
 

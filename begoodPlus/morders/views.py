@@ -944,9 +944,9 @@ def api_get_order_data(request, id):
     if not request.user.is_superuser:
         return JsonResponse({'status': 'error'}, status=status.HTTP_403_FORBIDDEN)
 
-    order = MOrder.objects.select_related('client', 'agent', 'client__user',).prefetch_related(
+    order = MOrder.objects.select_related('client', 'agent', 'client__user', 'mordersignature',).prefetch_related(
         'products', 'products__product__sizes', 'products__product__colors', 'products__product__varients', 'products__entries', 'products__entries__color', 'products__entries__size', 'products__entries__varient', 'products__toProviders',
-        'products__providers', 'products__product').get(id=id)
+        'products__providers', 'products__product',).get(id=id)
     if request.method == 'POST':
         with reversion.create_revision():
             data = json.loads(request.body)
@@ -1124,7 +1124,7 @@ def api_get_order_data(request, id):
             if new_status:
                 if new_status.name == 'בוטל' and order.gid == None:
                     orders_sync = False
-                if new_status.name == 'הצעת מחיר' and order.gid == None:
+                if (new_status.name == 'הצעת מחיר' or new_status.name == 'הצעת מחיר נשלחה') and order.gid == None:
                     orders_sync = False
                 order.status2 = new_status
 

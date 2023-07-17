@@ -234,7 +234,9 @@ class AdminMOrderSerializer(serializers.ModelSerializer):
             sigModal = obj.mordersignature
 
             if sigModal:
-                for sim in sigModal.simulations.all():
+                sims = sigModal.simulations.select_related(
+                    'order').prefetch_related('products__item__product')
+                for sim in sims.all():
                     row = {
                         'id': sim.id,
                         'description': sim.description,

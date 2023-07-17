@@ -137,10 +137,10 @@ class MOrderItem(models.Model):
 STATUS_CHOICES = [('new', 'חדש'), ('price_proposal', 'הצעת מחיר'), ('in_progress', 'סחורה הוזמנה'), ('in_progress2', 'מוכן לליקוט',), (
     'in_progress3', 'בהדפסה',), ('in_progress4', 'מוכן בבית דפוס'), ('in_progress5', 'ארוז מוכן למשלוח'), ('done', 'סופק'), ]
 
-LOCKED_CELL_COLOR = {
-    'backgroundColor': {'red': 0.9, 'green': 0.9, 'blue': 0.9},
-    'textFormat': {'fontSize': 12},
-}
+# LOCKED_CELL_COLOR = {
+#     'backgroundColor': {'red': 0.9, 'green': 0.9, 'blue': 0.9},
+#     'textFormat': {'fontSize': 12},
+# }
 
 BLANK_CELL_COLOR = {
     'backgroundColor': {'red': 1, 'green': 1, 'blue': 1},
@@ -158,6 +158,10 @@ BLANK_CELL_COLOR = {
         },
     },
 }
+PINK_HEADER_FORMAT_CONST = 'PINK_FORMAT_HEADER'
+SUBTABLE_HEADER_FORMAT_CONST = 'SUBTABLE_HEADER_FORMAT'
+USER_INPUT_FORMAT_CONST = 'USER_INPUT_FORMAT'
+LOCKED_CELL_COLOR_CONST = 'LOCKED_CELL_COLOR'
 
 
 @reversion.register()
@@ -685,7 +689,7 @@ class MOrder(models.Model):
                     'duplicateSheet': {
                         'sourceSheetId': baseSheetId,
                         'newSheetName': title,
-                        'insertSheetIndex': len(wb.worksheets()) - 1,
+                        'insertSheetIndex': 1,
                     },
                 },
             }
@@ -699,23 +703,7 @@ class MOrder(models.Model):
             return wb.worksheet(title)
 
     def init_spreedsheet(self, ws: gspread.Worksheet, data, wb):
-        # validation_rule = DataValidationRule(
-        #     BooleanCondition('ONE_OF_LIST', ['1', '2', '3', '4']),
-        #     showCustomUi=True
-        # )
-        # cells_range = 'A1:A1000'
-        # set_data_validation_for_cell_range(ws, cells_range, validation_rule)
-        # ws.update_cell(1, 1, 'מספר הזמנה')
-        # ws.update_cell(1, 2, 'תאריך הזמנה')
-        # ws.update_cell(1, 3, 'שם הלקוח')
-        # ws.update_cell(1, 4, 'הודעה')
-        # ws.update_cell(2, 1, data['id'])
-        # ws.update_cell(2, 2, data['date'])
-        # ws.update_cell(2, 3, data['name'])
-        # ws.update_cell(2, 4, data['message'])
-        # and another row (headers of the data: )
-        #  ['ברקוד	פריט	כמות כוללת	הערות	כמות נלקחת	מחיר מכירה	מע"מ	הדפסה?		רקמה?		ספקים'
-        # same as above but with one call
+        cell_tasks = []
         current_time = datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
         # =HYPERLINK("https://testing.boost-pop.com/morders/edit-order/517", "517")
         data_array = [
@@ -735,35 +723,44 @@ class MOrder(models.Model):
         headers_range = 'A1:' + \
             number_to_spreedsheet_letter(
                 longest_row_length) + str(len(data_array))
-        ws.update(headers_range, data_array,
-                  value_input_option='USER_ENTERED')
+        for i, row in enumerate(data_array):
+            for j, cell in enumerate(row):
+                cell_tasks.append(Cell(row=i + 1, col=j + 1, value=cell,))
+        # ws.update(headers_range, data_array,
+        #           value_input_option='USER_ENTERED')
 
-        ws.format(headers_range, LOCKED_CELL_COLOR)
+        # ws.format(headers_range, LOCKED_CELL_COLOR)
 
-        # reset all the other cells to blank data and format them
-        all_other_cells_range = 'A4:' + \
-            'M' + str(len(data_array) + 1000)
-        ws.update(all_other_cells_range, [[''] * longest_row_length] * 1000)
-        # ws.format(all_other_cells_range, BLANK_CELL_COLOR)
-        # clear all data validation
-        set_data_validation_for_cell_range(ws, all_other_cells_range, None)
+        # formating_tasks.append(
+        #     {'range': 'A' + str(current_row) + ':K' + str(current_row), 'format': PINK_HEADER_FORMAT_CONST})
 
+        formating_tasks = [
+            {
+                'range': headers_range,
+                'format': LOCKED_CELL_COLOR_CONST
+            }
+        ]
         all_statuses = list(
             MorderStatus.objects.all().values_list('name', flat=True))
         status_validation_rule = DataValidationRule(
             BooleanCondition('ONE_OF_LIST', all_statuses),
             showCustomUi=True
         )
-        set_data_validation_for_cell_range(
-            ws, 'G2:G2', status_validation_rule)
-
+        # set_data_validation_for_cell_range(
+        #     ws, 'G2:G2', status_validation_rule)
+        data_validation_ranges = [
+            ('G2:G2', status_validation_rule,)]
         # create a title at I1 cell: "לקחת לספקים?"
-        ws.update_cell(1, 9, 'לקחת לספקים?')
+        # ws.update_cell(1, 9, 'לקחת לספקים?')
+        cell_tasks.append(Cell(row=1, col=9, value='לקחת לספקים?'))
         # create a checkbox at I2 cell
         if data['export_to_suppliers']:
-            ws.update_cell(2, 9, data['export_to_suppliers'])
+            # ws.update_cell(2, 9, data['export_to_suppliers'])
+            cell_tasks.append(
+                Cell(row=2, col=9, value=data['export_to_suppliers']))
         else:
-            ws.update_cell(2, 9, '')
+            # ws.update_cell(2, 9, '')
+            cell_tasks.append(Cell(row=2, col=9, value=''))
 
         if self.status2:
             # change hex to rgb
@@ -794,6 +791,7 @@ class MOrder(models.Model):
             }
             res = wb.batch_update(body)
         print(res)
+        return cell_tasks, data_validation_ranges, formating_tasks
 
     def write_morder_to_spreedsheet(self, wb: gspread.Spreadsheet):
         order_data = self.get_exel_data()
@@ -838,15 +836,17 @@ class MOrder(models.Model):
 
         self.gid = order_ws.id
 
-        self.init_spreedsheet(order_ws, order_data, wb)
+        tasks, data_validation_ranges, formating_tasks = self.init_spreedsheet(
+            order_ws, order_data, wb)
         # write products to sheet:
 
-        self.write_products_to_spreedsheet(order_ws, order_data['products'])
+        self.write_products_to_spreedsheet(
+            order_ws, order_data['products'], additonal_cell_tasks=tasks, data_validation_ranges=data_validation_ranges, formating_tasks=formating_tasks)
         self.save()
         # raise Exception('my error')
         pass
 
-    def write_products_to_spreedsheet(self, order_ws: gspread.Worksheet, order_products: dict, starting_row: int = 4):
+    def write_products_to_spreedsheet(self, order_ws: gspread.Worksheet, order_products: dict, starting_row: int = 4, additonal_cell_tasks: list = [], data_validation_ranges: list = [], formating_tasks: list = []):
         # write products to sheet same as (export to exel from admin)
         from gspread_formatting import Color
         # add border bottom to header
@@ -866,15 +866,18 @@ class MOrder(models.Model):
             textFormat=TextFormat(bold=True, foregroundColor=Color(0, 0, 0)),
             horizontalAlignment='CENTER',)
 
-        PINK_HEADER_FORMAT_CONST = 'PINK_FORMAT_HEADER'
-        SUBTABLE_HEADER_FORMAT_CONST = 'SUBTABLE_HEADER_FORMAT'
-        USER_INPUT_FORMAT_CONST = 'USER_INPUT_FORMAT'
+        locked_cell_color_format = CellFormat(
+            backgroundColor=Color(0.9, 0.9, 0.9),
+            textFormat=TextFormat(
+                bold=False, foregroundColor=Color(0, 0, 0), fontSize=12),
+            horizontalAlignment='RIGHT',
+        )
 
         all_formats = {
             PINK_HEADER_FORMAT_CONST: pink_header_format,
             SUBTABLE_HEADER_FORMAT_CONST: subtable_header_format,
             USER_INPUT_FORMAT_CONST: user_input_format,
-
+            LOCKED_CELL_COLOR_CONST:  locked_cell_color_format,
         }
         # cell_formats = [PINK_FORMAT_HEADER,
         #                 SUBTABLE_HEADER_FORMAT, USER_INPUT_FORMAT]
@@ -887,9 +890,9 @@ class MOrder(models.Model):
         )
         # format_cell_range(order_ws, 'A1:J1', fmt)
         current_row = starting_row
-        sheet_cells_to_update = []
+        sheet_cells_to_update = additonal_cell_tasks
         providers_data_validetions_tasks = []
-        formating_tasks = []
+        # formating_tasks = formating_tasks
         for order_product in order_products:
             product_name = order_product['title']
             barcode = order_product['barcode']
@@ -1027,17 +1030,12 @@ class MOrder(models.Model):
                 format_cell_ranges(worksheet_for_formatting, full_format_list)
         execute_formatting_tasks(order_ws, formating_tasks)
 
-        # set validation for providers column (L)
-        # to the end of the table
-        # set_data_validation_for_cell_range(
-        #     order_ws, 'L' + str(starting_row) + ':L' + str(current_row), providers_validation_rule)
-
-        # ranges: An iterable whose elements are pairs of:
-        #            a string with range value in A1 notation, e.g. 'A1:A5',
-        #            and a ``DataValidationRule`` object or None to clear the data
-        #            validation rule).
         ranges = [(r['range'], providers_validation_rule)
                   for r in providers_data_validetions_tasks]
+
+        # append to ranges: data_validation_ranges
+        ranges.extend(data_validation_ranges)
+
         if len(ranges) > 0:
             set_data_validation_for_cell_ranges(
                 order_ws, ranges)

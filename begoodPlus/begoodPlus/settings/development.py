@@ -10,6 +10,11 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 52428800
 # drive auth
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
+DEBUG_TOOLBAR_CONFIG = {
+    "SHOW_TOOLBAR_CALLBACK": lambda request: True,
+}
+
+
 INSTALLED_APPS.append('debug_toolbar')
 # INSTALLED_APPS.insert(0,'livereload')
 CORS_ALLOW_CREDENTIALS = True
@@ -32,15 +37,6 @@ INTERNAL_IPS = [
     '*',
 ]
 
-
-def show_toolbar(request):
-    return True
-
-
-SHOW_TOOLBAR_CALLBACK = show_toolbar
-DEBUG_TOOLBAR_CONFIG = {
-    "SHOW_TOOLBAR_CALLBACK": show_toolbar,
-}
 
 # INSTALLED_APPS += [
 #     'silk',
