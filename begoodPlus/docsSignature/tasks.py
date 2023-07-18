@@ -25,3 +25,14 @@ def send_signature_doc_telegram_task(order_id):
         chat_id, sign_image_url, caption=msg, parse_mode=telegram.ParseMode.HTML)
 
     pass
+
+
+@shared_task
+def create_signature_doc_from_morder_task(morder_id):
+    from docsSignature.utils import create_signature_doc_from_morder
+    from morders.models import MOrder
+
+    obj = MOrder.objects.prefetch_related(
+        'products', 'products__entries',).get(id=morder_id)
+    create_signature_doc_from_morder(obj)
+    pass

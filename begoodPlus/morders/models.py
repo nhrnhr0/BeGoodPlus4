@@ -10,7 +10,7 @@ import copy
 
 import gspread
 from ordered_model.models import OrderedModelBase
-from begoodPlus.secrects import SECRECT_BASE_MY_DOMAIN, SECRECT_CLIENT_SIDE_DOMAIN, ALL_MORDER_FILE_SPREEDSHEET_URL, ALL_PRICE_PROPOSAL_SPREEADSHEET_URL
+from begoodPlus.secrects import SECRECT_BASE_MY_DOMAIN, SECRECT_CLIENT_SIDE_DOMAIN, ALL_MORDER_FILE_SPREEDSHEET_URL, ALL_PRICE_PROPOSAL_SPREEADSHEET_URL, ARCHIVED_MORDER_FILE_SPREEDSHEET_URL
 from django.conf import settings
 import reversion
 from decimal import Decimal
@@ -209,6 +209,7 @@ class MOrder(models.Model):
         max_length=100, blank=True, null=True)
     last_notify_order_total_price = models.FloatField(
         _('last notify order total price'), default=0)
+    order_sheet_archived = models.BooleanField(default=False)
     # save
 
     def recalculate_total_price(self):
@@ -301,10 +302,12 @@ class MOrder(models.Model):
     def get_sheets_order_link(self):
         ret = ''
         if self.gid:
-            ret = ALL_MORDER_FILE_SPREEDSHEET_URL
-
+            if self.order_sheet_archived:
+                ret = ARCHIVED_MORDER_FILE_SPREEDSHEET_URL
+            else:
+                ret = ALL_MORDER_FILE_SPREEDSHEET_URL
             ret = re.sub(r'#gid=\d+', f'#gid={self.gid}',
-                         ALL_MORDER_FILE_SPREEDSHEET_URL)
+                         ret)
         return ret
 
     def get_sheets_price_prop_link(self):
@@ -361,12 +364,21 @@ class MOrder(models.Model):
         return errors
 
     def start_morder_to_spreedsheet_thread(self, sync_price_proposal=True, sync_order=True):
-        import threading
-        print('starting thread')
-        t = threading.Thread(target=self.morder_to_spreedsheet, args=(
-            sync_price_proposal, sync_order))
+        from .tasks import morder_to_spreedsheet_task
+        # import threading
+        # print('starting thread')
+        # t = threading.Thread(target=self.morder_to_spreedsheet, args=(
+        #     sync_price_proposal, sync_order))
 
-        t.start()
+        # t.start()
+        if settings.DEBUG:
+            morder_to_spreedsheet_task(
+                self.id, sync_price_proposal, sync_order)
+        else:
+            morder_to_spreedsheet_task.delay(
+                self.id, sync_price_proposal, sync_order)
+
+        print('done starting thread')
 
     def morder_to_spreedsheet(self, sync_price_proposal=True, sync_order=True):
         gspred_client = get_gspread_client()
@@ -379,11 +391,64 @@ class MOrder(models.Model):
             self.write_morder_to_price_prop_spreedsheet(
                 gspred_client, workbook)
         if sync_order:
-            workbook = gspred_client.open_by_url(
-                ALL_MORDER_FILE_SPREEDSHEET_URL)
+            if self.order_sheet_archived == True:
+                workbook = gspred_client.open_by_url(
+                    ARCHIVED_MORDER_FILE_SPREEDSHEET_URL)
+            elif self.status2.name == 'בוטל' or self.status2.name == 'סופק':
+                # we need to move from the active orders to the archive
+                self.move_to_archive(gspred_client)
+                workbook = gspred_client.open_by_url(
+                    ARCHIVED_MORDER_FILE_SPREEDSHEET_URL)
+            else:
+                workbook = gspred_client.open_by_url(
+                    ALL_MORDER_FILE_SPREEDSHEET_URL)
             self.write_morder_to_spreedsheet(workbook)
 
     pass
+
+    def move_to_archive(self, gspred_client: Client = None):
+        # move from workbook = gspred_client.open_by_url(
+        # ALL_MORDER_FILE_SPREEDSHEET_URL)
+        # to workbook = gspred_client.open_by_url(
+        # ARCHIVED_MORDER_FILE_SPREEDSHEET_URL)
+        # at the end set order_sheet_archived to True
+        if not gspred_client:
+            gspred_client = get_gspread_client()
+        workbook = gspred_client.open_by_url(
+            ALL_MORDER_FILE_SPREEDSHEET_URL)
+        ws = list(filter(lambda ws: ws.id == int(
+            self.gid), workbook.worksheets()))
+        if ws:
+            ws = ws[0]
+        else:
+            try:
+                name = self.name + ' ' + \
+                    str(self.id) + ' ' + self.created.strftime('%Y_%m_%d')
+                ws = MOrder.try_get_order_sheet(
+                    workbook, name)
+            except Exception as e:
+                print(e)
+                return False
+        if not ws:
+            return False
+        # get the archive workbook
+        archive_workbook = gspred_client.open_by_url(
+            ARCHIVED_MORDER_FILE_SPREEDSHEET_URL)
+        # copy the sheet to the archive workbook and rename the sheet (remove עותק של)
+        ws2 = ws.copy_to(archive_workbook.id)
+        sid = ws2['sheetId']
+        ws2 = archive_workbook.get_worksheet_by_id(sid)
+        try:
+            ws2.update_title(ws.title)
+        except Exception as e:
+            print(e)
+        self.gid = ws2.id
+        # delete the sheet from the active workbook
+        workbook.del_worksheet(ws)
+        # set order_sheet_archived to True
+        self.order_sheet_archived = True
+        self.save()
+        return True
 
     def get_data_to_price_proposal_spreedsheet(self):
         # get the product name, total amount and product.product.cost_price
@@ -400,6 +465,7 @@ class MOrder(models.Model):
 
         data = self.get_data_to_price_proposal_spreedsheet()
         admin_edit_link = self.get_edit_url_without_html(base_url=FULL_DOMAIN)
+        sheet_cells_to_update = []
 
         # print(data)  # ['פנדה מונביסו', Decimal('15040.00'), 220.0]...
         # Col A from offset 4:
@@ -416,23 +482,47 @@ class MOrder(models.Model):
         # C cost
         # H price
         a_to_c = list(map(lambda x: x[:3], data))
-        worksheet.update('A5:C', a_to_c)
+        # worksheet.update('A5:C', a_to_c)
+        a_to_c_cells = []
+        for i, row in enumerate(a_to_c):
+            for j, cell in enumerate(row):
+                a_to_c_cells.append(Cell(row=i+5, col=j+1, value=cell))
+        sheet_cells_to_update.extend(a_to_c_cells)
 
         # update col H price
         h = list(map(lambda x: [int(x[3]) if int(
             x[3]) == float(x[3]) else float(x[3])], data))
-        worksheet.update('H5:H', h)
-
+        # worksheet.update('H5:H', h)
+        h_cells = []
+        for i, row in enumerate(h):
+            for j, cell in enumerate(row):
+                h_cells.append(Cell(row=i+5, col=8, value=cell))
+        sheet_cells_to_update.extend(h_cells)
         # H2 - admin edit link
 
-        worksheet.update('H2', admin_edit_link)
-        worksheet.update('I2', self.status2.name)
+        # worksheet.update('H2', admin_edit_link)
+        # worksheet.update('I2', self.status2.name)
+        sheet_cells_to_update.append(Cell(row=2, col=8, value=admin_edit_link))
+        sheet_cells_to_update.append(
+            Cell(row=2, col=9, value=self.status2.name))
 
         # A2 client name
-        worksheet.update('A2', self.name)
+        # worksheet.update('A2', self.name)
+        sheet_cells_to_update.append(Cell(row=2, col=1, value=self.name))
         # B2 client phone
-        worksheet.update('B2', self.phone)
+        # worksheet.update('B2', self.phone)
+        sheet_cells_to_update.append(Cell(row=2, col=2, value=self.phone))
+        # D2 client email
+        # worksheet.update('D2', self.email)
+        sheet_cells_to_update.append(Cell(row=2, col=4, value=self.email))
 
+        # G2 businessName
+        # worksheet.update('G2', self.cart.businessName)
+        sheet_cells_to_update.append(
+            Cell(row=2, col=7, value=self.cart.businessName))
+
+        if len(sheet_cells_to_update) > 0:
+            worksheet.update_cells(sheet_cells_to_update)
         GREEN_COLOR = {
             "red": 0,
             "green": 1,
@@ -482,7 +572,7 @@ class MOrder(models.Model):
         #     worksheet.update('D2', self.client.email)
         #     # E2 client address
         #     worksheet.update('E2', self.client.address)
-
+        self.price_proposal_sheetid = worksheet.id
         self.save()
 
     def spreedsheet_data_to_morder(self, sheets_data):
@@ -640,6 +730,12 @@ class MOrder(models.Model):
         # print(data)
         return data
 
+    def try_get_order_sheet(wb: gspread.Spreadsheet, title: str):
+        try:
+            return wb.worksheet(title)
+        except:
+            return None
+
     def get_or_create_order_sheet(wb: gspread.Spreadsheet, title: str):
         try:
             return wb.worksheet(title)
@@ -770,6 +866,10 @@ class MOrder(models.Model):
             # rbg = (255, 255, 255)
             # change to 0-1
             rgb = tuple(map(lambda x: x/255, rgb))
+            # if self.export_to_suppliers: set rgb to yellow
+            if self.export_to_suppliers == False:
+                rgb = (1, 1, 0)
+
             # color the spreedsheet
             body = {
                 "requests": [
@@ -793,6 +893,9 @@ class MOrder(models.Model):
         print(res)
         return cell_tasks, data_validation_ranges, formating_tasks
 
+    # wb can be either
+    # ALL_PRICE_PROPOSAL_SPREEADSHEET_URL
+    # ARCHIVED_MORDER_FILE_SPREEDSHEET_URL
     def write_morder_to_spreedsheet(self, wb: gspread.Spreadsheet):
         order_data = self.get_exel_data()
         name = order_data['name']
