@@ -20,3 +20,11 @@ def send_morder_status_update_to_telegram(edit_url, status, morder_id, name, tot
         telegram_bot.send_message(
             chat_id=chat_id, text=msg, parse_mode=telegram.ParseMode.HTML)
     pass
+
+
+@shared_task
+def morder_to_spreedsheet_task(morder_id, sync_price_proposal, sync_order):
+    from morders.models import MOrder
+    morder = MOrder.objects.get(id=morder_id)
+    morder.morder_to_spreedsheet(sync_price_proposal, sync_order)
+    pass

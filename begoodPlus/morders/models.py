@@ -364,12 +364,21 @@ class MOrder(models.Model):
         return errors
 
     def start_morder_to_spreedsheet_thread(self, sync_price_proposal=True, sync_order=True):
-        import threading
-        print('starting thread')
-        t = threading.Thread(target=self.morder_to_spreedsheet, args=(
-            sync_price_proposal, sync_order))
+        from .tasks import morder_to_spreedsheet_task
+        # import threading
+        # print('starting thread')
+        # t = threading.Thread(target=self.morder_to_spreedsheet, args=(
+        #     sync_price_proposal, sync_order))
 
-        t.start()
+        # t.start()
+        if settings.DEBUG:
+            morder_to_spreedsheet_task(
+                self.id, sync_price_proposal, sync_order)
+        else:
+            morder_to_spreedsheet_task.delay(
+                self.id, sync_price_proposal, sync_order)
+
+        print('done starting thread')
 
     def morder_to_spreedsheet(self, sync_price_proposal=True, sync_order=True):
         gspred_client = get_gspread_client()
@@ -563,7 +572,7 @@ class MOrder(models.Model):
         #     worksheet.update('D2', self.client.email)
         #     # E2 client address
         #     worksheet.update('E2', self.client.address)
-
+        self.price_proposal_sheetid = worksheet.id
         self.save()
 
     def spreedsheet_data_to_morder(self, sheets_data):

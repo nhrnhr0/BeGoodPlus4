@@ -954,7 +954,6 @@ def api_get_order_data(request, id):
             new_status = None
             if data['status2']:
                 new_status = MorderStatus.objects.get(id=data['status2'])
-            print('status: ', data['status2'])
             order.message = data['message']
             order.email = data['email']
             order.name = data['name']

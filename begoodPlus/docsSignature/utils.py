@@ -6,17 +6,25 @@ from django.core.files import File
 import requests
 from begoodPlus.settings.base import CLOUDINARY_BASE_URL
 from morders.models import MOrder
+from django.conf import settings
 from docsSignature.models import MOrderSignature, MOrderSignatureItem, MOrderSignatureItemDetail
+from .tasks import create_signature_doc_from_morder_task
 
 
 def create_signature_doc_from_morder_thread(morder):
     # create thread to create_signature_doc_from_morder
     # code:
     print('start create_signature_doc_from_morder_thread')
-    import threading
-    t = threading.Thread(
-        target=create_signature_doc_from_morder, args=(morder,))
-    t.start()
+    # import threading
+    # t = threading.Thread(
+    #     target=create_signature_doc_from_morder, args=(morder,))
+    # t.start()
+
+    if settings.DEBUG:
+        create_signature_doc_from_morder_task(morder.id)
+    else:
+        create_signature_doc_from_morder_task.delay(morder.id)
+    print('end create_signature_doc_from_morder_thread')
 
 
 def create_signature_doc_from_morder(morder):
