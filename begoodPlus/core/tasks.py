@@ -178,9 +178,17 @@ def turn_to_morder_and_send_telegram_notification_task(cart_id):
     from core.models import SvelteCartModal
     cart = SvelteCartModal.objects.get(id=cart_id)
     morder = cart.turn_to_morder()
-    send_cart_notification(cart_id, morder.id)
+    try:
+        send_cart_notification(cart_id, morder.id)
+    except:
+        print('error in send_cart_notification')
+        pass
     morder.recalculate_total_price()
-    morder.notify_order_status_update()
+    try:
+        morder.notify_order_status_update()
+    except:
+        print('error in notify_order_status_update')
+        pass
     print('done')
 
 
