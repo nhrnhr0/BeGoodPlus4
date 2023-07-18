@@ -456,6 +456,7 @@ class MOrder(models.Model):
 
         data = self.get_data_to_price_proposal_spreedsheet()
         admin_edit_link = self.get_edit_url_without_html(base_url=FULL_DOMAIN)
+        sheet_cells_to_update = []
 
         # print(data)  # ['פנדה מונביסו', Decimal('15040.00'), 220.0]...
         # Col A from offset 4:
@@ -472,23 +473,47 @@ class MOrder(models.Model):
         # C cost
         # H price
         a_to_c = list(map(lambda x: x[:3], data))
-        worksheet.update('A5:C', a_to_c)
+        # worksheet.update('A5:C', a_to_c)
+        a_to_c_cells = []
+        for i, row in enumerate(a_to_c):
+            for j, cell in enumerate(row):
+                a_to_c_cells.append(Cell(row=i+5, col=j+1, value=cell))
+        sheet_cells_to_update.extend(a_to_c_cells)
 
         # update col H price
         h = list(map(lambda x: [int(x[3]) if int(
             x[3]) == float(x[3]) else float(x[3])], data))
-        worksheet.update('H5:H', h)
-
+        # worksheet.update('H5:H', h)
+        h_cells = []
+        for i, row in enumerate(h):
+            for j, cell in enumerate(row):
+                h_cells.append(Cell(row=i+5, col=8, value=cell))
+        sheet_cells_to_update.extend(h_cells)
         # H2 - admin edit link
 
-        worksheet.update('H2', admin_edit_link)
-        worksheet.update('I2', self.status2.name)
+        # worksheet.update('H2', admin_edit_link)
+        # worksheet.update('I2', self.status2.name)
+        sheet_cells_to_update.append(Cell(row=2, col=8, value=admin_edit_link))
+        sheet_cells_to_update.append(
+            Cell(row=2, col=9, value=self.status2.name))
 
         # A2 client name
-        worksheet.update('A2', self.name)
+        # worksheet.update('A2', self.name)
+        sheet_cells_to_update.append(Cell(row=2, col=1, value=self.name))
         # B2 client phone
-        worksheet.update('B2', self.phone)
+        # worksheet.update('B2', self.phone)
+        sheet_cells_to_update.append(Cell(row=2, col=2, value=self.phone))
+        # D2 client email
+        # worksheet.update('D2', self.email)
+        sheet_cells_to_update.append(Cell(row=2, col=4, value=self.email))
 
+        # G2 businessName
+        # worksheet.update('G2', self.cart.businessName)
+        sheet_cells_to_update.append(
+            Cell(row=2, col=7, value=self.cart.businessName))
+
+        if len(sheet_cells_to_update) > 0:
+            worksheet.update_cells(sheet_cells_to_update)
         GREEN_COLOR = {
             "red": 0,
             "green": 1,
@@ -832,6 +857,10 @@ class MOrder(models.Model):
             # rbg = (255, 255, 255)
             # change to 0-1
             rgb = tuple(map(lambda x: x/255, rgb))
+            # if self.export_to_suppliers: set rgb to yellow
+            if self.export_to_suppliers == False:
+                rgb = (1, 1, 0)
+
             # color the spreedsheet
             body = {
                 "requests": [
