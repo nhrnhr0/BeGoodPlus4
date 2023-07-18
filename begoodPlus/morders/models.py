@@ -10,7 +10,7 @@ import copy
 
 import gspread
 from ordered_model.models import OrderedModelBase
-from begoodPlus.secrects import SECRECT_BASE_MY_DOMAIN, SECRECT_CLIENT_SIDE_DOMAIN, ALL_MORDER_FILE_SPREEDSHEET_URL, ALL_PRICE_PROPOSAL_SPREEADSHEET_URL
+from begoodPlus.secrects import SECRECT_BASE_MY_DOMAIN, SECRECT_CLIENT_SIDE_DOMAIN, ALL_MORDER_FILE_SPREEDSHEET_URL, ALL_PRICE_PROPOSAL_SPREEADSHEET_URL, ARCHIVED_MORDER_FILE_SPREEDSHEET_URL
 from django.conf import settings
 import reversion
 from decimal import Decimal
@@ -209,6 +209,7 @@ class MOrder(models.Model):
         max_length=100, blank=True, null=True)
     last_notify_order_total_price = models.FloatField(
         _('last notify order total price'), default=0)
+    order_sheet_archived = models.BooleanField(default=False)
     # save
 
     def recalculate_total_price(self):
@@ -301,10 +302,12 @@ class MOrder(models.Model):
     def get_sheets_order_link(self):
         ret = ''
         if self.gid:
-            ret = ALL_MORDER_FILE_SPREEDSHEET_URL
-
+            if self.order_sheet_archived:
+                ret = ARCHIVED_MORDER_FILE_SPREEDSHEET_URL
+            else:
+                ret = ALL_MORDER_FILE_SPREEDSHEET_URL
             ret = re.sub(r'#gid=\d+', f'#gid={self.gid}',
-                         ALL_MORDER_FILE_SPREEDSHEET_URL)
+                         ret)
         return ret
 
     def get_sheets_price_prop_link(self):
@@ -379,11 +382,64 @@ class MOrder(models.Model):
             self.write_morder_to_price_prop_spreedsheet(
                 gspred_client, workbook)
         if sync_order:
-            workbook = gspred_client.open_by_url(
-                ALL_MORDER_FILE_SPREEDSHEET_URL)
+            if self.order_sheet_archived == True:
+                workbook = gspred_client.open_by_url(
+                    ARCHIVED_MORDER_FILE_SPREEDSHEET_URL)
+            elif self.status2.name == 'בוטל' or self.status2.name == 'סופק':
+                # we need to move from the active orders to the archive
+                self.move_to_archive(gspred_client)
+                workbook = gspred_client.open_by_url(
+                    ARCHIVED_MORDER_FILE_SPREEDSHEET_URL)
+            else:
+                workbook = gspred_client.open_by_url(
+                    ALL_MORDER_FILE_SPREEDSHEET_URL)
             self.write_morder_to_spreedsheet(workbook)
 
     pass
+
+    def move_to_archive(self, gspred_client: Client = None):
+        # move from workbook = gspred_client.open_by_url(
+        # ALL_MORDER_FILE_SPREEDSHEET_URL)
+        # to workbook = gspred_client.open_by_url(
+        # ARCHIVED_MORDER_FILE_SPREEDSHEET_URL)
+        # at the end set order_sheet_archived to True
+        if not gspred_client:
+            gspred_client = get_gspread_client()
+        workbook = gspred_client.open_by_url(
+            ALL_MORDER_FILE_SPREEDSHEET_URL)
+        ws = list(filter(lambda ws: ws.id == int(
+            self.gid), workbook.worksheets()))
+        if ws:
+            ws = ws[0]
+        else:
+            try:
+                name = self.name + ' ' + \
+                    str(self.id) + ' ' + self.created.strftime('%Y_%m_%d')
+                ws = MOrder.try_get_order_sheet(
+                    workbook, name)
+            except Exception as e:
+                print(e)
+                return False
+        if not ws:
+            return False
+        # get the archive workbook
+        archive_workbook = gspred_client.open_by_url(
+            ARCHIVED_MORDER_FILE_SPREEDSHEET_URL)
+        # copy the sheet to the archive workbook and rename the sheet (remove עותק של)
+        ws2 = ws.copy_to(archive_workbook.id)
+        sid = ws2['sheetId']
+        ws2 = archive_workbook.get_worksheet_by_id(sid)
+        try:
+            ws2.update_title(ws.title)
+        except Exception as e:
+            print(e)
+        self.gid = ws2.id
+        # delete the sheet from the active workbook
+        workbook.del_worksheet(ws)
+        # set order_sheet_archived to True
+        self.order_sheet_archived = True
+        self.save()
+        return True
 
     def get_data_to_price_proposal_spreedsheet(self):
         # get the product name, total amount and product.product.cost_price
@@ -640,6 +696,12 @@ class MOrder(models.Model):
         # print(data)
         return data
 
+    def try_get_order_sheet(wb: gspread.Spreadsheet, title: str):
+        try:
+            return wb.worksheet(title)
+        except:
+            return None
+
     def get_or_create_order_sheet(wb: gspread.Spreadsheet, title: str):
         try:
             return wb.worksheet(title)
@@ -793,6 +855,9 @@ class MOrder(models.Model):
         print(res)
         return cell_tasks, data_validation_ranges, formating_tasks
 
+    # wb can be either
+    # ALL_PRICE_PROPOSAL_SPREEADSHEET_URL
+    # ARCHIVED_MORDER_FILE_SPREEDSHEET_URL
     def write_morder_to_spreedsheet(self, wb: gspread.Spreadsheet):
         order_data = self.get_exel_data()
         name = order_data['name']

@@ -1122,10 +1122,12 @@ def api_get_order_data(request, id):
             price_prop_sync = True
             orders_sync = True
             if new_status:
-                if new_status.name == 'בוטל' and order.gid == None:
+                if (new_status.name == 'בוטל' or new_status.name == 'סופק') and order.gid == None:
                     orders_sync = False
                 if (new_status.name == 'הצעת מחיר' or new_status.name == 'הצעת מחיר נשלחה') and order.gid == None:
                     orders_sync = False
+
+                    # if סופק / בוטל and there is no morder.gid then sync_order = False
                 order.status2 = new_status
 
             # recalculate total price
