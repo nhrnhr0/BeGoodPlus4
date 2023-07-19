@@ -364,7 +364,8 @@ class MOrder(models.Model):
         ws.update_cell(2, 5, now.strftime('%d/%m/%Y %H:%M:%S'))
         ws.update_cell(2, 6, str(errors))
         if len(errors) == 0:
-            self.start_morder_to_spreedsheet_thread(True, sync_to_orders_sheet)
+            # self.start_morder_to_spreedsheet_thread(True, sync_to_orders_sheet)
+            pass
 
         return errors
 
