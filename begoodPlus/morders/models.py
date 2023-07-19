@@ -415,6 +415,9 @@ class MOrder(models.Model):
             self.save()
         except Exception as e:
             print(e)
+        finally:
+            # throw error to the user
+            raise Exception('error in morder_to_spreedsheet')
 
     pass
 
