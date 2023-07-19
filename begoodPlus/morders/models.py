@@ -387,27 +387,34 @@ class MOrder(models.Model):
 
     def morder_to_spreedsheet(self, sync_price_proposal=True, sync_order=True):
         gspred_client = get_gspread_client()
-        self.last_sheet_update = datetime.datetime.now()
+        # import timezone
+        import datetime
+        import pytz
+        self.last_sheet_update = datetime.datetime.now(
+            pytz.timezone('Asia/Jerusalem'))
         print('morder to spreedsheet ', self.id)
-
-        if sync_price_proposal:
-            workbook = gspred_client.open_by_url(
-                ALL_PRICE_PROPOSAL_SPREEADSHEET_URL)
-            self.write_morder_to_price_prop_spreedsheet(
-                gspred_client, workbook)
-        if sync_order:
-            if self.order_sheet_archived == True:
+        try:
+            if sync_price_proposal:
                 workbook = gspred_client.open_by_url(
-                    ARCHIVED_MORDER_FILE_SPREEDSHEET_URL)
-            elif self.status2.name == 'בוטל' or self.status2.name == 'סופק':
-                # we need to move from the active orders to the archive
-                self.move_to_archive(gspred_client)
-                workbook = gspred_client.open_by_url(
-                    ARCHIVED_MORDER_FILE_SPREEDSHEET_URL)
-            else:
-                workbook = gspred_client.open_by_url(
-                    ALL_MORDER_FILE_SPREEDSHEET_URL)
-            self.write_morder_to_spreedsheet(workbook)
+                    ALL_PRICE_PROPOSAL_SPREEADSHEET_URL)
+                self.write_morder_to_price_prop_spreedsheet(
+                    gspred_client, workbook)
+            if sync_order:
+                if self.order_sheet_archived == True:
+                    workbook = gspred_client.open_by_url(
+                        ARCHIVED_MORDER_FILE_SPREEDSHEET_URL)
+                elif self.status2.name == 'בוטל' or self.status2.name == 'סופק':
+                    # we need to move from the active orders to the archive
+                    self.move_to_archive(gspred_client)
+                    workbook = gspred_client.open_by_url(
+                        ARCHIVED_MORDER_FILE_SPREEDSHEET_URL)
+                else:
+                    workbook = gspred_client.open_by_url(
+                        ALL_MORDER_FILE_SPREEDSHEET_URL)
+                self.write_morder_to_spreedsheet(workbook)
+            self.save()
+        except Exception as e:
+            print(e)
 
     pass
 
