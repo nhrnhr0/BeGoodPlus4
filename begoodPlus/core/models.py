@@ -481,6 +481,9 @@ class SvelteCartModal(models.Model):
         sync_order = True
         if morder.status2.name == 'הצעת מחיר' or morder.status2.name == 'הצעת מחיר נשלחה':
             sync_order = False
+        # if סופק / בוטל and there is no morder.gid then sync_order = False
+        if (morder.status2.name == 'סופק' or morder.status2.name == 'בוטל') and morder.gid == None:
+            sync_order = False
         morder.start_morder_to_spreedsheet_thread(sync_price_prop, sync_order)
         morder.notify_order_status_update()
         return morder

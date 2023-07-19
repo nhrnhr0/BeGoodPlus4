@@ -52,8 +52,11 @@ def spreedsheet_to_morder_view(request):
     if request.method == 'POST':
         morder_id = request.POST.get('morder_id', None)
         sheets_gid = request.POST.get('sheets_gid', None)
+        sync_to_orders_sheet = request.POST.get('refresh_sheet', False)
+        if sync_to_orders_sheet == 'true':
+            sync_to_orders_sheet = True
         morder = MOrder.objects.get(id=morder_id)
-        errors = morder.spreedsheet_to_morder(sheets_gid)
+        errors = morder.spreedsheet_to_morder(sheets_gid, sync_to_orders_sheet)
         if errors:
             return JsonResponse({'error': errors}, status=status.HTTP_400_BAD_REQUEST)
         else:
@@ -954,7 +957,6 @@ def api_get_order_data(request, id):
             new_status = None
             if data['status2']:
                 new_status = MorderStatus.objects.get(id=data['status2'])
-            print('status: ', data['status2'])
             order.message = data['message']
             order.email = data['email']
             order.name = data['name']
@@ -1122,10 +1124,12 @@ def api_get_order_data(request, id):
             price_prop_sync = True
             orders_sync = True
             if new_status:
-                if new_status.name == 'בוטל' and order.gid == None:
+                if (new_status.name == 'בוטל' or new_status.name == 'סופק') and order.gid == None:
                     orders_sync = False
                 if (new_status.name == 'הצעת מחיר' or new_status.name == 'הצעת מחיר נשלחה') and order.gid == None:
                     orders_sync = False
+
+                    # if סופק / בוטל and there is no morder.gid then sync_order = False
                 order.status2 = new_status
 
             # recalculate total price
