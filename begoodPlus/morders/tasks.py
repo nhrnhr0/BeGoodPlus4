@@ -46,4 +46,3 @@ def morder_to_spreedsheet_task(morder_id, sync_price_proposal, sync_order):
     from morders.models import MOrder
     morder = MOrder.objects.get(id=morder_id)
     morder.morder_to_spreedsheet(sync_price_proposal, sync_order)
-    pass

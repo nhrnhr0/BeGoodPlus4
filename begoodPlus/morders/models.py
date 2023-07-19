@@ -388,7 +388,7 @@ class MOrder(models.Model):
     def morder_to_spreedsheet(self, sync_price_proposal=True, sync_order=True):
         gspred_client = get_gspread_client()
         self.last_sheet_update = datetime.datetime.now()
-        print('morder to spreedsheet')
+        print('morder to spreedsheet ', self.id)
 
         if sync_price_proposal:
             workbook = gspred_client.open_by_url(
