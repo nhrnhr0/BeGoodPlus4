@@ -231,29 +231,30 @@ class MOrder(models.Model):
                     sum(product.entries.all().values_list('quantity', flat=True))
             if self.total_sell_price != total_price:
                 self.total_sell_price = total_price
+            return total_price
+        else:
+            return 0
 
     def notify_order_status_update(self):
         from morders.tasks import send_morder_status_update_to_telegram
-        print('notify_order_status_update_post_save: ', self.total_sell_price)
-        if self.total_sell_price > 0:
+        total_sell = self.recalculate_total_price()
+        print('notify_order_status_update_post_save: ', total_sell)
+
+        if total_sell > 0:
             # we compare self.total_sell_price to self
             # kkkkkkkkk
-            edit_url = SECRECT_BASE_MY_DOMAIN + self.get_edit_order_url()
+
             status = self.get_status_display()
-            name = self.name or self.client.businessName
-            total_sell = self.total_sell_price
 
             # we check if last_notify_order_status is not the same as status
             # or last_notify_order_total_price is not the same as total_sell_price
             if self.last_notify_order_status != status.name or self.last_notify_order_total_price != total_sell:
                 if settings.DEBUG:
-                    pass
-                    print('send_morder_status_update_to_telegram')
-                    # send_morder_status_update_to_telegram(
-                    #     edit_url=edit_url, status=status, name=name, total_price=total_sell, morder_id=self.id)
+                    send_morder_status_update_to_telegram(morder_id=self.id)
+
                 else:
                     send_morder_status_update_to_telegram.delay(
-                        edit_url=edit_url, status=status.name, name=name, total_price=total_sell, morder_id=self.id)
+                        morder_id=self.id)
                     pass
                 self.last_notify_order_status = status.name
                 self.last_notify_order_total_price = total_sell
@@ -261,7 +262,7 @@ class MOrder(models.Model):
             else:
                 print('no need to send notification')
                 pass
-        print('done notify_order_status_update_post_save: ', self.total_sell_price)
+        print('done notify_order_status_update_post_save: ', total_sell)
         pass
 
     def update_sell_price_from_price_proposal_sheet(self, sheet_id=None):
@@ -387,7 +388,7 @@ class MOrder(models.Model):
     def morder_to_spreedsheet(self, sync_price_proposal=True, sync_order=True):
         gspred_client = get_gspread_client()
         self.last_sheet_update = datetime.datetime.now()
-        print('morder to spreedsheet')
+        print('morder to spreedsheet ', self.id)
 
         if sync_price_proposal:
             workbook = gspred_client.open_by_url(

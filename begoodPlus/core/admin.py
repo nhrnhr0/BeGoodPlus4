@@ -1,4 +1,3 @@
-from core.tasks import send_cart_notification
 from django.utils.html import mark_safe
 from django.utils.http import urlencode
 import json

@@ -28,6 +28,8 @@ import cloudinary.uploader
 import cloudinary.api
 from begoodPlus.secrects import FULL_DOMAIN, SECRECT_BASE_MY_DOMAIN, GOOGLE_CLIENT_SECRET_PATH, GOOGLE_AUTH_DIR
 
+BROKER_TRANSPORT_OPTIONS = {'visibility_timeout': 3600*10}
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(
     os.path.dirname(os.path.abspath(__file__))))
