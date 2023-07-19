@@ -52,8 +52,11 @@ def spreedsheet_to_morder_view(request):
     if request.method == 'POST':
         morder_id = request.POST.get('morder_id', None)
         sheets_gid = request.POST.get('sheets_gid', None)
+        sync_to_orders_sheet = request.POST.get('refresh_sheet', False)
+        if sync_to_orders_sheet == 'true':
+            sync_to_orders_sheet = True
         morder = MOrder.objects.get(id=morder_id)
-        errors = morder.spreedsheet_to_morder(sheets_gid)
+        errors = morder.spreedsheet_to_morder(sheets_gid, sync_to_orders_sheet)
         if errors:
             return JsonResponse({'error': errors}, status=status.HTTP_400_BAD_REQUEST)
         else:

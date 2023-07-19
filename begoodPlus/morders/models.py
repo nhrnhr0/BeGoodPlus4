@@ -332,7 +332,7 @@ class MOrder(models.Model):
     class Meta:
         ordering = ['-created']
 
-    def spreedsheet_to_morder(self, gid=None):
+    def spreedsheet_to_morder(self, gid=None, sync_to_orders_sheet=False):
         gspred_client = get_gspread_client()
         workbook = gspred_client.open_by_url(ALL_MORDER_FILE_SPREEDSHEET_URL)
         # Israel timezone now
@@ -358,9 +358,13 @@ class MOrder(models.Model):
         # print(sheets_data)
         # update last update time in spreedsheet E2
 
-        errors = self.spreedsheet_data_to_morder(sheets_data)
+        errors = self.spreedsheet_data_to_morder(
+            sheets_data)
         ws.update_cell(2, 5, now.strftime('%d/%m/%Y %H:%M:%S'))
         ws.update_cell(2, 6, str(errors))
+        if len(errors) == 0:
+            self.start_morder_to_spreedsheet_thread(True, sync_to_orders_sheet)
+
         return errors
 
     def start_morder_to_spreedsheet_thread(self, sync_price_proposal=True, sync_order=True):
@@ -604,7 +608,7 @@ class MOrder(models.Model):
         # I2 = <has any>
         if(sheets_data[0][8] == 'לקחת לספקים?'):
             new_export_to_suppliers = sheets_data[1][8]
-            if new_export_to_suppliers != None and new_export_to_suppliers != '':
+            if new_export_to_suppliers != None and new_export_to_suppliers != '' and new_export_to_suppliers != 'FALSE':
                 self.export_to_suppliers = True
             else:
                 self.export_to_suppliers = False
@@ -842,21 +846,33 @@ class MOrder(models.Model):
             BooleanCondition('ONE_OF_LIST', all_statuses),
             showCustomUi=True
         )
+
+        # set data validation for I2 cell (TRUE or FALSE)
+        options = ['TRUE', 'FALSE']
+        providers_validation_rule = DataValidationRule(
+            BooleanCondition('ONE_OF_LIST', options),
+            showCustomUi=True
+        )
+
         # set_data_validation_for_cell_range(
         #     ws, 'G2:G2', status_validation_rule)
         data_validation_ranges = [
-            ('G2:G2', status_validation_rule,)]
+            ('G2:G2', status_validation_rule,),
+            ('I2:I2', providers_validation_rule,), ]
         # create a title at I1 cell: "לקחת לספקים?"
         # ws.update_cell(1, 9, 'לקחת לספקים?')
         cell_tasks.append(Cell(row=1, col=9, value='לקחת לספקים?'))
+        suppliers = data.get('export_to_suppliers', False)
+        suppliers = 'TRUE' if suppliers and suppliers != 'FALSE' else 'FALSE'
+        cell_tasks.append(
+            Cell(row=2, col=9, value=str(suppliers)))
         # create a checkbox at I2 cell
-        if data['export_to_suppliers']:
-            # ws.update_cell(2, 9, data['export_to_suppliers'])
-            cell_tasks.append(
-                Cell(row=2, col=9, value=data['export_to_suppliers']))
-        else:
-            # ws.update_cell(2, 9, '')
-            cell_tasks.append(Cell(row=2, col=9, value=''))
+        # if data['export_to_suppliers']:
+        #     # ws.update_cell(2, 9, data['export_to_suppliers'])
+
+        # else:
+        #     # ws.update_cell(2, 9, '')
+        #     cell_tasks.append(Cell(row=2, col=9, value=''))
 
         if self.status2:
             # change hex to rgb
@@ -867,7 +883,7 @@ class MOrder(models.Model):
             # change to 0-1
             rgb = tuple(map(lambda x: x/255, rgb))
             # if self.export_to_suppliers: set rgb to yellow
-            if self.export_to_suppliers == False:
+            if self.export_to_suppliers == False and self.order_sheet_archived == False:
                 rgb = (1, 1, 0)
 
             # color the spreedsheet
@@ -1110,8 +1126,6 @@ class MOrder(models.Model):
                     {'range': 'L' + str(current_row)})
                 current_row += 1
         pass
-        if len(sheet_cells_to_update) > 0:
-            order_ws.update_cells(sheet_cells_to_update)
 
         # execute_formatting_tasks:
         # @param worksheet_for_formatting: the worksheet to apply the formatting to
@@ -1142,6 +1156,9 @@ class MOrder(models.Model):
         if len(ranges) > 0:
             set_data_validation_for_cell_ranges(
                 order_ws, ranges)
+
+        if len(sheet_cells_to_update) > 0:
+            order_ws.update_cells(sheet_cells_to_update)
 
     def subtract_collected_inventory(self, user):
         collected_items = CollectedInventory.objects.filter(
