@@ -174,69 +174,76 @@ def send_question_notification(question_id):
 
 
 @shared_task
-def turn_to_morder_and_send_telegram_notification_task(cart_id):
+def turn_to_morder_task(cart_id):
     from core.models import SvelteCartModal
     cart = SvelteCartModal.objects.get(id=cart_id)
     morder = cart.turn_to_morder()
-    try:
-        send_cart_notification(cart_id, morder.id)
-    except:
-        print('error in send_cart_notification')
-        pass
-    morder.recalculate_total_price()
-    try:
-        morder.notify_order_status_update()
-    except:
-        print('error in notify_order_status_update')
-        pass
     print('done')
 
+# @shared_task
+# def turn_to_morder_and_send_telegram_notification_task(cart_id):
+#     from core.models import SvelteCartModal
+#     cart = SvelteCartModal.objects.get(id=cart_id)
+#     morder = cart.turn_to_morder()
+#     try:
+#         send_cart_notification(cart_id, morder.id)
+#     except:
+#         print('error in send_cart_notification')
+#         pass
+#     morder.recalculate_total_price()
+#     try:
+#         morder.notify_order_status_update()
+#     except:
+#         print('error in notify_order_status_update')
+#         pass
+#     print('done')
 
-@shared_task
-def send_cart_notification(cart_id, morder_id=None):
-    from core.models import SvelteCartModal
-    print('=================== send_cart_email is running ==========================')
-    cart = SvelteCartModal.objects.get(id=cart_id)
-    # subject = to the current date and time if the cart
-    # if cart.user is not None and cart.user.is_anonymous == False:
-    #     s = str(cart.user.client.businessName)
-    # else:
-    #     s = str(cart.name)
-    if cart.name:
-        s = str(cart.name)
-    else:
-        if cart.user and cart.user.client:
-            s = str(cart.user.client.businessName)
-        else:
-            s = str(cart.user)
-    if morder_id:
-        subject = str(morder_id) + ') ' + s
-    else:
-        subject = str(cart.id) + ') ' + s
 
-    html_message = render_to_string(
-        'emails/cart_template.html', {'cart': cart})
-    plain_message = strip_tags(html_message)
-    from_email = 'עגלת קניות <Main@ms-global.co.il>'
-    to = MAIN_EMAIL_RECEIVER
-    mail.send_mail(subject, plain_message, from_email,
-                   [to], html_message=html_message)
-    print('=================== send_cart_email is done ==========================')
+# @shared_task
+# def send_cart_notification(cart_id, morder_id=None):
+#     from core.models import SvelteCartModal
+#     print('=================== send_cart_email is running ==========================')
+#     cart = SvelteCartModal.objects.get(id=cart_id)
+#     # subject = to the current date and time if the cart
+#     # if cart.user is not None and cart.user.is_anonymous == False:
+#     #     s = str(cart.user.client.businessName)
+#     # else:
+#     #     s = str(cart.name)
+#     if cart.name:
+#         s = str(cart.name)
+#     else:
+#         if cart.user and cart.user.client:
+#             s = str(cart.user.client.businessName)
+#         else:
+#             s = str(cart.user)
+#     if morder_id:
+#         subject = str(morder_id) + ') ' + s
+#     else:
+#         subject = str(cart.id) + ') ' + s
 
-    # sending telegram message
-    # for chat_id in self.chat_ids:
-    chat_id = TELEGRAM_CHAT_ID_CARTS
-    if not chat_id:
-        return
-    telegram_message = '* ' + subject + ' *' + '\n'
-    telegram_message += 'סטטוס: * ' + cart.order_type + ' * \n'
-    if cart.agent:
-        telegram_message += 'סוכן: * ' + cart.agent.username + ' * \n'
-    for item in cart.productEntries.all():
-        row = str(item.amount) + ' ' + item.product.title + '\n'
-        telegram_message += row
-    telegram_bot.send_message(
-        chat_id=chat_id, text=telegram_message, parse_mode='markdown')
+#     html_message = render_to_string(
+#         'emails/cart_template.html', {'cart': cart})
+#     plain_message = strip_tags(html_message)
+#     from_email = 'עגלת קניות <Main@ms-global.co.il>'
+#     to = MAIN_EMAIL_RECEIVER
+#     mail.send_mail(subject, plain_message, from_email,
+#                    [to], html_message=html_message)
+#     print('=================== send_cart_email is done ==========================')
+
+#     # sending telegram message
+#     # for chat_id in self.chat_ids:
+#     chat_id = TELEGRAM_CHAT_ID_CARTS
+#     if not chat_id:
+#         return
+#     telegram_message = '* ' + subject + ' *' + '\n'
+#     telegram_message += 'סטטוס: * ' + cart.order_type + ' * \n'
+#     if cart.agent:
+#         telegram_message += 'סוכן: * ' + cart.agent.username + ' * \n'
+#     for item in cart.productEntries.all():
+#         row = str(item.amount) + ' ' + item.product.title + '\n'
+#         telegram_message += row
+#     telegram_bot.send_message(
+#         chat_id=chat_id, text=telegram_message, parse_mode='markdown')
 
 
 '''from __future__ import absolute_import, unicode_literals

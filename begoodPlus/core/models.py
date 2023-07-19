@@ -472,6 +472,7 @@ class SvelteCartModal(models.Model):
         morder = MOrder.objects.create(cart=cart, client=client, name=name,
                                        phone=phone, email=email, status=status, status2=status2, message=message, agent=agent)
         morder.products.add(*dbProducts)
+        morder.recalculate_total_price()
         morder.save()
 
         # Create Signature for created morder
@@ -484,6 +485,7 @@ class SvelteCartModal(models.Model):
         # if סופק / בוטל and there is no morder.gid then sync_order = False
         if (morder.status2.name == 'סופק' or morder.status2.name == 'בוטל') and morder.gid == None:
             sync_order = False
+        
         morder.start_morder_to_spreedsheet_thread(sync_price_prop, sync_order)
         morder.notify_order_status_update()
         return morder
