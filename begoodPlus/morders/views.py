@@ -1125,7 +1125,7 @@ def api_get_order_data(request, id):
             orders_sync = True
             if new_status:
                 if (new_status.name == 'בוטל' or new_status.name == 'סופק') and order.gid == None:
-                    orders_sync = False
+                    order.export_to_suppliers = False
                 if (new_status.name == 'הצעת מחיר' or new_status.name == 'הצעת מחיר נשלחה') and order.gid == None:
                     orders_sync = False
 

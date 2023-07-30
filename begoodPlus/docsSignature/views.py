@@ -243,7 +243,7 @@ def api_adit_doc_signature(request, uuid):
 def serialize_doc_signature(obj):
     ret = {
         'uuid': obj.uuid,
-        'client_name': obj.client_name,
+        'client_name': obj.related_omrder.name,
         'status': obj.status,
         'signature': obj.signature_cimage,
         'items': [],

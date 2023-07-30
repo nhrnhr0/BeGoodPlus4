@@ -91,7 +91,7 @@ class MOrderAdmin(admin.ModelAdmin):  #
     change_list_template = 'admin/morders/change_list.html'
     model = MOrder
     fields = ('cart', 'total_sell_price', 'client', 'name', 'phone', 'email',
-              'status', 'status2', 'message', 'gid', 'price_proposal_sheetid', 'export_to_suppliers',)  # what is this for?
+              'status', 'status2', 'message', 'gid', 'price_proposal_sheetid', 'export_to_suppliers', 'order_sheet_archived',)  # what is this for?
     readonly_fields = ('created', 'total_sell_price', 'updated', 'get_edit_url',
                        'view_morder_pdf_link', 'get_signiture_link', 'cart', 'client', 'status', 'status2', )
     list_display = ('id', 'client', 'name', 'status2', 'status_msg', 'total_sell_price',

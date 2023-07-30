@@ -407,6 +407,8 @@ class MOrder(models.Model):
                 elif self.status2.name == 'בוטל' or self.status2.name == 'סופק':
                     # we need to move from the active orders to the archive
                     self.move_to_archive(gspred_client)
+                    self.order_sheet_archived = True
+                    # self.save()
                     workbook = gspred_client.open_by_url(
                         ARCHIVED_MORDER_FILE_SPREEDSHEET_URL)
                 else:
@@ -461,8 +463,7 @@ class MOrder(models.Model):
         # delete the sheet from the active workbook
         workbook.del_worksheet(ws)
         # set order_sheet_archived to True
-        self.order_sheet_archived = True
-        self.save()
+
         return True
 
     def get_data_to_price_proposal_spreedsheet(self):
