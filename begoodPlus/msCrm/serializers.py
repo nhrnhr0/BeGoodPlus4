@@ -30,6 +30,7 @@ class MsCrmIntrestsGroupsSerializer(serializers.ModelSerializer):
         model = MsCrmIntrestsGroups
         fields = ('name', 'intrests')
 
+
 class MsCrmUserWhatsappCampaignSerializer(serializers.ModelSerializer):
     lastMessageWithTimestamp = serializers.SerializerMethodField()
     businessTypeSelect = serializers.CharField(
@@ -68,11 +69,14 @@ class MsCrmUsersForExcelSerializer(serializers.ModelSerializer):
         model = MsCrmUser
         fields = ('phone', 'name', 'email',
                   'businessName', 'businessSelect')
-        
+
+
 class MsCrmPhoneContactsSerializer(serializers.ModelSerializer):
     clean_phonenumber = serializers.SerializerMethodField()
-    
+
     def get_clean_phonenumber(self, obj):
+        if len(obj.phone) == 0:
+            return ''
         # remove \u2066 and ⁩ and '+'
         # then add one + at the begining and return
         phone = obj.phone
@@ -88,6 +92,7 @@ class MsCrmPhoneContactsSerializer(serializers.ModelSerializer):
         if phone[0] != '+':
             phone = '+' + phone
         return phone
+
     class Meta:
         model = MsCrmUser
         fields = ('id', 'name', 'phone', 'clean_phonenumber')

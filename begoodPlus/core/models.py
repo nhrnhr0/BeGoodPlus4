@@ -1,3 +1,5 @@
+import pytz
+import datetime
 from core.tasks import send_providers_docx_to_telegram_task
 from core.gspred import gspread_fetch_sheet_from_url
 from core.utils import uuid2slug
@@ -485,7 +487,7 @@ class SvelteCartModal(models.Model):
         # if סופק / בוטל and there is no morder.gid then sync_order = False
         if (morder.status2.name == 'סופק' or morder.status2.name == 'בוטל') and morder.gid == None:
             sync_order = False
-        
+
         morder.start_morder_to_spreedsheet_thread(sync_price_prop, sync_order)
         morder.notify_order_status_update()
         return morder
@@ -538,7 +540,7 @@ class ProvidersDocxTask(models.Model):
                 sheet, sheetname, last_sh = gspread_fetch_sheet_from_url(
                     url, last_sh)
             except Exception as e:
-                log = 'error: ' + str(e)
+                log = 'error: ' + str(e) + ' - ' + url
                 self.logs.append(log)
                 self.save()
                 continue
@@ -577,11 +579,11 @@ class ProvidersDocxTask(models.Model):
                     prov_name = provider_name
                     if is_file_private:
                         prov_name = 'private_' + prov_name
-
                     docs_data.append({
                         'doc': doc,
                         'provider_name': prov_name,
-                        'morders_ids': info[provider_name].get('morders', '')
+                        'morders_ids': info[provider_name].get('morders', ''),
+                        'is_private': is_file_private,
                     })
 
         zip_buffer = io.BytesIO()
@@ -590,9 +592,13 @@ class ProvidersDocxTask(models.Model):
                 file_stream = io.BytesIO()
                 doc = doc_info['doc']
                 doc.save(file_stream)
-
-                file_name = str(
-                    '(' + doc_info['provider_name'] + ') ' + '|'.join(doc_info['morders_ids']) + '.docx')
+                if doc_info['is_private']:
+                    file_name = str(
+                        '(' + doc_info['provider_name'] + ') ' + '|'.join(doc_info['morders_ids']) + '.docx')
+                else:
+                    file_name = str(doc_info['provider_name'] + ' ' +
+                                    str(datetime.datetime.now(tz=pytz.timezone(
+                                        'Israel')).strftime("%Y-%m-%d")) + '.docx')
                 file_stream.seek(0)
                 zip_file.writestr(
                     file_name, file_stream.getvalue())

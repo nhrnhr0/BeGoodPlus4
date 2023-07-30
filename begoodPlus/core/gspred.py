@@ -53,6 +53,7 @@ def gspread_fetch_sheet_from_url(url, sh=None):
 
 def get_sheet_from_gid(gid, sh):
     worksheet_list = sh.worksheets()
+    ret = None
     for sheet in worksheet_list:
         if sheet.id == int(gid):
             ret = sheet
