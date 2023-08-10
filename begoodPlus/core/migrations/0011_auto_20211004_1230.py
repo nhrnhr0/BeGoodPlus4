@@ -6,19 +6,19 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('customerCart', '0003_customercart'),
-        ('core', '0010_customer_carts'),
+        # ('customerCart', '0003_customercart'),
+        # ('core', '0010_customer_carts'),
     ]
 
     operations = [
-        migrations.AlterField(
-            model_name='customer',
-            name='carts',
-            field=models.ManyToManyField(related_name='owner', to='customerCart.CustomerCart'),
-        ),
-        migrations.AlterField(
-            model_name='customer',
-            name='contact',
-            field=models.ManyToManyField(related_name='owner', to='core.BeseContactInformation'),
-        ),
+        # migrations.AlterField(
+        #     model_name='customer',
+        #     name='carts',
+        #     field=models.ManyToManyField(related_name='owner', to='customerCart.CustomerCart'),
+        # ),
+        # migrations.AlterField(
+        #     model_name='customer',
+        #     name='contact',
+        #     field=models.ManyToManyField(related_name='owner', to='core.BeseContactInformation'),
+        # ),
     ]

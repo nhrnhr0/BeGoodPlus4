@@ -6,14 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('catalogImageDetail', '0001_initial'),
-        ('catalogImages', '0026_catalogimage_date_modified'),
     ]
 
     operations = [
-        migrations.AddField(
-            model_name='catalogimage',
-            name='detailTabel',
-            field=models.ManyToManyField(to='catalogImageDetail.CatalogImageDetail', verbose_name='mini-tabel'),
-        ),
     ]

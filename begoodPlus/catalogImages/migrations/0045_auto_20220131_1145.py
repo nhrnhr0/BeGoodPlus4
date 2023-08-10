@@ -7,14 +7,14 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('catalogImageAttrs', '0001_initial'),
+        # ('catalogImageAttrs', '0001_initial'),
         ('catalogImages', '0044_catalogimage_clientprices'),
     ]
 
     operations = [
-        migrations.AlterField(
-            model_name='catalogimage',
-            name='clientPrices',
-            field=models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='clientPrices', to='catalogImageAttrs.productprices'),
-        ),
+        # migrations.AlterField(
+        #     model_name='catalogimage',
+        #     name='clientPrices',
+        #     field=models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='clientPrices', to='catalogImageAttrs.productprices'),
+        # ),
     ]

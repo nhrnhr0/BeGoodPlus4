@@ -1,7 +1,7 @@
 
 from django.db import models
 from django.db.models import fields
-from campains.admin import CartCampainAdmin
+
 from clientApi.serializers import AlbumClientApi
 from catalogImages.serializers import CatalogImageApiSerializer
 from clientApi.serializers import ImageClientApi
@@ -37,20 +37,24 @@ class ClientMonthCampainSerializer(ModelSerializer):
     id = serializers.CharField(source='album.id')
     slug = serializers.CharField(source='album.slug')
     get_image = serializers.CharField(source='album.cimage')
-    is_campain =  serializers.CharField(source='album.is_campain')
-    is_public =  serializers.CharField(source='album.is_public')
+    is_campain = serializers.CharField(source='album.is_campain')
+    is_public = serializers.CharField(source='album.is_public')
     album_order = serializers.CharField(source='album.album_order')
+
     class Meta:
         model = MonthCampain
-        fields = ('id', 'name','slug', 'get_image', 'is_shown','endTime', 'is_campain', 'is_public','album_order',)
+        fields = ('id', 'name', 'slug', 'get_image', 'is_shown',
+                  'endTime', 'is_campain', 'is_public', 'album_order',)
 
 
 class AdminMonthCampainSerializer(ModelSerializer):
     slug = serializers.CharField(source='album.slug')
     get_image = serializers.CharField(source='album.cimage')
+
     class Meta:
         model = MonthCampain
-        fields = ('id', 'is_shown', 'name', 'users', 'products','slug', 'get_image')
+        fields = ('id', 'is_shown', 'name', 'users',
+                  'products', 'slug', 'get_image')
 
 
 class AdminProductCampainSerilizer(ModelSerializer):
@@ -60,12 +64,8 @@ class AdminProductCampainSerilizer(ModelSerializer):
     title = serializers.CharField(source='catalogImage.title')
     cost_price = serializers.CharField(source='catalogImage.cost_price')
     client_price = serializers.CharField(source='catalogImage.client_price')
+
     class Meta:
         model = CampainProduct
         fields = ('id', 'order', 'cimg', 'title', 'catalogImage',
                   'monthCampain', 'newPrice', 'cost_price', 'client_price',)
-
-
-class AdminCartCampainSerializer(ModelSerializer):
-    class Meta:
-        model = CartCampainAdmin

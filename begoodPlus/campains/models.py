@@ -137,11 +137,11 @@ class MonthCampain(models.Model):
 # catalogImage,catalogAlbum,image_order
 
 
-class CartCampain(models.Model):
-    title = models.CharField(verbose_name=_('title'), max_length=100)
-    end_showing_date = models.DateTimeField(verbose_name=_(
-        'End showing date'), default=datetime.now, blank=False)
-    users = models.ManyToManyField(
-        to=Client, verbose_name=_('users'), blank=True)
-    cart = models.ForeignKey(to='core.SvelteCartModal', verbose_name=_(
-        'cart'), on_delete=models.CASCADE, null=True, blank=True, related_name='campain_cart')
+# class CartCampain(models.Model):
+#     title = models.CharField(verbose_name=_('title'), max_length=100)
+#     end_showing_date = models.DateTimeField(verbose_name=_(
+#         'End showing date'), default=datetime.now, blank=False)
+#     users = models.ManyToManyField(
+#         to=Client, verbose_name=_('users'), blank=True)
+#     cart = models.ForeignKey(to='core.SvelteCartModal', verbose_name=_(
+#         'cart'), on_delete=models.CASCADE, null=True, blank=True, related_name='campain_cart')

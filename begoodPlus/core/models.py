@@ -10,7 +10,6 @@ from core.utils import generate_provider_docx, process_sheets_to_providers_docx
 from core.utils import get_sheet_from_drive_url
 from catalogImages.models import CatalogImage, CatalogImageVarient
 from colorhash import ColorHash
-from customerCart.models import CustomerCart
 from urllib import request
 from django.db import models
 from django.utils.translation import gettext_lazy as _
@@ -79,18 +78,6 @@ class BeseContactInformation(models.Model):
         phone = self.phone or 'None'
         email = self.email or 'None'
         return url + ' | ' + name + ' | ' + phone + ' | ' + email
-
-
-class Customer(models.Model):
-    contact = models.ManyToManyField(
-        to=BeseContactInformation, related_name='owner')
-    carts = models.ManyToManyField(to=CustomerCart, related_name='owner')
-    device = models.CharField(max_length=120, unique=True)
-
-    def get_active_cart(self):
-        active_cart, created = self.carts.get_or_create(
-            sumbited=False, defaults={'formUUID': uuid.uuid4(), })
-        return active_cart
 
 
 class UserSearchData(models.Model):
@@ -495,137 +482,3 @@ class SvelteCartModal(models.Model):
     def __str__(self):
         # Return a string that represents the instance
         return f"{self.created_date.strftime('%Y-%m-%d %H:%M:%S')} - {self.name} - {self.cart_count()}"
-
-
-ProvidersDocxTaskStatusChoices = (
-    ('new', _('New')),
-    ('in_progress', _('In Progress')),
-    ('done', _('Done')),
-    ('error', _('Error')),
-)
-
-
-class ProvidersDocxTask(models.Model):
-    links = models.JSONField(blank=True, null=True)
-    created_date = models.DateTimeField(auto_now_add=True)
-    updated_date = models.DateTimeField(auto_now=True)
-    logs = models.JSONField(blank=True, null=True)
-    docx = models.FileField(
-        upload_to='docx', blank=True, null=True, storage=fs)
-    status = models.CharField(
-        max_length=20, choices=ProvidersDocxTaskStatusChoices, default='new')
-    progress = models.IntegerField(default=0)
-    doc_names = models.JSONField(blank=True, null=True)
-
-    def status_str_display(self):
-        ret = dict(ProvidersDocxTaskStatusChoices)[self.status]
-        return ret
-
-    def process_sheetsurl_to_providers_docx(self):
-        # try:
-        sheets = []
-        urls = self.links
-        self.status = 'in_progress'
-        self.logs = []
-        self.save()
-        loaded_files = {}
-        self.doc_names = []
-        last_sh = None
-        for url in urls:
-            log = 'fetching sheet from url: ' + url
-            self.logs.append(log)
-            self.save()
-
-            try:
-                sheet, sheetname, last_sh = gspread_fetch_sheet_from_url(
-                    url, last_sh)
-            except Exception as e:
-                log = 'error: ' + str(e) + ' - ' + url
-                self.logs.append(log)
-                self.save()
-                continue
-
-            sheets.append(sheet)
-            self.doc_names.append(sheetname)
-            log = 'downloaded'
-            self.logs.append(log)
-            self.save()
-
-        self.logs.append('parsing sheets')
-        info = process_sheets_to_providers_docx(sheets, self)
-        self.save()
-        # print(info)
-        # get all sheet names
-        # get each sheet get row[1] col[0] as the sheetname
-        # morders_ids = []
-        # for sheet in sheets:
-        #     print(sheet.columns)
-        #     print(sheet.iloc[0, 0])
-        #     morders_ids.append(str(int(float(sheet.iloc[0, 0]))))
-        docs_data = []
-        with_private_file = [False, True]
-        for is_file_private in with_private_file:
-            for provider_name in info.keys():
-                doc, seccsess = generate_provider_docx(
-                    info[provider_name], provider_name, is_file_private)
-                # if doc is string then there was an error
-                if type(doc) == str:
-                    return {'error': {
-                        'provider_name': provider_name,
-                        'product_name': doc
-                    }}
-                # docs.append(doc)
-                if seccsess:
-                    prov_name = provider_name
-                    if is_file_private:
-                        prov_name = 'private_' + prov_name
-                    docs_data.append({
-                        'doc': doc,
-                        'provider_name': prov_name,
-                        'morders_ids': info[provider_name].get('morders', ''),
-                        'is_private': is_file_private,
-                    })
-
-        zip_buffer = io.BytesIO()
-        with zipfile.ZipFile(zip_buffer, "a", zipfile.ZIP_DEFLATED, False) as zip_file:
-            for doc_info in docs_data:
-                file_stream = io.BytesIO()
-                doc = doc_info['doc']
-                doc.save(file_stream)
-                if doc_info['is_private']:
-                    file_name = str(
-                        '(' + doc_info['provider_name'] + ') ' + '|'.join(doc_info['morders_ids']) + '.docx')
-                else:
-                    file_name = str(doc_info['provider_name'] + ' ' +
-                                    str(datetime.datetime.now(tz=pytz.timezone(
-                                        'Israel')).strftime("%Y-%m-%d")) + '.docx')
-                file_stream.seek(0)
-                zip_file.writestr(
-                    file_name, file_stream.getvalue())
-        zip_buffer.seek(0)
-        self.status = 'done'
-        self.docx = ContentFile(zip_buffer.getvalue(
-        ), 'providers - ' + str(self.created_date) + '.zip')
-        self.save()
-
-        # send providers file to telegram
-        send_providers_docx_to_telegram(self.docx.path)
-
-        return {'zip': zip_buffer}
-        # except Exception as e:
-        #     print(e)
-        #     self.status = 'error'
-        #     self.logs.append(str(e))
-        #     self.save()
-        #     return {'error': str(e)}
-
-
-def send_providers_docx_to_telegram(docx_path):
-    # send providers file to telegram
-    try:
-        if settings.DEBUG:
-            send_providers_docx_to_telegram_task(docx_path)
-        else:
-            send_providers_docx_to_telegram_task.delay(docx_path)
-    except Exception as e:
-        print(e)

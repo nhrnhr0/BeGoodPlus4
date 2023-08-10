@@ -1,3 +1,12 @@
+from django.db.models.query import QuerySet
+from django.db.models import Max
+import json
+import uuid
+from core.models import BeseContactInformation
+from core.forms import FormBeseContactInformation
+from catalogLogos.models import CatalogLogo
+import datetime
+from pprint import PrettyPrinter
 from django.shortcuts import redirect, render
 from django.urls.base import reverse
 from clientApi.serializers import AlbumClientApi
@@ -10,22 +19,29 @@ from django.http import JsonResponse
 from rest_framework import viewsets
 from rest_framework.decorators import api_view
 from rest_framework.renderers import JSONRenderer
+
+
 @api_view(['GET'])
 def get_catalog_albums(request, id=None):
     if not id:
-        albums = CatalogAlbum.objects.filter(is_public=True,is_campain=False,).order_by('topLevelCategory','album_order').select_related('topLevelCategory')
+        albums = CatalogAlbum.objects.filter(is_public=True, is_campain=False,).order_by(
+            'topLevelCategory', 'album_order').select_related('topLevelCategory')
         serializer = CatalogAlbumSlimSerializer(albums, many=True)
-    else: 
+    else:
         album = CatalogAlbum.objects.get(id=id)
         serializer = CatalogAlbumSlimSerializer(album)
-        
+
     return JsonResponse(serializer.data, safe=False)
+
+
 @api_view(['GET'])
 def get_main_categories(request):
     qs = TopLevelCategory.objects.all().prefetch_related('albums')
     ser = TopLevelCategorySerializer(qs, many=True)
     data = ser.data
     return JsonResponse(data, safe=False)
+
+
 @api_view(['GET'])
 def get_albums(request):
     ids = request.GET.get('ids').split(',')
@@ -33,11 +49,11 @@ def get_albums(request):
     data = AlbumClientApi(albums, many=True).data
     return JsonResponse(data, safe=False)
 
+
 class CatalogAlbumViewSet(viewsets.ModelViewSet):
     queryset = CatalogAlbum.objects.all()
     serializer_class = CatalogAlbumSerializer
-from django.db.models.query import QuerySet
-from pprint import PrettyPrinter
+
 
 def dprint(object, stream=None, indent=1, width=80, depth=None):
     """
@@ -58,22 +74,19 @@ def dprint(object, stream=None, indent=1, width=80, depth=None):
         if object.__metaclass__.__name__ == 'ModelBase':
             # Convert it to a dictionary
             object = object.__dict__
-    
+
     # Catch any Django QuerySets that might get passed in
     elif isinstance(object, QuerySet):
         # Convert it to a list of dictionaries
         object = [i.__dict__ for i in object]
-        
-    # Pass everything through pprint in the typical way
-    printer = PrettyPrinter(stream=stream, indent=indent, width=width, depth=depth)
-    printer.pprint(object)
 
-import json
-import datetime
+    # Pass everything through pprint in the typical way
+    printer = PrettyPrinter(stream=stream, indent=indent,
+                            width=width, depth=depth)
+    printer.pprint(object)
 
 
 # TODO: solve this
-
 '''
 def catalog_timer(request, *args, **wkargs):
     return None
@@ -103,41 +116,35 @@ def renew_timer_date():
     time = datetime.strftime(str(time), '%S-%M-%H-%d-%y')
     return time
 '''
-from rest_framework.renderers import JSONRenderer
+
 
 def catalogView_api(request, *args, **wkrags):
     print('catalogView_api start')
-    #update_catalogAlbum_timers2()
+    # update_catalogAlbum_timers2()
     albums = CatalogAlbum.objects.prefetch_related('images').all()
-    ser_context={'request': request}
-    serializer = CatalogAlbumSerializer(albums,context=ser_context, many=True)
+    ser_context = {'request': request}
+    serializer = CatalogAlbumSerializer(albums, context=ser_context, many=True)
     data = json.dumps(serializer.data)
     #data = JSONRenderer().render(serializer.data)
 
-    context = {'catalogAlbumData':data,}
+    context = {'catalogAlbumData': data, }
     print('catalogView_api end')
     return JsonResponse(context)
-    #return render(request, 'catalog2.html', context=context)
+    # return render(request, 'catalog2.html', context=context)
 
-from django.db.models import Max
 
-#.annotate(max_weight=Max('throughimage__image_order')).order_by('-max_weight').all()#.order_by("throughimage__image_order")
-    #albums = albums.order_by('id', 'throughimage__image_order')
-    #albums.images.order_by('throughimage__image_order')
-    
-    
-#def catalogView2(request, *args, **wkargs):
+# .annotate(max_weight=Max('throughimage__image_order')).order_by('-max_weight').all()#.order_by("throughimage__image_order")
+  #albums = albums.order_by('id', 'throughimage__image_order')
+  # albums.images.order_by('throughimage__image_order')
+
+
+# def catalogView2(request, *args, **wkargs):
 #    print('catalogView2 start')
 #    albums = CatalogAlbum.objects.prefetch_related('images')
 #    context = {'albums':albums}
 #    print('catalogView2 end')
 #    return render(request, 'catalog2.html', context=context)
 
-
-from catalogLogos.models import CatalogLogo
-from core.forms import FormBeseContactInformation
-from core.models import BeseContactInformation, Customer
-import uuid
 '''
 def catalogView(request, *args, **kwargs):
     print('catalogView start')

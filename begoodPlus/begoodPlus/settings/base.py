@@ -102,28 +102,14 @@ INSTALLED_APPS = [
     'catalogAlbum',
     'catalogLogos',
 
-    'customerCart',
-    'catalogImageDetail',
     'clientApi',
     'client',
     'campains',
-    'catalogImageAttrs',
     'morders',
-    'inventory',
-    'smartbee',
     'docsSignature',
     'shareableCarts',
 
     #### old unused modals ####
-    'clientLikedImages',
-    'myUserTasks',
-    'product',
-    'category',
-    'productImages',
-    'stock',
-    'glofa_types',
-    'mcrm',
-    'msCrm',
     ### django modals ###
     'django.contrib.admin',
     'django.contrib.auth',

@@ -6,14 +6,8 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('customerCart', '0003_customercart'),
-        ('core', '0009_auto_20210402_0331'),
     ]
 
     operations = [
-        migrations.AddField(
-            model_name='customer',
-            name='carts',
-            field=models.ManyToManyField(to='customerCart.CustomerCart'),
-        ),
+
     ]

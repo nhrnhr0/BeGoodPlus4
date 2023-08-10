@@ -9,20 +9,24 @@ from productSize.models import ProductSize
 from packingType.models import PackingType
 from provider.models import Provider
 import datetime
+
+
 class CatalogImageIdSerializer(serializers.ModelSerializer):
     class Meta:
         model = CatalogImage
         fields = ('id',)
 # I don't think this is used somewhere.
+
+
 class CatalogImageApiSerializer(serializers.ModelSerializer):
     class Meta:
         model = CatalogImage
-        fields = ('id','date_modified','title', 'description', 'barcode',
+        fields = ('id', 'date_modified', 'title', 'description', 'barcode',
                   'whatsapp_text', 'image', 'albums',
                   'packingTypeProvider', 'packingTypeClient',
-                  'colors', 'sizes', 'providers', 'can_tag', 'detailTabel','is_active')
+                  'colors', 'sizes', 'providers', 'can_tag', 'is_active')
         extra_kwargs = {"image": {"required": False, "allow_null": True}}
-        
+
     '''def to_internal_value(self, data):
         print('to_internal_value: ', data)
 
@@ -53,34 +57,40 @@ class CatalogImageApiSerializer(serializers.ModelSerializer):
         data['image_thumbnail'] = self.instance.image
         ret = super().to_internal_value(data)
         return ret'''
-        
-    #def to_representation(self, instance):
-        #print('to_representation: ', instance)
+
+    # def to_representation(self, instance):
+    #print('to_representation: ', instance)
     #    return super().to_representation(instance)
-    
+
+
 class ProductVarientSerializer(serializers.ModelSerializer):
     class Meta:
         model = CatalogImageVarient
         fields = '__all__'
-        
-        
+
+
 class CatalogImageSerializer(serializers.ModelSerializer):
 
     colors_list = serializers.SerializerMethodField('_get_colors')
     id = serializers.IntegerField(read_only=True)
+
     def _get_colors(self, obj):
         serializer = ColorSerializer(obj.colors, many=True)
         return serializer.data
     sizes_list = serializers.SerializerMethodField('_get_sizes')
+
     def _get_sizes(self, obj):
         serializer = ProductSizeSerializer(obj.sizes, many=True)
         return serializer.data
 
     varient_list = serializers.SerializerMethodField('_get_varients')
+
     def _get_varients(self, obj):
         serializer = ProductVarientSerializer(obj.varients, many=True)
         return serializer.data
+
     class Meta:
         model = CatalogImage
         #fields = '__all__'
-        exclude = ('colors','sizes', 'packingTypeProvider','packingTypeClient', 'providers')
+        exclude = ('colors', 'sizes', 'packingTypeProvider',
+                   'packingTypeClient', 'providers')

@@ -1,128 +1,15 @@
-{% extends "admin/change_form.html" %}
-{% load i18n admin_urls %}
-{%load static%}
-
-{% block extrahead %}{{ block.super }}
+{% extends "admin/change_form.html" %} {% load i18n admin_urls %} {%load static%} {% block extrahead %}{{ block.super }}
 <script type="text/javascript" src="{% url 'admin:jsi18n' %}"></script>
-{{ media }}
-{% endblock %}
-
-{% block field_sets %}
-
-    {% for fieldset in adminform %}
-        <div class="temp">{{fieldset}}</div>
-        {% include "admin/includes/fieldset.html" %}
-    {% endfor %}
-    <script>
-        let currUrl = window.location.href;
-        currUrl = currUrl.substr(currUrl.indexOf('catalogimage/') + 'catalogimage/'.length);
-        let id = currUrl.substr(0, currUrl.indexOf('/'));
-    </script>
-    <svelte-custom-element id="custom" catalog_image_id={id}></svelte-custom-element>
-    <button type="button" onclick="exportDetailTabel()">ייצא לטבלת פרטים (פעולה חד פעמית!)</button>
-    
-    <div id="export_report"></div>
-    <script>
-        function update_ppns_eventlistener() {
-            let ppns_sets_elements = document.getElementsByClassName('dynamic-ppn_set');
-            for (let i = 0; i < ppns_sets_elements.length; i++) {
-                let buyPriceTd = ppns_sets_elements[i].getElementsByClassName('field-buy_price')[0];
-                let buyPriceInput = buyPriceTd.getElementsByTagName('input')[0];
-
-                let storePriceTd = ppns_sets_elements[i].getElementsByClassName('field-store_price')[0];
-                let storePriceInput = storePriceTd.getElementsByTagName('input')[0];
-                buyPriceInput.removeEventListener('input', buyPriceChanged, true);
-                buyPriceInput.addEventListener('input', buyPriceChanged, true);
-                storePriceInput.removeEventListener('input', storePriceChanged, true);
-                storePriceInput.addEventListener('input', storePriceChanged, true);
-            }
-        }
-        function storePriceChanged(e) {
-            console.log('storePriceChanged: ', e.target.value);
-            let buy = e.target.parentElement.parentElement.getElementsByClassName('field-buy_price')[0].getElementsByTagName('input')[0].value;
-            let store = e.target.value;
-            
-            let prcent = ((store / buy) - 1)*100
-            let prcent_td = e.target.parentElement.parentElement.getElementsByClassName('field-buy_price')[0];
-            let precent_element = document.createElement('span');
-            console.log('buy: ', buy, ' store:', store, ' prcent:', prcent);
-            let color = prcent > 0 ? 'green' : 'red';
-            precent_element.innerHTML = `<span style="color:${color}">` + prcent.toFixed(2) + '%</span>';
-            if(prcent_td.getElementsByTagName('span').length > 0) {
-                prcent_td.getElementsByTagName('span')[0].remove();
-            }
-            
-            prcent_td.appendChild(precent_element);
-        }
-        function buyPriceChanged(e) {
-            console.log('buyPriceChanged: ' + e.target.value);
-            let buy = e.target.value;
-            let store = e.target.parentElement.parentElement.getElementsByClassName('field-store_price')[0].getElementsByTagName('input')[0].value;
-            
-            let prcent = ((store / buy) - 1)*100
-            let prcent_td = e.target.parentElement.parentElement.getElementsByClassName('field-buy_price')[0];
-            let precent_element = document.createElement('span');
-            console.log('buy: ', buy, ' store:', store, ' prcent:', prcent);
-            let color = prcent > 0 ? 'green' : 'red';
-            precent_element.innerHTML = `<span style="color:${color}">` + prcent.toFixed(2) + '%</span>';
-            if(prcent_td.getElementsByTagName('span').length > 0) {
-                prcent_td.getElementsByTagName('span')[0].remove();
-            }
-
-            prcent_td.appendChild(precent_element);
-        }
-        setInterval(update_ppns_eventlistener, 1000);
-        function getCookie(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                const cookies = document.cookie.split(';');
-                for (let i = 0; i < cookies.length; i++) {
-                    const cookie = cookies[i].trim();
-                    // Does this cookie string begin with the name we want?
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
-                }
-            }
-            return cookieValue;
-        }
-        const csrftoken = getCookie('csrftoken');
-        
-        function exportDetailTabel(e) {
-            console.log(id);
-            let raw = {'id': id};
-            var myHeaders = new Headers();
-            myHeaders.append("X-CSRFToken", csrftoken);
-
-            var requestOptions = {
-                method: 'POST',
-                headers: myHeaders,
-                body: raw,
-                redirect: 'follow'
-            };
-            fetch("/create_mini_table/" + id + "/", requestOptions)
-                .then(response => response.json())
-                .then(result => {
-                    debugger;
-                    console.log('result: ', result);
-                    report_div = document.getElementById('export_report');
-                    let text = '';
-                    for(let i = 0; i < result.actions.length; i++) {
-                        text += result.actions[i].msg + '<br/>';
-                    }
-                    report_div.innerHTML=text;
-                })
-                .catch(error => console.log('error', error));
-        }
-
-
-
-        debugger;
-        let customElement = document.getElementById('custom');
-        customElement.setAttribute('catalog_image_id', id)
-        console.log(customElement);
-    </script>
-    <script src="{%static 'admin/catalogImages/handlePrices.js' %}"></script>
-    <script src="{%static 'admin/catalogImages/svelte-custom-element.0.1.0.min.js' %}"></script>
+{{ media }} {% endblock %} {% block field_sets %} {% for fieldset in adminform %}
+<div class="temp">{{fieldset}}</div>
+{% include "admin/includes/fieldset.html" %} {% endfor %}
+<script>
+  let currUrl = window.location.href;
+  currUrl = currUrl.substr(currUrl.indexOf("catalogimage/") + "catalogimage/".length);
+  let id = currUrl.substr(0, currUrl.indexOf("/"));
+</script>
+<!-- <svelte-custom-element id="custom" catalog_image_id={id}></svelte-custom-element> -->
+<!-- <button type="button" onclick="exportDetailTabel()">ייצא לטבלת פרטים (פעולה חד פעמית!)</button> -->
+<script src="{%static 'admin/catalogImages/handlePrices.js' %}"></script>
+<!-- <script src="{%static 'admin/catalogImages/svelte-custom-element.0.1.0.min.js' %}"></script> -->
 {% endblock %}

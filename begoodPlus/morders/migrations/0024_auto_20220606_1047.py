@@ -7,22 +7,22 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('inventory', '0030_auto_20220602_1851'),
+        # ('inventory', '0030_auto_20220602_1851'),
         ('morders', '0023_auto_20220604_2337'),
     ]
 
     operations = [
-        migrations.CreateModel(
-            name='CollectedInventory',
-            fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('quantity', models.IntegerField(default=0)),
-                ('warehouseStock', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='collectedInventory', to='inventory.warehousestock')),
-            ],
-        ),
-        migrations.AddField(
-            model_name='takeninventory',
-            name='collected',
-            field=models.ManyToManyField(related_name='taken_inventory', to='morders.CollectedInventory'),
-        ),
+        # migrations.CreateModel(
+        #     name='CollectedInventory',
+        #     fields=[
+        #         ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+        #         ('quantity', models.IntegerField(default=0)),
+        #         ('warehouseStock', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='collectedInventory', to='inventory.warehousestock')),
+        #     ],
+        # ),
+        # migrations.AddField(
+        #     model_name='takeninventory',
+        #     name='collected',
+        #     field=models.ManyToManyField(related_name='taken_inventory', to='morders.CollectedInventory'),
+        # ),
     ]

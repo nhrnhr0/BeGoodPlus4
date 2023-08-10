@@ -15,14 +15,13 @@ from django.conf import settings
 from django.urls import reverse
 import pytz
 from begoodPlus.settings.base import CLOUDINARY_BASE_URL
-from catalogImageAttrs.models import ProductPrices
 from django.utils.text import slugify
 
 from color.models import Color
 from provider.models import Provider
 from productSize.models import ProductSize
 from packingType.models import PackingType
-from catalogImageDetail.models import CatalogImageDetail
+# from catalogImageDetail.models import CatalogImageDetail
 import sys
 from cloudinary.models import CloudinaryField
 #from cloudinary.uploader import upload
@@ -109,14 +108,12 @@ class CatalogImage(models.Model):
         verbose_name=_('out of stock'), default=False)
 
     is_active = models.BooleanField(default=False, verbose_name=_('is active'))
-    detailTabel = models.ManyToManyField(
-        related_name='parent', to=CatalogImageDetail, verbose_name=_('mini-tabel'), blank=True)
 
     can_tag = models.BooleanField(default=False, verbose_name=_('can tag'))
     #big_discount = models.BooleanField(default=False)
 
-    clientPrices = models.OneToOneField(
-        to=ProductPrices, on_delete=models.SET_NULL, null=True, blank=True)
+    # clientPrices = models.OneToOneField(
+    #     to=ProductPrices, on_delete=models.SET_NULL, null=True, blank=True)
 
     NO_DISCOUNT = ''
     DISCOUNT_10_PRES = '/static/assets/catalog/imgs/discount_10.gif'
