@@ -76,7 +76,13 @@ def update_sell_price_from_price_proposal_sheet_view(request):
             return JsonResponse({'error': errors}, status=status.HTTP_400_BAD_REQUEST)
         else:
             # sync the new prices to the orders spreedsheet as well
-            morder.start_morder_to_spreedsheet_thread(False, True)
+            sync_order = True
+            if morder.status2.name == 'הצעת מחיר' or morder.status2.name == 'הצעת מחיר נשלחה':
+                sync_order = False
+            # if סופק / בוטל and there is no morder.gid then sync_order = False
+            if (morder.status2.name == 'סופק' or morder.status2.name == 'בוטל') and morder.gid == None:
+                sync_order = False
+            morder.start_morder_to_spreedsheet_thread(False, sync_order)
 
             return JsonResponse({'status': 'success'}, status=status.HTTP_200_OK)
 
