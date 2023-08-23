@@ -5,15 +5,15 @@ from django.db.models import fields
 from clientApi.serializers import AlbumClientApi
 from catalogImages.serializers import CatalogImageApiSerializer
 from clientApi.serializers import ImageClientApi
-from .models import CampainProduct, MonthCampain, PriceTable
+from .models import CampainProduct, MonthCampain
 from rest_framework.serializers import ModelSerializer
 from rest_framework import serializers
 
 
-class priceTableSerializer(ModelSerializer):
-    class Meta:
-        model = PriceTable
-        fields = ('id', 'cach_price', 'credit_price', 'amount',)
+# class priceTableSerializer(ModelSerializer):
+#     class Meta:
+#         model = PriceTable
+#         fields = ('id', 'cach_price', 'credit_price', 'amount',)
 
 
 class ClientProductCampainSerilizer(ModelSerializer):

@@ -35,6 +35,11 @@ class ClientAdmin(admin.ModelAdmin):
     list_filter = ('storeType', 'clientType',)
     # inlines = [MsCrmUserInline]
 
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        qs.select_related('user')
+        return qs
+
     def make_show_prices_inactive(self, request, queryset):
         queryset.update(show_prices=False)
         self.message_user(request, _("Show prices was set to False"))

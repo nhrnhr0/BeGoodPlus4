@@ -83,7 +83,7 @@ class TopLevelCategory(models.Model):
         super(TopLevelCategory, self).save(*args, **kwargs)
 
 
-class CatalogAlbum(MPTTModel):
+class CatalogAlbum(models.Model):
     topLevelCategory = models.ForeignKey(
         to="TopLevelCategory", on_delete=models.SET_NULL, null=True, blank=True, related_name='albums')
     title = models.CharField(max_length=120, verbose_name=_("title"))
@@ -139,8 +139,8 @@ class CatalogAlbum(MPTTModel):
     def sorted_image_set(self):
         return self.images.order_by('throughimage__image_order')
 
-    class MPTTMeta:
-        order_insertion_by = ['title']
+    # class MPTTMeta:
+    #     order_insertion_by = ['title']
 
     class Meta(Sortable.Meta):
         unique_together = ('slug', 'parent',)

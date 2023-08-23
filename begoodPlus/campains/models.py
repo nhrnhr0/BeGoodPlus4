@@ -30,23 +30,23 @@ class PaymantType(models.Model):
         return self.text
 
 
-class PriceTable(models.Model):
-    #paymentType  = models.ForeignKey(verbose_name=_('payment type'), to=PaymantType, on_delete=models.SET_NULL, null=True,blank=True)
-    #amountBrakepoint = models.ForeignKey(verbose_name=_('amount brakepoint'), to=AmountBrakepoint, on_delete=models.SET_NULL, null=True,blank=True)
-    #paymentType = models.CharField(verbose_name=_('payment type'), max_length=10, null=True,blank=True, choices=[('מזומן','מזומן'),('שוטף','שוטף'),('אחר','אחר')])
-    amount = models.FloatField(verbose_name=_(
-        'amount'), null=True, blank=True, default=1)
+# class PriceTable(models.Model):
+#     #paymentType  = models.ForeignKey(verbose_name=_('payment type'), to=PaymantType, on_delete=models.SET_NULL, null=True,blank=True)
+#     #amountBrakepoint = models.ForeignKey(verbose_name=_('amount brakepoint'), to=AmountBrakepoint, on_delete=models.SET_NULL, null=True,blank=True)
+#     #paymentType = models.CharField(verbose_name=_('payment type'), max_length=10, null=True,blank=True, choices=[('מזומן','מזומן'),('שוטף','שוטף'),('אחר','אחר')])
+#     amount = models.FloatField(verbose_name=_(
+#         'amount'), null=True, blank=True, default=1)
 
-    cach_price = models.FloatField(verbose_name=_('cach price'), default=0)
-    credit_price = models.FloatField(verbose_name=_('credit price'), default=0)
+#     cach_price = models.FloatField(verbose_name=_('cach price'), default=0)
+#     credit_price = models.FloatField(verbose_name=_('credit price'), default=0)
 
-    class Meta():
-        verbose_name = _('price table')
-        verbose_name_plural = _('price tables')
-        #unique_together = ('amount','cach_price','credit_price')
+#     class Meta():
+#         verbose_name = _('price table')
+#         verbose_name_plural = _('price tables')
+#         #unique_together = ('amount','cach_price','credit_price')
 
-    def __str__(self):
-        return str(self.amount) + ' | ' + str(self.cach_price) + '₪' + ' | ' + str(self.credit_price) + '₪'
+#     def __str__(self):
+#         return str(self.amount) + ' | ' + str(self.cach_price) + '₪' + ' | ' + str(self.credit_price) + '₪'
 
 
 class CampainProduct(models.Model):
@@ -89,6 +89,14 @@ class MonthCampain(models.Model):
     def show_users(self):
         return ', '.join([str(user) for user in self.users.all()])
 
+    def products_count(self):
+        return self.products.count()
+    products_count.short_description = _('products count')
+
+    def users_count(self):
+        return self.users.count()
+    users_count.short_description = _('users count')
+
     def show_products(self):
         ret = '<ul>'
         ret += ''.join(['<li>' + str(product) +
@@ -99,6 +107,7 @@ class MonthCampain(models.Model):
     def can_users_see_campain(self):
         return self.startTime < timezone.now() and timezone.now() < self.endTime and self.is_shown
     can_users_see_campain.boolean = True
+    can_users_see_campain.short_description = _('can users see campain')
 
     def copy_to_empty_campain(self):
         new_cmapain = MonthCampain.objects.create(

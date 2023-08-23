@@ -191,7 +191,7 @@ class SvelteCartModalAdmin(admin.ModelAdmin):
         return wb
 
 
-admin.site.register(SvelteCartModal, SvelteCartModalAdmin)
+# admin.site.register(SvelteCartModal, SvelteCartModalAdmin)
 
 
 class UserQuestionAdmin(admin.ModelAdmin):

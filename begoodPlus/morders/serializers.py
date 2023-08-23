@@ -162,9 +162,8 @@ class AdminMOrderSerializer(serializers.ModelSerializer):
             sigModal = obj.mordersignature
 
             if sigModal:
-                sims = sigModal.simulations.select_related(
-                    'order').prefetch_related('products__item__product')
-                for sim in sims.all():
+                sims = sigModal.simulations.prefetch_related('products').all()
+                for sim in sims:
                     row = {
                         'id': sim.id,
                         'description': sim.description,
@@ -183,22 +182,11 @@ class AdminMOrderSerializer(serializers.ModelSerializer):
         except:
             pass
         return ret
-    sheets_order_link = serializers.SerializerMethodField(
-        '_get_sheets_order_link', read_only=True)
-
-    def _get_sheets_order_link(self, obj):
-        return obj.get_sheets_order_link()
-    sheets_price_prop_link = serializers.SerializerMethodField(
-        '_get_sheets_price_prop_link', read_only=True)
-
-    def _get_sheets_price_prop_link(self, obj):
-        return obj.get_sheets_price_prop_link()
 
     class Meta:
         model = MOrder
-        fields = ('id', 'agent', 'agent_name', 'client', 'status', 'status2', 'status_msg', 'created', 'updated', 'message', 'name', 'phone',
-                  'email', 'client_businessName', 'products', 'freezeTakenInventory', 'isOrder', 'sendProviders', 'startCollecting', 'simulations', 'sheets_order_link',
-                  'sheets_price_prop_link',  'export_to_suppliers',)
+        fields = ('id', 'agent', 'agent_name', 'client', 'status2', 'status_msg', 'created', 'updated', 'message', 'name', 'phone',
+                  'email', 'client_businessName', 'products', 'simulations',)
 
 
 class MOrderCollectionSerializer(serializers.ModelSerializer):

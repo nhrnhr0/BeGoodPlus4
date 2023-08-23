@@ -1,19 +1,19 @@
 from django.contrib import admin
 from adminsortable.admin import SortableAdmin, SortableTabularInline
 # Register your models here.
-from .models import MonthCampain, CampainProduct, PriceTable, PaymantType
+from .models import MonthCampain, CampainProduct, PaymantType
 
 
-class ProductInline(admin.TabularInline):
-    model = MonthCampain.products.through
-    filter_horizontal = ('priceTable',)
-    extra = 1
+# class ProductInline(admin.TabularInline):
+#     model = MonthCampain.products.through
+#     filter_horizontal = ('priceTable',)
+#     extra = 1
 
 
 class MonthCampainAdmin(admin.ModelAdmin):
     # is_shown,name,users,startTime,endTime,products,album
     list_display = ('name', 'can_users_see_campain', 'is_shown',
-                    'startTime', 'endTime', 'show_users', 'album', 'show_products')
+                    'startTime', 'endTime', 'users_count', 'album', 'products_count')
     #inlines = [ProductInline]
     actions = ['copy_to_empty_campain']
     filter_horizontal = ('users',)  # 'products',)
@@ -45,13 +45,13 @@ class CampainProductAdmin(admin.ModelAdmin):
     pass
 
 
-admin.site.register(CampainProduct, CampainProductAdmin)
+# admin.site.register(CampainProduct, CampainProductAdmin)
 
 
-class PriceTableAdmin(admin.ModelAdmin):
-    #search_fields = ('amountBrakepoint__text',)
-    #search_fields = ('paymentType__text','amountBrakepoint__text', 'amountBrakepoint__number',)
-    pass
+# class PriceTableAdmin(admin.ModelAdmin):
+#search_fields = ('amountBrakepoint__text',)
+#search_fields = ('paymentType__text','amountBrakepoint__text', 'amountBrakepoint__number',)
+# pass
 
 
-admin.site.register(PriceTable, PriceTableAdmin)
+# admin.site.register(PriceTable, PriceTableAdmin)

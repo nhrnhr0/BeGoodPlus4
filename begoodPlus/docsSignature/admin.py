@@ -13,7 +13,7 @@ class MOrderSignatureItemDetailAdmin(admin.ModelAdmin):
     pass
 
 
-admin.site.register(MOrderSignatureItemDetail, MOrderSignatureItemDetailAdmin)
+# admin.site.register(MOrderSignatureItemDetail, MOrderSignatureItemDetailAdmin)
 
 
 class MOrderSignatureItemAdmin(admin.ModelAdmin):
@@ -22,7 +22,7 @@ class MOrderSignatureItemAdmin(admin.ModelAdmin):
     pass
 
 
-admin.site.register(MOrderSignatureItem, MOrderSignatureItemAdmin)
+# admin.site.register(MOrderSignatureItem, MOrderSignatureItemAdmin)
 
 
 class MOrderSignatureAdmin(admin.ModelAdmin):
@@ -41,4 +41,4 @@ class MOrderSignatureAdmin(admin.ModelAdmin):
         return mark_safe(f'<a href="{base}/signature/{obj.uuid}">חתום</a>')
 
 
-admin.site.register(MOrderSignature, MOrderSignatureAdmin)
+# admin.site.register(MOrderSignature, MOrderSignatureAdmin)

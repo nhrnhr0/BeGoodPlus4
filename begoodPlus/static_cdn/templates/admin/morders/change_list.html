@@ -1,57 +1,54 @@
-{% extends "admin/change_list.html" %}
-{% load i18n admin_urls %}
-
-
-{% block object-tools-items %}
-{% if not is_popup and has_add_permission and has_change_permission %}
-<li><a href="{% url opts|admin_urlname:'recoverlist' %}" class="recoverlink">{% blocktrans with cl.opts.verbose_name_plural|escape as name %}Recover deleted {{name}}{% endblocktrans %}</a></li>
-{% endif %}
-{{block.super}}
+{% extends "admin/change_list.html" %} {% load i18n admin_urls %} {% block object-tools-items %} {% if not is_popup and has_add_permission and has_change_permission %}
+<li>
+  <a href="{% url opts|admin_urlname:'recoverlist' %}" class="recoverlink"
+    >{% blocktrans with cl.opts.verbose_name_plural|escape as name %}Recover deleted {{name}}{% endblocktrans %}</a
+  >
+</li>
+{% endif %} {{block.super}}
 
 <!-- MY CODE START  -->
-<li>
+<!-- <li>
   <button id="collect-providers" type="button">ייצירת טופס ספקים
   </li>
-</div>
+</div> -->
 <!-- MY CODE END  -->
-
 
 <!-- MY CODE START -->
 <!-- script that will send a POST request to an endpoint to start collect providers -->
 <script>
-  const collectProvidersButton = document.getElementById('collect-providers');
-  collectProvidersButton.addEventListener('click', () =>
-  {
-    collectProvidersButton.disabled = true;
-    fetch('/morders-create-providers-docx/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': '{{ csrf_token }}'
-      },
-      body: JSON.stringify({
-        'csrfmiddlewaretoken': '{{ csrf_token }}'
-      })
-    })
-      .then(response => response.json())
-      .then(data =>
-      {
-        console.log(data);
-        // open new tab with /providers_docx_task/<task_id> endpoint
-        window.open(`/providers_docx_task/${data.task_id}/`, '_blank');
-      })
-      .catch(error =>
-      {
-        console.log(error);
-      }).finally(() =>
-      {
-        collectProvidersButton.disabled = false;
-      });
-  });
+  // const collectProvidersButton = document.getElementById('collect-providers');
+  // collectProvidersButton.addEventListener('click', () =>
+  // {
+  //   collectProvidersButton.disabled = true;
+  //   fetch('/morders-create-providers-docx/', {
+  //     method: 'POST',
+  //     headers: {
+  //       'Content-Type': 'application/json',
+  //       'X-CSRFToken': '{{ csrf_token }}'
+  //     },
+  //     body: JSON.stringify({
+  //       'csrfmiddlewaretoken': '{{ csrf_token }}'
+  //     })
+  //   })
+  //     .then(response => response.json())
+  //     .then(data =>
+  //     {
+  //       console.log(data);
+  //       // open new tab with /providers_docx_task/<task_id> endpoint
+  //       window.open(`/providers_docx_task/${data.task_id}/`, '_blank');
+  //     })
+  //     .catch(error =>
+  //     {
+  //       console.log(error);
+  //     }).finally(() =>
+  //     {
+  //       collectProvidersButton.disabled = false;
+  //     });
+  // });
 </script>
 
 <style>
-  #collect-providers {
+  /* #collect-providers {
     display: block;
     float: left;
     padding: 3px 12px;
@@ -62,9 +59,7 @@
     letter-spacing: 0.5px;
     color: #000;
     border-radius: 15px;
-  }
+  } */
 </style>
 <!-- MY CODE END  -->
 {% endblock %}
-
-

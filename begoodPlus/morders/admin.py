@@ -43,8 +43,7 @@ admin.site.register(MOrderItemEntry, MOrderItemEntryAdmin)
 
 class MOrderItemAdmin(admin.ModelAdmin):
     model = MOrderItem
-    list_display = ('id', 'product', 'price', 'ergent',
-                    'prining', 'embroidery', 'comment',)
+    list_display = ('id', 'product', 'price', 'comment',)
     filter_horizontal = ('providers', 'entries', 'morder',)
 
 
@@ -54,20 +53,20 @@ admin.site.register(MOrderItem, MOrderItemAdmin)
 class MOrderAdmin(admin.ModelAdmin):  #
     change_list_template = 'admin/morders/change_list.html'
     model = MOrder
-    fields = ('cart', 'total_sell_price', 'client', 'name', 'phone', 'email',
-              'status', 'status2', 'message', 'gid', 'price_proposal_sheetid', 'export_to_suppliers', 'order_sheet_archived',)  # what is this for?
-    readonly_fields = ('created', 'total_sell_price', 'updated', 'get_edit_url',
-                       'view_morder_pdf_link', 'get_signiture_link', 'cart', 'client', 'status', 'status2', )
-    list_display = ('id', 'client', 'name', 'status2', 'status_msg', 'total_sell_price',
-                    'get_edit_url', 'view_morder_pdf_link', 'get_googlesheets_links', 'get_signiture_link', 'created', 'updated', 'export_to_suppliers')
+    fields = ('cart', 'total_sell_price', 'client', 'name', 'phone',
+              'email', 'status2', 'message', )  # what is this for?
+    readonly_fields = ('get_edit_url_id', 'created', 'total_sell_price', 'updated',
+                       'view_morder_pdf_link', 'get_signiture_link', 'cart', 'client', 'status2', )
+    list_display = ('get_edit_url_id', 'client', 'name', 'status2', 'status_msg',
+                    'total_sell_price', 'view_morder_pdf_link', 'get_signiture_link', 'created', 'updated')
+    list_display_links = ('get_edit_url_id',)
     # list_editable = ('status_msg',)
     # filter_horizontal = ('products',)
-    list_filter = ('status2', 'created', 'updated', 'export_to_suppliers')
-    search_fields = ('id', 'name', 'phone', 'email', 'status', 'message', 'products__product__title',
+    list_filter = ('status2', 'created', 'updated',)
+    search_fields = ('id', 'name', 'phone', 'email', 'message', 'products__product__title',
                      'client__businessName', 'client__email', 'client__extraName', 'client__contactMan', 'client__user__username')
     list_select_related = ('client', 'client__user',)
-    actions = ('export_to_excel', 'export_to_signiture_doc',
-               'sync_with_spreedsheet', 'set_export_to_providers_true', 'set_export_to_providers_false')
+    actions = ('export_to_excel',)
 
     def get_queryset(self, request):
         qs = super(MOrderAdmin, self).get_queryset(request)
@@ -76,19 +75,6 @@ class MOrderAdmin(admin.ModelAdmin):  #
         return qs
 
     # select_related = ('client', 'status2')
-
-    def set_export_to_providers_true(self, request, queryset):
-        queryset.update(export_to_suppliers=True)
-        for morder in queryset:
-            morder.start_morder_to_spreedsheet_thread(True, True)
-    set_export_to_providers_true.short_description = 'הכנס לספקים'
-
-    def set_export_to_providers_false(self, request, queryset):
-        queryset.update(export_to_suppliers=False)
-        for morder in queryset:
-            morder.start_morder_to_spreedsheet_thread(True, True)
-    set_export_to_providers_false.short_description = 'הוצא מספקים'
-
     def get_signiture_link(self, obj):
         if obj.mordersignature:
             res1 = obj.mordersignature.get_client_sign_url()
@@ -99,54 +85,6 @@ class MOrderAdmin(admin.ModelAdmin):  #
             return '-'
         return mark_safe(ret)
     get_signiture_link.short_description = _('Signiture')
-
-    def get_googlesheets_links(self, obj):
-        res1 = self.get_priceproposal_sheet_link(obj)
-        res2 = self.get_googlesheets_link(obj)
-        ret = ''
-        if res1:
-            ret += res1
-        if res2:
-            if ret:
-                ret += '<br/>'
-            ret += res2
-        if not ret:
-            return '-'
-        return mark_safe(ret)
-
-    def get_priceproposal_sheet_link(self, obj):
-        from begoodPlus.secrects import ALL_PRICE_PROPOSAL_SPREEADSHEET_URL
-        if obj.price_proposal_sheetid:
-            # ALL_PRICE_PROPOSAL_SPREEADSHEET_URL = 'https://docs.google.com/spreadsheets/d/1fRipiJMZpk-53017Te94jhrqzWEVlTl4dw6XN6Vs3VQ/edit#gid=215639457'  # dev
-            import re
-            url = re.sub(r'#gid=\d+', f'#gid={obj.price_proposal_sheetid}',
-                         ALL_PRICE_PROPOSAL_SPREEADSHEET_URL)
-            return mark_safe(f'<a href="{url}" target="_blank">קישור להצעת מחיר </a>')
-        return None
-    get_priceproposal_sheet_link.short_description = _('Price Proposal Sheet')
-
-    def get_googlesheets_link(self, obj):
-        import re
-        from begoodPlus.secrects import ALL_MORDER_FILE_SPREEDSHEET_URL
-        if obj.gid:
-            # relpace with regex #gid=XXXXX with #gid=obj.gid
-            url = re.sub(r'#gid=\d+', f'#gid={obj.gid}',
-                         ALL_MORDER_FILE_SPREEDSHEET_URL)
-            return mark_safe(f'<a href="{url}" target="_blank">קישור הזמנה בSHEETS</a>')
-        return None
-    get_googlesheets_link.short_description = _('Google Sheets Orders')
-
-    formfield_overrides = {
-        models.TextField: {'widget': Textarea(
-            attrs={'rows': 2,
-                   'cols': 20, })},  # 'style': 'height: 1em;'
-    }
-
-    def sync_with_spreedsheet(self, request, queryset):
-        for morder in queryset:
-            morder.morder_to_spreedsheet()
-            messages.add_message(
-                request, messages.INFO, f'הזמנה {morder.id} סונכרנה')
 
     def export_to_signiture_doc(self, request, queryset):
         for morder in queryset:
@@ -215,7 +153,7 @@ class MOrderAdmin(admin.ModelAdmin):  #
         # פריט, הערות, ברקוד, כמות כוללת
         # פירוט מידות צבעים
         headers = ['ברקוד', 'פריט', 'כמות כוללת', 'הערות',
-                   'כמות נלקחת', 'מחיר מכירה', 'מע"מ', 'הדפסה?', '', 'רקמה?', '', ]
+                   'כמות נלקחת', 'מחיר מכירה', 'מע"מ', '', '', '', '', ]
 
         wb = Workbook()
         main_ws = wb.active
@@ -392,49 +330,49 @@ class MOrderAdmin(admin.ModelAdmin):  #
                 # data_val.add(order_ws.cell(
                 #     row=order_ws_rows_counter, column=7))
 
-                order_ws.cell(row=order_ws_rows_counter,
-                              column=8).value = 'כן' if product['prining'] else 'לא'
-                order_ws.cell(row=order_ws_rows_counter,
-                              column=8).fill = header_fill
-                order_ws.cell(row=order_ws_rows_counter,
-                              column=8).alignment = align_rtl
-                order_ws.cell(row=order_ws_rows_counter,
-                              column=8).font = header_font
-                order_ws.cell(row=order_ws_rows_counter,
-                              column=8).border = bottom_border
+                # order_ws.cell(row=order_ws_rows_counter,
+                #               column=8).value = 'כן' if product['prining'] else 'לא'
+                # order_ws.cell(row=order_ws_rows_counter,
+                #               column=8).fill = header_fill
+                # order_ws.cell(row=order_ws_rows_counter,
+                #               column=8).alignment = align_rtl
+                # order_ws.cell(row=order_ws_rows_counter,
+                #               column=8).font = header_font
+                # order_ws.cell(row=order_ws_rows_counter,
+                #               column=8).border = bottom_border
 
-                order_ws.cell(row=order_ws_rows_counter,
-                              column=9).value = product['priningComment'] if product['prining'] else ''
-                order_ws.cell(row=order_ws_rows_counter,
-                              column=9).fill = header_fill
-                order_ws.cell(row=order_ws_rows_counter,
-                              column=9).alignment = align_rtl
-                order_ws.cell(row=order_ws_rows_counter,
-                              column=9).font = header_font
-                order_ws.cell(row=order_ws_rows_counter,
-                              column=9).border = bottom_border
+                # order_ws.cell(row=order_ws_rows_counter,
+                #               column=9).value = product['priningComment'] if product['prining'] else ''
+                # order_ws.cell(row=order_ws_rows_counter,
+                #               column=9).fill = header_fill
+                # order_ws.cell(row=order_ws_rows_counter,
+                #               column=9).alignment = align_rtl
+                # order_ws.cell(row=order_ws_rows_counter,
+                #               column=9).font = header_font
+                # order_ws.cell(row=order_ws_rows_counter,
+                #               column=9).border = bottom_border
 
-                order_ws.cell(row=order_ws_rows_counter,
-                              column=10).value = 'כן' if product['embroidery'] else 'לא'
-                order_ws.cell(row=order_ws_rows_counter,
-                              column=10).fill = header_fill
-                order_ws.cell(row=order_ws_rows_counter,
-                              column=10).alignment = align_rtl
-                order_ws.cell(row=order_ws_rows_counter,
-                              column=10).font = header_font
-                order_ws.cell(row=order_ws_rows_counter,
-                              column=10).border = bottom_border
+                # order_ws.cell(row=order_ws_rows_counter,
+                #               column=10).value = 'כן' if product['embroidery'] else 'לא'
+                # order_ws.cell(row=order_ws_rows_counter,
+                #               column=10).fill = header_fill
+                # order_ws.cell(row=order_ws_rows_counter,
+                #               column=10).alignment = align_rtl
+                # order_ws.cell(row=order_ws_rows_counter,
+                #               column=10).font = header_font
+                # order_ws.cell(row=order_ws_rows_counter,
+                #               column=10).border = bottom_border
 
-                order_ws.cell(row=order_ws_rows_counter,
-                              column=11).value = product['embroideryComment'] if product['embroidery'] else ''
-                order_ws.cell(row=order_ws_rows_counter,
-                              column=11).fill = header_fill
-                order_ws.cell(row=order_ws_rows_counter,
-                              column=11).alignment = align_rtl
-                order_ws.cell(row=order_ws_rows_counter,
-                              column=11).font = header_font
-                order_ws.cell(row=order_ws_rows_counter,
-                              column=11).border = bottom_border
+                # order_ws.cell(row=order_ws_rows_counter,
+                #               column=11).value = product['embroideryComment'] if product['embroidery'] else ''
+                # order_ws.cell(row=order_ws_rows_counter,
+                #               column=11).fill = header_fill
+                # order_ws.cell(row=order_ws_rows_counter,
+                #               column=11).alignment = align_rtl
+                # order_ws.cell(row=order_ws_rows_counter,
+                #               column=11).font = header_font
+                # order_ws.cell(row=order_ws_rows_counter,
+                #               column=11).border = bottom_border
 
                 order_ws_rows_counter += 1
 
@@ -479,7 +417,7 @@ class MOrderAdmin(admin.ModelAdmin):  #
             #     product_name = order_product['title']
 
         headers = ['ברקוד', 'פריט', 'כמות כוללת',
-                   'הערות', 'פירוט', 'ספק', 'כמות חדשה לספקים', 'האם שורה ראשית']
+                   'הערות', 'פירוט', '', '', 'האם שורה ראשית']
         # Add headers in bold
         for i in range(len(headers)):
             main_ws.cell(row=ws_rows_counter, column=i+1).value = headers[i]
@@ -560,7 +498,9 @@ class MOrderAdmin(admin.ModelAdmin):  #
                 color = entry[0]
                 size = entry[1]
                 varient = entry[2]
-                quantity = product['entries'][entry]
+                # print(product['entries'], ' - ', entry,)
+                quantity = product['entries'].get(entry, 0)
+
                 main_ws.cell(row=ws_rows_counter, column=1).value = color
                 main_ws.cell(row=ws_rows_counter,
                              column=1).alignment = align_rtl

@@ -30,7 +30,7 @@ from core.views import api_logout, autocompleteClick, autocompleteModel, client_
 from catalogImages.views import AlbumImagesApiView, admin_api_get_product_cost_price, all_images_ids, catalogimage_upload_warehouse_excel, create_image_from_exel, get_main_albums_for_main_page, get_main_info, get_product_sizes_colors_martix, admin_remove_product_from_cart, admin_add_to_existing_cart, get_products_slim, get_products_viewset, get_similar_products
 from clientApi.views import ColorsClientViewSet, ImageClientViewSet, SizesClientViewSet, LogoClientViewSet, get_album_images
 from clientApi.views import AlbumClientViewSet
-from morders.views import api_edit_order_add_product, api_edit_order_delete_product, api_get_order_data, api_get_order_data2, dashboard_orders_collection_smartbee, edit_morder, get_all_orders, dashboard_orders_collection_collect_save, get_order_detail_to_collect, list_orders_to_collect, morder_edit_order_add_product_entries, api_delete_order_data_item, morder_edit_order_add_product_entries_2, view_morder_pdf
+from morders.views import api_edit_order_add_product, api_edit_order_delete_product, api_get_order_data, edit_morder, get_all_orders, morder_edit_order_add_product_entries, api_delete_order_data_item, morder_edit_order_add_product_entries_2, view_morder_pdf
 
 
 from packingType.views import SvelteApiPackingTypeViewSet
@@ -217,8 +217,8 @@ urlpatterns = [
     path('morders/edit-order/<int:id>', edit_morder, name='admin_edit_order'),
     path('morders/api-get-order-data/<int:id>',
          api_get_order_data, name='admin_api_get_order_data'),
-    path('morders/api-get-order-data2/<int:id>',
-         api_get_order_data2, name='admin_api_get_order_data2'),
+    #     path('morders/api-get-order-data2/<int:id>',
+    #          api_get_order_data2, name='admin_api_get_order_data2'),
 
     path('morders/api-edit-order/add-new-product',
          api_edit_order_add_product, name="admin_api_edit_order_add_product"),
@@ -240,14 +240,14 @@ urlpatterns = [
     #          name='exel_to_providers_docx'),
     #     path('sheetsurl-to-providers-docx/', sheetsurl_to_providers_docx),
     #     path('exel-to-smartbee/', submit_exel_to_smartbee),
-    path('morders/list-orders-to-collect', list_orders_to_collect,
-         name='admin_list_orders_to_collect'),
-    path('morders/get-order-detail-to-collect', get_order_detail_to_collect,
-         name='admin_get_order_detail_to_collect'),
-    path('dashboard/orders-collection/collect/save', dashboard_orders_collection_collect_save,
-         name='admin_dashboard_orders_collection_collect_save'),
-    path('dashboard/orders-collection/smartbee/<int:id>',
-         dashboard_orders_collection_smartbee, name='admin_dashboard_orders_collection_smartbee'),
+    #     path('morders/list-orders-to-collect', list_orders_to_collect,
+    #          name='admin_list_orders_to_collect'),
+    #     path('morders/get-order-detail-to-collect', get_order_detail_to_collect,
+    #          name='admin_get_order_detail_to_collect'),
+    #     path('dashboard/orders-collection/collect/save', dashboard_orders_collection_collect_save,
+    #          name='admin_dashboard_orders_collection_collect_save'),
+    #     path('dashboard/orders-collection/smartbee/<int:id>',
+    #          dashboard_orders_collection_smartbee, name='admin_dashboard_orders_collection_smartbee'),
     #     path('get-smartbee-doc/<str:doc_id>',
     #          get_smartbee_doc, name='admin_get_smartbee_doc'),
     path('api/get-all-orders', get_all_orders, name='admin_get_all_orders'),
