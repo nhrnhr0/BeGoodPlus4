@@ -311,18 +311,19 @@ def generate_provider_docx(provider_data, provider_name, private_docx=False):
     opt1 = ['XS', 'S',
             'M', 'L', 'XL', '2XL', '3XL', '4XL', '5XL']
     opt2 = ['36', '37', '38', '39',
-            '40', '41', '42', '43', '44', '45', '46', '47', '48']
+            '40', '41', '42', '43', '44', '45', '46', '47', '48', '50']
     opt3 = ['ONE SIZE']
     # opt4 = 2-18 (in tows)
     opt4 = ['2', '4', '6', '8', '10', '12', '14', '16', '18']
     # opt5 = 36-54 (in tows)
     opt5 = ['36', '38', '40', '42', '44', '46', '48', '50', '52', '54']
+    opt6 = ['9', '10', '11', '12']
     # opt3 = ['מוצר', 'צבע', 'מודל', + all options exept what is in opt1 and opt2]
-    opt6 = []
+    opt7 = []
     for option in options:
-        if option not in opt1 and option not in opt2 and option not in opt3 and option not in opt4 and option not in opt5:
-            opt6.append(option)
-    all_options = [opt1, opt2, opt3, opt4, opt5, opt6]
+        if option not in opt1 and option not in opt2 and option not in opt3 and option not in opt4 and option not in opt5 and option not in opt6:
+            opt7.append(option)
+    all_options = [opt1, opt2, opt3, opt4, opt5, opt6, opt7]
     # df = find for each product (מוצר) the best option to be used as the columns names (מידה)
     # for example if the product has only XS and S then the option will be opt1
     # if the product has only 36 and 37 then the option will be opt2
@@ -591,8 +592,10 @@ def process_sheets_to_providers_docx(sheets, obj):
     all_sheets_data = []
     sheet_index = 1
     for sheet in sheets:
+        print('processing sheet: ', sheet_index)
+        time.sleep(2)
         values = sheet.get_all_values()
-        time.sleep(0.5)
+        time.sleep(2)
         morders_id = str(int(float(values[1][0])))
         obj.logs.append('processing sheet: ' +
                         str(sheet_index) + ' morder: ' + morders_id)
