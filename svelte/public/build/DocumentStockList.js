@@ -1,2 +1,778 @@
-var documentstocklist=function(){"use strict";function t(){}function e(t){return t()}function n(){return Object.create(null)}function o(t){t.forEach(e)}function s(t){return"function"==typeof t}function l(t,e){return t!=t?e==e:t!==e||t&&"object"==typeof t||"function"==typeof t}function c(t,e){t.appendChild(e)}function r(t,e,n){t.insertBefore(e,n||null)}function a(t){t.parentNode.removeChild(t)}function i(t){return document.createElement(t)}function u(t){return document.createTextNode(t)}function d(){return u(" ")}function f(t,e,n){null==n?t.removeAttribute(e):t.getAttribute(e)!==n&&t.setAttribute(e,n)}function h(t,e){e=""+e,t.wholeText!==e&&(t.data=e)}let p;function m(t){p=t}const g=[],$=[],_=[],v=[],w=Promise.resolve();let b=!1;function y(t){_.push(t)}const z=new Set;let k=0;function x(){const t=p;do{for(;k<g.length;){const t=g[k];k++,m(t),E(t.$$)}for(m(null),g.length=0,k=0;$.length;)$.pop()();for(let t=0;t<_.length;t+=1){const e=_[t];z.has(e)||(z.add(e),e())}_.length=0}while(g.length);for(;v.length;)v.pop()();b=!1,z.clear(),m(t)}function E(t){if(null!==t.fragment){t.update(),o(t.before_update);const e=t.dirty;t.dirty=[-1],t.fragment&&t.fragment.p(t.ctx,e),t.after_update.forEach(y)}}const A=new Set;function N(t,e){-1===t.$$.dirty[0]&&(g.push(t),b||(b=!0,w.then(x)),t.$$.dirty.fill(0)),t.$$.dirty[e/31|0]|=1<<e%31}function O(l,c,r,i,u,d,f,h=[-1]){const g=p;m(l);const $=l.$$={fragment:null,ctx:null,props:d,update:t,not_equal:u,bound:n(),on_mount:[],on_destroy:[],on_disconnect:[],before_update:[],after_update:[],context:new Map(c.context||(g?g.$$.context:[])),callbacks:n(),dirty:h,skip_bound:!1,root:c.target||g.$$.root};f&&f($.root);let _=!1;if($.ctx=r?r(l,c.props||{},((t,e,...n)=>{const o=n.length?n[0]:e;return $.ctx&&u($.ctx[t],$.ctx[t]=o)&&(!$.skip_bound&&$.bound[t]&&$.bound[t](o),_&&N(l,t)),e})):[],$.update(),_=!0,o($.before_update),$.fragment=!!i&&i($.ctx),c.target){if(c.hydrate){const t=function(t){return Array.from(t.childNodes)}(c.target);$.fragment&&$.fragment.l(t),t.forEach(a)}else $.fragment&&$.fragment.c();c.intro&&((v=l.$$.fragment)&&v.i&&(A.delete(v),v.i(w))),function(t,n,l,c){const{fragment:r,on_mount:a,on_destroy:i,after_update:u}=t.$$;r&&r.m(n,l),c||y((()=>{const n=a.map(e).filter(s);i?i.push(...n):o(n),t.$$.on_mount=[]})),u.forEach(y)}(l,c.target,c.anchor,c.customElement),x()}var v,w;m(g)}function j(t,e,n){const o=t.slice();return o[1]=e[n],o}function B(t){let e,n,o,s,l,p,m,g,$,_,v,w,b,y,z,k,x,E,A,N,O,j,B,C,S,T,I,M,q=t[1].id+"",H=t[1].description+"",J=t[1].docNumber+"",L=t[1].provider_name+"",P=t[1].created_at+"",D=t[1].warehouse_name+"",F=t[1].isAplied+"";return{c(){e=i("tr"),n=i("td"),o=u(q),s=d(),l=i("td"),p=u(H),m=d(),g=i("td"),$=u(J),_=d(),v=i("td"),w=u(L),b=d(),y=i("td"),z=u(P),k=d(),x=i("td"),E=u(D),A=d(),N=i("td"),O=u(F),j=d(),B=i("td"),C=i("a"),S=u("עריכה"),M=d(),f(n,"class","svelte-zwatol"),f(l,"class","svelte-zwatol"),f(g,"class","svelte-zwatol"),f(v,"class","svelte-zwatol"),f(y,"class","svelte-zwatol"),f(x,"class","svelte-zwatol"),f(N,"class","svelte-zwatol"),f(C,"href",T="/inv/doc-stock-enter/"+t[1].id),f(C,"class","edit-document-link"),f(C,"data-id",I=t[1].id),f(B,"class","svelte-zwatol"),f(e,"class","svelte-zwatol")},m(t,a){r(t,e,a),c(e,n),c(n,o),c(e,s),c(e,l),c(l,p),c(e,m),c(e,g),c(g,$),c(e,_),c(e,v),c(v,w),c(e,b),c(e,y),c(y,z),c(e,k),c(e,x),c(x,E),c(e,A),c(e,N),c(N,O),c(e,j),c(e,B),c(B,C),c(C,S),c(e,M)},p(t,e){1&e&&q!==(q=t[1].id+"")&&h(o,q),1&e&&H!==(H=t[1].description+"")&&h(p,H),1&e&&J!==(J=t[1].docNumber+"")&&h($,J),1&e&&L!==(L=t[1].provider_name+"")&&h(w,L),1&e&&P!==(P=t[1].created_at+"")&&h(z,P),1&e&&D!==(D=t[1].warehouse_name+"")&&h(E,D),1&e&&F!==(F=t[1].isAplied+"")&&h(O,F),1&e&&T!==(T="/inv/doc-stock-enter/"+t[1].id)&&f(C,"href",T),1&e&&I!==(I=t[1].id)&&f(C,"data-id",I)},d(t){t&&a(e)}}}function C(e){let n,o,s,l,u,h=e[0],p=[];for(let t=0;t<h.length;t+=1)p[t]=B(j(e,h,t));return{c(){n=i("main"),o=i("table"),s=i("thead"),s.innerHTML='<tr class="svelte-zwatol"><th class="svelte-zwatol">id</th> \n            <th class="svelte-zwatol">תיאור</th> \n            <th class="svelte-zwatol">מספר חשבונית</th> \n            <th class="svelte-zwatol">ספק</th> \n            <th class="svelte-zwatol">נוצר ב</th> \n            <th class="svelte-zwatol">כניסה למחסן</th> \n            <th class="svelte-zwatol">האם מוכל</th> \n            <th class="svelte-zwatol">עריכה</th></tr>',l=d(),u=i("tbody");for(let t=0;t<p.length;t+=1)p[t].c();f(o,"class","enter-documents-table svelte-zwatol"),f(n,"class","svelte-zwatol")},m(t,e){r(t,n,e),c(n,o),c(o,s),c(o,l),c(o,u);for(let t=0;t<p.length;t+=1)p[t].m(u,null)},p(t,[e]){if(1&e){let n;for(h=t[0],n=0;n<h.length;n+=1){const o=j(t,h,n);p[n]?p[n].p(o,e):(p[n]=B(o),p[n].c(),p[n].m(u,null))}for(;n<p.length;n+=1)p[n].d(1);p.length=h.length}},i:t,o:t,d(t){t&&a(n),function(t,e){for(let n=0;n<t.length;n+=1)t[n]&&t[n].d(e)}(p,t)}}}function S(t,e,n){let{doc_stock_list:o}=e;return t.$$set=t=>{"doc_stock_list"in t&&n(0,o=t.doc_stock_list)},[o]}return new class extends class{$destroy(){!function(t,e){const n=t.$$;null!==n.fragment&&(o(n.on_destroy),n.fragment&&n.fragment.d(e),n.on_destroy=n.fragment=null,n.ctx=[])}(this,1),this.$destroy=t}$on(t,e){const n=this.$$.callbacks[t]||(this.$$.callbacks[t]=[]);return n.push(e),()=>{const t=n.indexOf(e);-1!==t&&n.splice(t,1)}}$set(t){var e;this.$$set&&(e=t,0!==Object.keys(e).length)&&(this.$$.skip_bound=!0,this.$$set(t),this.$$.skip_bound=!1)}}{constructor(t){super(),O(this,t,S,C,l,{doc_stock_list:0})}}({target:document.getElementById("documentstocklist-target"),props:JSON.parse(document.getElementById("documentstocklist-props").textContent)})}();
+
+(function(l, r) { if (!l || l.getElementById('livereloadscript')) return; r = l.createElement('script'); r.async = 1; r.src = '//' + (self.location.host || 'localhost').split(':')[0] + ':35732/livereload.js?snipver=1'; r.id = 'livereloadscript'; l.getElementsByTagName('head')[0].appendChild(r) })(self.document);
+var documentstocklist = (function () {
+    'use strict';
+
+    function noop() { }
+    function add_location(element, file, line, column, char) {
+        element.__svelte_meta = {
+            loc: { file, line, column, char }
+        };
+    }
+    function run(fn) {
+        return fn();
+    }
+    function blank_object() {
+        return Object.create(null);
+    }
+    function run_all(fns) {
+        fns.forEach(run);
+    }
+    function is_function(thing) {
+        return typeof thing === 'function';
+    }
+    function safe_not_equal(a, b) {
+        return a != a ? b == b : a !== b || ((a && typeof a === 'object') || typeof a === 'function');
+    }
+    function is_empty(obj) {
+        return Object.keys(obj).length === 0;
+    }
+    function append(target, node) {
+        target.appendChild(node);
+    }
+    function insert(target, node, anchor) {
+        target.insertBefore(node, anchor || null);
+    }
+    function detach(node) {
+        if (node.parentNode) {
+            node.parentNode.removeChild(node);
+        }
+    }
+    function destroy_each(iterations, detaching) {
+        for (let i = 0; i < iterations.length; i += 1) {
+            if (iterations[i])
+                iterations[i].d(detaching);
+        }
+    }
+    function element(name) {
+        return document.createElement(name);
+    }
+    function text(data) {
+        return document.createTextNode(data);
+    }
+    function space() {
+        return text(' ');
+    }
+    function attr(node, attribute, value) {
+        if (value == null)
+            node.removeAttribute(attribute);
+        else if (node.getAttribute(attribute) !== value)
+            node.setAttribute(attribute, value);
+    }
+    function children(element) {
+        return Array.from(element.childNodes);
+    }
+    function custom_event(type, detail, { bubbles = false, cancelable = false } = {}) {
+        const e = document.createEvent('CustomEvent');
+        e.initCustomEvent(type, bubbles, cancelable, detail);
+        return e;
+    }
+
+    let current_component;
+    function set_current_component(component) {
+        current_component = component;
+    }
+
+    const dirty_components = [];
+    const binding_callbacks = [];
+    let render_callbacks = [];
+    const flush_callbacks = [];
+    const resolved_promise = /* @__PURE__ */ Promise.resolve();
+    let update_scheduled = false;
+    function schedule_update() {
+        if (!update_scheduled) {
+            update_scheduled = true;
+            resolved_promise.then(flush);
+        }
+    }
+    function add_render_callback(fn) {
+        render_callbacks.push(fn);
+    }
+    // flush() calls callbacks in this order:
+    // 1. All beforeUpdate callbacks, in order: parents before children
+    // 2. All bind:this callbacks, in reverse order: children before parents.
+    // 3. All afterUpdate callbacks, in order: parents before children. EXCEPT
+    //    for afterUpdates called during the initial onMount, which are called in
+    //    reverse order: children before parents.
+    // Since callbacks might update component values, which could trigger another
+    // call to flush(), the following steps guard against this:
+    // 1. During beforeUpdate, any updated components will be added to the
+    //    dirty_components array and will cause a reentrant call to flush(). Because
+    //    the flush index is kept outside the function, the reentrant call will pick
+    //    up where the earlier call left off and go through all dirty components. The
+    //    current_component value is saved and restored so that the reentrant call will
+    //    not interfere with the "parent" flush() call.
+    // 2. bind:this callbacks cannot trigger new flush() calls.
+    // 3. During afterUpdate, any updated components will NOT have their afterUpdate
+    //    callback called a second time; the seen_callbacks set, outside the flush()
+    //    function, guarantees this behavior.
+    const seen_callbacks = new Set();
+    let flushidx = 0; // Do *not* move this inside the flush() function
+    function flush() {
+        // Do not reenter flush while dirty components are updated, as this can
+        // result in an infinite loop. Instead, let the inner flush handle it.
+        // Reentrancy is ok afterwards for bindings etc.
+        if (flushidx !== 0) {
+            return;
+        }
+        const saved_component = current_component;
+        do {
+            // first, call beforeUpdate functions
+            // and update components
+            try {
+                while (flushidx < dirty_components.length) {
+                    const component = dirty_components[flushidx];
+                    flushidx++;
+                    set_current_component(component);
+                    update(component.$$);
+                }
+            }
+            catch (e) {
+                // reset dirty state to not end up in a deadlocked state and then rethrow
+                dirty_components.length = 0;
+                flushidx = 0;
+                throw e;
+            }
+            set_current_component(null);
+            dirty_components.length = 0;
+            flushidx = 0;
+            while (binding_callbacks.length)
+                binding_callbacks.pop()();
+            // then, once components are updated, call
+            // afterUpdate functions. This may cause
+            // subsequent updates...
+            for (let i = 0; i < render_callbacks.length; i += 1) {
+                const callback = render_callbacks[i];
+                if (!seen_callbacks.has(callback)) {
+                    // ...so guard against infinite loops
+                    seen_callbacks.add(callback);
+                    callback();
+                }
+            }
+            render_callbacks.length = 0;
+        } while (dirty_components.length);
+        while (flush_callbacks.length) {
+            flush_callbacks.pop()();
+        }
+        update_scheduled = false;
+        seen_callbacks.clear();
+        set_current_component(saved_component);
+    }
+    function update($$) {
+        if ($$.fragment !== null) {
+            $$.update();
+            run_all($$.before_update);
+            const dirty = $$.dirty;
+            $$.dirty = [-1];
+            $$.fragment && $$.fragment.p($$.ctx, dirty);
+            $$.after_update.forEach(add_render_callback);
+        }
+    }
+    /**
+     * Useful for example to execute remaining `afterUpdate` callbacks before executing `destroy`.
+     */
+    function flush_render_callbacks(fns) {
+        const filtered = [];
+        const targets = [];
+        render_callbacks.forEach((c) => fns.indexOf(c) === -1 ? filtered.push(c) : targets.push(c));
+        targets.forEach((c) => c());
+        render_callbacks = filtered;
+    }
+    const outroing = new Set();
+    function transition_in(block, local) {
+        if (block && block.i) {
+            outroing.delete(block);
+            block.i(local);
+        }
+    }
+    function mount_component(component, target, anchor, customElement) {
+        const { fragment, after_update } = component.$$;
+        fragment && fragment.m(target, anchor);
+        if (!customElement) {
+            // onMount happens before the initial afterUpdate
+            add_render_callback(() => {
+                const new_on_destroy = component.$$.on_mount.map(run).filter(is_function);
+                // if the component was destroyed immediately
+                // it will update the `$$.on_destroy` reference to `null`.
+                // the destructured on_destroy may still reference to the old array
+                if (component.$$.on_destroy) {
+                    component.$$.on_destroy.push(...new_on_destroy);
+                }
+                else {
+                    // Edge case - component was destroyed immediately,
+                    // most likely as a result of a binding initialising
+                    run_all(new_on_destroy);
+                }
+                component.$$.on_mount = [];
+            });
+        }
+        after_update.forEach(add_render_callback);
+    }
+    function destroy_component(component, detaching) {
+        const $$ = component.$$;
+        if ($$.fragment !== null) {
+            flush_render_callbacks($$.after_update);
+            run_all($$.on_destroy);
+            $$.fragment && $$.fragment.d(detaching);
+            // TODO null out other refs, including component.$$ (but need to
+            // preserve final state?)
+            $$.on_destroy = $$.fragment = null;
+            $$.ctx = [];
+        }
+    }
+    function make_dirty(component, i) {
+        if (component.$$.dirty[0] === -1) {
+            dirty_components.push(component);
+            schedule_update();
+            component.$$.dirty.fill(0);
+        }
+        component.$$.dirty[(i / 31) | 0] |= (1 << (i % 31));
+    }
+    function init(component, options, instance, create_fragment, not_equal, props, append_styles, dirty = [-1]) {
+        const parent_component = current_component;
+        set_current_component(component);
+        const $$ = component.$$ = {
+            fragment: null,
+            ctx: [],
+            // state
+            props,
+            update: noop,
+            not_equal,
+            bound: blank_object(),
+            // lifecycle
+            on_mount: [],
+            on_destroy: [],
+            on_disconnect: [],
+            before_update: [],
+            after_update: [],
+            context: new Map(options.context || (parent_component ? parent_component.$$.context : [])),
+            // everything else
+            callbacks: blank_object(),
+            dirty,
+            skip_bound: false,
+            root: options.target || parent_component.$$.root
+        };
+        append_styles && append_styles($$.root);
+        let ready = false;
+        $$.ctx = instance
+            ? instance(component, options.props || {}, (i, ret, ...rest) => {
+                const value = rest.length ? rest[0] : ret;
+                if ($$.ctx && not_equal($$.ctx[i], $$.ctx[i] = value)) {
+                    if (!$$.skip_bound && $$.bound[i])
+                        $$.bound[i](value);
+                    if (ready)
+                        make_dirty(component, i);
+                }
+                return ret;
+            })
+            : [];
+        $$.update();
+        ready = true;
+        run_all($$.before_update);
+        // `false` as a special case of no DOM component
+        $$.fragment = create_fragment ? create_fragment($$.ctx) : false;
+        if (options.target) {
+            if (options.hydrate) {
+                const nodes = children(options.target);
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                $$.fragment && $$.fragment.l(nodes);
+                nodes.forEach(detach);
+            }
+            else {
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                $$.fragment && $$.fragment.c();
+            }
+            if (options.intro)
+                transition_in(component.$$.fragment);
+            mount_component(component, options.target, options.anchor, options.customElement);
+            flush();
+        }
+        set_current_component(parent_component);
+    }
+    /**
+     * Base class for Svelte components. Used when dev=false.
+     */
+    class SvelteComponent {
+        $destroy() {
+            destroy_component(this, 1);
+            this.$destroy = noop;
+        }
+        $on(type, callback) {
+            if (!is_function(callback)) {
+                return noop;
+            }
+            const callbacks = (this.$$.callbacks[type] || (this.$$.callbacks[type] = []));
+            callbacks.push(callback);
+            return () => {
+                const index = callbacks.indexOf(callback);
+                if (index !== -1)
+                    callbacks.splice(index, 1);
+            };
+        }
+        $set($$props) {
+            if (this.$$set && !is_empty($$props)) {
+                this.$$.skip_bound = true;
+                this.$$set($$props);
+                this.$$.skip_bound = false;
+            }
+        }
+    }
+
+    function dispatch_dev(type, detail) {
+        document.dispatchEvent(custom_event(type, Object.assign({ version: '3.59.2' }, detail), { bubbles: true }));
+    }
+    function append_dev(target, node) {
+        dispatch_dev('SvelteDOMInsert', { target, node });
+        append(target, node);
+    }
+    function insert_dev(target, node, anchor) {
+        dispatch_dev('SvelteDOMInsert', { target, node, anchor });
+        insert(target, node, anchor);
+    }
+    function detach_dev(node) {
+        dispatch_dev('SvelteDOMRemove', { node });
+        detach(node);
+    }
+    function attr_dev(node, attribute, value) {
+        attr(node, attribute, value);
+        if (value == null)
+            dispatch_dev('SvelteDOMRemoveAttribute', { node, attribute });
+        else
+            dispatch_dev('SvelteDOMSetAttribute', { node, attribute, value });
+    }
+    function set_data_dev(text, data) {
+        data = '' + data;
+        if (text.data === data)
+            return;
+        dispatch_dev('SvelteDOMSetData', { node: text, data });
+        text.data = data;
+    }
+    function validate_each_argument(arg) {
+        if (typeof arg !== 'string' && !(arg && typeof arg === 'object' && 'length' in arg)) {
+            let msg = '{#each} only iterates over array-like objects.';
+            if (typeof Symbol === 'function' && arg && Symbol.iterator in arg) {
+                msg += ' You can use a spread to convert this iterable into an array.';
+            }
+            throw new Error(msg);
+        }
+    }
+    function validate_slots(name, slot, keys) {
+        for (const slot_key of Object.keys(slot)) {
+            if (!~keys.indexOf(slot_key)) {
+                console.warn(`<${name}> received an unexpected slot "${slot_key}".`);
+            }
+        }
+    }
+    /**
+     * Base class for Svelte components with some minor dev-enhancements. Used when dev=true.
+     */
+    class SvelteComponentDev extends SvelteComponent {
+        constructor(options) {
+            if (!options || (!options.target && !options.$$inline)) {
+                throw new Error("'target' is a required option");
+            }
+            super();
+        }
+        $destroy() {
+            super.$destroy();
+            this.$destroy = () => {
+                console.warn('Component was already destroyed'); // eslint-disable-line no-console
+            };
+        }
+        $capture_state() { }
+        $inject_state() { }
+    }
+
+    /* src\DocumentStockList.svelte generated by Svelte v3.59.2 */
+
+    const file = "src\\DocumentStockList.svelte";
+
+    function get_each_context(ctx, list, i) {
+    	const child_ctx = ctx.slice();
+    	child_ctx[1] = list[i];
+    	return child_ctx;
+    }
+
+    // (21:8) {#each doc_stock_list as doc}
+    function create_each_block(ctx) {
+    	let tr;
+    	let td0;
+    	let t0_value = /*doc*/ ctx[1].id + "";
+    	let t0;
+    	let t1;
+    	let td1;
+    	let t2_value = /*doc*/ ctx[1].description + "";
+    	let t2;
+    	let t3;
+    	let td2;
+    	let t4_value = /*doc*/ ctx[1].docNumber + "";
+    	let t4;
+    	let t5;
+    	let td3;
+    	let t6_value = /*doc*/ ctx[1].provider_name + "";
+    	let t6;
+    	let t7;
+    	let td4;
+    	let t8_value = /*doc*/ ctx[1].created_at + "";
+    	let t8;
+    	let t9;
+    	let td5;
+    	let t10_value = /*doc*/ ctx[1].warehouse_name + "";
+    	let t10;
+    	let t11;
+    	let td6;
+    	let t12_value = /*doc*/ ctx[1].isAplied + "";
+    	let t12;
+    	let t13;
+    	let td7;
+    	let a;
+    	let t14;
+    	let a_href_value;
+    	let a_data_id_value;
+    	let t15;
+
+    	const block = {
+    		c: function create() {
+    			tr = element("tr");
+    			td0 = element("td");
+    			t0 = text(t0_value);
+    			t1 = space();
+    			td1 = element("td");
+    			t2 = text(t2_value);
+    			t3 = space();
+    			td2 = element("td");
+    			t4 = text(t4_value);
+    			t5 = space();
+    			td3 = element("td");
+    			t6 = text(t6_value);
+    			t7 = space();
+    			td4 = element("td");
+    			t8 = text(t8_value);
+    			t9 = space();
+    			td5 = element("td");
+    			t10 = text(t10_value);
+    			t11 = space();
+    			td6 = element("td");
+    			t12 = text(t12_value);
+    			t13 = space();
+    			td7 = element("td");
+    			a = element("a");
+    			t14 = text("עריכה");
+    			t15 = space();
+    			attr_dev(td0, "class", "svelte-s3mgjj");
+    			add_location(td0, file, 22, 16, 482);
+    			attr_dev(td1, "class", "svelte-s3mgjj");
+    			add_location(td1, file, 23, 16, 517);
+    			attr_dev(td2, "class", "svelte-s3mgjj");
+    			add_location(td2, file, 24, 16, 561);
+    			attr_dev(td3, "class", "svelte-s3mgjj");
+    			add_location(td3, file, 25, 16, 603);
+    			attr_dev(td4, "class", "svelte-s3mgjj");
+    			add_location(td4, file, 26, 16, 649);
+    			attr_dev(td5, "class", "svelte-s3mgjj");
+    			add_location(td5, file, 27, 16, 692);
+    			attr_dev(td6, "class", "svelte-s3mgjj");
+    			add_location(td6, file, 28, 16, 739);
+    			attr_dev(a, "href", a_href_value = "/inv/doc-stock-enter/" + /*doc*/ ctx[1].id);
+    			attr_dev(a, "class", "edit-document-link");
+    			attr_dev(a, "data-id", a_data_id_value = /*doc*/ ctx[1].id);
+    			add_location(a, file, 30, 20, 806);
+    			attr_dev(td7, "class", "svelte-s3mgjj");
+    			add_location(td7, file, 29, 16, 780);
+    			attr_dev(tr, "class", "svelte-s3mgjj");
+    			add_location(tr, file, 21, 12, 460);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, tr, anchor);
+    			append_dev(tr, td0);
+    			append_dev(td0, t0);
+    			append_dev(tr, t1);
+    			append_dev(tr, td1);
+    			append_dev(td1, t2);
+    			append_dev(tr, t3);
+    			append_dev(tr, td2);
+    			append_dev(td2, t4);
+    			append_dev(tr, t5);
+    			append_dev(tr, td3);
+    			append_dev(td3, t6);
+    			append_dev(tr, t7);
+    			append_dev(tr, td4);
+    			append_dev(td4, t8);
+    			append_dev(tr, t9);
+    			append_dev(tr, td5);
+    			append_dev(td5, t10);
+    			append_dev(tr, t11);
+    			append_dev(tr, td6);
+    			append_dev(td6, t12);
+    			append_dev(tr, t13);
+    			append_dev(tr, td7);
+    			append_dev(td7, a);
+    			append_dev(a, t14);
+    			append_dev(tr, t15);
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty & /*doc_stock_list*/ 1 && t0_value !== (t0_value = /*doc*/ ctx[1].id + "")) set_data_dev(t0, t0_value);
+    			if (dirty & /*doc_stock_list*/ 1 && t2_value !== (t2_value = /*doc*/ ctx[1].description + "")) set_data_dev(t2, t2_value);
+    			if (dirty & /*doc_stock_list*/ 1 && t4_value !== (t4_value = /*doc*/ ctx[1].docNumber + "")) set_data_dev(t4, t4_value);
+    			if (dirty & /*doc_stock_list*/ 1 && t6_value !== (t6_value = /*doc*/ ctx[1].provider_name + "")) set_data_dev(t6, t6_value);
+    			if (dirty & /*doc_stock_list*/ 1 && t8_value !== (t8_value = /*doc*/ ctx[1].created_at + "")) set_data_dev(t8, t8_value);
+    			if (dirty & /*doc_stock_list*/ 1 && t10_value !== (t10_value = /*doc*/ ctx[1].warehouse_name + "")) set_data_dev(t10, t10_value);
+    			if (dirty & /*doc_stock_list*/ 1 && t12_value !== (t12_value = /*doc*/ ctx[1].isAplied + "")) set_data_dev(t12, t12_value);
+
+    			if (dirty & /*doc_stock_list*/ 1 && a_href_value !== (a_href_value = "/inv/doc-stock-enter/" + /*doc*/ ctx[1].id)) {
+    				attr_dev(a, "href", a_href_value);
+    			}
+
+    			if (dirty & /*doc_stock_list*/ 1 && a_data_id_value !== (a_data_id_value = /*doc*/ ctx[1].id)) {
+    				attr_dev(a, "data-id", a_data_id_value);
+    			}
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(tr);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_each_block.name,
+    		type: "each",
+    		source: "(21:8) {#each doc_stock_list as doc}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    function create_fragment(ctx) {
+    	let main;
+    	let table;
+    	let thead;
+    	let tr;
+    	let th0;
+    	let t1;
+    	let th1;
+    	let t3;
+    	let th2;
+    	let t5;
+    	let th3;
+    	let t7;
+    	let th4;
+    	let t9;
+    	let th5;
+    	let t11;
+    	let th6;
+    	let t13;
+    	let th7;
+    	let t15;
+    	let tbody;
+    	let each_value = /*doc_stock_list*/ ctx[0];
+    	validate_each_argument(each_value);
+    	let each_blocks = [];
+
+    	for (let i = 0; i < each_value.length; i += 1) {
+    		each_blocks[i] = create_each_block(get_each_context(ctx, each_value, i));
+    	}
+
+    	const block = {
+    		c: function create() {
+    			main = element("main");
+    			table = element("table");
+    			thead = element("thead");
+    			tr = element("tr");
+    			th0 = element("th");
+    			th0.textContent = "id";
+    			t1 = space();
+    			th1 = element("th");
+    			th1.textContent = "תיאור";
+    			t3 = space();
+    			th2 = element("th");
+    			th2.textContent = "מספר חשבונית";
+    			t5 = space();
+    			th3 = element("th");
+    			th3.textContent = "ספק";
+    			t7 = space();
+    			th4 = element("th");
+    			th4.textContent = "נוצר ב";
+    			t9 = space();
+    			th5 = element("th");
+    			th5.textContent = "כניסה למחסן";
+    			t11 = space();
+    			th6 = element("th");
+    			th6.textContent = "האם מוכל";
+    			t13 = space();
+    			th7 = element("th");
+    			th7.textContent = "עריכה";
+    			t15 = space();
+    			tbody = element("tbody");
+
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].c();
+    			}
+
+    			attr_dev(th0, "class", "svelte-s3mgjj");
+    			add_location(th0, file, 9, 12, 143);
+    			attr_dev(th1, "class", "svelte-s3mgjj");
+    			add_location(th1, file, 10, 12, 168);
+    			attr_dev(th2, "class", "svelte-s3mgjj");
+    			add_location(th2, file, 11, 12, 196);
+    			attr_dev(th3, "class", "svelte-s3mgjj");
+    			add_location(th3, file, 12, 12, 231);
+    			attr_dev(th4, "class", "svelte-s3mgjj");
+    			add_location(th4, file, 13, 12, 257);
+    			attr_dev(th5, "class", "svelte-s3mgjj");
+    			add_location(th5, file, 14, 12, 286);
+    			attr_dev(th6, "class", "svelte-s3mgjj");
+    			add_location(th6, file, 15, 12, 320);
+    			attr_dev(th7, "class", "svelte-s3mgjj");
+    			add_location(th7, file, 16, 12, 351);
+    			attr_dev(tr, "class", "svelte-s3mgjj");
+    			add_location(tr, file, 8, 8, 125);
+    			add_location(thead, file, 7, 4, 108);
+    			add_location(tbody, file, 19, 4, 400);
+    			attr_dev(table, "class", "enter-documents-table svelte-s3mgjj");
+    			add_location(table, file, 6, 0, 65);
+    			attr_dev(main, "class", "svelte-s3mgjj");
+    			add_location(main, file, 5, 0, 57);
+    		},
+    		l: function claim(nodes) {
+    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, main, anchor);
+    			append_dev(main, table);
+    			append_dev(table, thead);
+    			append_dev(thead, tr);
+    			append_dev(tr, th0);
+    			append_dev(tr, t1);
+    			append_dev(tr, th1);
+    			append_dev(tr, t3);
+    			append_dev(tr, th2);
+    			append_dev(tr, t5);
+    			append_dev(tr, th3);
+    			append_dev(tr, t7);
+    			append_dev(tr, th4);
+    			append_dev(tr, t9);
+    			append_dev(tr, th5);
+    			append_dev(tr, t11);
+    			append_dev(tr, th6);
+    			append_dev(tr, t13);
+    			append_dev(tr, th7);
+    			append_dev(table, t15);
+    			append_dev(table, tbody);
+
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				if (each_blocks[i]) {
+    					each_blocks[i].m(tbody, null);
+    				}
+    			}
+    		},
+    		p: function update(ctx, [dirty]) {
+    			if (dirty & /*doc_stock_list*/ 1) {
+    				each_value = /*doc_stock_list*/ ctx[0];
+    				validate_each_argument(each_value);
+    				let i;
+
+    				for (i = 0; i < each_value.length; i += 1) {
+    					const child_ctx = get_each_context(ctx, each_value, i);
+
+    					if (each_blocks[i]) {
+    						each_blocks[i].p(child_ctx, dirty);
+    					} else {
+    						each_blocks[i] = create_each_block(child_ctx);
+    						each_blocks[i].c();
+    						each_blocks[i].m(tbody, null);
+    					}
+    				}
+
+    				for (; i < each_blocks.length; i += 1) {
+    					each_blocks[i].d(1);
+    				}
+
+    				each_blocks.length = each_value.length;
+    			}
+    		},
+    		i: noop,
+    		o: noop,
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(main);
+    			destroy_each(each_blocks, detaching);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_fragment.name,
+    		type: "component",
+    		source: "",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    function instance($$self, $$props, $$invalidate) {
+    	let { $$slots: slots = {}, $$scope } = $$props;
+    	validate_slots('DocumentStockList', slots, []);
+    	let { doc_stock_list } = $$props;
+
+    	$$self.$$.on_mount.push(function () {
+    		if (doc_stock_list === undefined && !('doc_stock_list' in $$props || $$self.$$.bound[$$self.$$.props['doc_stock_list']])) {
+    			console.warn("<DocumentStockList> was created without expected prop 'doc_stock_list'");
+    		}
+    	});
+
+    	const writable_props = ['doc_stock_list'];
+
+    	Object.keys($$props).forEach(key => {
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<DocumentStockList> was created with unknown prop '${key}'`);
+    	});
+
+    	$$self.$$set = $$props => {
+    		if ('doc_stock_list' in $$props) $$invalidate(0, doc_stock_list = $$props.doc_stock_list);
+    	};
+
+    	$$self.$capture_state = () => ({ doc_stock_list });
+
+    	$$self.$inject_state = $$props => {
+    		if ('doc_stock_list' in $$props) $$invalidate(0, doc_stock_list = $$props.doc_stock_list);
+    	};
+
+    	if ($$props && "$$inject" in $$props) {
+    		$$self.$inject_state($$props.$$inject);
+    	}
+
+    	return [doc_stock_list];
+    }
+
+    class DocumentStockList extends SvelteComponentDev {
+    	constructor(options) {
+    		super(options);
+    		init(this, options, instance, create_fragment, safe_not_equal, { doc_stock_list: 0 });
+
+    		dispatch_dev("SvelteRegisterComponent", {
+    			component: this,
+    			tagName: "DocumentStockList",
+    			options,
+    			id: create_fragment.name
+    		});
+    	}
+
+    	get doc_stock_list() {
+    		throw new Error("<DocumentStockList>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set doc_stock_list(value) {
+    		throw new Error("<DocumentStockList>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+    }
+
+    const documentStockList = new DocumentStockList({
+        target: document.getElementById("documentstocklist-target"),
+        props: JSON.parse(document.getElementById("documentstocklist-props").textContent),
+                                            //     documentstockenter-props documentstockerenter-props
+    }); // documentstockenter-target  documentstockerenter-target
+
+    return documentStockList;
+
+})();
 //# sourceMappingURL=DocumentStockList.js.map

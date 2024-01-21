@@ -12,16 +12,18 @@ import {
   apiGetMOrder,
   apiSaveMOrder,
   apiSearchProducts,
+  apiGetProviders,
 } from "./api/api";
 import { CLOUDINARY_BASE_URL } from "./consts/consts";
 import MentriesServerTable from "./MentriesServerTable.svelte";
 import AutoComplete from "simple-svelte-autocomplete";
 import MorderAddProductEntryPopup from "./components/popups/MorderAddProductEntryPopup.svelte";
 import { morderAddProductEntryPopupStore } from "./components/popups/MorderAddProductEntryPopupStore";
+import CollectingTable from "./CollectingTable.svelte";
 
 export let id;
 let updateing = false;
-//let ALL_PROVIDERS;
+let ALL_PROVIDERS;
 let headerData = undefined;
 let serverData = undefined;
 let data = undefined;
@@ -55,7 +57,12 @@ async function load_order_from_server(resp = undefined) {
       agent: data.agent_name,
       sheets_price_prop_link: data.sheets_price_prop_link,
       sheets_order_link: data.sheets_order_link,
+      client_sign_url: data.client_sign_url,
       export_to_suppliers: data.export_to_suppliers,
+      address: data.address,
+      settlement: data.settlement,
+      is_delivery_company: data.is_delivery_company,
+      private_company: data.private_company,
     },
   ];
   //productsData = data.products;
@@ -68,6 +75,9 @@ let ALL_SIZES;
 let ALL_COLORS;
 let ALL_VERIENTS;
 let ALL_STATUSES;
+let ALL_COLORS_DICT;
+let ALL_SIZES_DICT;
+let ALL_VERIENTS_DICT;
 let updateing_to_server = false;
 
 onMount(async () => {
@@ -82,25 +92,35 @@ onMount(async () => {
     color: "#FFFFFF00",
     code: "00",
   };
+
+  // TODO: set collectingState based on the hash
+
   // ALL_SIZES = await apiGetAllSizes();
   // ALL_COLORS = await apiGetAllColors();
   // ALL_VERIENTS = await apiGetAllVariants();
   // ALL_STATUSES = await apiGetAllMorderStatuses();
-  let promises = [
-    apiGetAllSizes(),
-    apiGetAllColors(),
-    apiGetAllVariants(),
-    apiGetAllMorderStatuses(),
-    get_order_from_server(),
-  ];
+  let promises = [apiGetAllSizes(), apiGetAllColors(), apiGetAllVariants(), apiGetAllMorderStatuses(), get_order_from_server(), apiGetProviders()];
   let results = await Promise.all(promises);
   ALL_SIZES = results[0];
   ALL_COLORS = results[1];
   ALL_VERIENTS = results[2];
+  debugger;
   ALL_STATUSES = results[3];
   let resp = results[4];
+  ALL_PROVIDERS = results[5];
   await load_order_from_server(resp);
-  //ALL_PROVIDERS = await apiGetProviders();
+
+  // based on the hash, set collectingState
+  debugger;
+  if (window.location.hash == "#collecting") {
+    collectingState = true;
+    // set the value of the checkbox
+    document.querySelector(".collecting-switch input").checked = true;
+  } else {
+    collectingState = false;
+    // set the value of the checkbox
+    document.querySelector(".collecting-switch input").checked = false;
+  }
 });
 
 async function save_data() {
@@ -118,6 +138,10 @@ async function save_data() {
   data.client = headerData[0].client_id;
   data.client_businessName = headerData[0].client_name;
   data.export_to_suppliers = headerData[0].export_to_suppliers;
+  data.address = headerData[0].address;
+  data.settlement = headerData[0].settlement;
+  data.contact_name = headerData[0].contact_name;
+  data.private_company = headerData[0].private_company;
   updateing_to_server = true;
   await apiSaveMOrder(data.id, data);
   updateing_to_server = false;
@@ -145,9 +169,7 @@ function addNewProductButtonClick(e) {
   add_product_status_color = "black";
   let sendData = {};
   console.log("looking for ", selectedProduct.id, " in ", data.products);
-  if (
-    data.products.find((product) => product.product.id == selectedProduct.id)
-  ) {
+  if (data.products.find((product) => product.product.id == selectedProduct.id)) {
     add_product_message = "מוצר כבר נמצא בהזמנה";
     add_product_status = "error";
     add_product_status_color = "red";
@@ -193,15 +215,8 @@ function add_entry_btn_clicked(e) {
   }
   let selected_color = parseInt(formDictData["color"]);
   let selected_size = parseInt(formDictData["size"]);
-  let selected_verient =
-    formDictData["varient"] == "undefined" || formDictData["varient"] == ""
-      ? null
-      : parseInt(formDictData["varient"]);
-  let amount = parseInt(
-    formDictData["amount"] == "undefined" || formDictData["amount"] == ""
-      ? "0"
-      : formDictData["amount"]
-  );
+  let selected_verient = formDictData["varient"] == "undefined" || formDictData["varient"] == "" ? null : parseInt(formDictData["varient"]);
+  let amount = parseInt(formDictData["amount"] == "undefined" || formDictData["amount"] == "" ? "0" : formDictData["amount"]);
 
   for (let i = 0; i < data.products.length; i++) {
     if (data.products[i].id == formDictData["entry_id"]) {
@@ -275,11 +290,7 @@ function new_product_btn_click() {
   } else {
     href += "&_popup=1";
   }
-  var win = window.open(
-    href,
-    "_blank",
-    "height=500,width=800,resizable=yes,scrollbars=yes"
-  );
+  var win = window.open(href, "_blank", "height=500,width=800,resizable=yes,scrollbars=yes");
   win.focus();
   return false;
 }
@@ -314,19 +325,69 @@ function addNewSimBtnClicked(e) {
 }
 
 let current_selected_sim_idx = -1;
+let collectingState = false;
+
+function update_collecting_state(e) {
+  collectingState = e.target.checked;
+  debugger;
+  if (collectingState) {
+    window.location.hash = "#collecting";
+  } else {
+    window.location.hash = "";
+  }
+}
+
+$: {
+  ALL_COLORS;
+  if (ALL_COLORS) {
+    let ALL_COLORS_DICT_temp = {};
+    ALL_COLORS.forEach((color) => {
+      ALL_COLORS_DICT_temp[color.id] = color;
+    });
+    ALL_COLORS_DICT = ALL_COLORS_DICT_temp;
+  }
+}
+$: {
+  ALL_SIZES;
+  if (ALL_SIZES) {
+    let ALL_SIZES_DICT_temp = {};
+    ALL_SIZES.forEach((size) => {
+      ALL_SIZES_DICT_temp[size.id] = size;
+    });
+    ALL_SIZES_DICT = ALL_SIZES_DICT_temp;
+  }
+}
+
+$: {
+  ALL_VERIENTS;
+  if (ALL_VERIENTS) {
+    let ALL_VERIENTS_DICT_temp = {};
+    ALL_VERIENTS.forEach((ver) => {
+      ALL_VERIENTS_DICT_temp[ver.id] = ver;
+    });
+    ALL_VERIENTS_DICT = ALL_VERIENTS_DICT_temp;
+  }
+}
 </script>
 
 <svelte:head>
-  <link
-    rel="stylesheet"
-    href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css"
-  />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" />
 </svelte:head>
 <!-- headerData table -->
 <MorderAddProductEntryPopup {ALL_COLORS} {ALL_SIZES} {ALL_VERIENTS} />
 <main>
   <!-- href to back to  /admin/morders/morder/ -->
   <a href="/admin/morders/morder/" class="back-btn">חזרה להזמנות</a>
+
+  <!-- switch to start collecting on not (affecting href#collecting and state collecting) -->
+  <div class="collecting-switch">
+    ליקוט
+    <label class="switch">
+      <input type="checkbox" on:change={update_collecting_state} />
+      <span class="slider round" />
+    </label>
+    הזמנה
+  </div>
   {#if headerData}
     <div class="created">
       נוצר ב{new Date(headerData[0].created).toLocaleString("Israel")}
@@ -334,84 +395,75 @@ let current_selected_sim_idx = -1;
     <div class="updated">
       עודכן ב{new Date(headerData[0].updated).toLocaleString("Israel")}
     </div>
+    <div class="id">
+      מזהה: {headerData[0].id}
+    </div>
+
     <table class="headers-table">
       <thead>
         <tr>
-          <th>מזהה</th>
-          <th>שם</th>
+          <th>שם בחשבונית</th>
+          <th> שם איש קשר </th>
           <th>דואר אלקטרוני</th>
-          <th>הודעה</th>
+          <th>הודעה מהעגלה</th>
           <th>טלפון</th>
           <th>סטטוס</th>
-          <th>שם העסק</th>
-          <th>סוכן</th>
+          <th> כתובת </th>
+          <th>ח.פ.</th>
           <th>לקחת ספקים?</th>
           <th>קישורים</th>
         </tr>
       </thead>
       <tbody>
         <tr>
-          <td class="header-cell">{headerData[0].id}</td>
+          <!-- <td class="header-cell">{headerData[0].id}</td> -->
           <td class="header-cell">
-            <input
-              type="text"
-              bind:value={headerData[0].name}
-              placeholder="שם"
-            />
+            <input type="text" bind:value={headerData[0].name} placeholder="שם" />
+            סוכן: {headerData[0].agent}
           </td>
           <td class="header-cell">
-            <input
-              type="email"
-              bind:value={headerData[0].email}
-              placeholder="אימייל"
-            />
-          </td>
-          <td class="header-cell"
-            ><textarea bind:value={headerData[0].message} placeholder="הודעה" />
+            <input type="text" bind:value={headerData[0].contact_name} placeholder="שם איש קשר" />
           </td>
           <td class="header-cell">
-            <input
-              type="phone"
-              bind:value={headerData[0].phone}
-              placeholder="טלפון"
-            />
+            <input type="email" bind:value={headerData[0].email} placeholder="אימייל" />
+          </td>
+          <td class="header-cell"><textarea bind:value={headerData[0].message} placeholder="הודעה" /> </td>
+          <td class="header-cell">
+            <input type="phone" bind:value={headerData[0].phone} placeholder="טלפון" />
           </td>
           <td class="header-cell">
             <select class="status-select" bind:value={headerData[0].status2}>
               {#each ALL_STATUSES as opt}
-                <option
-                  value={opt.id}
-                  selected={opt.name == headerData[0].status2}
-                  >{opt.name}</option
-                >
+                <option value={opt.id} selected={opt.name == headerData[0].status2}>{opt.name}</option>
               {/each}
             </select>
-            <textarea
-              cols="18"
-              bind:value={headerData[0].status_msg}
-              placeholder="הערות לסטטוס"
-            />
+            <textarea cols="18" bind:value={headerData[0].status_msg} placeholder="הערות לסטטוס" />
           </td>
-          <td class="header-cell">{headerData[0].client_name}</td>
-          <td class="header-cell">{headerData[0].agent}</td>
+          <td class="header-cell">
+            <input type="text" bind:value={headerData[0].address} placeholder="כתובת" />
+            <label for="is_delivery_company">האם חברת משלוחים</label>
+            <input id="is_delivery_company" type="checkbox" bind:checked={headerData[0].is_delivery_company} />
+            <!-- <div class="d-flex"> -->
+            <label for="settlement" style="margin-left: 10px;">ישוב</label>
+            <input id="settlement" type="text" bind:value={headerData[0].settlement} placeholder="ישוב" />
+            <!-- </div> -->
+          </td>
+          <td class="header-cell">
+            <input type="text" bind:value={headerData[0].private_company} />
+          </td>
           <td class="header-cell">
             <!-- big checkbox -->
-            <input
-              style="width: 20px; height: 20px;"
-              type="checkbox"
-              bind:checked={headerData[0].export_to_suppliers}
-            />
+            <input style="width: 20px; height: 20px;" type="checkbox" bind:checked={headerData[0].export_to_suppliers} />
           </td><td class="header-cell">
             {#if headerData[0].sheets_price_prop_link}
-              <a href={headerData[0].sheets_price_prop_link} target="_blank">
-                הצעת מחיר
-              </a>
+              <a href={headerData[0].sheets_price_prop_link} target="_blank"> הצעת מחיר </a>
               <br />
             {/if}
             {#if headerData[0].sheets_order_link}
-              <a href={headerData[0].sheets_order_link} target="_blank">
-                הזמנה
-              </a>
+              <a href={headerData[0].sheets_order_link} target="_blank"> הזמנה </a>
+            {/if}
+            {#if headerData[0].client_sign_url}
+              <a href={headerData[0].client_sign_url} target="_blank"> חתימה </a>
             {/if}
           </td>
         </tr>
@@ -434,10 +486,10 @@ let current_selected_sim_idx = -1;
           <th>מזהה</th>
           <th>שם מוצר</th>
           <th>מחיר</th>
-          <th>רקמה?</th>
-          <th>הדפסה?</th>
-          <th>חשוב להזמנה</th>
-          <th>הערות</th>
+          <th>הערה פרטית</th>
+          <th>הערה ציבורית</th>
+          <!-- <th>חשוב להזמנה</th> -->
+          <!-- <th>הערות</th> -->
           <th>ברקוד</th>
           <th colspan="2">פעולות</th>
         </tr>
@@ -447,70 +499,42 @@ let current_selected_sim_idx = -1;
           <tr>
             <td class="cell-border">{product.product.id}</td>
             <td class="cell-border">
-              <img
-                src="{CLOUDINARY_BASE_URL}f_auto,w_auto/{product.product
-                  .cimage}"
-                alt={product.product.title}
-                width="25px"
-                height="25px"
-                loading="lazy"
-              />
+              <img src="{CLOUDINARY_BASE_URL}f_auto,w_auto/{product.product.cimage}" alt={product.product.title} width="25px" height="25px" loading="lazy" />
               {product.product.title}
             </td>
 
             <td
               class="cell-border"
+              tabindex="-1"
               on:click={() => {
                 let new_price = prompt("מחיר חדש:", product.price);
-                product.price = new_price;
+                if (new_price != null) {
+                  product.price = new_price;
+                }
+              }}
+              on:keydown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  let new_price = prompt("מחיר חדש:", product.price);
+                  if (new_price != null) {
+                    product.price = new_price;
+                  }
+                }
               }}>{product.price}₪</td
             >
             <td class="cell-border">
-              <div class="d-flex-wraper">
-                <input
-                  name="embro"
-                  type="checkbox"
-                  bind:checked={product.embroidery}
-                />
-                {#if product.embroidery}
-                  <textarea
-                    bind:value={product.embroideryComment}
-                    placeholder="תיאור רקמה"
-                  />
-                {/if}
-                <label for="embro">רקמה</label>
-              </div>
+              <textarea bind:value={product.private_comment} placeholder="הערה פרטית" />
             </td>
             <td class="cell-border">
-              <div class="d-flex-wraper">
-                <input
-                  name="prining"
-                  type="checkbox"
-                  bind:checked={product.prining}
-                />
-                {#if product.prining}
-                  <textarea
-                    bind:value={product.priningComment}
-                    placeholder="תיאור הדפסה"
-                  />
-                {/if}
-                <label for="prining">הדפסה</label>
-              </div>
+              <textarea bind:value={product.public_comment} placeholder="הערה פומבית" />
             </td>
-            <td class="cell-border">
+            <!-- <td class="cell-border">
               <div class="d-flex-wraper">
-                <input
-                  name="ergent"
-                  type="checkbox"
-                  bind:value={product.ergent}
-                />
+                <input name="ergent" type="checkbox" bind:value={product.ergent} />
                 <label for="ergent">חשוב להזמנה</label>
               </div>
-            </td>
+            </td> -->
 
-            <td class="cell-border"
-              ><textarea bind:value={product.comment} placeholder="הערות" /></td
-            >
+            <!-- <td class="cell-border"><textarea bind:value={product.comment} placeholder="הערות" /></td> -->
             <td class="cell-border">{product.pbarcode || ""}</td>
             <td class="cell-border" colspan="2">
               <button
@@ -519,9 +543,7 @@ let current_selected_sim_idx = -1;
                   if (confirm("בטוח שברצונך למחוק את המוצר?")) {
                     // Save it!
                     apiDeleteMOrderItem(product.id);
-                    data.products = [
-                      ...data.products.filter((item) => item.id != product.id),
-                    ];
+                    data.products = [...data.products.filter((item) => item.id != product.id)];
                   } else {
                   }
                 }}>מחק</button
@@ -535,38 +557,22 @@ let current_selected_sim_idx = -1;
                     data?.simulations &&
                     current_selected_sim_idx != -1 &&
                     data.simulations[current_selected_sim_idx].products &&
-                    data.simulations[current_selected_sim_idx].products[
-                      product.id
-                    ]}
+                    data.simulations[current_selected_sim_idx].products[product.id]}
                   on:click={() => {
                     //data.simulations[current_selected_sim_idx].products = {product_id: amount:Int}
                     // set data.simulations[current_selected_sim_idx].products = [...data.simulations[current_selected_sim_idx].products, newData];
                     // if it already exists, remove it
-                    if (
-                      data.simulations[current_selected_sim_idx].products &&
-                      data.simulations[current_selected_sim_idx].products[
-                        product.id
-                      ]
-                    ) {
-                      delete data.simulations[current_selected_sim_idx]
-                        .products[product.id];
+                    if (data.simulations[current_selected_sim_idx].products && data.simulations[current_selected_sim_idx].products[product.id]) {
+                      delete data.simulations[current_selected_sim_idx].products[product.id];
                       data.simulations = [...data.simulations];
                     } else {
                       console.log(product);
                       debugger;
-                      let total_amount = product.entries.reduce(
-                        (acc, curr) => acc + curr.quantity,
-                        0
-                      );
-                      if (
-                        !data.simulations[current_selected_sim_idx].products
-                      ) {
-                        data.simulations[current_selected_sim_idx].products =
-                          {};
+                      let total_amount = product.entries.reduce((acc, curr) => acc + curr.quantity, 0);
+                      if (!data.simulations[current_selected_sim_idx].products) {
+                        data.simulations[current_selected_sim_idx].products = {};
                       }
-                      data.simulations[current_selected_sim_idx].products[
-                        product.id
-                      ] = {
+                      data.simulations[current_selected_sim_idx].products[product.id] = {
                         amount: total_amount,
                         title: product.product.title,
                         img: product.product.cimage,
@@ -578,71 +584,56 @@ let current_selected_sim_idx = -1;
             </td>
           </tr>
           <tr class="details">
-            <td colspan="9">
-              {#key product.id}
-                <MentriesServerTable
-                  bind:product
-                  {ALL_SIZES}
-                  {ALL_COLORS}
-                  {ALL_VERIENTS}
-                />
-              {/key}
-            </td>
-            <td colspan="1">
-              <form
-                class="add-entry-form"
-                action=""
-                method="post"
-                on:submit={add_entry_btn_clicked}
-              >
-                <input
-                  type="hidden"
-                  name="product_id"
-                  value={product.product.id}
-                />
-                <input type="hidden" name="entry_id" value={product.id} />
-                <div class="form-group">
-                  <!-- <label for="color">צבע</label> -->
-                  <select class="form-control" name="color" id="color">
-                    <option default value="undefined">צבע</option>
-                    {#each ALL_COLORS as color}
-                      <option value={color["id"]}>{color["name"]}</option>
-                    {/each}
-                  </select>
-
-                  <!-- <label for="size">מידה</label> -->
-                  <select class="form-control" name="size" id="size">
-                    <option default value="undefined">מידה</option>
-                    {#each ALL_SIZES.sort((a, b) => {
-                      return a.code.localeCompare(b.code);
-                    }) as size}
-                      <option value={size["id"]}>{size["size"]}</option>
-                    {/each}
-                  </select>
-                  <!-- <label for="varient">מודל</label> -->
-                  {#if product.verients.length != 0}
-                    <select class="form-control" name="varient" id="varient">
-                      <option default value="undefined">מודל</option>
-                      {#each ALL_VERIENTS as varient}
-                        <option value={varient["id"]}>{varient["name"]}</option>
+            {#if collectingState == false}
+              <td colspan="7">
+                {#key product.id}
+                  <MentriesServerTable bind:product {ALL_SIZES} {ALL_COLORS_DICT} {ALL_SIZES_DICT} {ALL_VERIENTS} />
+                {/key}
+              </td>
+              <td colspan="1">
+                <form class="add-entry-form" action="" method="post" on:submit={add_entry_btn_clicked}>
+                  <input type="hidden" name="product_id" value={product.product.id} />
+                  <input type="hidden" name="entry_id" value={product.id} />
+                  <div class="form-group">
+                    <!-- <label for="color">צבע</label> -->
+                    <select class="form-control" name="color" id="color">
+                      <option default value="undefined">צבע</option>
+                      {#each ALL_COLORS as color}
+                        <option value={color["id"]}>{color["name"]}</option>
                       {/each}
                     </select>
-                  {/if}
 
-                  <!-- <label for="amount">כמות</label> -->
-                  <input
-                    class="form-control"
-                    type="number"
-                    placeholder="כמות"
-                    name="amount"
-                    id="amount"
-                    min="0"
-                  />
-                </div>
-                <div class="error-msg" />
-                <button type="submit" class="btn btn-secondary">הוסף</button>
-              </form>
-            </td>
+                    <!-- <label for="size">מידה</label> -->
+                    <select class="form-control" name="size" id="size">
+                      <option default value="undefined">מידה</option>
+                      {#each ALL_SIZES.sort((a, b) => {
+                        return a.code.localeCompare(b.code);
+                      }) as size}
+                        <option value={size["id"]}>{size["size"]}</option>
+                      {/each}
+                    </select>
+                    <!-- <label for="varient">מודל</label> -->
+                    {#if product.verients.length != 0}
+                      <select class="form-control" name="varient" id="varient">
+                        <option default value="undefined">מודל</option>
+                        {#each ALL_VERIENTS as varient}
+                          <option value={varient["id"]}>{varient["name"]}</option>
+                        {/each}
+                      </select>
+                    {/if}
+
+                    <!-- <label for="amount">כמות</label> -->
+                    <input class="form-control" type="number" placeholder="כמות" name="amount" id="amount" min="0" />
+                  </div>
+                  <div class="error-msg" />
+                  <button type="submit" class="btn btn-secondary">הוסף</button>
+                </form>
+              </td>
+            {:else}
+              <td colspan="8">
+                <CollectingTable bind:product {ALL_COLORS_DICT} {ALL_PROVIDERS} {ALL_SIZES_DICT} {ALL_VERIENTS_DICT} />
+              </td>
+            {/if}
           </tr>
         {/each}
       </tbody>
@@ -674,11 +665,7 @@ let current_selected_sim_idx = -1;
           <div slot="item" let:item let:label>
             <div class="search-item">
               <div class="inner">
-                <img
-                  alt={item.title}
-                  style="height:25px;"
-                  src="{CLOUDINARY_BASE_URL}f_auto,w_auto/{item.cimage}"
-                />
+                <img alt={item.title} style="height:25px;" src="{CLOUDINARY_BASE_URL}f_auto,w_auto/{item.cimage}" />
                 {@html label}
               </div>
             </div>
@@ -687,20 +674,12 @@ let current_selected_sim_idx = -1;
         {#if selectedProduct}
           <div class="selected-product">
             <div class="inner">
-              <img
-                alt={selectedProduct?.title}
-                style="height:25px;"
-                src="{CLOUDINARY_BASE_URL}f_auto,w_auto/{selectedProduct?.cimage}"
-              />
+              <img alt={selectedProduct?.title} style="height:25px;" src="{CLOUDINARY_BASE_URL}f_auto,w_auto/{selectedProduct?.cimage}" />
               {@html selectedProduct?.title}
             </div>
           </div>
 
-          <button
-            disabled={add_product_status == "sending"}
-            on:click={addNewProductButtonClick}
-            class="btn btn-secondary"
-          >
+          <button disabled={add_product_status == "sending"} on:click={addNewProductButtonClick} class="btn btn-secondary">
             {#if add_product_status == "sending"}
               <div class="spinner-border" role="status">
                 <span class="sr-only" />
@@ -719,9 +698,7 @@ let current_selected_sim_idx = -1;
     </div>
     <!-- </form> -->
     <div class="new-product-btn-wraper">
-      <button class="btn btn-secondary" on:click={new_product_btn_click}>
-        צור מוצר חדש
-      </button>
+      <button class="btn btn-secondary" on:click={new_product_btn_click}> צור מוצר חדש </button>
     </div>
   </div>
   <!-- simulation -->
@@ -737,14 +714,7 @@ let current_selected_sim_idx = -1;
           </td>
           <td>
             <div class="sim-description">
-              <textarea
-                name="sim-{i}"
-                id=""
-                cols="50"
-                rows="5"
-                placeholder="תיאור הדמייה"
-                bind:value={sim.description}
-              />
+              <textarea name="sim-{i}" id="" cols="50" rows="5" placeholder="תיאור הדמייה" bind:value={sim.description} />
             </div>
           </td>
           <td>
@@ -776,20 +746,11 @@ let current_selected_sim_idx = -1;
                 {#each Object.keys(sim.products || {}) as product_idx}
                   <tr>
                     <td>
-                      <img
-                        src="{CLOUDINARY_BASE_URL}{sim.products[product_idx]
-                          .img}"
-                        width="25px"
-                        height="25px"
-                      />
+                      <img src="{CLOUDINARY_BASE_URL}{sim.products[product_idx].img}" width="25px" height="25px" />
                       {sim.products[product_idx].title}</td
                     >
                     <td>
-                      <input
-                        type="number"
-                        bind:value={sim.products[product_idx].amount}
-                        Width="min-content"
-                      />
+                      <input type="number" bind:value={sim.products[product_idx].amount} Width="min-content" />
                     </td>
                   </tr>
                 {/each}
@@ -819,30 +780,16 @@ let current_selected_sim_idx = -1;
       </tr>
       <tr>
         <td colspan="1" class="sim-image-td">
-          <input
-            type="file"
-            id="selectedFileSim"
-            on:change={handleImageUploadSim}
-            accept="image/png, image/gif, image/jpeg"
-          />
+          <input type="file" id="selectedFileSim" on:change={handleImageUploadSim} accept="image/png, image/gif, image/jpeg" />
           <img width="50px" height="50px" src={simImage} class="sim-img" />
         </td>
         <td colspan="1">
           <div class="sim-description">
-            <textarea
-              name="sim-new"
-              id=""
-              cols="50"
-              rows="5"
-              placeholder="תיאור הדמייה"
-              bind:value={SimDescriptionNew}
-            />
+            <textarea name="sim-new" id="" cols="50" rows="5" placeholder="תיאור הדמייה" bind:value={SimDescriptionNew} />
           </div>
         </td>
         <td>
-          <button type="button" on:click={addNewSimBtnClicked}
-            >הוסף הדמייה</button
-          >
+          <button type="button" on:click={addNewSimBtnClicked}>הוסף הדמייה</button>
         </td>
       </tr>
     </table>
@@ -1050,5 +997,71 @@ table.simulation {
   &.active {
     background-color: #ccc;
   }
+}
+
+//switch
+.collecting-switch {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px;
+  .switch {
+    margin-left: 10px;
+    margin-right: 10px;
+  }
+}
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: 0.4s;
+  transition: 0.4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: 0.4s;
+  transition: 0.4s;
+}
+
+input:checked + .slider {
+  background-color: #2196f3;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196f3;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+}
+
+.slider.round:before {
+  border-radius: 50%;
 }
 </style>

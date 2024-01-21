@@ -5,7 +5,7 @@ import { apiGetAllSizes } from "./api/api";
 export let product;
 
 export let ALL_SIZES;
-export let ALL_COLORS;
+// export let ALL_COLORS;
 export let ALL_VERIENTS;
 let sizes_ids_set = new Set();
 let colors_ids_set = new Set();
@@ -13,28 +13,8 @@ let verients_ids_set = new Set();
 let sorted_sizes = [];
 let sorted_colors = [];
 let sorted_verients = [];
-let ALL_COLORS_DICT = undefined;
-let ALL_SIZES_DICT = undefined;
-$: {
-  ALL_COLORS;
-  if (ALL_COLORS) {
-    let ALL_COLORS_DICT_temp = {};
-    ALL_COLORS.forEach((color) => {
-      ALL_COLORS_DICT_temp[color.id] = color;
-    });
-    ALL_COLORS_DICT = ALL_COLORS_DICT_temp;
-  }
-}
-$: {
-  ALL_SIZES;
-  if (ALL_SIZES) {
-    let ALL_SIZES_DICT_temp = {};
-    ALL_SIZES.forEach((size) => {
-      ALL_SIZES_DICT_temp[size.id] = size;
-    });
-    ALL_SIZES_DICT = ALL_SIZES_DICT_temp;
-  }
-}
+export let ALL_COLORS_DICT = undefined;
+export let ALL_SIZES_DICT = undefined;
 
 $: {
   product.entries;
@@ -100,9 +80,7 @@ $: {
 
   sorted_colors = [...colors_temp_set];
 
-  sorted_verients = [...verients_temp_set]
-    .filter((v) => v != null)
-    .map((ver_id) => ALL_VERIENTS.find((ver) => ver.id == ver_id));
+  sorted_verients = [...verients_temp_set].filter((v) => v != null).map((ver_id) => ALL_VERIENTS.find((ver) => ver.id == ver_id));
 }
 function input_amount_changed(e) {
   let el = e.target;
@@ -116,11 +94,7 @@ function input_amount_changed(e) {
   //console.log('input_amount_changed:', size_id, color_id, verient_id, quantity);
   let found = false;
   product.entries.forEach((entry) => {
-    if (
-      entry.size == size_id &&
-      entry.color == color_id &&
-      entry.varient == verient_id
-    ) {
+    if (entry.size == size_id && entry.color == color_id && entry.varient == verient_id) {
       entry.quantity = quantity;
       found = true;
     }
@@ -134,24 +108,13 @@ function input_amount_changed(e) {
       quantity: quantity,
     });
   }
-  console.log(
-    "input_amount_changed",
-    found,
-    size_id,
-    color_id,
-    verient_id,
-    quantity
-  );
+  console.log("input_amount_changed", found, size_id, color_id, verient_id, quantity);
   product.entries = [...product.entries];
 }
 
 function find_entry_quantity(size, color, verient) {
   for (let entry of product.entries) {
-    if (
-      entry.size == size &&
-      entry.color == color &&
-      entry.varient == verient
-    ) {
+    if (entry.size == size && entry.color == color && entry.varient == verient) {
       return entry.quantity;
     }
   }
@@ -240,10 +203,7 @@ function clear_sizes_entries(color_key) {
             <td class="sticky-col">
               {#if color}
                 <div class="color-box">
-                  <div
-                    class="inner"
-                    style="background-color: {ALL_COLORS_DICT[color].color}"
-                  />
+                  <div class="inner" style="background-color: {ALL_COLORS_DICT[color].color}" />
                   {ALL_COLORS_DICT[color].name}
                 </div>
               {:else}
@@ -284,20 +244,14 @@ function clear_sizes_entries(color_key) {
                     <div class="cell-wraper">
                       <input
                         on:change={input_amount_changed}
-                        value={find_entry_quantity(
-                          size_obj.id,
-                          color,
-                          ver?.id || null
-                        )}
-                        style="border: 2px solid {ALL_COLORS_DICT[color]
-                          ?.color}"
+                        value={find_entry_quantity(size_obj.id, color, ver?.id || null)}
+                        style="border: 2px solid {ALL_COLORS_DICT[color]?.color}"
                         data-color={color}
                         data-size={size_obj.id}
                         data-ver={ver?.id || null}
                         class="size-input cls-cell"
                         type="number"
-                        placeholder="{ALL_SIZES_DICT[size_obj.id]
-                          .size}({ver?.name || ''})"
+                        placeholder="{ALL_SIZES_DICT[size_obj.id].size}({ver?.name || ''})"
                         min="0"
                         max="9999"
                       />
@@ -330,15 +284,8 @@ function clear_sizes_entries(color_key) {
             </td>
 
             <td class="delete-cell-style">
-              <button
-                class="remove-button"
-                on:click={clear_sizes_entries(color)}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16px"
-                  height="16px"
-                  viewBox="0 0 32 36"
+              <button class="remove-button" on:click={clear_sizes_entries(color)}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16px" height="16px" viewBox="0 0 32 36"
                   ><path
                     fill="currentColor"
                     d="M30.9 2.3h-8.6L21.6 1c-.3-.6-.9-1-1.5-1h-8.2c-.6 0-1.2.4-1.5.9l-.7 1.4H1.1C.5 2.3 0 2.8 0 3.4v2.2c0 .6.5 1.1 1.1 1.1h29.7c.6 0 1.1-.5 1.1-1.1V3.4c.1-.6-.4-1.1-1-1.1zM3.8 32.8A3.4 3.4 0 0 0 7.2 36h17.6c1.8 0 3.3-1.4 3.4-3.2L29.7 9H2.3l1.5 23.8z"

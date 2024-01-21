@@ -907,6 +907,10 @@ def svelte_cart_form(request):
         email = body['email'] or ''
         phone = body['phone'] or ''
         business_name = body['business_name'] or ''
+        address = body.get('address', '')
+        is_delivery_company = body.get('is_delivery_company', '')
+        contact_name = body.get('contact_name', '')
+        settlement = body.get('settlement', '')
         my_uuid = body['uuid'] or ''
         message = body['message'] or ''
         order_type = body['order_type'] or ''
@@ -936,7 +940,8 @@ def svelte_cart_form(request):
         except ValueError:
             user_uuid = uuid.uuid4()
         db_cart = SvelteCartModal.objects.create(user=user_id, device=device, uid=user_uuid, businessName=business_name,
-                                                 name=name, phone=phone, email=email, message=message, agent=agent, order_type=order_type)
+                                                 name=name, phone=phone, email=email, message=message, agent=agent, order_type=order_type, address=address,
+                                                 is_delivery_company=is_delivery_company, contact_name=contact_name, settlement=settlement)
         # data.products.set(products)
         db_cart.productsRaw = raw_cart
         # products = [{'id': 5, 'amount': 145, 'mentries': {...}}, {'id': 18, 'amount': 0, 'mentries': {...}}, {'id': 138, 'amount': 0}]
@@ -958,9 +963,11 @@ def svelte_cart_form(request):
                     unitPrice = 0
             print_desition = p.get('print', False)
             embro = p.get('embro', False)
+            private_comment = p.get('private_comment', '')
+            public_comment = p.get('public_comment', '')
             try:
                 obj = SvelteCartProductEntery.objects.create(
-                    product_id=pid, amount=pamount, details=pentries, unitPrice=unitPrice, print=print_desition, embro=embro)
+                    product_id=pid, amount=pamount, details=pentries, unitPrice=unitPrice, print=print_desition, embro=embro, private_comment=private_comment, public_comment=public_comment)
                 data.append(obj)
             except:
                 pass

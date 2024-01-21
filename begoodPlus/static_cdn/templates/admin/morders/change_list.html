@@ -11,6 +11,11 @@
 <!-- MY CODE START  -->
 <li>
   <button id="collect-providers" type="button">ייצירת טופס ספקים
+  </button>
+  </li>
+  <li>
+  <button id="collect-providers-2" type="button">ייצירת טופס ספקים 2
+  </button>
   </li>
 </div>
 <!-- MY CODE END  -->
@@ -48,10 +53,42 @@
         collectProvidersButton.disabled = false;
       });
   });
+
+
+
+    const collectProvidersButton2 = document.getElementById('collect-providers-2');
+  collectProvidersButton2.addEventListener('click', () =>
+  {
+    collectProvidersButton2.disabled = true;
+    fetch('/morders-create-providers-docx-2/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': '{{ csrf_token }}'
+      },
+      body: JSON.stringify({
+        'csrfmiddlewaretoken': '{{ csrf_token }}'
+      })
+    })
+      .then(response => response.json())
+      .then(data =>
+      {
+        console.log(data);
+        // open new tab with /providers_docx_task/<task_id> endpoint
+        window.open(`/providers_docx_task-2/${data.task_id}/`, '_blank');
+      })
+      .catch(error =>
+      {
+        console.log(error);
+      }).finally(() =>
+      {
+        collectProvidersButton2.disabled = false;
+      });
+  });
 </script>
 
 <style>
-  #collect-providers {
+  #collect-providers,#collect-providers-2 {
     display: block;
     float: left;
     padding: 3px 12px;

@@ -1,6 +1,6 @@
 from threading import Thread
 from uuid import uuid4
-from core.models import ProvidersDocxTask
+from core.models import ProvidersDocxTask, ProvidersDocxTask2
 from core.tasks import sheetsurl_to_providers_docx_task
 from docsSignature.models import MOrderSignatureSimulationConnectedItem
 from docsSignature.models import MOrderSignatureSimulation
@@ -43,6 +43,7 @@ from django.template.loader import get_template
 from productSize.models import ProductSize
 from docx.enum.table import WD_TABLE_DIRECTION
 import reversion
+from rest_framework.response import Response
 
 
 def spreedsheet_to_morder_view(request):
@@ -176,6 +177,24 @@ def morders_create_providers_docx(request):
         Thread(target=sheetsurl_to_providers_docx_task,
                args=(task.id,)).start()
         return JsonResponse({'status': 'success', 'task_id': task.id}, status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+def morders_create_providers_docx2(request):
+    if not request.user.is_superuser:
+        return JsonResponse({'error': 'You are not authorized to perform this action'}, status=status.HTTP_401_UNAUTHORIZED)
+    else:
+        # set request.ids to a list of Morder ids with export_to_suppliers=True
+        morders = MOrder.objects.filter(
+            export_to_suppliers=True)
+        # morder_ids = morders.values_list('id', flat=True)
+
+        task = ProvidersDocxTask2.objects.create()
+        task.morders.set(morders)
+        task.save()
+        task.process_morders()
+        return JsonResponse({'status': 'success', 'task_id': task.id}, status=status.HTTP_200_OK)
+    pass
 
 
 def create_provider_docs(request):
@@ -944,9 +963,7 @@ def api_get_order_data2(request, id):
     return JsonResponse(data, status=status.HTTP_200_OK)
 
 
-# @api_view(['GET', 'POST'])
-
-
+@api_view(['GET', 'POST'])
 def api_get_order_data(request, id):
     from docsSignature.utils import create_signature_doc_from_morder, create_signature_doc_from_morder_thread
     print('api_get_order_data', id)
@@ -954,7 +971,7 @@ def api_get_order_data(request, id):
         return JsonResponse({'status': 'error'}, status=status.HTTP_403_FORBIDDEN)
 
     order = MOrder.objects.select_related('client', 'agent', 'client__user', 'mordersignature',).prefetch_related(
-        'products', 'products__product__sizes', 'products__product__colors', 'products__product__varients', 'products__entries', 'products__entries__color', 'products__entries__size', 'products__entries__varient', 'products__toProviders',
+        'products', 'products__product__sizes', 'products__product__colors', 'products__product__varients', 'products__entries', 'products__entries__color', 'products__entries__size', 'products__entries__varient',
         'products__providers', 'products__product',).get(id=id)
     if request.method == 'POST':
         with reversion.create_revision():
@@ -968,7 +985,14 @@ def api_get_order_data(request, id):
             order.name = data['name']
             order.phone = data['phone']
             order.status_msg = data['status_msg']
-            order.export_to_suppliers = data.get('export_to_suppliers', False)
+            order.export_to_suppliers = data.get(
+                'export_to_suppliers', False)
+            order.private_company = data.get('private_company', '')
+            order.address = data.get('address', '')
+            order.settlement = data.get('settlement', '')
+            order.contact_name = data.get('contact_name', '')
+            order.is_delivery_company = data.get('is_delivery_company', False)
+
             for product in data['products']:
                 '''
                     'id':258
@@ -990,17 +1014,20 @@ def api_get_order_data(request, id):
                     p.product = product['product']
                     p.save()
                 p.price = product['price']
-                p.providers.set(product['providers'])
-                p.ergent = product['ergent']
-                if p.ergent == 'false':
-                    p.ergent = False
-                elif p.ergent == 'true':
-                    p.ergent = True
-                p.prining = product['prining']
-                p.embroidery = product['embroidery']
-                p.embroideryComment = product.get('embroideryComment', '')
-                p.priningComment = product.get('priningComment', '')
-                p.comment = product['comment']
+                # ders.set(product['providers'])
+                # p.ergent = product['ergent']
+                # if p.ergent == 'false':
+                #     p.ergent = False
+                # elif p.ergent == 'true':
+                #     p.ergent = True
+                # p.prining = product['prining']
+                # p.embroidery = product['embroidery']
+                # p.embroideryComment = product.get('embroideryComment', '')
+                # p.priningComment = product.get('priningComment', '')
+                # p.comment = product['comment']
+                p.private_comment = product.get('private_comment', '')
+                p.public_comment = product.get('public_comment', '')
+
                 p.save()
                 all_es = []
                 for entry in product['entries']:
@@ -1029,45 +1056,39 @@ def api_get_order_data(request, id):
                     e = p.entries.filter(id=entry['id'])
                     qyt = entry.get('quantity', '')
                     qyt = int(qyt) if qyt != "" else 0
-
+                    my_entry = None
                     if len(e) != 0:
                         e = e.first()
-                        # e.color_id = entry['color']
-                        # e.size_id = entry['size']
-                        # e.varient_id = entry.get('varient', None)
                         if qyt > 0:
                             e.quantity = qyt
+                            my_entry = e
                             e.save()
-                            # dups = p.entries.filter(
-                            #     Q(color=e.color) and
-                            #     Q(size=e.size) and
-                            #     Q(varient=e.varient) and
-                            #     Q(morder_item=p) and
-                            #     ~Q(id=e.id)
-                            # )
-                            # if dups.count() != 0:
-                            #     print('delete all dups: ', dups)
-                            #     dups.delete()
                         else:
                             e.delete()
                             pass
                     else:
                         if qyt > 0:
+
                             existing_entry = p.entries.filter(
                                 color_id=entry['color'], size_id=entry['size'], varient_id=entry.get('varient', None))
                             if existing_entry.count() != 0:
                                 existing_entry = existing_entry.first()
                                 existing_entry.quantity = qyt
-                                existing_entry.save()
+                                # existing_entry.save()
+                                my_entry = existing_entry
                             else:
                                 e = MOrderItemEntry(
                                     quantity=qyt, color_id=entry['color'], size_id=entry['size'], varient_id=entry.get('varient', None))
                                 e.morder_item = p
                                 e.save()
+                                my_entry = e
                                 p.entries.add(e)
-                    # e.
-
-                    # print('e2', e, 'save')
+                    if my_entry:
+                        my_entry.sheets_provider = entry.get(
+                            'sheets_provider', '')
+                        my_entry.sheets_taken_quantity = entry.get(
+                            'sheets_taken_quantity', '')
+                        my_entry.save()
                     p.save()
             print('done saving order items, move to simulations')
             for sim in data['simulations']:
@@ -1170,4 +1191,6 @@ def api_get_order_data(request, id):
         return JsonResponse({'status': 'ok'}, status=status.HTTP_200_OK)
 
     data = AdminMOrderSerializer(order).data
-    return JsonResponse(data, status=status.HTTP_200_OK)
+    # return JsonResponse(data, status=status.HTTP_200_OK)
+
+    return Response(data)

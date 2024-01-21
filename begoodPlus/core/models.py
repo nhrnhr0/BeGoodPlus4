@@ -6,7 +6,7 @@ from core.utils import uuid2slug
 from django.core.files.base import ContentFile
 import io
 import zipfile
-from core.utils import generate_provider_docx, process_sheets_to_providers_docx
+from core.utils import generate_provider_docx, process_sheets_to_providers_docx, generate_provider_docx2
 from core.utils import get_sheet_from_drive_url
 from catalogImages.models import CatalogImage, CatalogImageVarient
 from colorhash import ColorHash
@@ -134,6 +134,10 @@ class SvelteCartProductEntery(models.Model):
         'unit price'), max_digits=10, decimal_places=2, default=0)
     print = models.BooleanField(verbose_name=_('print'), default=False)
     embro = models.BooleanField(verbose_name=_('embro'), default=False)
+    private_comment = models.TextField(verbose_name=_(
+        'private comment'), blank=True, null=True)
+    public_comment = models.TextField(verbose_name=_(
+        'public comment'), blank=True, null=True)
 
     def __str__(self):
         return str(self.amount) + ' - ' + self.product.title
@@ -280,6 +284,13 @@ class SvelteCartModal(models.Model):
         'business name'), max_length=120, null=True, blank=True)
     phone = models.CharField(verbose_name=_('phone'), max_length=120)
     email = models.EmailField(verbose_name=_('email'), max_length=120)
+    address = models.CharField(verbose_name=_(
+        'address'), max_length=120, null=True, blank=True)
+    settlement = models.CharField(verbose_name=_(
+        'settlement'), max_length=120, null=True, blank=True)
+    is_delivery_company = models.BooleanField(default=False)
+    contact_name = models.CharField(verbose_name=_(
+        'Contact Name'), max_length=120, null=True, blank=True)
     products = models.ManyToManyField(to=CatalogImage, blank=True)
     productEntries = models.ManyToManyField(
         to=SvelteCartProductEntery, blank=True)
@@ -400,8 +411,14 @@ class SvelteCartModal(models.Model):
             name = self.name
             phone = self.phone
             email = self.email
+        private_company = self.businessName
         message = self.message if self.message != '' else ''
         agent = self.agent if self.agent != '' else ''
+        address = self.address if self.address != '' else ''
+        settlement = self.settlement if self.settlement != '' else ''
+        contact_name = self.contact_name if self.contact_name != '' else ''
+        is_delivery_company = self.is_delivery_company
+
         # STATUS_CHOICES = [('new', 'חדש'), ('price_proposal', 'הצעת מחיר'), ('in_progress', 'סחורה הוזמנה'), ('in_progress2', 'מוכן לליקוט',), (
         #     'in_progress3', 'בהדפסה',), ('in_progress4', 'מוכן בבית דפוס'), ('in_progress5', 'ארוז מוכן למשלוח'), ('done', 'סופק'), ]
         status = 'price_proposal' if self.order_type == 'הצעת מחיר' else 'new'
@@ -423,7 +440,10 @@ class SvelteCartModal(models.Model):
             # or
             # {'COLOR_ID': {'SIZE_ID': {'quantity': 0}...}...}
             price = i.unitPrice
-            currentProduct = {'product': product, 'price': price}
+            private_comment = i.private_comment
+            public_comment = i.public_comment
+            currentProduct = {'product': product, 'price': price,
+                              'private_comment': private_comment, 'public_comment': public_comment}
             entries_list = []
             if details == None or len(details) == 0:
                 size_id = None
@@ -466,13 +486,12 @@ class SvelteCartModal(models.Model):
             dbEntries = [MOrderItemEntry(size_id=entry['size_id'], color_id=entry['color_id'],
                                          varient_id=entry['varient_id'], quantity=entry['quantity']) for entry in product['entries']]
             dbEntries = MOrderItemEntry.objects.bulk_create(dbEntries)
-
             dbProduct = MOrderItem.objects.create(
-                product=product['product'], price=product['price'])
+                product=product['product'], price=product['price'], private_comment=product['private_comment'], public_comment=product['public_comment'])
             dbProduct.entries.set(dbEntries)
             dbProducts.append(dbProduct)
         morder = MOrder.objects.create(cart=cart, client=client, name=name,
-                                       phone=phone, email=email, status=status, status2=status2, message=message, agent=agent)
+                                       phone=phone, email=email, status=status, status2=status2, message=message, agent=agent, address=address, is_delivery_company=is_delivery_company, private_company=private_company, contact_name=contact_name, settlement=settlement)
         morder.products.add(*dbProducts)
         morder.recalculate_total_price()
         morder.save()
@@ -503,6 +522,161 @@ ProvidersDocxTaskStatusChoices = (
     ('done', _('Done')),
     ('error', _('Error')),
 )
+
+
+class ProvidersDocxTask2(models.Model):
+    morders = models.ManyToManyField('morders.MOrder', blank=True)
+    created_date = models.DateTimeField(auto_now_add=True)
+    updated_date = models.DateTimeField(auto_now=True)
+    logs = models.JSONField(blank=True, null=True)
+    docx = models.FileField(
+        upload_to='docx', blank=True, null=True, storage=fs)
+    status = models.CharField(
+        max_length=20, choices=ProvidersDocxTaskStatusChoices, default='new')
+    message = models.TextField(blank=True, null=True)
+
+    def convert_info_to_docx(self, info):
+        self.message = 'step 2'
+        self.save()
+        docs_data = []
+        with_private_file = [False, True]
+        for is_file_private in with_private_file:
+            for provider_name in info.keys():
+                doc, seccsess = generate_provider_docx(
+                    info[provider_name], provider_name, is_file_private)
+                if seccsess:
+                    prov_name = provider_name
+                    if is_file_private:
+                        prov_name = 'private_' + prov_name
+                    # morders_ids as string
+                    docs_data.append({
+                        'doc': doc,
+                        'provider_name': prov_name,
+                        'morders_ids': map(str, info[provider_name]['morders']),
+                        'is_private': is_file_private,
+                    })
+                zip_buffer = io.BytesIO()
+        with zipfile.ZipFile(zip_buffer, "a", zipfile.ZIP_DEFLATED, False) as zip_file:
+            for doc_info in docs_data:
+                file_stream = io.BytesIO()
+                doc = doc_info['doc']
+                doc.save(file_stream)
+                if doc_info['is_private']:
+                    file_name = str(
+                        '(' + doc_info['provider_name'] + ') ' + '|'.join(doc_info['morders_ids']) + '.docx')
+                else:
+                    file_name = str(doc_info['provider_name'] + ' ' +
+                                    str(datetime.datetime.now(tz=pytz.timezone(
+                                        'Israel')).strftime("%Y-%m-%d")) + '.docx')
+                file_stream.seek(0)
+                zip_file.writestr(
+                    file_name, file_stream.getvalue())
+        zip_buffer.seek(0)
+        self.docx = ContentFile(zip_buffer.getvalue(
+        ), 'providers - ' + str(self.created_date) + '.zip')
+        self.save()
+
+    def process_morders(self):
+        from morders.models import MOrder
+        self.status = 'in_progress'
+        self.logs = []
+        self.save()
+        # try:
+        morders = self.morders.all()
+        info = self.process_morders_to_providers_docx(morders)
+        self.convert_info_to_docx(info)
+        self.save()
+
+        # send providers file to telegram
+        send_providers_docx_to_telegram(self.docx.path)
+        # except Exception as e:
+        #     print(e)
+        #     self.status = 'error'
+        #     self.logs.append(str(e))
+        #     self.save()
+        #     return {'error': str(e)}
+        self.status = 'done'
+        self.message = 'done'
+        self.save()
+
+    def process_morders_to_providers_docx(self, morders):
+        self.message = 'step 1'
+        self.save()
+        info = {}
+        # info = { 'provider_name': {'morders': ['morder_id1', 'morder_id2', ...],
+        #       'products': {'product_name': {'items': [{'color': 'color_name',
+        #                                                           'orders': ['(morder_id1) 1\n'
+        #                                                                      'כמות: 6'],
+        #                                                           'qty': 6,
+        #                                                           'size': 'size_name',
+        #                                                           'verient': 'verient_name'}]}}}}
+        #
+        # '': {'morders': ['864'],
+        #                 'products': {'מגף עבודה בייסיק S3': {'items': [{'color': 'שחור',
+        #                                                                 'orders': ['(864) 1\n'
+        #                                                                            'כמות: 6'],
+        #                                                                 'qty': 6,
+        #                                                                 'size': '43',
+        #                                                                 'verient': '02'}]}}},
+        #            'אופנת רן - לי': {'morders': ['837'],
+        #                              'products': {'חולצת טריקו 160 גרם שרוול קצר': {'items': [{'color': 'לבן',
+        #                                                                                        'orders': ['(837) '
+        #                                                                                                   'גת '
+        #                                                                                                   'וית\n'
+        #                                                                                                   'כמות: '
+        #                                                                                                   '1'],
+        #                                                                                        'qty': 1,
+        #                                                                                        'size': 'S',
+        #                                                                                        'verient': ''}]}}}}
+        all_info = []
+        for morder in morders:
+            privider_info = morder.get_provider_info()
+            print('done morder: ' + str(morder.id))
+            # provider_info = 00:{'provider': 'אחים נוריאלי', 'product': 'כפכף פס רחב', 'size': < ProductSize: 39 (ad) > , 'color': < Color: שחור > , 'varient': None, 'qyt': 3}01:{'provider': 'מלאי', 'product': 'כפכף פס רחב', 'size': < ProductSize: 42 (ag) > , 'color': < Color: שחור > , 'varient': None, 'qyt': 5}02:{'provider': '', 'product': 'כפכף פס רחב', 'size': < ProductSize: 43 (ah) > , 'color': < Color: שחור > , 'varient': None, 'qyt': 3}03:{'provider': '', 'product': 'כפכף פס רחב', 'size': < ProductSize: 36 (aa) > , 'color': < Color: שחור > , 'varient': None, 'qyt': 1}04:{'provider': '', 'product': 'כפכף פס רחב', 'size': < ProductSize: 37 (ab) > , 'color': < Color: שחור > , 'varient': None, 'qyt': 2}05:{'provider': '', 'product': 'כפכף פס רחב', 'size': < ProductSize: 38 (ac) > , 'color': < Color: שחור > , 'varient': None, 'qyt': 3}06:{'provider': '', 'product': 'כפכף פס רחב', 'size': < ProductSize: 44 (ai) > , 'color': < Color: שחור > , 'varient': None, 'qyt': 7}07:{'provider': '', 'product': 'כפכף פס רחב', 'size': < ProductSize: 45 (aj) > , 'color': < Color: שחור > , 'varient': None, 'qyt': 8}08:{'provider': 'סייף בוק', 'product': 'כפכף פס רחב', 'size': < ProductSize: 46 (ak) > , 'color': < Color: שחור > , 'varient': None, 'qyt': 0}09:{'provider': '', 'product': 'נעל בטיחות ספורטיבית...DE PLUS S3', 'size': < ProductSize: 41 (af) > , 'color': < Color: שחור > , 'varient': None, 'qyt': 6}10:{'provider': '', 'product': 'נעל בטיחות TITAN SNEAKER', 'size': < ProductSize: 41 (af) > , 'color': < Color: שחור > , 'varient': None, 'qyt': 1}
+            all_info.extend(privider_info)
+        print(all_info)
+        for i in all_info:
+            provider_name = i['provider']
+            product_name = i['product']
+            size = i['size'].size
+            color = i['color'].name
+            varient = i['varient'].name if i['varient'] != None else ''
+            qty = i['qyt']
+            morder_id = i['morder_id']
+            if provider_name not in info.keys():
+                info[provider_name] = {'morders': [], 'products': {}}
+            if morder_id not in info[provider_name]['morders']:
+                info[provider_name]['morders'].append(morder_id)
+            if product_name not in info[provider_name]['products'].keys():
+                info[provider_name]['products'][product_name] = {
+                    'items': []}
+            # info[provider_name]['products'][product_name]['items'].append({
+            #     'color': color,
+            #     'size': size,
+            #     'verient': varient,
+            #     'qty': qty,
+            #     'orders': ['(' + str(morder_id) + ') ' + str(qty) + '\n' + 'כמות: ' + str(qty)]
+            # })
+            # check if the same item already exists, if so then add the qty to the existing item and append to orders, else create new item
+            item_exists = False
+            for item in info[provider_name]['products'][product_name]['items']:
+                if item['color'] == color and item['size'] == size and item['verient'] == varient:
+                    item_exists = True
+                    item['qty'] += qty
+                    item['orders'].append(
+                        '(' + str(morder_id) + ') ' + 'כמות: ' + str(qty) + '\n')
+            if not item_exists:
+                info[provider_name]['products'][product_name]['items'].append({
+                    'color': color,
+                    'size': size,
+                    'verient': varient,
+                    'qty': qty,
+                    'orders': ['(' + str(morder_id) + ') ' + 'כמות: ' + str(qty) + '\n']
+                })
+        self.message = 'step 1 - done'
+        self.save()
+        return info
+        # print(info)
 
 
 class ProvidersDocxTask(models.Model):

@@ -254,6 +254,14 @@ async def insert_image_from_url_to_cell(session, url, cell):
             print('failed to download image', e)
 
 
+def generate_provider_docx2(provider_data, provider_name, private_docx=False):
+    print('generate_provider_docx2')
+    print('provider_data', provider_data)
+    print('provider_name', provider_name)
+    print('private_docx', private_docx)
+    pass
+
+
 def generate_provider_docx(provider_data, provider_name, private_docx=False):
     pd.option_context('expand_frame_repr', False, 'display.max_rows', None)
     document = Document()
@@ -504,8 +512,10 @@ def generate_provider_docx(provider_data, provider_name, private_docx=False):
                 except:
                     pass
 
-            asyncio.run(add_table_to_doc(document, value.dropna(
-                axis=0, how='all'), private_docx))
+            # asyncio.run(add_table_to_doc(document, value.dropna(
+            #     axis=0, how='all'), private_docx))
+            add_table_to_doc(document, value.dropna(
+                axis=0, how='all'), private_docx)
     # changing the page margins
     margin = 1
     sections = document.sections

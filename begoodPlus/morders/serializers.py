@@ -26,7 +26,7 @@ class AdminMOrderItemEntrySerializer(serializers.ModelSerializer):
     class Meta:
         model = MOrderItemEntry
         fields = ('id', 'quantity', 'color', 'size', 'varient',
-                  'color_name', 'size_name', 'varient_name')
+                  'color_name', 'size_name', 'varient_name', 'sheets_taken_quantity', 'sheets_provider')
     pass
 
 
@@ -102,18 +102,31 @@ class AdminProviderRequestrSerializer(serializers.ModelSerializer):
         pass
 
 
+class ColorIdsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MOrderItem
+        fields = ('id',)
+
+
 class AdminMOrderItemSerializer(serializers.ModelSerializer):
     product_name = serializers.CharField(source='product.title')
     product_cimage = serializers.CharField(source='product.cimage')
     entries = AdminMOrderItemEntrySerializer(many=True, read_only=True)
-    providers = serializers.SerializerMethodField('get_providers')
+    # providers = serializers.SerializerMethodField('get_providers')
     pbarcode = serializers.CharField(source='product.barcode')
-    colors = serializers.SerializerMethodField('get_colors')
-    sizes = serializers.SerializerMethodField('get_sizes')
-    verients = serializers.SerializerMethodField('get_verients')
+    # colors = serializers.SerializerMethodField('get_colors')
+    # sizes = serializers.SerializerMethodField('get_sizes')
+    colors = serializers.PrimaryKeyRelatedField(
+        source='product.colors', many=True, read_only=True)
+    sizes = serializers.PrimaryKeyRelatedField(
+        source='product.sizes', many=True, read_only=True)
+    verients = serializers.PrimaryKeyRelatedField(
+        source='product.varients', many=True, read_only=True)
+    # END: ed8c6549bwf9)
+    # verients = serializers.SerializerMethodField('get_verients')
     #available_inventory = serializers.SerializerMethodField('get_available_inventory')
     product = serializers.SerializerMethodField('get_product_serializer')
-    toProviders = AdminProviderRequestrSerializer(many=True, read_only=True)
+    # toProviders = AdminProviderRequestrSerializer(many=True, read_only=True)
 
     def get_product_serializer(self, obj):
         # serializer_context = {'request': self.context.get('request') }
@@ -176,26 +189,26 @@ class AdminMOrderItemSerializer(serializers.ModelSerializer):
     #     ret = list(stock)
     #     return ret
 
-    def get_sizes(self, obj):
-        ids = obj.product.sizes.values_list('id', flat=True)
-        return list(ids)
+    # def get_sizes(self, obj):
+    #     ids = obj.product.sizes.values_list('id', flat=True)
+    #     return list(ids)
 
-    def get_colors(self, obj):
-        ids = obj.product.colors.values_list('id', flat=True)
-        return list(ids)
+    # def get_colors(self, obj):
+    #     ids = obj.product.colors.values_list('id', flat=True)
+    #     return list(ids)
 
-    def get_verients(self, obj):
-        ids = obj.product.varients.values_list('id', flat=True)
-        return list(ids)
+    # def get_verients(self, obj):
+    #     ids = obj.product.varients.values_list('id', flat=True)
+    #     return list(ids)
 
-    def get_providers(self, obj):
-        ids = obj.providers.values_list('id', flat=True)
-        return list(ids)
+    # def get_providers(self, obj):
+    #     ids = obj.providers.values_list('id', flat=True)
+    #     return list(ids)
 
     class Meta:
         model = MOrderItem
         fields = ('id', 'product',  'price', 'providers', 'ergent', 'prining', 'embroidery', 'comment', 'product_name', 'entries', 'pbarcode',
-                  'product_cimage', 'product', 'priningComment', 'embroideryComment', 'toProviders', 'colors', 'sizes', 'verients',)  # 'available_inventory',
+                  'product_cimage', 'product', 'priningComment', 'embroideryComment', 'colors', 'sizes', 'verients', 'public_comment', 'private_comment',)  # 'available_inventory',
 
 
 class AdminMOrderListSerializer(serializers.ModelSerializer):
@@ -227,6 +240,10 @@ class AdminMOrderSerializer(serializers.ModelSerializer):
         source='agent.username', read_only=False, default='')
     #client_id = serializers.IntegerField(source='client.user.id', read_only=False)
     simulations = serializers.SerializerMethodField('get_simulations')
+    client_sign_url = serializers.SerializerMethodField()
+
+    def get_client_sign_url(self, obj):
+        return obj.get_client_sign_url()
 
     def get_simulations(self, obj):
         ret = []
@@ -268,9 +285,9 @@ class AdminMOrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = MOrder
-        fields = ('id', 'agent', 'agent_name', 'client', 'status', 'status2', 'status_msg', 'created', 'updated', 'message', 'name', 'phone',
+        fields = ('id', 'agent', 'address', 'settlement', 'private_company', 'is_delivery_company',  'agent_name', 'client', 'status', 'status2', 'status_msg', 'created', 'updated', 'message', 'name', 'phone',
                   'email', 'client_businessName', 'products', 'freezeTakenInventory', 'isOrder', 'sendProviders', 'startCollecting', 'simulations', 'sheets_order_link',
-                  'sheets_price_prop_link',  'export_to_suppliers',)
+                  'sheets_price_prop_link',  'export_to_suppliers', 'client_sign_url', 'contact_name')
 
 
 class MOrderCollectionSerializer(serializers.ModelSerializer):

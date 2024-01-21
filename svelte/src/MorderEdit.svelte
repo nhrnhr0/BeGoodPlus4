@@ -2,15 +2,7 @@
 import { onMount } from "svelte";
 import { Loading } from "carbon-components-svelte";
 import { CLOUDINARY_BASE_URL } from "./consts/consts";
-import {
-  apiAddNewProductToMorder,
-  apiSearchProducts,
-  apiGetMOrder,
-  apiGetProviders,
-  apiSaveMOrder,
-  apiRequestStockInventory,
-  apiDeleteMOrderItem,
-} from "./api/api";
+import { apiAddNewProductToMorder, apiSearchProducts, apiGetMOrder, apiGetProviders, apiSaveMOrder, apiRequestStockInventory, apiDeleteMOrderItem } from "./api/api";
 import { TabulatorFull as Tabulator } from "tabulator-tables";
 import { Button } from "carbon-components-svelte";
 import { MultiSelect } from "carbon-components-svelte";
@@ -163,8 +155,7 @@ function multiSelectProviderFormatter(cell, formatterParams, onRendered) {
   } else {
     values = [];
   }
-  let html =
-    '<select class=""  data-placeholder=\'סמן ספקים\' multiple="multiple">';
+  let html = '<select class=""  data-placeholder=\'סמן ספקים\' multiple="multiple">';
   ALL_PROVIDERS.forEach((provider) => {
     /* values = 
                 0: {value: '32', label: 'אחים אשכנזי'}
@@ -178,8 +169,7 @@ function multiSelectProviderFormatter(cell, formatterParams, onRendered) {
                 8: {value: '41', label: 'סיינט'}
             */
     // provider = {value: '32', label: 'אחים אשכנזי'}
-    let selected =
-      values.find((v) => v == provider.value) != undefined ? "selected" : "";
+    let selected = values.find((v) => v == provider.value) != undefined ? "selected" : "";
     //let selected = values.indexOf(parseInt(provider.value)) > -1 ? "selected" : "";
     html += `<option value="${provider.value}" ${selected}>${provider.label}</option>`;
   });
@@ -372,9 +362,7 @@ onMount(async () => {
             let rowData = row.getData();
             //console.log('sendData: ', sendData);
             apiDeleteMOrderItem(rowData.id);
-            data.products = data.products.filter(
-              (item) => item.id != rowData.id
-            );
+            data.products = data.products.filter((item) => item.id != rowData.id);
             row.delete();
 
             console.log("row ", row, " deleted");
@@ -426,11 +414,7 @@ function createPivot(data, tableEl) {
           let color_name = filters["color_name"];
           let varient_name = filters["varient_name"];
           for (let i = 0; i < data.length; i++) {
-            if (
-              data[i].size_name == size_name &&
-              data[i].color_name == color_name &&
-              data[i].varient_name == varient_name
-            ) {
+            if (data[i].size_name == size_name && data[i].color_name == color_name && data[i].varient_name == varient_name) {
               console.log(data[i]);
               let newQuantity = prompt("הזן כמות", data[i].quantity);
               //let text;
@@ -479,11 +463,7 @@ function addNewProductFormSubmit(e) {
 </script>
 
 <main>
-  <ProductAmountEditModel
-    bind:this={productAmountEditModel}
-    is_open={is_modal_open}
-    row_id={amount_modal_row_id}
-  />
+  <ProductAmountEditModel bind:this={productAmountEditModel} is_open={is_modal_open} row_id={amount_modal_row_id} />
   {#if updateing}
     <Loading withOverlay={false} />
   {:else}
@@ -519,11 +499,7 @@ function addNewProductFormSubmit(e) {
               <div slot="item" let:item let:label>
                 <div class="search-item">
                   <div class="inner">
-                    <img
-                      alt={item.title}
-                      style="height:25px;"
-                      src="{CLOUDINARY_BASE_URL}f_auto,w_auto/{item.cimage}"
-                    />
+                    <img alt={item.title} style="height:25px;" src="{CLOUDINARY_BASE_URL}f_auto,w_auto/{item.cimage}" />
                     {@html label}
                   </div>
                 </div>
@@ -532,11 +508,7 @@ function addNewProductFormSubmit(e) {
             {#if selectedProduct}
               <div class="selected-product">
                 <div class="inner">
-                  <img
-                    alt={selectedProduct?.title}
-                    style="height:25px;"
-                    src="{CLOUDINARY_BASE_URL}f_auto,w_auto/{selectedProduct?.cimage}"
-                  />
+                  <img alt={selectedProduct?.title} style="height:25px;" src="{CLOUDINARY_BASE_URL}f_auto,w_auto/{selectedProduct?.cimage}" />
                   {@html selectedProduct?.title}
                 </div>
               </div>

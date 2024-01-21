@@ -124,6 +124,8 @@ class MOrderItem(models.Model):
     prop_totalPrice = property(
         lambda self: self.prop_totalEntriesQuantity * self.price)
     created_at = models.DateTimeField(auto_now_add=True)
+    public_comment = models.TextField(null=True, blank=True)
+    private_comment = models.TextField(null=True, blank=True)
 
     class Meta:
         ordering = ['created_at', 'product__title', ]
@@ -175,11 +177,17 @@ class MOrder(models.Model):
     name = models.CharField(max_length=100, blank=True, null=True, default='')
     phone = models.CharField(max_length=100, blank=True, null=True, default='')
     email = models.CharField(max_length=100, blank=True, null=True, default='')
+    private_company = models.CharField(
+        max_length=100, blank=True, null=True, default='')
     status = models.CharField(
         max_length=100, choices=STATUS_CHOICES, default='new')
     status2 = models.ForeignKey(
         to='MorderStatus', on_delete=models.SET_NULL, null=True, blank=True)
     status_msg = models.TextField(_('status message'), blank=True, null=True)
+    address = models.CharField(max_length=120, blank=True, null=True)
+    settlement = models.CharField(max_length=120, blank=True, null=True)
+    is_delivery_company = models.BooleanField(default=False)
+    contact_name = models.CharField(max_length=120, blank=True, null=True)
     # order_type = models.CharField(max_length=100, choices=[('Invoice', 'חשבונית מס'), ('RefundInvoice', 'חשבונית זיכוי'), (
     #     'PriceProposal', 'הצעת מחיר'), ('ShippingCertificate', 'תעודת משלוח'), ('ReturnCertificate', 'תעודת החזרה')], blank=True, null=True)
     products = models.ManyToManyField(
@@ -264,6 +272,28 @@ class MOrder(models.Model):
                 pass
         print('done notify_order_status_update_post_save: ', total_sell)
         pass
+
+    def get_provider_info(self):
+        # return list of [{'provider': provider, 'product': product, 'size': size, 'color': color, 'varient': varient, 'qyt': X,},...]
+        ret = []
+        for product in self.products.all():
+            for entry in product.entries.all():
+                provider_name = entry.sheets_provider or ''
+                product_title = product.product.title
+                size = entry.size
+                color = entry.color
+                varient = entry.varient
+                if entry.sheets_taken_quantity and entry.sheets_taken_quantity.lower() == 'v':
+                    qyt = 0
+                else:
+                    qyt = entry.quantity - \
+                        int(entry.sheets_taken_quantity if entry.sheets_taken_quantity else '0')
+                ret.append({'provider': provider_name, 'product': product_title, 'size': size,
+                            'color': color, 'varient': varient, 'qyt': qyt, 'morder_id': self.id})
+        return ret
+
+    def get_client_sign_url(self):
+        return self.mordersignature.get_client_sign_url()
 
     def update_sell_price_from_price_proposal_sheet(self, sheet_id=None):
         #
