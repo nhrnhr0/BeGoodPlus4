@@ -64,9 +64,8 @@ $: {
   // order sizes_ids_set by code
   // sizes_ids_set: [1,2,7,3]
   // ALL_SIZES: [{id:1, code: '3'}, {id:2, code: '4'}, {id:7, code: '2'}, {id:3, code: '1'}]
-  let ALL_SIZES_ordered = ALL_SIZES.sort((a, b) => {
-    return a.code.localeCompare(b.code);
-  });
+  debugger;
+  let ALL_SIZES_ordered = ALL_SIZES;
   //console.log('ALL_SIZES_ordered:', ALL_SIZES_ordered);
   //console.log('sizes_ids_set:', sizes_ids_set);
   let sorted_sizes_temp = [];

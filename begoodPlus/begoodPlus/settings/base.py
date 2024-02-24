@@ -96,6 +96,7 @@ INSTALLED_APPS = [
     'provider',
     'productColor',
     'productSize',
+    'productSizeGroup',
     'packingType',
 
     'catalogImages',

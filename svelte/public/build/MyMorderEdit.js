@@ -3277,7 +3277,7 @@ var mymorderedit = (function () {
     	return child_ctx;
     }
 
-    // (168:0) {#if ALL_COLORS_DICT && ALL_SIZES_DICT}
+    // (167:0) {#if ALL_COLORS_DICT && ALL_SIZES_DICT}
     function create_if_block$3(ctx) {
     	let if_block_anchor;
 
@@ -3321,14 +3321,14 @@ var mymorderedit = (function () {
     		block,
     		id: create_if_block$3.name,
     		type: "if",
-    		source: "(168:0) {#if ALL_COLORS_DICT && ALL_SIZES_DICT}",
+    		source: "(167:0) {#if ALL_COLORS_DICT && ALL_SIZES_DICT}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (185:2) {:else}
+    // (184:2) {:else}
     function create_else_block$2(ctx) {
     	let table;
     	let thead;
@@ -3411,22 +3411,22 @@ var mymorderedit = (function () {
     			td1 = element("td");
     			t8 = text(t8_value);
     			attr_dev(th, "class", "sticky-col const-size-cell svelte-13qct7y");
-    			add_location(th, file$4, 188, 10, 6298);
+    			add_location(th, file$4, 187, 10, 6247);
     			attr_dev(tr, "class", "svelte-13qct7y");
-    			add_location(tr, file$4, 187, 8, 6283);
+    			add_location(tr, file$4, 186, 8, 6232);
     			attr_dev(thead, "class", "svelte-13qct7y");
-    			add_location(thead, file$4, 186, 6, 6267);
+    			add_location(thead, file$4, 185, 6, 6216);
     			attr_dev(tbody, "class", "svelte-13qct7y");
-    			add_location(tbody, file$4, 199, 6, 6609);
+    			add_location(tbody, file$4, 198, 6, 6558);
     			attr_dev(td0, "class", "svelte-13qct7y");
-    			add_location(td0, file$4, 299, 8, 10706);
+    			add_location(td0, file$4, 298, 8, 10655);
     			attr_dev(td1, "class", "total-cell full-total svelte-13qct7y");
-    			add_location(td1, file$4, 315, 8, 11157);
+    			add_location(td1, file$4, 314, 8, 11106);
     			attr_dev(tfoot, "class", "svelte-13qct7y");
-    			add_location(tfoot, file$4, 298, 6, 10690);
+    			add_location(tfoot, file$4, 297, 6, 10639);
     			attr_dev(table, "class", "entries-table svelte-13qct7y");
     			attr_dev(table, "id", table_id_value = "entries-table-" + /*product*/ ctx[0].id);
-    			add_location(table, file$4, 185, 4, 6199);
+    			add_location(table, file$4, 184, 4, 6148);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, table, anchor);
@@ -3584,14 +3584,14 @@ var mymorderedit = (function () {
     		block,
     		id: create_else_block$2.name,
     		type: "else",
-    		source: "(185:2) {:else}",
+    		source: "(184:2) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (169:2) {#if sorted_verients.length == 0 && sorted_colors.length == 1 && sorted_sizes.length == 1}
+    // (168:2) {#if sorted_verients.length == 0 && sorted_colors.length == 1 && sorted_sizes.length == 1}
     function create_if_block_1$3(ctx) {
     	let div;
     	let input;
@@ -3616,9 +3616,9 @@ var mymorderedit = (function () {
     			attr_dev(input, "placeholder", input_placeholder_value = /*ALL_SIZES_DICT*/ ctx[2][/*sorted_sizes*/ ctx[3][0].id].size);
     			attr_dev(input, "min", "0");
     			attr_dev(input, "max", "9999");
-    			add_location(input, file$4, 170, 6, 5703);
+    			add_location(input, file$4, 169, 6, 5652);
     			attr_dev(div, "class", "single-input-wraper svelte-13qct7y");
-    			add_location(div, file$4, 169, 4, 5663);
+    			add_location(div, file$4, 168, 4, 5612);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -3661,14 +3661,14 @@ var mymorderedit = (function () {
     		block,
     		id: create_if_block_1$3.name,
     		type: "if",
-    		source: "(169:2) {#if sorted_verients.length == 0 && sorted_colors.length == 1 && sorted_sizes.length == 1}",
+    		source: "(168:2) {#if sorted_verients.length == 0 && sorted_colors.length == 1 && sorted_sizes.length == 1}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (190:10) {#if sorted_verients.length != 0}
+    // (189:10) {#if sorted_verients.length != 0}
     function create_if_block_7$2(ctx) {
     	let th;
 
@@ -3677,7 +3677,7 @@ var mymorderedit = (function () {
     			th = element("th");
     			th.textContent = "מודל";
     			attr_dev(th, "class", "const-size-cell svelte-13qct7y");
-    			add_location(th, file$4, 190, 12, 6402);
+    			add_location(th, file$4, 189, 12, 6351);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, th, anchor);
@@ -3691,14 +3691,14 @@ var mymorderedit = (function () {
     		block,
     		id: create_if_block_7$2.name,
     		type: "if",
-    		source: "(190:10) {#if sorted_verients.length != 0}",
+    		source: "(189:10) {#if sorted_verients.length != 0}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (193:10) {#each sorted_sizes as size}
+    // (192:10) {#each sorted_sizes as size}
     function create_each_block_6$1(ctx) {
     	let th;
     	let t0_value = /*size*/ ctx[21].size + "";
@@ -3711,7 +3711,7 @@ var mymorderedit = (function () {
     			t0 = text(t0_value);
     			t1 = space();
     			attr_dev(th, "class", "svelte-13qct7y");
-    			add_location(th, file$4, 193, 12, 6507);
+    			add_location(th, file$4, 192, 12, 6456);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, th, anchor);
@@ -3730,14 +3730,14 @@ var mymorderedit = (function () {
     		block,
     		id: create_each_block_6$1.name,
     		type: "each",
-    		source: "(193:10) {#each sorted_sizes as size}",
+    		source: "(192:10) {#each sorted_sizes as size}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (209:14) {:else}
+    // (208:14) {:else}
     function create_else_block_3$1(ctx) {
     	let div;
 
@@ -3746,7 +3746,7 @@ var mymorderedit = (function () {
     			div = element("div");
     			div.textContent = "-";
     			attr_dev(div, "class", "svelte-13qct7y");
-    			add_location(div, file$4, 209, 16, 6990);
+    			add_location(div, file$4, 208, 16, 6939);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -3761,14 +3761,14 @@ var mymorderedit = (function () {
     		block,
     		id: create_else_block_3$1.name,
     		type: "else",
-    		source: "(209:14) {:else}",
+    		source: "(208:14) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (204:14) {#if color}
+    // (203:14) {#if color}
     function create_if_block_6$2(ctx) {
     	let div1;
     	let div0;
@@ -3784,9 +3784,9 @@ var mymorderedit = (function () {
     			t1 = text(t1_value);
     			attr_dev(div0, "class", "inner svelte-13qct7y");
     			set_style(div0, "background-color", /*ALL_COLORS_DICT*/ ctx[1][/*color*/ ctx[24]].color);
-    			add_location(div0, file$4, 205, 18, 6802);
+    			add_location(div0, file$4, 204, 18, 6751);
     			attr_dev(div1, "class", "color-box svelte-13qct7y");
-    			add_location(div1, file$4, 204, 16, 6760);
+    			add_location(div1, file$4, 203, 16, 6709);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div1, anchor);
@@ -3810,14 +3810,14 @@ var mymorderedit = (function () {
     		block,
     		id: create_if_block_6$2.name,
     		type: "if",
-    		source: "(204:14) {#if color}",
+    		source: "(203:14) {#if color}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (214:12) {#if sorted_verients.length != 0}
+    // (213:12) {#if sorted_verients.length != 0}
     function create_if_block_5$2(ctx) {
     	let td;
     	let each_value_5 = /*sorted_verients*/ ctx[5];
@@ -3837,7 +3837,7 @@ var mymorderedit = (function () {
     			}
 
     			attr_dev(td, "class", "svelte-13qct7y");
-    			add_location(td, file$4, 214, 14, 7102);
+    			add_location(td, file$4, 213, 14, 7051);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, td, anchor);
@@ -3883,14 +3883,14 @@ var mymorderedit = (function () {
     		block,
     		id: create_if_block_5$2.name,
     		type: "if",
-    		source: "(214:12) {#if sorted_verients.length != 0}",
+    		source: "(213:12) {#if sorted_verients.length != 0}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (216:16) {#each sorted_verients as varient}
+    // (215:16) {#each sorted_verients as varient}
     function create_each_block_5$1(ctx) {
     	let div;
     	let t0_value = (/*varient*/ ctx[34]?.name || "") + "";
@@ -3903,7 +3903,7 @@ var mymorderedit = (function () {
     			t0 = text(t0_value);
     			t1 = space();
     			attr_dev(div, "class", "varient-box cls-cell svelte-13qct7y");
-    			add_location(div, file$4, 216, 18, 7176);
+    			add_location(div, file$4, 215, 18, 7125);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -3922,14 +3922,14 @@ var mymorderedit = (function () {
     		block,
     		id: create_each_block_5$1.name,
     		type: "each",
-    		source: "(216:16) {#each sorted_verients as varient}",
+    		source: "(215:16) {#each sorted_verients as varient}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (242:16) {:else}
+    // (241:16) {:else}
     function create_else_block_2$1(ctx) {
     	let each_1_anchor;
     	let each_value_4 = /*sorted_verients*/ ctx[5];
@@ -3992,14 +3992,14 @@ var mymorderedit = (function () {
     		block,
     		id: create_else_block_2$1.name,
     		type: "else",
-    		source: "(242:16) {:else}",
+    		source: "(241:16) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (226:16) {#if sorted_verients.length == 0}
+    // (225:16) {#if sorted_verients.length == 0}
     function create_if_block_4$2(ctx) {
     	let div;
     	let input;
@@ -4024,9 +4024,9 @@ var mymorderedit = (function () {
     			attr_dev(input, "placeholder", input_placeholder_value = /*ALL_SIZES_DICT*/ ctx[2][/*size_obj*/ ctx[30].id].size);
     			attr_dev(input, "min", "0");
     			attr_dev(input, "max", "9999");
-    			add_location(input, file$4, 227, 20, 7622);
+    			add_location(input, file$4, 226, 20, 7571);
     			attr_dev(div, "class", "cell-wraper svelte-13qct7y");
-    			add_location(div, file$4, 226, 18, 7576);
+    			add_location(div, file$4, 225, 18, 7525);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -4069,14 +4069,14 @@ var mymorderedit = (function () {
     		block,
     		id: create_if_block_4$2.name,
     		type: "if",
-    		source: "(226:16) {#if sorted_verients.length == 0}",
+    		source: "(225:16) {#if sorted_verients.length == 0}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (243:18) {#each sorted_verients as ver, idx}
+    // (242:18) {#each sorted_verients as ver, idx}
     function create_each_block_4$1(ctx) {
     	let div;
     	let input;
@@ -4102,9 +4102,9 @@ var mymorderedit = (function () {
     			attr_dev(input, "placeholder", input_placeholder_value = "" + (/*ALL_SIZES_DICT*/ ctx[2][/*size_obj*/ ctx[30].id].size + "(" + (/*ver*/ ctx[27]?.name || '') + ")"));
     			attr_dev(input, "min", "0");
     			attr_dev(input, "max", "9999");
-    			add_location(input, file$4, 244, 22, 8378);
+    			add_location(input, file$4, 243, 22, 8327);
     			attr_dev(div, "class", "cell-wraper svelte-13qct7y");
-    			add_location(div, file$4, 243, 20, 8330);
+    			add_location(div, file$4, 242, 20, 8279);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -4151,14 +4151,14 @@ var mymorderedit = (function () {
     		block,
     		id: create_each_block_4$1.name,
     		type: "each",
-    		source: "(243:18) {#each sorted_verients as ver, idx}",
+    		source: "(242:18) {#each sorted_verients as ver, idx}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (223:12) {#each sorted_sizes as size_obj}
+    // (222:12) {#each sorted_sizes as size_obj}
     function create_each_block_3$1(ctx) {
     	let td;
 
@@ -4175,7 +4175,7 @@ var mymorderedit = (function () {
     			td = element("td");
     			if_block.c();
     			attr_dev(td, "class", "size-cell svelte-13qct7y");
-    			add_location(td, file$4, 223, 14, 7399);
+    			add_location(td, file$4, 222, 14, 7348);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, td, anchor);
@@ -4204,14 +4204,14 @@ var mymorderedit = (function () {
     		block,
     		id: create_each_block_3$1.name,
     		type: "each",
-    		source: "(223:12) {#each sorted_sizes as size_obj}",
+    		source: "(222:12) {#each sorted_sizes as size_obj}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (273:14) {:else}
+    // (272:14) {:else}
     function create_else_block_1$1(ctx) {
     	let each_1_anchor;
     	let each_value_2 = /*sorted_verients*/ ctx[5];
@@ -4274,14 +4274,14 @@ var mymorderedit = (function () {
     		block,
     		id: create_else_block_1$1.name,
     		type: "else",
-    		source: "(273:14) {:else}",
+    		source: "(272:14) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (265:14) {#if sorted_verients.length == 0}
+    // (264:14) {#if sorted_verients.length == 0}
     function create_if_block_3$2(ctx) {
     	let div;
     	let t_value = /*product*/ ctx[0].entries.filter(func).reduce(/*func_1*/ ctx[12], 0) + "";
@@ -4296,7 +4296,7 @@ var mymorderedit = (function () {
     			div = element("div");
     			t = text(t_value);
     			attr_dev(div, "class", "center-text svelte-13qct7y");
-    			add_location(div, file$4, 265, 16, 9245);
+    			add_location(div, file$4, 264, 16, 9194);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -4315,14 +4315,14 @@ var mymorderedit = (function () {
     		block,
     		id: create_if_block_3$2.name,
     		type: "if",
-    		source: "(265:14) {#if sorted_verients.length == 0}",
+    		source: "(264:14) {#if sorted_verients.length == 0}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (274:16) {#each sorted_verients as ver, idx}
+    // (273:16) {#each sorted_verients as ver, idx}
     function create_each_block_2$3(ctx) {
     	let div;
     	let t0;
@@ -4341,7 +4341,7 @@ var mymorderedit = (function () {
     			t1 = text(t1_value);
     			t2 = text(")\n                  ");
     			attr_dev(div, "class", "center-text svelte-13qct7y");
-    			add_location(div, file$4, 274, 18, 9613);
+    			add_location(div, file$4, 273, 18, 9562);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -4362,14 +4362,14 @@ var mymorderedit = (function () {
     		block,
     		id: create_each_block_2$3.name,
     		type: "each",
-    		source: "(274:16) {#each sorted_verients as ver, idx}",
+    		source: "(273:16) {#each sorted_verients as ver, idx}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (201:8) {#each sorted_colors as color, color_idx}
+    // (200:8) {#each sorted_colors as color, color_idx}
     function create_each_block_1$4(ctx) {
     	let tr;
     	let td0;
@@ -4433,25 +4433,25 @@ var mymorderedit = (function () {
     			path = svg_element("path");
     			t4 = space();
     			attr_dev(td0, "class", "sticky-col svelte-13qct7y");
-    			add_location(td0, file$4, 202, 12, 6694);
+    			add_location(td0, file$4, 201, 12, 6643);
     			attr_dev(td1, "class", "total-cell svelte-13qct7y");
-    			add_location(td1, file$4, 263, 12, 9157);
+    			add_location(td1, file$4, 262, 12, 9106);
     			attr_dev(path, "fill", "currentColor");
     			attr_dev(path, "d", "M30.9 2.3h-8.6L21.6 1c-.3-.6-.9-1-1.5-1h-8.2c-.6 0-1.2.4-1.5.9l-.7 1.4H1.1C.5 2.3 0 2.8 0 3.4v2.2c0 .6.5 1.1 1.1 1.1h29.7c.6 0 1.1-.5 1.1-1.1V3.4c.1-.6-.4-1.1-1-1.1zM3.8 32.8A3.4 3.4 0 0 0 7.2 36h17.6c1.8 0 3.3-1.4 3.4-3.2L29.7 9H2.3l1.5 23.8z");
     			attr_dev(path, "class", "svelte-13qct7y");
-    			add_location(path, file$4, 288, 19, 10237);
+    			add_location(path, file$4, 287, 19, 10186);
     			attr_dev(svg, "xmlns", "http://www.w3.org/2000/svg");
     			attr_dev(svg, "width", "16px");
     			attr_dev(svg, "height", "16px");
     			attr_dev(svg, "viewBox", "0 0 32 36");
     			attr_dev(svg, "class", "svelte-13qct7y");
-    			add_location(svg, file$4, 287, 16, 10131);
+    			add_location(svg, file$4, 286, 16, 10080);
     			attr_dev(button, "class", "remove-button svelte-13qct7y");
-    			add_location(button, file$4, 286, 14, 10046);
+    			add_location(button, file$4, 285, 14, 9995);
     			attr_dev(td2, "class", "delete-cell-style svelte-13qct7y");
-    			add_location(td2, file$4, 285, 12, 10001);
+    			add_location(td2, file$4, 284, 12, 9950);
     			attr_dev(tr, "class", "svelte-13qct7y");
-    			add_location(tr, file$4, 201, 10, 6677);
+    			add_location(tr, file$4, 200, 10, 6626);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, tr, anchor);
@@ -4572,14 +4572,14 @@ var mymorderedit = (function () {
     		block,
     		id: create_each_block_1$4.name,
     		type: "each",
-    		source: "(201:8) {#each sorted_colors as color, color_idx}",
+    		source: "(200:8) {#each sorted_colors as color, color_idx}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (303:8) {#if product.verients.length > 0}
+    // (302:8) {#if product.verients.length > 0}
     function create_if_block_2$3(ctx) {
     	let td;
 
@@ -4587,7 +4587,7 @@ var mymorderedit = (function () {
     		c: function create() {
     			td = element("td");
     			attr_dev(td, "class", "svelte-13qct7y");
-    			add_location(td, file$4, 303, 10, 10826);
+    			add_location(td, file$4, 302, 10, 10775);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, td, anchor);
@@ -4601,14 +4601,14 @@ var mymorderedit = (function () {
     		block,
     		id: create_if_block_2$3.name,
     		type: "if",
-    		source: "(303:8) {#if product.verients.length > 0}",
+    		source: "(302:8) {#if product.verients.length > 0}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (306:8) {#each sorted_sizes as size}
+    // (305:8) {#each sorted_sizes as size}
     function create_each_block$4(ctx) {
     	let td;
     	let t_value = /*product*/ ctx[0].entries.filter(func_4).reduce(/*func_5*/ ctx[16], 0) + "";
@@ -4623,7 +4623,7 @@ var mymorderedit = (function () {
     			td = element("td");
     			t = text(t_value);
     			attr_dev(td, "class", "total-cell svelte-13qct7y");
-    			add_location(td, file$4, 306, 10, 10894);
+    			add_location(td, file$4, 305, 10, 10843);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, td, anchor);
@@ -4642,7 +4642,7 @@ var mymorderedit = (function () {
     		block,
     		id: create_each_block$4.name,
     		type: "each",
-    		source: "(306:8) {#each sorted_sizes as size}",
+    		source: "(305:8) {#each sorted_sizes as size}",
     		ctx
     	});
 
@@ -4914,9 +4914,9 @@ var mymorderedit = (function () {
     				// order sizes_ids_set by code
     				// sizes_ids_set: [1,2,7,3]
     				// ALL_SIZES: [{id:1, code: '3'}, {id:2, code: '4'}, {id:7, code: '2'}, {id:3, code: '1'}]
-    				let ALL_SIZES_ordered = ALL_SIZES.sort((a, b) => {
-    					return a.code.localeCompare(b.code);
-    				});
+    				debugger;
+
+    				let ALL_SIZES_ordered = ALL_SIZES;
 
     				//console.log('ALL_SIZES_ordered:', ALL_SIZES_ordered);
     				//console.log('sizes_ids_set:', sizes_ids_set);
@@ -8709,7 +8709,7 @@ var mymorderedit = (function () {
     		each_blocks_2[i] = create_each_block_2$1(get_each_context_2$1(ctx, each_value_2, i));
     	}
 
-    	let each_value_1 = /*ALL_SIZES*/ ctx[1].sort(func$1);
+    	let each_value_1 = /*ALL_SIZES*/ ctx[1].sort(func);
     	validate_each_argument(each_value_1);
     	let each_blocks_1 = [];
 
@@ -8981,7 +8981,7 @@ var mymorderedit = (function () {
     			}
 
     			if (dirty & /*ALL_SIZES*/ 2) {
-    				each_value_1 = /*ALL_SIZES*/ ctx[1].sort(func$1);
+    				each_value_1 = /*ALL_SIZES*/ ctx[1].sort(func);
     				validate_each_argument(each_value_1);
     				let i;
 
@@ -9299,7 +9299,7 @@ var mymorderedit = (function () {
     	return block;
     }
 
-    const func$1 = (a, b) => {
+    const func = (a, b) => {
     	return a.code.localeCompare(b.code);
     };
 
@@ -11195,7 +11195,7 @@ var mymorderedit = (function () {
     	return block;
     }
 
-    // (632:12) {:else}
+    // (630:12) {:else}
     function create_else_block_4(ctx) {
     	let td;
     	let collectingtable;
@@ -11230,7 +11230,7 @@ var mymorderedit = (function () {
     			create_component(collectingtable.$$.fragment);
     			attr_dev(td, "colspan", "8");
     			attr_dev(td, "class", "svelte-1sy0stl");
-    			add_location(td, file, 632, 14, 22045);
+    			add_location(td, file, 630, 14, 21942);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, td, anchor);
@@ -11272,7 +11272,7 @@ var mymorderedit = (function () {
     		block,
     		id: create_else_block_4.name,
     		type: "else",
-    		source: "(632:12) {:else}",
+    		source: "(630:12) {:else}",
     		ctx
     	});
 
@@ -11317,7 +11317,7 @@ var mymorderedit = (function () {
     		each_blocks_1[i] = create_each_block_5(get_each_context_5(ctx, each_value_5, i));
     	}
 
-    	let each_value_4 = /*ALL_SIZES*/ ctx[0].sort(func);
+    	let each_value_4 = /*ALL_SIZES*/ ctx[0];
     	validate_each_argument(each_value_4);
     	let each_blocks = [];
 
@@ -11400,14 +11400,14 @@ var mymorderedit = (function () {
     			attr_dev(input2, "name", "amount");
     			attr_dev(input2, "id", "amount");
     			attr_dev(input2, "min", "0");
-    			add_location(input2, file, 625, 20, 21720);
+    			add_location(input2, file, 623, 20, 21617);
     			attr_dev(div0, "class", "form-group svelte-1sy0stl");
     			add_location(div0, file, 596, 18, 20234);
     			attr_dev(div1, "class", "error-msg");
-    			add_location(div1, file, 627, 18, 21861);
+    			add_location(div1, file, 625, 18, 21758);
     			attr_dev(button, "type", "submit");
     			attr_dev(button, "class", "btn btn-secondary");
-    			add_location(button, file, 628, 18, 21905);
+    			add_location(button, file, 626, 18, 21802);
     			attr_dev(form, "class", "add-entry-form svelte-1sy0stl");
     			attr_dev(form, "action", "");
     			attr_dev(form, "method", "post");
@@ -11507,7 +11507,7 @@ var mymorderedit = (function () {
     			}
 
     			if (dirty[0] & /*ALL_SIZES*/ 1) {
-    				each_value_4 = /*ALL_SIZES*/ ctx[0].sort(func);
+    				each_value_4 = /*ALL_SIZES*/ ctx[0];
     				validate_each_argument(each_value_4);
     				let i;
 
@@ -11696,7 +11696,7 @@ var mymorderedit = (function () {
     	return block;
     }
 
-    // (609:22) {#each ALL_SIZES.sort((a, b) => {                         return a.code.localeCompare(b.code);                       }) as size}
+    // (609:22) {#each ALL_SIZES as size}
     function create_each_block_4(ctx) {
     	let option;
     	let t_value = /*size*/ ctx[74]["size"] + "";
@@ -11709,7 +11709,7 @@ var mymorderedit = (function () {
     			t = text(t_value);
     			option.__value = option_value_value = /*size*/ ctx[74]["id"];
     			option.value = option.__value;
-    			add_location(option, file, 611, 24, 21027);
+    			add_location(option, file, 609, 24, 20924);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, option, anchor);
@@ -11732,14 +11732,14 @@ var mymorderedit = (function () {
     		block,
     		id: create_each_block_4.name,
     		type: "each",
-    		source: "(609:22) {#each ALL_SIZES.sort((a, b) => {                         return a.code.localeCompare(b.code);                       }) as size}",
+    		source: "(609:22) {#each ALL_SIZES as size}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (616:20) {#if product.verients.length != 0}
+    // (614:20) {#if product.verients.length != 0}
     function create_if_block_6(ctx) {
     	let select;
     	let option;
@@ -11764,11 +11764,11 @@ var mymorderedit = (function () {
     			attr_dev(option, "default", "");
     			option.__value = "undefined";
     			option.value = option.__value;
-    			add_location(option, file, 617, 24, 21360);
+    			add_location(option, file, 615, 24, 21257);
     			attr_dev(select, "class", "form-control svelte-1sy0stl");
     			attr_dev(select, "name", "varient");
     			attr_dev(select, "id", "varient");
-    			add_location(select, file, 616, 22, 21278);
+    			add_location(select, file, 614, 22, 21175);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, select, anchor);
@@ -11815,14 +11815,14 @@ var mymorderedit = (function () {
     		block,
     		id: create_if_block_6.name,
     		type: "if",
-    		source: "(616:20) {#if product.verients.length != 0}",
+    		source: "(614:20) {#if product.verients.length != 0}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (619:24) {#each ALL_VERIENTS as varient}
+    // (617:24) {#each ALL_VERIENTS as varient}
     function create_each_block_3(ctx) {
     	let option;
     	let t_value = /*varient*/ ctx[71]["name"] + "";
@@ -11835,7 +11835,7 @@ var mymorderedit = (function () {
     			t = text(t_value);
     			option.__value = option_value_value = /*varient*/ ctx[71]["id"];
     			option.value = option.__value;
-    			add_location(option, file, 619, 26, 21490);
+    			add_location(option, file, 617, 26, 21387);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, option, anchor);
@@ -11858,7 +11858,7 @@ var mymorderedit = (function () {
     		block,
     		id: create_each_block_3.name,
     		type: "each",
-    		source: "(619:24) {#each ALL_VERIENTS as varient}",
+    		source: "(617:24) {#each ALL_VERIENTS as varient}",
     		ctx
     	});
 
@@ -12147,7 +12147,7 @@ var mymorderedit = (function () {
     	return block;
     }
 
-    // (665:10) 
+    // (663:10) 
     function create_item_slot(ctx) {
     	let div2;
     	let div1;
@@ -12170,14 +12170,14 @@ var mymorderedit = (function () {
     			attr_dev(img, "alt", img_alt_value = /*item*/ ctx[67].title);
     			set_style(img, "height", "25px");
     			if (!src_url_equal(img.src, img_src_value = "" + (CLOUDINARY_BASE_URL + "f_auto,w_auto/" + /*item*/ ctx[67].cimage))) attr_dev(img, "src", img_src_value);
-    			add_location(img, file, 667, 16, 23192);
+    			add_location(img, file, 665, 16, 23089);
     			html_tag.a = null;
     			attr_dev(div0, "class", "inner");
-    			add_location(div0, file, 666, 14, 23156);
+    			add_location(div0, file, 664, 14, 23053);
     			attr_dev(div1, "class", "search-item");
-    			add_location(div1, file, 665, 12, 23116);
+    			add_location(div1, file, 663, 12, 23013);
     			attr_dev(div2, "slot", "item");
-    			add_location(div2, file, 664, 10, 23067);
+    			add_location(div2, file, 662, 10, 22964);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div2, anchor);
@@ -12207,14 +12207,14 @@ var mymorderedit = (function () {
     		block,
     		id: create_item_slot.name,
     		type: "slot",
-    		source: "(665:10) ",
+    		source: "(663:10) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (694:8) {:else}
+    // (692:8) {:else}
     function create_else_block_3(ctx) {
     	let button;
 
@@ -12223,7 +12223,7 @@ var mymorderedit = (function () {
     			button = element("button");
     			button.textContent = "הוסף";
     			button.disabled = true;
-    			add_location(button, file, 694, 10, 24244);
+    			add_location(button, file, 692, 10, 24141);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, button, anchor);
@@ -12238,14 +12238,14 @@ var mymorderedit = (function () {
     		block,
     		id: create_else_block_3.name,
     		type: "else",
-    		source: "(694:8) {:else}",
+    		source: "(692:8) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (674:8) {#if selectedProduct}
+    // (672:8) {#if selectedProduct}
     function create_if_block_2(ctx) {
     	let div1;
     	let div0;
@@ -12290,18 +12290,18 @@ var mymorderedit = (function () {
     			attr_dev(img, "alt", img_alt_value = /*selectedProduct*/ ctx[6]?.title);
     			set_style(img, "height", "25px");
     			if (!src_url_equal(img.src, img_src_value = "" + (CLOUDINARY_BASE_URL + "f_auto,w_auto/" + /*selectedProduct*/ ctx[6]?.cimage))) attr_dev(img, "src", img_src_value);
-    			add_location(img, file, 676, 14, 23521);
+    			add_location(img, file, 674, 14, 23418);
     			html_tag.a = null;
     			attr_dev(div0, "class", "inner");
-    			add_location(div0, file, 675, 12, 23487);
+    			add_location(div0, file, 673, 12, 23384);
     			attr_dev(div1, "class", "selected-product");
-    			add_location(div1, file, 674, 10, 23444);
+    			add_location(div1, file, 672, 10, 23341);
     			button.disabled = button_disabled_value = /*add_product_status*/ ctx[13] == "sending";
     			attr_dev(button, "class", "btn btn-secondary");
-    			add_location(button, file, 681, 10, 23738);
-    			add_location(pre, file, 691, 12, 24168);
+    			add_location(button, file, 679, 10, 23635);
+    			add_location(pre, file, 689, 12, 24065);
     			set_style(div2, "color", /*add_product_status_color*/ ctx[14]);
-    			add_location(div2, file, 690, 10, 24108);
+    			add_location(div2, file, 688, 10, 24005);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div1, anchor);
@@ -12369,14 +12369,14 @@ var mymorderedit = (function () {
     		block,
     		id: create_if_block_2.name,
     		type: "if",
-    		source: "(674:8) {#if selectedProduct}",
+    		source: "(672:8) {#if selectedProduct}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (687:12) {:else}
+    // (685:12) {:else}
     function create_else_block_2(ctx) {
     	let t;
 
@@ -12396,14 +12396,14 @@ var mymorderedit = (function () {
     		block,
     		id: create_else_block_2.name,
     		type: "else",
-    		source: "(687:12) {:else}",
+    		source: "(685:12) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (683:12) {#if add_product_status == "sending"}
+    // (681:12) {#if add_product_status == "sending"}
     function create_if_block_3(ctx) {
     	let div;
     	let span;
@@ -12413,10 +12413,10 @@ var mymorderedit = (function () {
     			div = element("div");
     			span = element("span");
     			attr_dev(span, "class", "sr-only");
-    			add_location(span, file, 684, 16, 23975);
+    			add_location(span, file, 682, 16, 23872);
     			attr_dev(div, "class", "spinner-border");
     			attr_dev(div, "role", "status");
-    			add_location(div, file, 683, 14, 23916);
+    			add_location(div, file, 681, 14, 23813);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -12431,14 +12431,14 @@ var mymorderedit = (function () {
     		block,
     		id: create_if_block_3.name,
     		type: "if",
-    		source: "(683:12) {#if add_product_status == \\\"sending\\\"}",
+    		source: "(681:12) {#if add_product_status == \\\"sending\\\"}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (746:16) {#each Object.keys(sim.products || {}) as product_idx}
+    // (744:16) {#each Object.keys(sim.products || {}) as product_idx}
     function create_each_block_1(ctx) {
     	let tr;
     	let td0;
@@ -12472,17 +12472,17 @@ var mymorderedit = (function () {
     			if (!src_url_equal(img.src, img_src_value = "" + (CLOUDINARY_BASE_URL + /*sim*/ ctx[60].products[/*product_idx*/ ctx[63]].img))) attr_dev(img, "src", img_src_value);
     			attr_dev(img, "width", "25px");
     			attr_dev(img, "height", "25px");
-    			add_location(img, file, 748, 22, 26066);
+    			add_location(img, file, 746, 22, 25963);
     			attr_dev(td0, "class", "svelte-1sy0stl");
-    			add_location(td0, file, 747, 20, 26039);
+    			add_location(td0, file, 745, 20, 25936);
     			attr_dev(input, "type", "number");
     			attr_dev(input, "width", "min-content");
     			attr_dev(input, "class", "svelte-1sy0stl");
-    			add_location(input, file, 752, 22, 26289);
+    			add_location(input, file, 750, 22, 26186);
     			attr_dev(td1, "class", "svelte-1sy0stl");
-    			add_location(td1, file, 751, 20, 26262);
+    			add_location(td1, file, 749, 20, 26159);
     			attr_dev(tr, "class", "svelte-1sy0stl");
-    			add_location(tr, file, 746, 18, 26014);
+    			add_location(tr, file, 744, 18, 25911);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, tr, anchor);
@@ -12525,14 +12525,14 @@ var mymorderedit = (function () {
     		block,
     		id: create_each_block_1.name,
     		type: "each",
-    		source: "(746:16) {#each Object.keys(sim.products || {}) as product_idx}",
+    		source: "(744:16) {#each Object.keys(sim.products || {}) as product_idx}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (770:16) {:else}
+    // (768:16) {:else}
     function create_else_block_1(ctx) {
     	let t;
 
@@ -12552,14 +12552,14 @@ var mymorderedit = (function () {
     		block,
     		id: create_else_block_1.name,
     		type: "else",
-    		source: "(770:16) {:else}",
+    		source: "(768:16) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (768:16) {#if !sim.deleted}
+    // (766:16) {#if !sim.deleted}
     function create_if_block_1(ctx) {
     	let t;
 
@@ -12579,14 +12579,14 @@ var mymorderedit = (function () {
     		block,
     		id: create_if_block_1.name,
     		type: "if",
-    		source: "(768:16) {#if !sim.deleted}",
+    		source: "(766:16) {#if !sim.deleted}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (707:6) {#each data?.simulations || [] as sim, i}
+    // (705:6) {#each data?.simulations || [] as sim, i}
     function create_each_block(ctx) {
     	let tr1;
     	let td0;
@@ -12689,51 +12689,51 @@ var mymorderedit = (function () {
     			if_block.c();
     			attr_dev(input, "type", "number");
     			attr_dev(input, "class", "svelte-1sy0stl");
-    			add_location(input, file, 709, 12, 24703);
+    			add_location(input, file, 707, 12, 24600);
     			attr_dev(td0, "class", "svelte-1sy0stl");
-    			add_location(td0, file, 708, 10, 24686);
+    			add_location(td0, file, 706, 10, 24583);
     			if (!src_url_equal(img.src, img_src_value = /*sim*/ ctx[60].cimage)) attr_dev(img, "src", img_src_value);
     			attr_dev(img, "class", "sim-img svelte-1sy0stl");
-    			add_location(img, file, 712, 12, 24793);
+    			add_location(img, file, 710, 12, 24690);
     			attr_dev(td1, "class", "svelte-1sy0stl");
-    			add_location(td1, file, 711, 10, 24776);
+    			add_location(td1, file, 709, 10, 24673);
     			attr_dev(textarea, "name", "sim-" + /*i*/ ctx[62]);
     			attr_dev(textarea, "id", "");
     			attr_dev(textarea, "cols", "50");
     			attr_dev(textarea, "rows", "5");
     			attr_dev(textarea, "placeholder", "תיאור הדמייה");
-    			add_location(textarea, file, 716, 14, 24921);
+    			add_location(textarea, file, 714, 14, 24818);
     			attr_dev(div0, "class", "sim-description");
-    			add_location(div0, file, 715, 12, 24877);
+    			add_location(div0, file, 713, 12, 24774);
     			attr_dev(td2, "class", "svelte-1sy0stl");
-    			add_location(td2, file, 714, 10, 24860);
+    			add_location(td2, file, 712, 10, 24757);
     			attr_dev(button0, "type", "button");
     			attr_dev(button0, "class", "connect-btn svelte-1sy0stl");
     			toggle_class(button0, "active", /*current_selected_sim_idx*/ ctx[17] == /*i*/ ctx[62]);
-    			add_location(button0, file, 721, 12, 25148);
+    			add_location(button0, file, 719, 12, 25045);
     			attr_dev(th0, "class", "svelte-1sy0stl");
-    			add_location(th0, file, 740, 18, 25809);
+    			add_location(th0, file, 738, 18, 25706);
     			attr_dev(th1, "class", "svelte-1sy0stl");
-    			add_location(th1, file, 741, 18, 25844);
+    			add_location(th1, file, 739, 18, 25741);
     			attr_dev(tr0, "class", "svelte-1sy0stl");
-    			add_location(tr0, file, 739, 16, 25786);
+    			add_location(tr0, file, 737, 16, 25683);
     			attr_dev(thead, "class", "svelte-1sy0stl");
-    			add_location(thead, file, 738, 14, 25762);
-    			add_location(tbody, file, 744, 14, 25917);
+    			add_location(thead, file, 736, 14, 25659);
+    			add_location(tbody, file, 742, 14, 25814);
     			attr_dev(table, "class", "product-table simulation-table svelte-1sy0stl");
-    			add_location(table, file, 737, 12, 25701);
+    			add_location(table, file, 735, 12, 25598);
     			attr_dev(td3, "class", "svelte-1sy0stl");
-    			add_location(td3, file, 719, 10, 25075);
+    			add_location(td3, file, 717, 10, 24972);
     			attr_dev(button1, "type", "button");
-    			add_location(button1, file, 761, 14, 26582);
+    			add_location(button1, file, 759, 14, 26479);
     			attr_dev(div1, "class", "delete-action");
-    			add_location(div1, file, 760, 12, 26540);
+    			add_location(div1, file, 758, 12, 26437);
     			attr_dev(td4, "class", "svelte-1sy0stl");
-    			add_location(td4, file, 759, 10, 26523);
+    			add_location(td4, file, 757, 10, 26420);
     			attr_dev(tr1, "data-idx", /*i*/ ctx[62]);
     			attr_dev(tr1, "class", "svelte-1sy0stl");
     			toggle_class(tr1, "deleted", /*sim*/ ctx[60].deleted);
-    			add_location(tr1, file, 707, 8, 24630);
+    			add_location(tr1, file, 705, 8, 24527);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, tr1, anchor);
@@ -12854,14 +12854,14 @@ var mymorderedit = (function () {
     		block,
     		id: create_each_block.name,
     		type: "each",
-    		source: "(707:6) {#each data?.simulations || [] as sim, i}",
+    		source: "(705:6) {#each data?.simulations || [] as sim, i}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (807:6) {:else}
+    // (805:6) {:else}
     function create_else_block(ctx) {
     	let t;
 
@@ -12883,14 +12883,14 @@ var mymorderedit = (function () {
     		block,
     		id: create_else_block.name,
     		type: "else",
-    		source: "(807:6) {:else}",
+    		source: "(805:6) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (805:6) {#if updateing_to_server}
+    // (803:6) {#if updateing_to_server}
     function create_if_block(ctx) {
     	let loading;
     	let current;
@@ -12926,14 +12926,14 @@ var mymorderedit = (function () {
     		block,
     		id: create_if_block.name,
     		type: "if",
-    		source: "(805:6) {#if updateing_to_server}",
+    		source: "(803:6) {#if updateing_to_server}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (798:4) <Button       class="update-btn"       disabled={updateing_to_server}       on:click={() => {         save_data();       }}     >
+    // (796:4) <Button       class="update-btn"       disabled={updateing_to_server}       on:click={() => {         save_data();       }}     >
     function create_default_slot(ctx) {
     	let current_block_type_index;
     	let if_block;
@@ -13002,7 +13002,7 @@ var mymorderedit = (function () {
     		block,
     		id: create_default_slot.name,
     		type: "slot",
-    		source: "(798:4) <Button       class=\\\"update-btn\\\"       disabled={updateing_to_server}       on:click={() => {         save_data();       }}     >",
+    		source: "(796:4) <Button       class=\\\"update-btn\\\"       disabled={updateing_to_server}       on:click={() => {         save_data();       }}     >",
     		ctx
     	});
 
@@ -13228,60 +13228,60 @@ var mymorderedit = (function () {
     			add_location(label0, file, 384, 4, 11375);
     			attr_dev(div0, "class", "collecting-switch svelte-1sy0stl");
     			add_location(div0, file, 382, 2, 11329);
-    			add_location(h3, file, 642, 4, 22322);
+    			add_location(h3, file, 640, 4, 22219);
     			attr_dev(label1, "for", "product_name");
-    			add_location(label1, file, 645, 6, 22448);
+    			add_location(label1, file, 643, 6, 22345);
     			attr_dev(div1, "class", "search-wraper");
-    			add_location(div1, file, 646, 6, 22496);
+    			add_location(div1, file, 644, 6, 22393);
     			attr_dev(div2, "class", "form-group");
-    			add_location(div2, file, 644, 4, 22417);
+    			add_location(div2, file, 642, 4, 22314);
     			attr_dev(button0, "class", "btn btn-secondary");
-    			add_location(button0, file, 700, 6, 24381);
+    			add_location(button0, file, 698, 6, 24278);
     			attr_dev(div3, "class", "new-product-btn-wraper svelte-1sy0stl");
-    			add_location(div3, file, 699, 4, 24338);
+    			add_location(div3, file, 697, 4, 24235);
     			attr_dev(div4, "id", "new-product-form");
-    			add_location(div4, file, 641, 2, 22290);
+    			add_location(div4, file, 639, 2, 22187);
     			attr_dev(td0, "colspan", "2");
     			attr_dev(td0, "class", "svelte-1sy0stl");
-    			add_location(td0, file, 778, 8, 26967);
+    			add_location(td0, file, 776, 8, 26864);
     			attr_dev(tr0, "class", "svelte-1sy0stl");
-    			add_location(tr0, file, 777, 6, 26954);
+    			add_location(tr0, file, 775, 6, 26851);
     			attr_dev(input1, "type", "file");
     			attr_dev(input1, "id", "selectedFileSim");
     			attr_dev(input1, "accept", "image/png, image/gif, image/jpeg");
     			attr_dev(input1, "class", "svelte-1sy0stl");
-    			add_location(input1, file, 782, 10, 27082);
+    			add_location(input1, file, 780, 10, 26979);
     			attr_dev(img, "width", "50px");
     			attr_dev(img, "height", "50px");
     			if (!src_url_equal(img.src, img_src_value = /*simImage*/ ctx[15])) attr_dev(img, "src", img_src_value);
     			attr_dev(img, "class", "sim-img svelte-1sy0stl");
-    			add_location(img, file, 783, 10, 27210);
+    			add_location(img, file, 781, 10, 27107);
     			attr_dev(td1, "colspan", "1");
     			attr_dev(td1, "class", "sim-image-td svelte-1sy0stl");
-    			add_location(td1, file, 781, 8, 27034);
+    			add_location(td1, file, 779, 8, 26931);
     			attr_dev(textarea, "name", "sim-new");
     			attr_dev(textarea, "id", "");
     			attr_dev(textarea, "cols", "50");
     			attr_dev(textarea, "rows", "5");
     			attr_dev(textarea, "placeholder", "תיאור הדמייה");
-    			add_location(textarea, file, 787, 12, 27367);
+    			add_location(textarea, file, 785, 12, 27264);
     			attr_dev(div5, "class", "sim-description");
-    			add_location(div5, file, 786, 10, 27325);
+    			add_location(div5, file, 784, 10, 27222);
     			attr_dev(td2, "colspan", "1");
     			attr_dev(td2, "class", "svelte-1sy0stl");
-    			add_location(td2, file, 785, 8, 27298);
+    			add_location(td2, file, 783, 8, 27195);
     			attr_dev(button1, "type", "button");
-    			add_location(button1, file, 791, 10, 27532);
+    			add_location(button1, file, 789, 10, 27429);
     			attr_dev(td3, "class", "svelte-1sy0stl");
-    			add_location(td3, file, 790, 8, 27517);
+    			add_location(td3, file, 788, 8, 27414);
     			attr_dev(tr1, "class", "svelte-1sy0stl");
-    			add_location(tr1, file, 780, 6, 27021);
+    			add_location(tr1, file, 778, 6, 26918);
     			attr_dev(table, "class", "simulation svelte-1sy0stl");
-    			add_location(table, file, 705, 4, 24547);
+    			add_location(table, file, 703, 4, 24444);
     			attr_dev(div6, "class", "table-wraper svelte-1sy0stl");
-    			add_location(div6, file, 704, 2, 24516);
+    			add_location(div6, file, 702, 2, 24413);
     			attr_dev(div7, "class", "update-btn-wraper svelte-1sy0stl");
-    			add_location(div7, file, 796, 2, 27656);
+    			add_location(div7, file, 794, 2, 27553);
     			attr_dev(main, "class", "svelte-1sy0stl");
     			add_location(main, file, 377, 0, 11105);
     		},
@@ -13531,10 +13531,6 @@ var mymorderedit = (function () {
     	win.focus();
     	return false;
     }
-
-    const func = (a, b) => {
-    	return a.code.localeCompare(b.code);
-    };
 
     function instance($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;

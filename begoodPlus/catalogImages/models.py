@@ -132,6 +132,38 @@ class CatalogImage(models.Model):
     ]
     discount = models.CharField(
         max_length=50, choices=DISCOUNT_TYPES, default=NO_DISCOUNT, null=True, blank=True)
+    
+    # def export_to_csv(filename='products_data.csv',filename2='sizes_groups.csv'):
+    #     # Assuming your CatalogImage model has a related_name 'sizes' for the sizes field
+    #     from catalogImages.models import CatalogImage
+    #     import pandas as pd
+
+    #     data = []
+    #     for catalog_image in CatalogImage.objects.all():
+    #         product_name = catalog_image.title
+    #         sizes_list = ', '.join([str(size.size) for size in catalog_image.sizes.all()])
+    #         data.append({'Product Name': product_name, 'Sizes': sizes_list})
+
+    #     df = pd.DataFrame(data)
+        
+    #     # now we want to add col C witch is the sizess group unique identifier (hash)
+    #     df['Sizes Group'] = df['Sizes'].apply(lambda x: hash(x))
+        
+    #     # set col D as the countr of the sizes group
+    #     df['Sizes Group Count'] = df.groupby('Sizes Group')['Sizes Group'].transform('count')
+
+    #     # print the number of unique sizes groups
+    #     print(f'Number of unique sizes groups: {df["Sizes Group"].nunique()}')
+        
+    #     df.to_csv(filename, index=False)
+    #     print(f'Data exported to {filename}')
+        
+    #     # write another file with the sizes groups and their count
+    #     df2 = df[['Sizes','Sizes Group', 'Sizes Group Count']].drop_duplicates()
+        
+    #     df2.to_csv(filename2, index=False)
+    #     print(f'Sizes groups exported to sizes_groups.csv')
+
 
     def free_text_display(self):
         # div with truncating text and title with full text

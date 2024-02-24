@@ -5,10 +5,9 @@ from .models import ProductSize
 
 
 class ProductSizeAdmin(admin.ModelAdmin):
-    list_display = ('id', 'size', 'code', 'order')
-    list_filter = ('code', )
-    search_fields = ('size', 'code', )
-    list_editable = ('size', 'code', 'order')
+    list_display = ('id', 'size',  'order')
+    search_fields = ('size',  )
+    list_editable = ('size',  'order')
 
 
 admin.site.register(ProductSize, ProductSizeAdmin)

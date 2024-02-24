@@ -141,4 +141,4 @@ class ColorClientApi(serializers.ModelSerializer):
 class SizeClientApi(serializers.ModelSerializer):
     class Meta:
         model = ProductSize
-        fields = ('id', 'size', 'code')
+        fields = ('id', 'size',)

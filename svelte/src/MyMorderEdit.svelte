@@ -606,9 +606,7 @@ $: {
                     <!-- <label for="size">מידה</label> -->
                     <select class="form-control" name="size" id="size">
                       <option default value="undefined">מידה</option>
-                      {#each ALL_SIZES.sort((a, b) => {
-                        return a.code.localeCompare(b.code);
-                      }) as size}
+                      {#each ALL_SIZES as size}
                         <option value={size["id"]}>{size["size"]}</option>
                       {/each}
                     </select>
