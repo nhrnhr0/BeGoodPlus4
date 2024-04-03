@@ -210,7 +210,53 @@ class MOrder(models.Model):
     last_notify_order_total_price = models.FloatField(
         _('last notify order total price'), default=0)
     order_sheet_archived = models.BooleanField(default=False)
-    # save
+    
+    def copy_morder(self):
+        new_morder = MOrder.objects.create(
+            cart=self.cart, 
+            client=self.client,
+            agent=self.agent,
+            name=self.name + ' עותק',
+            phone=self.phone,
+            email=self.email,
+            status=self.status,
+            status2=self.status2,
+            status_msg=self.status_msg,
+            message=self.message,
+            freezeTakenInventory=self.freezeTakenInventory,
+            archive=self.archive,
+            isOrder=self.isOrder,
+            sendProviders=self.sendProviders,
+            startCollecting=self.startCollecting,
+            total_sell_price=self.total_sell_price,
+            export_to_suppliers=self.export_to_suppliers,
+            last_notify_order_status=self.last_notify_order_status,
+            last_notify_order_total_price=self.last_notify_order_total_price,
+            order_sheet_archived=self.order_sheet_archived,
+        )
+        for product in self.products.all():
+            new_product = MOrderItem.objects.create(
+                product=product.product,
+                price=product.price,
+                ergent=product.ergent,
+                prining=product.prining,
+                priningComment=product.priningComment,
+                embroidery=product.embroidery,
+                embroideryComment=product.embroideryComment,
+                comment=product.comment,
+            )
+            for entry in product.entries.all():
+                new_entry = MOrderItemEntry.objects.create(
+                    quantity=entry.quantity,
+                    color=entry.color,
+                    size=entry.size,
+                    varient=entry.varient,
+                    sheets_taken_quantity=entry.sheets_taken_quantity,
+                    sheets_provider=entry.sheets_provider,
+                )
+                new_product.entries.add(new_entry)
+            new_morder.products.add(new_product)
+        return new_morder
 
     def recalculate_total_price(self):
         if self.pk:

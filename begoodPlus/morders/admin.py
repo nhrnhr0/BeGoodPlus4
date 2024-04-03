@@ -102,7 +102,7 @@ class MOrderAdmin(admin.ModelAdmin):  #
     search_fields = ('id', 'name', 'phone', 'email', 'status', 'message', 'products__product__title',
                      'client__businessName', 'client__email', 'client__extraName', 'client__contactMan', 'client__user__username')
     list_select_related = ('client', 'client__user',)
-    actions = ('export_to_excel', 'export_to_signiture_doc',
+    actions = ('export_to_excel', 'export_to_signiture_doc', 'copy_morder',
                'sync_with_spreedsheet', 'set_export_to_providers_true', 'set_export_to_providers_false')
 
     def get_queryset(self, request):
@@ -112,7 +112,14 @@ class MOrderAdmin(admin.ModelAdmin):  #
         return qs
 
     # select_related = ('client', 'status2')
-
+    def copy_morder(self, request, queryset):
+        for morder in queryset:
+            new_order = morder.copy_morder()
+            messages.add_message(
+                request, messages.INFO, f'הזמנה {morder.id} הועתקה להזמנה {new_order.id}')
+            
+    copy_morder.short_description = 'שכפל הזמנה'
+    
     def set_export_to_providers_true(self, request, queryset):
         queryset.update(export_to_suppliers=True)
         for morder in queryset:
