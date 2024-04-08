@@ -213,7 +213,6 @@ class CatalogImage(models.Model):
             ''
 
     def get_small_cloundinary_url(self):
-        # https://res.cloudinary.com/ms-global/image/upload/w_70,h_53,c_scale,q_auto/v1635672398/site/products/%D7%90%D7%95%D7%96%D7%A0%D7%99%D7%AA_%D7%A9%D7%9C%D7%98_%D7%A7%D7%A4%D7%99%D7%A6%D7%99%D7%AA_-_RETRACTABLE-removebg-preview_Gu4wwDw_Irp1D1a_By59SKw.png
         if self.cimage and self.cimage != '':
             return CLOUDINARY_BASE_URL + 'w_25,h_25,c_scale,q_auto/' + self.cimage
 
@@ -316,7 +315,7 @@ class CatalogImage(models.Model):
         ret = ''
         if self.cimage:
             ret += '<img width="50px" height="50px" src="%s" />' % (
-                "https://res.cloudinary.com/ms-global/image/upload/" + self.cimage)
+                CLOUDINARY_BASE_URL + self.cimage)
         return mark_safe(ret)
     render_thumbnail.short_description = _("thumbnail")
 

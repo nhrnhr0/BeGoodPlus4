@@ -64,7 +64,7 @@ class TopLevelCategory(models.Model):
                             datetime.datetime.now().strftime('%Y-%m-%d-%H_%M_%S_%f'), format='png')
     slug = models.SlugField(max_length=120, verbose_name=_(
         "slug"), unique=True, blank=True, null=True, allow_unicode=True)
-    get_image = property(lambda self: self.image.url[len('https://res.cloudinary.com/ms-global/image/upload/'):] if self.image else '' if self.albums.order_by(
+    get_image = property(lambda self: self.image.url[len(CLOUDINARY_BASE_URL):] if self.image else '' if self.albums.order_by(
         'album_order').first() == None else self.albums.order_by('album_order').first().cimage)
 
     def __str__(self) -> str:
@@ -131,7 +131,7 @@ class CatalogAlbum(MPTTModel):
         ret = ''
         if self.cimage:
             ret += '<img width="50px" height="50px" src="%s" />' % (
-                "https://res.cloudinary.com/ms-global/image/upload/" + self.cimage)
+                CLOUDINARY_BASE_URL + self.cimage)
         return mark_safe(ret)
     render_cimage_thumbnail.short_description = _("thumbnail")
 

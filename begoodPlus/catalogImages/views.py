@@ -9,6 +9,7 @@ from django.http import HttpRequest
 from django.http.response import JsonResponse
 from django.shortcuts import redirect, render
 import pytz
+from begoodPlus.settings.base import CLOUDINARY_BASE_URL
 from catalogAlbum.models import TopLevelCategory
 from campains.models import CampainProduct, MonthCampain
 from campains.views import get_user_active_campaigns, get_user_campains_serializer_data
@@ -285,7 +286,7 @@ def get_product_og_meta(product_id):
     cimage = product.cimage if product.cimage else 'undefined'
     #
     return {
-        'icon': 'https://res.cloudinary.com/ms-global/image/upload/c_scale,w_219,h_219/c_scale,u_v1649744644:msAssets:image_5_qo7yhx.jpg,w_300/' + cimage,
+        'icon': CLOUDINARY_BASE_URL + 'c_scale,w_219,h_219/c_scale,u_v1649744644:msAssets:image_5_qo7yhx.jpg,w_300/' + cimage,
         'title': product.title,
         'description': product.description[:175] + '...',
     }
@@ -294,7 +295,7 @@ def get_product_og_meta(product_id):
 def get_album_og_meta(album):
     album_cimage = album.cimage if album.cimage else 'undefined'
     return {
-        'icon': 'https://res.cloudinary.com/ms-global/image/upload/c_scale,w_219,h_219/c_scale,u_v1649744644:msAssets:image_5_qo7yhx.jpg,w_300/' + album_cimage,
+        'icon': CLOUDINARY_BASE_URL + 'c_scale,w_219,h_219/c_scale,u_v1649744644:msAssets:image_5_qo7yhx.jpg,w_300/' + album_cimage,
         'title': album.title,
         'description': album.description[:175] + '...',
         'keywords': album.keywords,
@@ -307,11 +308,11 @@ def get_top_album_og_meta(top_album, icon=None):
             first_album = CatalogAlbum.objects.filter(
                 Q(topLevelCategory__id=top_album.id) & ~Q(cimage='')).first()
             if first_album:
-                icon = 'https://res.cloudinary.com/ms-global/image/upload/c_scale,w_219,h_219/c_scale,u_v1649744644:msAssets:image_5_qo7yhx.jpg,w_300/' + first_album.cimage
+                icon = CLOUDINARY_BASE_URL + 'c_scale,w_219,h_219/c_scale,u_v1649744644:msAssets:image_5_qo7yhx.jpg,w_300/' + first_album.cimage
             else:
                 icon = ''
         else:
-            icon = 'https://res.cloudinary.com/ms-global/image/upload/c_scale,w_219,h_219/c_scale,u_v1649744644:msAssets:image_5_qo7yhx.jpg,w_300/' + top_album.image.public_id
+            icon = CLOUDINARY_BASE_URL + 'c_scale,w_219,h_219/c_scale,u_v1649744644:msAssets:image_5_qo7yhx.jpg,w_300/' + top_album.image.public_id
     return {
         'icon': icon,
         'title': top_album.name,

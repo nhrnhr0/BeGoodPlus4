@@ -102,18 +102,17 @@ INSTALLED_APPS = [
     'catalogAlbum',
     'catalogLogos',
 
-    'customerCart',
+    
     'catalogImageDetail',
     'clientApi',
     'client',
     'campains',
-    'catalogImageAttrs',
+    
     'morders',
-    'inventory',
     'smartbee',
     'docsSignature',
     'shareableCarts',
-
+    'msCrm',
     #### old unused modals ####
     'clientLikedImages',
     'myUserTasks',
@@ -123,7 +122,9 @@ INSTALLED_APPS = [
     'stock',
     'glofa_types',
     'mcrm',
-    'msCrm',
+    'inventory',
+    'customerCart',
+    'catalogImageAttrs',
     ### django modals ###
     'django.contrib.admin',
     'django.contrib.auth',
@@ -323,7 +324,7 @@ STATICFILES_DIRS = [
 ]
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(STATIC_ROOT, 'media_root/')
-CLOUDINARY_BASE_URL = 'https://res.cloudinary.com/ms-global/image/upload/'
+CLOUDINARY_BASE_URL = 'https://res.cloudinary.com/dctnj9wvo/image/upload/'
 cloudinary.config(
     cloud_name=secrects.CLOUDINARY_NAME,
     api_key=secrects.CLOUDINARY_KEY,
