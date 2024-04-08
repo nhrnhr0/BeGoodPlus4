@@ -8,7 +8,7 @@ from django.urls import reverse
 import csv
 import io
 
-from inventory.models import PPN
+#from inventory.models import PPN
 from .models import CatalogImage, CatalogImageVarient
 from django.http import FileResponse
 from xlwt.Style import XFStyle
@@ -104,10 +104,10 @@ class albumsInline(admin.TabularInline):
 # Register your models here.
 
 
-class ppnInline(admin.TabularInline):
-    model = PPN
-    classes = ['ppn-cls', ]
-    extra = 0
+# class ppnInline(admin.TabularInline):
+#     model = PPN
+#     classes = ['ppn-cls', ]
+#     extra = 0
 
 
 class FreeTextListFilter(admin.SimpleListFilter):
@@ -154,9 +154,9 @@ class CatalogImageAdmin(AdminAdvancedFiltersMixin, admin.ModelAdmin):
                     'cost_price', 'client_price', 'recomended_price', 'date_created', 'date_modified', 'is_main_public_album_set', 'is_active', 'show_sizes_popup', 'has_physical_barcode',)
     list_editable = ('cost_price', 'client_price', 'recomended_price',)
     list_display_links = ('title',)
-    actions = ['turn_on_is_active', 'turn_off_is_active', 'download_images_csv', 'download_images_exel_slim', 'download_images_exel_warehouse', 'turn_sizes_popup_active', 'turn_sizes_popup_inactive',
+    actions = ['turn_on_is_active', 'turn_off_is_active', 'download_images_csv', 'download_images_exel_slim', 'turn_sizes_popup_active', 'turn_sizes_popup_inactive',
                'upload_images_to_cloudinary_bool_active', 'upload_images_to_cloudinary_bool_inactive', 'turn_can_tag_active', 'turn_can_tag_inactive', 'turn_out_of_stock_inactive', 'turn_out_of_stock_active']
-    inlines = (albumsInline, tableInline, ppnInline)
+    inlines = (albumsInline, tableInline,)
     readonly_fields = ('id', 'render_thumbnail',
                        'render_image', 'is_main_public_album_set')
     search_fields = ('title', 'description', 'barcode',
@@ -283,72 +283,72 @@ class CatalogImageAdmin(AdminAdvancedFiltersMixin, admin.ModelAdmin):
         buffer.seek(0)
         return FileResponse(buffer, as_attachment=True, filename=file_name + '.xls')
 
-    def download_images_exel_warehouse(modeladmin, request, queryset):
+    # def download_images_exel_warehouse(modeladmin, request, queryset):
 
-        buffer = io.BytesIO()
-        wb = xlwt.Workbook()
-        file_name = 'data'
-        ws = wb.add_sheet('sheet1', cell_overwrite_ok=True)
-        ws.cols_right_to_left = True
-        title_style = XFStyle()
-        value_style = XFStyle()
-        alignment_center = xlwt.Alignment()
-        alignment_center.horz = xlwt.Alignment.HORZ_CENTER
-        alignment_center.vert = xlwt.Alignment.VERT_CENTER
-        title_style.alignment = alignment_center
-        value_style.alignment = alignment_center
-        title_style.font.bold = True
+    #     buffer = io.BytesIO()
+    #     wb = xlwt.Workbook()
+    #     file_name = 'data'
+    #     ws = wb.add_sheet('sheet1', cell_overwrite_ok=True)
+    #     ws.cols_right_to_left = True
+    #     title_style = XFStyle()
+    #     value_style = XFStyle()
+    #     alignment_center = xlwt.Alignment()
+    #     alignment_center.horz = xlwt.Alignment.HORZ_CENTER
+    #     alignment_center.vert = xlwt.Alignment.VERT_CENTER
+    #     title_style.alignment = alignment_center
+    #     value_style.alignment = alignment_center
+    #     title_style.font.bold = True
 
-        ws.write(0, 0, 'קטגוריה', title_style)
-        ws.write(0, 1, 'שם מוצר', title_style)
-        ws.write(0, 2, 'מחיר עלות ללא מע"מ', title_style)
-        ws.write(0, 3, 'מחיר חנות ללא מע"מ', title_style)
-        ws.write(0, 4, 'ברקוד', title_style)
-        ws.write(0, 5, 'האם יש ברקוד פיזי (כן/לא)', title_style)
-        ws.write(0, 6, 'האם ניתן למיתוג (כן/לא)', title_style)
-        ws.write(0, 7, 'ספק-1', title_style)
-        ws.write(0, 8, 'מקט אצל הספק-1', title_style)
-        ws.write(0, 9, 'ספק-2', title_style)
-        ws.write(0, 10, 'מקט אצל הספק-2', title_style)
-        ws.write(0, 11, 'ספק-3', title_style)
-        ws.write(0, 12, 'מקט אצל הספק-3', title_style)
-        i = 1
-        for product in queryset:
-            if product.albums.all().count() > 0:
-                ws.write(i, 0, product.albums.first().title, value_style)
-            ws.write(i, 1, product.title, value_style)
-            ws.write(i, 2, product.cost_price, value_style)
-            ws.write(i, 3, product.client_price, value_style)
-            ws.write(i, 4, product.barcode, value_style)
-            ws.write(i, 5, 'כן' if product.has_physical_barcode ==
-                     True else 'לא', value_style)
-            ws.write(i, 6, 'כן' if product.can_tag ==
-                     True else 'לא', value_style)
-            ppns = PPN.objects.filter(product=product)
-            ppn_offset = 7
-            for ppn in ppns:
-                ws.write(i, ppn_offset, ppn.provider.name, value_style)
-                ws.write(i, ppn_offset+1, ppn.providerProductName, value_style)
-                ppn_offset += 2
+    #     ws.write(0, 0, 'קטגוריה', title_style)
+    #     ws.write(0, 1, 'שם מוצר', title_style)
+    #     ws.write(0, 2, 'מחיר עלות ללא מע"מ', title_style)
+    #     ws.write(0, 3, 'מחיר חנות ללא מע"מ', title_style)
+    #     ws.write(0, 4, 'ברקוד', title_style)
+    #     ws.write(0, 5, 'האם יש ברקוד פיזי (כן/לא)', title_style)
+    #     ws.write(0, 6, 'האם ניתן למיתוג (כן/לא)', title_style)
+    #     ws.write(0, 7, 'ספק-1', title_style)
+    #     ws.write(0, 8, 'מקט אצל הספק-1', title_style)
+    #     ws.write(0, 9, 'ספק-2', title_style)
+    #     ws.write(0, 10, 'מקט אצל הספק-2', title_style)
+    #     ws.write(0, 11, 'ספק-3', title_style)
+    #     ws.write(0, 12, 'מקט אצל הספק-3', title_style)
+    #     i = 1
+    #     for product in queryset:
+    #         if product.albums.all().count() > 0:
+    #             ws.write(i, 0, product.albums.first().title, value_style)
+    #         ws.write(i, 1, product.title, value_style)
+    #         ws.write(i, 2, product.cost_price, value_style)
+    #         ws.write(i, 3, product.client_price, value_style)
+    #         ws.write(i, 4, product.barcode, value_style)
+    #         ws.write(i, 5, 'כן' if product.has_physical_barcode ==
+    #                  True else 'לא', value_style)
+    #         ws.write(i, 6, 'כן' if product.can_tag ==
+    #                  True else 'לא', value_style)
+    #         ppns = PPN.objects.filter(product=product)
+    #         ppn_offset = 7
+    #         for ppn in ppns:
+    #             ws.write(i, ppn_offset, ppn.provider.name, value_style)
+    #             ws.write(i, ppn_offset+1, ppn.providerProductName, value_style)
+    #             ppn_offset += 2
 
-            i += 1
+    #         i += 1
 
-        ws = wb.add_sheet('sheet2', cell_overwrite_ok=True)
-        ws.cols_right_to_left = True
-        title_style = XFStyle()
-        value_style = XFStyle()
-        alignment_center = xlwt.Alignment()
-        alignment_center.horz = xlwt.Alignment.HORZ_CENTER
-        alignment_center.vert = xlwt.Alignment.VERT_CENTER
-        instractions = 'ניתן להעלות את הטופס בקישור הבא:'
-        url = settings.MY_DOMAIN + \
-            reverse('catalog_catalogimage_upload_warehouse_excel')
-        ws.write(0, 0, instractions, title_style)
-        ws.write(1, 0, url, value_style)
+    #     ws = wb.add_sheet('sheet2', cell_overwrite_ok=True)
+    #     ws.cols_right_to_left = True
+    #     title_style = XFStyle()
+    #     value_style = XFStyle()
+    #     alignment_center = xlwt.Alignment()
+    #     alignment_center.horz = xlwt.Alignment.HORZ_CENTER
+    #     alignment_center.vert = xlwt.Alignment.VERT_CENTER
+    #     instractions = 'ניתן להעלות את הטופס בקישור הבא:'
+    #     url = settings.MY_DOMAIN + \
+    #         reverse('catalog_catalogimage_upload_warehouse_excel')
+    #     ws.write(0, 0, instractions, title_style)
+    #     ws.write(1, 0, url, value_style)
 
-        wb.save(buffer)
-        buffer.seek(0)
-        return FileResponse(buffer, as_attachment=True, filename=file_name + '.xls')
+    #     wb.save(buffer)
+    #     buffer.seek(0)
+    #     return FileResponse(buffer, as_attachment=True, filename=file_name + '.xls')
 
     def download_images_exel_slim(modeladmin, request, queryset):
         # export title, description, const_price, first provider_name, barcode, first category,

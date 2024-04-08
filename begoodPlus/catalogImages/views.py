@@ -20,7 +20,7 @@ from clientApi.serializers import ImageClientApi
 
 from core.models import SvelteCartProductEntery
 from core.pagination import CurserResultsSetPagination, StandardResultsSetPagination
-from inventory.models import PPN
+#from inventory.models import PPN
 from productColor.models import ProductColor
 from productSize.models import ProductSize
 from .models import CatalogImage

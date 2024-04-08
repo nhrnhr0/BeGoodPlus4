@@ -23,13 +23,13 @@ from core.views import admin_upload_docs_page, providers_docx_task, sheetsurl_to
 from docsSignature.views import api_get_doc_signature, api_sign_on_doc
 from core.views import admin_upload_docs_page
 from catalogAlbum.views import get_albums, get_catalog_albums
-from inventory.views import doc_stock_enter_provider_requests_api, get_stock_by_id_api, save_doc_stock_enter_provider_requests, unpivot_inventory_exel, upload_inventory_csv
+#from inventory.views import doc_stock_enter_provider_requests_api, get_stock_by_id_api, save_doc_stock_enter_provider_requests, unpivot_inventory_exel, upload_inventory_csv
 from clientApi.views import CustomAuthToken, get_all_varients_api, get_products_info, get_products_info2
-from inventory.views import add_doc_stock_enter_ppn, add_doc_stock_enter_ppn_entry, create_enter_doc, enter_doc_edit, delete_doc_stock_enter_ppn_entry, doc_stock_detail_api, doc_stock_list_api, get_all_inventory_api, get_all_warehouses_api, enter_doc_insert_inventory, enter_doc_remove_product, get_doc_stock_enter_ppn_entries, inventory_edit_entry, inventory_get_entry_history, inventory_manual_update_entry, search_ppn, search_warehouses, show_inventory_stock, get_product_inventory, doc_stock_list
+# from inventory.views import add_doc_stock_enter_ppn, add_doc_stock_enter_ppn_entry, create_enter_doc, enter_doc_edit, delete_doc_stock_enter_ppn_entry, doc_stock_detail_api, doc_stock_list_api, get_all_inventory_api, get_all_warehouses_api, enter_doc_insert_inventory, enter_doc_remove_product, get_doc_stock_enter_ppn_entries, inventory_edit_entry, inventory_get_entry_history, inventory_manual_update_entry, search_ppn, search_warehouses, show_inventory_stock, get_product_inventory, doc_stock_list
 
 from clientApi.views import get_all_colors_api, get_all_sizes_api, main_page_api, get_all_morder_statuses_api
 from campains.views import admin_get_all_campains, admin_get_campain_products, get_user_campains
-from inventory.views import DocStockEnterViewSet, doc_stock_enter
+# from inventory.views import DocStockEnterViewSet, doc_stock_enter
 # from mcrm.views import , admin_upload_bulk_crm_exel, upload_crm_execl, upload_crm_execl2
 
 from msCrm.views import api_save_lead, fix_ms_crm, get_all_business_types_groups, get_all_mscrm_phone_contacts, get_crm_users_for_whatsapp, get_crm_users_numbers_in_excel, mcrm_lead_register, get_all_business_types, get_all_interests, import_mscrm_from_exel, upload_mscrm_business_select_to_intrests_exel
@@ -38,7 +38,7 @@ from catalogImages.views import AlbumImagesApiView, admin_api_get_product_cost_p
 from clientApi.views import ColorsClientViewSet, ImageClientViewSet, SizesClientViewSet, LogoClientViewSet, get_album_images
 from clientApi.views import AlbumClientViewSet
 from catalogImageDetail.views import SvelteCatalogImageDetailViewSet
-from morders.views import api_edit_order_add_product, api_edit_order_delete_product, api_get_order_data, api_get_order_data2, create_provider_docs, morders_create_providers_docx, dashboard_orders_collection_smartbee, edit_morder, get_all_orders, dashboard_orders_collection_collect_save, get_order_detail_to_collect, list_orders_to_collect, load_all_provider_request_admin, morder_edit_order_add_product_entries, api_delete_order_data_item, morder_edit_order_add_product_entries_2, morder_edit_order_add_provider_entries, provider_request_update_entry_admin, request_provider_info_admin, view_morder_pdf, view_morder_stock_document, spreedsheet_to_morder_view
+from morders.views import api_edit_order_add_product, api_edit_order_delete_product, api_get_order_data, create_provider_docs, morders_create_providers_docx, dashboard_orders_collection_smartbee, edit_morder, get_all_orders, dashboard_orders_collection_collect_save, list_orders_to_collect, load_all_provider_request_admin, morder_edit_order_add_product_entries, api_delete_order_data_item, morder_edit_order_add_product_entries_2, morder_edit_order_add_provider_entries, provider_request_update_entry_admin, view_morder_pdf, view_morder_stock_document, spreedsheet_to_morder_view
 
 
 from packingType.views import SvelteApiPackingTypeViewSet
@@ -148,12 +148,12 @@ urlpatterns = [
          name='client_product_question'),
 
 
-    path('request-provider-info/<int:ppn_id>',
-         request_provider_info_admin, name='request-provider-info'),
-    path('upload-inventory-csv/', upload_inventory_csv,
-         name='upload-inventory-csv'),
-    path('unpivot-inventory-exel/', unpivot_inventory_exel,
-         name='unpivot-inventory-exel'),
+#     path('request-provider-info/<int:ppn_id>',
+#          request_provider_info_admin, name='request-provider-info'),
+#     path('upload-inventory-csv/', upload_inventory_csv,
+#          name='upload-inventory-csv'),
+#     path('unpivot-inventory-exel/', unpivot_inventory_exel,
+#          name='unpivot-inventory-exel'),
     path('create-provider-docs', create_provider_docs,
          name='create-provider-docs'),
     path('load-all-provider-request', load_all_provider_request_admin,
@@ -185,55 +185,55 @@ urlpatterns = [
     path('admin/', admin.site.urls),
 
     # inventory:
-    path('inv/enter-doc/save-doc-stock-enter-provider-requests',
-         save_doc_stock_enter_provider_requests, name='save_doc_stock_enter_provider_requests'),
-    path('inv/doc-stock-enter-provider-requests-api/<int:doc_stock_enter_id>',
-         doc_stock_enter_provider_requests_api),
-    path('inv/doc-stock-list', doc_stock_list, name='admin_doc_stock_list'),
-    path('inv/doc-stock-list-api', doc_stock_list_api, name='doc_stock_list_api'),
-    path('inv/doc-stock-detail-api/<int:id>',
-         doc_stock_detail_api, name='doc_stock_detail_api'),
-    path('inv/doc-stock-enter/<int:id>', doc_stock_enter,
-         name='admin_edit_doc_stock_enter'),
-    path('inv/enter-doc/<int:id>',
-         DocStockEnterViewSet.as_view(), name='admin_enter_doc'),
-    path('inv/enter-doc/get-doc-stock-enter-ppn-entries/',
-         get_doc_stock_enter_ppn_entries, name='admin_get_doc_stock_enter_ppn_entries'),
-    path('inv/enter-doc/delete-doc-stock-enter-ppn-entry',
-         delete_doc_stock_enter_ppn_entry, name='admin_delete_doc_stock_enter_ppn_entry'),
-    path('inv/enter-doc/add-doc-stock-enter-ppn-entry',
-         add_doc_stock_enter_ppn_entry, name='admin_add_doc_stock_enter_ppn_entry'),
-    path('inv/enter-doc/add-doc-stock-enter-ppn',
-         add_doc_stock_enter_ppn, name='admin_add_doc_stock_enter_ppn'),
-    path('inv/show-stock', show_inventory_stock),
-    path('inv/get-product-inventory/', get_product_inventory,
-         name='admin_get_product_inventory'),
-    path('inv/create-enter-doc/', create_enter_doc,
-         name='admin_create_enter_doc'),
-    path('enter-doc-edit/', enter_doc_edit, name='admin_enter_doc_edit'),
-    path('enter-doc-remove-product/', enter_doc_remove_product,
-         name='admin_enter_doc_remove_product'),
-    # path('enter-doc-insert-inventory/', enter_doc_insert_inventory, name='admin_enter_doc_insert_inventory'),
-    path('get-all-warehouses-api/', get_all_warehouses_api,
-         name='admin_get_all_warehouses_api'),
-    path('enter-doc-insert-inventory/<int:doc_id>',
-         enter_doc_insert_inventory, name='admin_enter_doc_insert_inventory'),
-    path('get-all-inventory-api/', get_all_inventory_api,
-         name='admin_get_all_inventory_api'),
-    path('get-stock-by-id-api/<int:id>', get_stock_by_id_api,
-         name='admin_get_stock_by_id_api'),
-    path('inventory-edit-entry/<int:entry_id>',
-         inventory_edit_entry, name='admin_inventory_edit_entry'),
-    path('inventory-edit-entry/<int:entry_id>/history/',
-         inventory_get_entry_history, name='admin_inventory_edit_entry_history'),
-    path('inventory-manual-update-entry/<int:entry_id>',
-         inventory_manual_update_entry, name='admin_inventory_manual_update_entry'),
+#     path('inv/enter-doc/save-doc-stock-enter-provider-requests',
+#          save_doc_stock_enter_provider_requests, name='save_doc_stock_enter_provider_requests'),
+#     path('inv/doc-stock-enter-provider-requests-api/<int:doc_stock_enter_id>',
+#          doc_stock_enter_provider_requests_api),
+#     path('inv/doc-stock-list', doc_stock_list, name='admin_doc_stock_list'),
+#     path('inv/doc-stock-list-api', doc_stock_list_api, name='doc_stock_list_api'),
+#     path('inv/doc-stock-detail-api/<int:id>',
+#          doc_stock_detail_api, name='doc_stock_detail_api'),
+#     path('inv/doc-stock-enter/<int:id>', doc_stock_enter,
+#          name='admin_edit_doc_stock_enter'),
+#     path('inv/enter-doc/<int:id>',
+#          DocStockEnterViewSet.as_view(), name='admin_enter_doc'),
+#     path('inv/enter-doc/get-doc-stock-enter-ppn-entries/',
+#          get_doc_stock_enter_ppn_entries, name='admin_get_doc_stock_enter_ppn_entries'),
+#     path('inv/enter-doc/delete-doc-stock-enter-ppn-entry',
+#          delete_doc_stock_enter_ppn_entry, name='admin_delete_doc_stock_enter_ppn_entry'),
+#     path('inv/enter-doc/add-doc-stock-enter-ppn-entry',
+#          add_doc_stock_enter_ppn_entry, name='admin_add_doc_stock_enter_ppn_entry'),
+#     path('inv/enter-doc/add-doc-stock-enter-ppn',
+#          add_doc_stock_enter_ppn, name='admin_add_doc_stock_enter_ppn'),
+#     path('inv/show-stock', show_inventory_stock),
+#     path('inv/get-product-inventory/', get_product_inventory,
+#          name='admin_get_product_inventory'),
+#     path('inv/create-enter-doc/', create_enter_doc,
+#          name='admin_create_enter_doc'),
+#     path('enter-doc-edit/', enter_doc_edit, name='admin_enter_doc_edit'),
+#     path('enter-doc-remove-product/', enter_doc_remove_product,
+#          name='admin_enter_doc_remove_product'),
+#     # path('enter-doc-insert-inventory/', enter_doc_insert_inventory, name='admin_enter_doc_insert_inventory'),
+#     path('get-all-warehouses-api/', get_all_warehouses_api,
+#          name='admin_get_all_warehouses_api'),
+#     path('enter-doc-insert-inventory/<int:doc_id>',
+#          enter_doc_insert_inventory, name='admin_enter_doc_insert_inventory'),
+#     path('get-all-inventory-api/', get_all_inventory_api,
+#          name='admin_get_all_inventory_api'),
+# #     path('get-stock-by-id-api/<int:id>', get_stock_by_id_api,
+# #          name='admin_get_stock_by_id_api'),
+#     path('inventory-edit-entry/<int:entry_id>',
+#          inventory_edit_entry, name='admin_inventory_edit_entry'),
+#     path('inventory-edit-entry/<int:entry_id>/history/',
+#          inventory_get_entry_history, name='admin_inventory_edit_entry_history'),
+#     path('inventory-manual-update-entry/<int:entry_id>',
+#          inventory_manual_update_entry, name='admin_inventory_manual_update_entry'),
     # orders
     path('morders/edit-order/<int:id>', edit_morder, name='admin_edit_order'),
     path('morders/api-get-order-data/<int:id>',
          api_get_order_data, name='admin_api_get_order_data'),
-    path('morders/api-get-order-data2/<int:id>',
-         api_get_order_data2, name='admin_api_get_order_data2'),
+#     path('morders/api-get-order-data2/<int:id>',
+#          api_get_order_data2, name='admin_api_get_order_data2'),
 
     path('morders/api-edit-order/add-new-product',
          api_edit_order_add_product, name="admin_api_edit_order_add_product"),
@@ -257,8 +257,8 @@ urlpatterns = [
     path('exel-to-smartbee/', submit_exel_to_smartbee),
     path('morders/list-orders-to-collect', list_orders_to_collect,
          name='admin_list_orders_to_collect'),
-    path('morders/get-order-detail-to-collect', get_order_detail_to_collect,
-         name='admin_get_order_detail_to_collect'),
+#     path('morders/get-order-detail-to-collect', get_order_detail_to_collect,
+#          name='admin_get_order_detail_to_collect'),
     path('dashboard/orders-collection/collect/save', dashboard_orders_collection_collect_save,
          name='admin_dashboard_orders_collection_collect_save'),
     path('dashboard/orders-collection/smartbee/<int:id>',
@@ -266,7 +266,7 @@ urlpatterns = [
     path('get-smartbee-doc/<str:doc_id>',
          get_smartbee_doc, name='admin_get_smartbee_doc'),
     path('api/get-all-orders', get_all_orders, name='admin_get_all_orders'),
-    path('search-ppn/', search_ppn, name='search_ppn'),
+#     path('search-ppn/', search_ppn, name='search_ppn'),
     # path('api/', include(router.urls)),
 
     re_path(r'get_album_images/(?P<pk>\d+)', get_album_images),
@@ -309,7 +309,7 @@ urlpatterns = [
     # path('', catalogView, name="catalogView"),
 
     path('catalog_api', catalogView_api, name="catalog-view-api"),
-    path('search-warehouses/', search_warehouses, name='search_warehouses'),
+#     path('search-warehouses/', search_warehouses, name='search_warehouses'),
     path('search-providers/', search_providers, name="search-providers"),
     path('search', autocompleteModel),
     path('search-click', autocompleteClick),

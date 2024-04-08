@@ -5,7 +5,7 @@ from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from catalogImages.models import CatalogImage, CatalogImageVarient
 from color.models import Color
-from morders.models import CollectedInventory, MOrderItem, TakenInventory
+from morders.models import MOrderItem
 from productColor.models import ProductColor
 from productSize.models import ProductSize
 from provider.models import Provider
@@ -281,89 +281,89 @@ def create_enter_doc(request):
         return JsonResponse({'status': 'ok',
                             'id': doc.id})
 
-@api_view(['POST'])
-def save_doc_stock_enter_provider_requests(request):
-    if request.user.is_superuser:
-        if request.method == 'POST':
-            data = request.data
-            doc_id = data.get('doc_id', None)
-            if doc_id:
-                doc = DocStockEnter.objects.get(id=doc_id)
-                all_items = list(data.items())
-                for key, val in all_items:
-                    if key.startswith('cell_entry_'):
-                        split_str = key.split('_')
-                        entry_id = split_str[2]
-                        request_id = split_str[4]
-                        print(entry_id, request_id, val)
-                        entryObj = ProductEnterItemsEntries.objects.get(id=entry_id)
-                        itemObj = entryObj.item.first()
-                        ppn= itemObj.ppn
+# @api_view(['POST'])
+# def save_doc_stock_enter_provider_requests(request):
+#     if request.user.is_superuser:
+#         if request.method == 'POST':
+#             data = request.data
+#             doc_id = data.get('doc_id', None)
+#             if doc_id:
+#                 doc = DocStockEnter.objects.get(id=doc_id)
+#                 all_items = list(data.items())
+#                 for key, val in all_items:
+#                     if key.startswith('cell_entry_'):
+#                         split_str = key.split('_')
+#                         entry_id = split_str[2]
+#                         request_id = split_str[4]
+#                         print(entry_id, request_id, val)
+#                         entryObj = ProductEnterItemsEntries.objects.get(id=entry_id)
+#                         itemObj = entryObj.item.first()
+#                         ppn= itemObj.ppn
                         
-                        warhouse = doc.warehouse
-                        provider = doc.provider
-                        if val:
-                            val = int(val)
+#                         warhouse = doc.warehouse
+#                         provider = doc.provider
+#                         if val:
+#                             val = int(val)
                             
                            
-                            # find the provider request and add the value
-                            providerRequestObj = ProviderRequest.objects.get(id=request_id)
-                            morderItem = providerRequestObj.orderItem.first()
-                            takens = morderItem.taken.filter(color=entryObj.color, size=entryObj.size, varient=entryObj.verient,provider=provider,has_physical_barcode=ppn.has_phisical_barcode)
-                            if takens.exists():
-                                taken = takens.first()
-                                taken.quantity += val
-                                taken.save()
-                            else:
-                                taken = TakenInventory.objects.create(
-                                    provider=provider,
-                                    quantity=val,
-                                    color=entryObj.color,
-                                    size=entryObj.size,
-                                    varient=entryObj.verient,
-                                    has_physical_barcode=ppn.has_phisical_barcode,
-                                    )
-                                taken.save()
-                                morderItem.taken.add(taken)
-                            morderItem.save()
+#                             # find the provider request and add the value
+#                             providerRequestObj = ProviderRequest.objects.get(id=request_id)
+#                             morderItem = providerRequestObj.orderItem.first()
+#                             takens = morderItem.taken.filter(color=entryObj.color, size=entryObj.size, varient=entryObj.verient,provider=provider,has_physical_barcode=ppn.has_phisical_barcode)
+#                             if takens.exists():
+#                                 taken = takens.first()
+#                                 taken.quantity += val
+#                                 taken.save()
+#                             else:
+#                                 taken = TakenInventory.objects.create(
+#                                     provider=provider,
+#                                     quantity=val,
+#                                     color=entryObj.color,
+#                                     size=entryObj.size,
+#                                     varient=entryObj.verient,
+#                                     has_physical_barcode=ppn.has_phisical_barcode,
+#                                     )
+#                                 taken.save()
+#                                 morderItem.taken.add(taken)
+#                             morderItem.save()
                             
                             
-                            # remove the taken quantity from the provider request
-                            providerRequestObj.quantity -= val
-                            providerRequestObj.save()
-                            if providerRequestObj.quantity <= 0:
-                                providerRequestObj.delete()
+#                             # remove the taken quantity from the provider request
+#                             providerRequestObj.quantity -= val
+#                             providerRequestObj.save()
+#                             if providerRequestObj.quantity <= 0:
+#                                 providerRequestObj.delete()
                             
-                            # find the warhouse stock and subtract the value
-                            try:
-                                stock = WarehouseStock.objects.get(ppn=ppn, warehouse=warhouse, size=entryObj.size,color=entryObj.color,verient=entryObj.verient)
-                                if stock and data.get('action', None) == 'collected':
-                                    collectedInventory = taken.collected.filter(warehouseStock=stock)
-                                    if collectedInventory.exists():
-                                        collectedInventory = collectedInventory.first()
-                                        collectedInventory.quantity += val
-                                        collectedInventory.save()
-                                    else:
-                                        collectedInventory = CollectedInventory.objects.create(
-                                            warehouseStock=stock,
-                                            quantity=val,
-                                            )
-                                        collectedInventory.save()
-                                        taken.collected.add(collectedInventory)
-                                # stock.quantity -= val
-                                # stock.save()
-                            except WarehouseStock.DoesNotExist:
-                                pass
+#                             # find the warhouse stock and subtract the value
+#                             try:
+#                                 stock = WarehouseStock.objects.get(ppn=ppn, warehouse=warhouse, size=entryObj.size,color=entryObj.color,verient=entryObj.verient)
+#                                 if stock and data.get('action', None) == 'collected':
+#                                     collectedInventory = taken.collected.filter(warehouseStock=stock)
+#                                     if collectedInventory.exists():
+#                                         collectedInventory = collectedInventory.first()
+#                                         collectedInventory.quantity += val
+#                                         collectedInventory.save()
+#                                     else:
+#                                         collectedInventory = CollectedInventory.objects.create(
+#                                             warehouseStock=stock,
+#                                             quantity=val,
+#                                             )
+#                                         collectedInventory.save()
+#                                         taken.collected.add(collectedInventory)
+#                                 # stock.quantity -= val
+#                                 # stock.save()
+#                             except WarehouseStock.DoesNotExist:
+#                                 pass
                             
-                            # request.save()
+#                             # request.save()
                             
-                return JsonResponse({'status': 'success'})
-            else:
-                return JsonResponse({'status': 'error', 'message': 'doc_id is required'})
-        else:
-            return JsonResponse({'status': 'error', 'message': 'method is not allowed'})
-    else:
-        return JsonResponse({'status': 'error', 'message': 'You are not authorized'})
+#                 return JsonResponse({'status': 'success'})
+#             else:
+#                 return JsonResponse({'status': 'error', 'message': 'doc_id is required'})
+#         else:
+#             return JsonResponse({'status': 'error', 'message': 'method is not allowed'})
+#     else:
+#         return JsonResponse({'status': 'error', 'message': 'You are not authorized'})
     
 @api_view(['GET'])
 def doc_stock_enter_provider_requests_api(request, doc_stock_enter_id):

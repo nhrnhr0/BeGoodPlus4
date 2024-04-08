@@ -28,7 +28,7 @@ from catalogImages.models import CatalogImage
 from client.models import Client
 from color.models import Color
 from core.models import SvelteCartModal
-from inventory.models import ProviderRequest, WarehouseStock
+#from inventory.models import ProviderRequest, WarehouseStock
 from productSize.models import ProductSize
 from catalogImages.models import CatalogImageVarient
 from provider.models import Provider
@@ -49,24 +49,24 @@ from django.db.models.signals import pre_save, post_save, m2m_changed
 from django.dispatch import receiver
 
 
-class CollectedInventory(models.Model):
-    warehouseStock = models.ForeignKey(
-        WarehouseStock, on_delete=models.CASCADE, related_name='collectedInventory')
-    quantity = models.IntegerField(default=0)
+# class CollectedInventory(models.Model):
+#     # warehouseStock = models.ForeignKey(
+#     #     WarehouseStock, on_delete=models.CASCADE, related_name='collectedInventory')
+#     quantity = models.IntegerField(default=0)
 
 
-class TakenInventory(models.Model):
-    quantity = models.IntegerField(default=0)
-    color = models.ForeignKey(
-        to=Color, on_delete=models.SET_DEFAULT, default=76,)
-    size = models.ForeignKey(
-        to=ProductSize, on_delete=models.SET_DEFAULT, default=108,)
-    varient = models.ForeignKey(
-        to=CatalogImageVarient, on_delete=models.CASCADE, null=True, blank=True)
-    has_physical_barcode = models.BooleanField(default=False)
-    provider = models.ForeignKey(to=Provider, on_delete=models.CASCADE,)
-    collected = models.ManyToManyField(
-        to=CollectedInventory, related_name='taken_inventory')
+# class TakenInventory(models.Model):
+#     quantity = models.IntegerField(default=0)
+#     color = models.ForeignKey(
+#         to=Color, on_delete=models.SET_DEFAULT, default=76,)
+#     size = models.ForeignKey(
+#         to=ProductSize, on_delete=models.SET_DEFAULT, default=108,)
+#     varient = models.ForeignKey(
+#         to=CatalogImageVarient, on_delete=models.CASCADE, null=True, blank=True)
+#     has_physical_barcode = models.BooleanField(default=False)
+#     provider = models.ForeignKey(to=Provider, on_delete=models.CASCADE,)
+#     collected = models.ManyToManyField(
+#         to=CollectedInventory, related_name='taken_inventory')
     # toOrder = models.IntegerField(default=0)
 
 
@@ -115,10 +115,10 @@ class MOrderItem(models.Model):
     comment = models.TextField(null=True, blank=True)
     entries = models.ManyToManyField(
         to=MOrderItemEntry, blank=True, related_name='orderItem')
-    taken = models.ManyToManyField(
-        to=TakenInventory, blank=True, related_name='orderItem')
-    toProviders = models.ManyToManyField(
-        to=ProviderRequest, blank=True, related_name='orderItem')
+    # taken = models.ManyToManyField(
+    #     to=TakenInventory, blank=True, related_name='orderItem')
+    # toProviders = models.ManyToManyField(
+    #     to=ProviderRequest, blank=True, related_name='orderItem')
     prop_totalEntriesQuantity = property(lambda self: sum(
         [entry.quantity for entry in self.entries.all()]))
     prop_totalPrice = property(

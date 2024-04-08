@@ -122,7 +122,7 @@ INSTALLED_APPS = [
     'stock',
     'glofa_types',
     'mcrm',
-    'inventory',
+    #'inventory',
     'customerCart',
     'catalogImageAttrs',
     ### django modals ###
