@@ -8,7 +8,7 @@ from django.urls import reverse
 import csv
 import io
 
-from inventory.models import PPN
+#from inventory.models import PPN
 from .models import CatalogImage, CatalogImageVarient
 from django.http import FileResponse
 from xlwt.Style import XFStyle
@@ -104,10 +104,10 @@ class albumsInline(admin.TabularInline):
 # Register your models here.
 
 
-class ppnInline(admin.TabularInline):
-    model = PPN
-    classes = ['ppn-cls', ]
-    extra = 0
+# class ppnInline(admin.TabularInline):
+#     model = PPN
+#     classes = ['ppn-cls', ]
+#     extra = 0
 
 
 class FreeTextListFilter(admin.SimpleListFilter):
@@ -156,7 +156,7 @@ class CatalogImageAdmin(AdminAdvancedFiltersMixin, admin.ModelAdmin):
     list_display_links = ('title',)
     actions = ['turn_on_is_active', 'turn_off_is_active', 'download_images_csv', 'download_images_exel_slim', 'download_images_exel_warehouse', 'turn_sizes_popup_active', 'turn_sizes_popup_inactive',
                'upload_images_to_cloudinary_bool_active', 'upload_images_to_cloudinary_bool_inactive', 'turn_can_tag_active', 'turn_can_tag_inactive', 'turn_out_of_stock_inactive', 'turn_out_of_stock_active']
-    inlines = (albumsInline, tableInline, ppnInline)
+    inlines = (albumsInline, tableInline)
     readonly_fields = ('id', 'render_thumbnail',
                        'render_image', 'is_main_public_album_set')
     search_fields = ('title', 'description', 'barcode',
@@ -324,7 +324,7 @@ class CatalogImageAdmin(AdminAdvancedFiltersMixin, admin.ModelAdmin):
                      True else 'לא', value_style)
             ws.write(i, 6, 'כן' if product.can_tag ==
                      True else 'לא', value_style)
-            ppns = PPN.objects.filter(product=product)
+            ppns = []#PPN.objects.filter(product=product)
             ppn_offset = 7
             for ppn in ppns:
                 ws.write(i, ppn_offset, ppn.provider.name, value_style)

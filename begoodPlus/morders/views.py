@@ -24,11 +24,11 @@ from django.shortcuts import render
 from matplotlib.pyplot import annotate
 from docsSignature.views import save_image_to_cloudinary
 from catalogImages.models import CatalogImage
-from inventory.models import PPN, WarehouseStock
+#from inventory.models import PPN, WarehouseStock
 from provider.models import Provider
 from smartbee.models import SmartbeeTokens
-from .serializers import AdminMOrderItemSerializer, AdminMOrderListSerializer, AdminMOrderSerializer, AdminProviderRequestrInfoSerializer, AdminProviderRequestrSerializer, AdminProviderResuestSerializerWithMOrder, MOrderCollectionSerializer
-from morders.models import CollectedInventory, MOrder, MOrderItem, MOrderItemEntry, ProviderRequest, TakenInventory
+from .serializers import AdminMOrderItemSerializer, AdminMOrderListSerializer, AdminMOrderSerializer
+from morders.models import CollectedInventory, MOrder, MOrderItem, MOrderItemEntry, TakenInventory
 from rest_framework import status
 import json
 from rest_framework.decorators import api_view
@@ -87,16 +87,16 @@ def update_sell_price_from_price_proposal_sheet_view(request):
             return JsonResponse({'status': 'success'}, status=status.HTTP_200_OK)
 
 
-def request_provider_info_admin(request, ppn_id):
-    if not request.user.is_superuser:
-        return HttpResponseRedirect('/admin/login/?next=' + request.path)
-    ppn_obj = PPN.objects.get(id=ppn_id)
-    product_id = ppn_obj.product_id
-    provider_id = ppn_obj.provider_id
-    obj = ProviderRequest.objects.filter(
-        orderItem__product=product_id, provider=provider_id)
-    serializer = AdminProviderRequestrInfoSerializer(obj, many=True)
-    return JsonResponse(serializer.data, status=status.HTTP_200_OK, safe=False)
+# def request_provider_info_admin(request, ppn_id):
+#     if not request.user.is_superuser:
+#         return HttpResponseRedirect('/admin/login/?next=' + request.path)
+#     ppn_obj = PPN.objects.get(id=ppn_id)
+#     product_id = ppn_obj.product_id
+#     provider_id = ppn_obj.provider_id
+#     obj = ProviderRequest.objects.filter(
+#         orderItem__product=product_id, provider=provider_id)
+#     serializer = AdminProviderRequestrInfoSerializer(obj, many=True)
+#     return JsonResponse(serializer.data, status=status.HTTP_200_OK, safe=False)
 
 
 @api_view(['GET'])
@@ -113,48 +113,48 @@ def get_all_orders(request):
             return JsonResponse(serializer.data, status=status.HTTP_200_OK, safe=False)
 
 
-def provider_request_update_entry_admin(request):
-    if not request.user.is_superuser:
-        return HttpResponseRedirect('/admin/login/?next=' + request.path)
-    data = json.loads(request.body)
-    print(data)
-    if data.get('id', None):
-        obj = ProviderRequest.objects.get(id=data['id'])
-        obj.quantity = data['quantity']
-    else:
-        morderItem = MOrderItem.objects.get(
-            product_id=data['product']['id'], morder=data['morder'])
-        objs = ProviderRequest.objects.filter(
-            provider_id=data['provider'],
-            size_id=data['size'],
-            varient_id=data['varient'],
-            color_id=data['color'],
-            force_physical_barcode=data['force_physical_barcode'],
-            orderItem=morderItem
-        )
-        if objs.exists():
-            obj = objs.first()
-            obj.quantity = data['quantity']
-        else:
-            obj = ProviderRequest.objects.create(
-                provider_id=data['provider'],
-                size_id=data['size'],
-                varient_id=data['varient'],
-                color_id=data['color'],
-                force_physical_barcode=data['force_physical_barcode'],
-                quantity=data['quantity'],
-            )
-            obj.orderItem.add(morderItem)
-        # morder = MOrder.objects.get(id=data['morder'])
+# def provider_request_update_entry_admin(request):
+#     if not request.user.is_superuser:
+#         return HttpResponseRedirect('/admin/login/?next=' + request.path)
+#     data = json.loads(request.body)
+#     print(data)
+#     if data.get('id', None):
+#         obj = ProviderRequest.objects.get(id=data['id'])
+#         obj.quantity = data['quantity']
+#     else:
+#         morderItem = MOrderItem.objects.get(
+#             product_id=data['product']['id'], morder=data['morder'])
+#         objs = ProviderRequest.objects.filter(
+#             provider_id=data['provider'],
+#             size_id=data['size'],
+#             varient_id=data['varient'],
+#             color_id=data['color'],
+#             force_physical_barcode=data['force_physical_barcode'],
+#             orderItem=morderItem
+#         )
+#         if objs.exists():
+#             obj = objs.first()
+#             obj.quantity = data['quantity']
+#         else:
+#             obj = ProviderRequest.objects.create(
+#                 provider_id=data['provider'],
+#                 size_id=data['size'],
+#                 varient_id=data['varient'],
+#                 color_id=data['color'],
+#                 force_physical_barcode=data['force_physical_barcode'],
+#                 quantity=data['quantity'],
+#             )
+#             obj.orderItem.add(morderItem)
+#         # morder = MOrder.objects.get(id=data['morder'])
 
-    print(obj)
-    obj.save()
-    if obj.quantity <= 0:
-        obj.delete()
-        return JsonResponse({'status': 'Entry deleted'}, status=status.HTTP_200_OK)
-    else:
-        data = AdminProviderResuestSerializerWithMOrder(obj).data
-        return JsonResponse({'status': 'success', 'data': data}, status=status.HTTP_200_OK)
+#     print(obj)
+#     obj.save()
+#     if obj.quantity <= 0:
+#         obj.delete()
+#         return JsonResponse({'status': 'Entry deleted'}, status=status.HTTP_200_OK)
+#     else:
+#         data = AdminProviderResuestSerializerWithMOrder(obj).data
+#         return JsonResponse({'status': 'success', 'data': data}, status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])
@@ -421,14 +421,14 @@ def create_providers_docx(doc_data):
     return document  # response
 
 
-def load_all_provider_request_admin(request):
-    if not request.user.is_superuser:
-        return HttpResponseRedirect('/admin/login/?next=' + request.path)
-    # filter only ProviderRequest.orderItem(m2m).morder(m2m).sendProviders = True
-    data = ProviderRequest.objects.filter(orderItem__morder__sendProviders=True).order_by('orderItem__morder', 'orderItem__product',).prefetch_related(
-        'provider', 'orderItem__product', 'orderItem__morder').select_related('provider', 'size', 'varient', 'color')
-    serializer = AdminProviderResuestSerializerWithMOrder(data, many=True)
-    return JsonResponse(serializer.data, status=status.HTTP_200_OK, safe=False)
+# def load_all_provider_request_admin(request):
+#     if not request.user.is_superuser:
+#         return HttpResponseRedirect('/admin/login/?next=' + request.path)
+#     # filter only ProviderRequest.orderItem(m2m).morder(m2m).sendProviders = True
+#     data = ProviderRequest.objects.filter(orderItem__morder__sendProviders=True).order_by('orderItem__morder', 'orderItem__product',).prefetch_related(
+#         'provider', 'orderItem__product', 'orderItem__morder').select_related('provider', 'size', 'varient', 'color')
+#     serializer = AdminProviderResuestSerializerWithMOrder(data, many=True)
+#     return JsonResponse(serializer.data, status=status.HTTP_200_OK, safe=False)
 
 
 def view_morder_stock_document(request, id):
@@ -453,39 +453,39 @@ def view_morder_pdf(request, id):
     return HttpResponse(html)
 
 
-@api_view(['POST'])
-def morder_edit_order_add_provider_entries(request, entry_id):
-    if not request.user.is_superuser:
-        return JsonResponse({'error': 'You are not authorized to perform this action'}, status=status.HTTP_401_UNAUTHORIZED)
-    orderItem = MOrderItem.objects.get(id=entry_id)
-    data_provider = request.data.get('provider')
-    data_size = request.data.get('size')
-    data_varient = request.data.get('varient')
-    data_color = request.data.get('color')
-    data_need_phisical_barcode = request.data.get('need_phisical_barcode')
-    data_quantity = request.data.get('quantity')
+# @api_view(['POST'])
+# def morder_edit_order_add_provider_entries(request, entry_id):
+#     if not request.user.is_superuser:
+#         return JsonResponse({'error': 'You are not authorized to perform this action'}, status=status.HTTP_401_UNAUTHORIZED)
+#     orderItem = MOrderItem.objects.get(id=entry_id)
+#     data_provider = request.data.get('provider')
+#     data_size = request.data.get('size')
+#     data_varient = request.data.get('varient')
+#     data_color = request.data.get('color')
+#     data_need_phisical_barcode = request.data.get('need_phisical_barcode')
+#     data_quantity = request.data.get('quantity')
 
-    print(data_provider)
-    print(data_size)
-    print(data_varient)
-    print(data_color)
-    print(data_need_phisical_barcode)
-    print(data_quantity)
-    existing = orderItem.toProviders.filter(provider_id=data_provider, size_id=data_size,
-                                            varient_id=data_varient, color_id=data_color, force_physical_barcode=data_need_phisical_barcode)
-    if existing.exists():
-        entry = existing.first()
-        entry.quantity = data_quantity
-    else:
-        entry = ProviderRequest(provider_id=data_provider, size_id=data_size, varient_id=data_varient,
-                                color_id=data_color, force_physical_barcode=data_need_phisical_barcode, quantity=data_quantity)
-        entry.save()
-    orderItem.toProviders.add(entry)
-    data = AdminProviderRequestrSerializer(
-        orderItem.toProviders, many=True).data
-    return JsonResponse({'success': 'success', 'data': data}, status=status.HTTP_200_OK)
+#     print(data_provider)
+#     print(data_size)
+#     print(data_varient)
+#     print(data_color)
+#     print(data_need_phisical_barcode)
+#     print(data_quantity)
+#     existing = orderItem.toProviders.filter(provider_id=data_provider, size_id=data_size,
+#                                             varient_id=data_varient, color_id=data_color, force_physical_barcode=data_need_phisical_barcode)
+#     if existing.exists():
+#         entry = existing.first()
+#         entry.quantity = data_quantity
+#     else:
+#         entry = ProviderRequest(provider_id=data_provider, size_id=data_size, varient_id=data_varient,
+#                                 color_id=data_color, force_physical_barcode=data_need_phisical_barcode, quantity=data_quantity)
+#         entry.save()
+#     orderItem.toProviders.add(entry)
+#     data = AdminProviderRequestrSerializer(
+#         orderItem.toProviders, many=True).data
+#     return JsonResponse({'success': 'success', 'data': data}, status=status.HTTP_200_OK)
 
-    pass
+#     pass
 
 
 @api_view(["POST"])
@@ -783,15 +783,15 @@ startCollecting
 '''
 
 
-@api_view(['GET'])
-def list_orders_to_collect(request):
-    if request.user.is_superuser == False:
-        return JsonResponse({'error': 'You are not authorized to perform this action'}, status=status.HTTP_401_UNAUTHORIZED)
-    else:
-        if request.method == "GET":
-            orders = MOrder.objects.filter(startCollecting=True)
-            serializer = MOrderCollectionSerializer(orders, many=True)
-            return JsonResponse(serializer.data, safe=False, status=status.HTTP_200_OK)
+# @api_view(['GET'])
+# def list_orders_to_collect(request):
+#     if request.user.is_superuser == False:
+#         return JsonResponse({'error': 'You are not authorized to perform this action'}, status=status.HTTP_401_UNAUTHORIZED)
+#     else:
+#         if request.method == "GET":
+#             orders = MOrder.objects.filter(startCollecting=True)
+#             serializer = MOrderCollectionSerializer(orders, many=True)
+#             return JsonResponse(serializer.data, safe=False, status=status.HTTP_200_OK)
 
 
 @api_view(['GET', 'POST'])

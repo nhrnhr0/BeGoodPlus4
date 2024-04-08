@@ -14,7 +14,7 @@ from django.db import models
 from django.forms import Textarea
 
 from productSize.models import ProductSize
-from .models import MOrderItem, MOrder, MOrderItemEntry, ProviderRequest, TakenInventory
+from .models import MOrderItem, MOrder, MOrderItemEntry, TakenInventory
 import io
 from django.contrib import admin
 from django.http.response import HttpResponse
@@ -58,33 +58,33 @@ class MOrderItemAdmin(admin.ModelAdmin):
     model = MOrderItem
     list_display = ('id', 'product', 'price', 'ergent',
                     'prining', 'embroidery', 'comment',)
-    filter_horizontal = ('providers', 'entries', 'morder', 'taken')
+    filter_horizontal = ('providers', 'entries', 'morder',)
 
 
 admin.site.register(MOrderItem, MOrderItemAdmin)
 
 
-class ProviderRequestAdmin(admin.ModelAdmin):
-    model = ProviderRequest
-    list_display = ('id', 'provider', 'size', 'varient', 'color', 'force_physical_barcode',
-                    'quantity', 'product_name_display', 'morder_id_display')
+# class ProviderRequestAdmin(admin.ModelAdmin):
+#     model = ProviderRequest
+#     list_display = ('id', 'provider', 'size', 'varient', 'color', 'force_physical_barcode',
+#                     'quantity', 'product_name_display', 'morder_id_display')
 
-    def product_name_display(self, obj):
-        item = obj.orderItem.first()
-        if item:
-            return item.product.title
-        return None
-    product_name_display.short_description = _('Product Name')
+#     def product_name_display(self, obj):
+#         item = obj.orderItem.first()
+#         if item:
+#             return item.product.title
+#         return None
+#     product_name_display.short_description = _('Product Name')
 
-    def morder_id_display(self, obj):
-        item = obj.orderItem.first()
-        if item:
-            return item.morder.first().id
-        return None
-    morder_id_display.short_description = _('MOrder id')
+#     def morder_id_display(self, obj):
+#         item = obj.orderItem.first()
+#         if item:
+#             return item.morder.first().id
+#         return None
+#     morder_id_display.short_description = _('MOrder id')
 
 
-admin.site.register(ProviderRequest, ProviderRequestAdmin)
+# admin.site.register(ProviderRequest, ProviderRequestAdmin)
 
 
 class MOrderAdmin(admin.ModelAdmin):  #

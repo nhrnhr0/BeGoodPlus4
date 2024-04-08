@@ -5,13 +5,13 @@ from django.http import JsonResponse
 from rest_framework import serializers
 from begoodPlus.secrects import ALL_MORDER_FILE_SPREEDSHEET_URL
 from catalogImages.models import CatalogImage
-from inventory.models import WarehouseStock
-from inventory.serializers import WarehouseStockSerializer
+#from inventory.models import WarehouseStock
+#from inventory.serializers import WarehouseStockSerializer
 from catalogImages.serializers import CatalogImageSerializer
 from django.db.models import Sum, Avg
 from django.db.models import OuterRef, Subquery
 from provider.serializers import SvelteProviderSerializer
-from .models import CollectedInventory, MOrder, MOrderItem, MOrderItemEntry, ProviderRequest, TakenInventory
+from .models import CollectedInventory, MOrder, MOrderItem, MOrderItemEntry, TakenInventory
 from django.db import models
 from django.db.models import Q
 
@@ -30,76 +30,76 @@ class AdminMOrderItemEntrySerializer(serializers.ModelSerializer):
     pass
 
 
-class AdminProviderResuestSerializerWithMOrder(serializers.ModelSerializer):
-    '''
-        id
-        provider
-        size
-        varient
-        color
-        force_physical_barcode
-        quantity
-        orderItem__product
-        orderItem__morder
-    '''
-    morder = serializers.SerializerMethodField()
-    product = serializers.SerializerMethodField()
+# class AdminProviderResuestSerializerWithMOrder(serializers.ModelSerializer):
+#     '''
+#         id
+#         provider
+#         size
+#         varient
+#         color
+#         force_physical_barcode
+#         quantity
+#         orderItem__product
+#         orderItem__morder
+#     '''
+#     morder = serializers.SerializerMethodField()
+#     product = serializers.SerializerMethodField()
 
-    def get_morder(self, originalObj):
-        obj = originalObj.orderItem.first()
-        #print('get_morder', obj)
-        if obj:
-            return obj.morder.first().id
-        return ''
+#     def get_morder(self, originalObj):
+#         obj = originalObj.orderItem.first()
+#         #print('get_morder', obj)
+#         if obj:
+#             return obj.morder.first().id
+#         return ''
 
-    def get_product(self, originalObj):
-        obj = originalObj.orderItem.first()
-        #print('get_product', obj)
-        if obj:
-            return {'id': obj.product.id, 'title': obj.product.title, 'cimage': obj.product.cimage}
-        return ''
+#     def get_product(self, originalObj):
+#         obj = originalObj.orderItem.first()
+#         #print('get_product', obj)
+#         if obj:
+#             return {'id': obj.product.id, 'title': obj.product.title, 'cimage': obj.product.cimage}
+#         return ''
 
-    class Meta:
-        model = ProviderRequest
-        fields = ('id', 'provider', 'size', 'varient', 'color',
-                  'force_physical_barcode', 'quantity', 'morder', 'product')
-
-
-class AdminProviderRequestrInfoSerializer(serializers.ModelSerializer):
-    provider__str = serializers.CharField(source='provider.name', default='',)
-    size__str = serializers.CharField(source='size.size', default='',)
-    size__code = serializers.CharField(source='size.code', default='',)
-    varient__str = serializers.CharField(source='varient.name', default='',)
-    color__str = serializers.CharField(source='color.name', default='',)
-    color__color = serializers.CharField(source='color.color', default='',)
-    morder = serializers.SerializerMethodField()
-
-    def get_morder(self, originalObj):
-        obj = originalObj.orderItem.first()
-        if obj:
-            return obj.morder.first().id
-        return ''
-
-    class Meta:
-        model = ProviderRequest
-        fields = ('id', 'provider', 'force_physical_barcode', 'size', 'varient', 'color', 'provider__str',
-                  'size__str', 'size__code', 'varient__str', 'color__str', 'color__color', 'quantity', 'morder')
-        pass
+#     class Meta:
+#         model = ProviderRequest
+#         fields = ('id', 'provider', 'size', 'varient', 'color',
+#                   'force_physical_barcode', 'quantity', 'morder', 'product')
 
 
-class AdminProviderRequestrSerializer(serializers.ModelSerializer):
-    provider__str = serializers.CharField(source='provider.name', default='',)
-    size__str = serializers.CharField(source='size.size', default='',)
-    size__code = serializers.CharField(source='size.code', default='',)
-    varient__str = serializers.CharField(source='varient.name', default='',)
-    color__str = serializers.CharField(source='color.name', default='',)
-    color__color = serializers.CharField(source='color.color', default='',)
+# class AdminProviderRequestrInfoSerializer(serializers.ModelSerializer):
+#     provider__str = serializers.CharField(source='provider.name', default='',)
+#     size__str = serializers.CharField(source='size.size', default='',)
+#     size__code = serializers.CharField(source='size.code', default='',)
+#     varient__str = serializers.CharField(source='varient.name', default='',)
+#     color__str = serializers.CharField(source='color.name', default='',)
+#     color__color = serializers.CharField(source='color.color', default='',)
+#     morder = serializers.SerializerMethodField()
 
-    class Meta:
-        model = ProviderRequest
-        fields = ('id', 'provider', 'force_physical_barcode', 'size', 'varient', 'color', 'provider__str',
-                  'size__str', 'size__code', 'varient__str', 'color__str', 'color__color', 'quantity')
-        pass
+#     def get_morder(self, originalObj):
+#         obj = originalObj.orderItem.first()
+#         if obj:
+#             return obj.morder.first().id
+#         return ''
+
+#     class Meta:
+#         model = ProviderRequest
+#         fields = ('id', 'provider', 'force_physical_barcode', 'size', 'varient', 'color', 'provider__str',
+#                   'size__str', 'size__code', 'varient__str', 'color__str', 'color__color', 'quantity', 'morder')
+#         pass
+
+
+# class AdminProviderRequestrSerializer(serializers.ModelSerializer):
+#     provider__str = serializers.CharField(source='provider.name', default='',)
+#     size__str = serializers.CharField(source='size.size', default='',)
+#     size__code = serializers.CharField(source='size.code', default='',)
+#     varient__str = serializers.CharField(source='varient.name', default='',)
+#     color__str = serializers.CharField(source='color.name', default='',)
+#     color__color = serializers.CharField(source='color.color', default='',)
+
+#     class Meta:
+#         model = ProviderRequest
+#         fields = ('id', 'provider', 'force_physical_barcode', 'size', 'varient', 'color', 'provider__str',
+#                   'size__str', 'size__code', 'varient__str', 'color__str', 'color__color', 'quantity')
+#         pass
 
 
 class AdminMOrderItemSerializer(serializers.ModelSerializer):
@@ -113,7 +113,6 @@ class AdminMOrderItemSerializer(serializers.ModelSerializer):
     verients = serializers.SerializerMethodField('get_verients')
     #available_inventory = serializers.SerializerMethodField('get_available_inventory')
     product = serializers.SerializerMethodField('get_product_serializer')
-    toProviders = AdminProviderRequestrSerializer(many=True, read_only=True)
 
     def get_product_serializer(self, obj):
         # serializer_context = {'request': self.context.get('request') }
@@ -195,7 +194,7 @@ class AdminMOrderItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = MOrderItem
         fields = ('id', 'product',  'price', 'providers', 'ergent', 'prining', 'embroidery', 'comment', 'product_name', 'entries', 'pbarcode',
-                  'product_cimage', 'product', 'priningComment', 'embroideryComment', 'toProviders', 'colors', 'sizes', 'verients',)  # 'available_inventory',
+                  'product_cimage', 'product', 'priningComment', 'embroideryComment', 'colors', 'sizes', 'verients',)  # 'available_inventory',
 
 
 class AdminMOrderListSerializer(serializers.ModelSerializer):

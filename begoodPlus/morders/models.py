@@ -28,7 +28,7 @@ from catalogImages.models import CatalogImage
 from client.models import Client
 from color.models import Color
 from core.models import SvelteCartModal
-from inventory.models import ProviderRequest, WarehouseStock
+#from inventory.models import ProviderRequest, WarehouseStock
 from productSize.models import ProductSize
 from catalogImages.models import CatalogImageVarient
 from provider.models import Provider
@@ -50,8 +50,8 @@ from django.dispatch import receiver
 
 
 class CollectedInventory(models.Model):
-    warehouseStock = models.ForeignKey(
-        WarehouseStock, on_delete=models.CASCADE, related_name='collectedInventory')
+    # warehouseStock = models.ForeignKey(
+    #     WarehouseStock, on_delete=models.CASCADE, related_name='collectedInventory')
     quantity = models.IntegerField(default=0)
 
 
@@ -115,10 +115,10 @@ class MOrderItem(models.Model):
     comment = models.TextField(null=True, blank=True)
     entries = models.ManyToManyField(
         to=MOrderItemEntry, blank=True, related_name='orderItem')
-    taken = models.ManyToManyField(
-        to=TakenInventory, blank=True, related_name='orderItem')
-    toProviders = models.ManyToManyField(
-        to=ProviderRequest, blank=True, related_name='orderItem')
+    # taken = models.ManyToManyField(
+    #     to=TakenInventory, blank=True, related_name='orderItem')
+    # toProviders = models.ManyToManyField(
+    #     to=ProviderRequest, blank=True, related_name='orderItem')
     prop_totalEntriesQuantity = property(lambda self: sum(
         [entry.quantity for entry in self.entries.all()]))
     prop_totalPrice = property(
