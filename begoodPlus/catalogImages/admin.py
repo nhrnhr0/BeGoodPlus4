@@ -167,7 +167,7 @@ class CatalogImageAdmin(AdminAdvancedFiltersMixin, admin.ModelAdmin):
                          'varients')  # 'detailTabel'
     list_per_page = 50
     exclude = ('detailTabel',)
-    advanced_filter_fields = (('title','כותרת'), ('description', 'תיאור'), ('sizes__size', 'גדלים'), ('colors__name','צבעים'), ('provides__name', 'שם ספק'), ('varients__name', 'שם וריאנט'), ('barcode', 'ברקוד'), ('cost_price', 'מחיר עלות'), ('client_price', 'מחיר ללקוח'), ('recomended_price', 'מחיר מומלץ'), ('albums__title', 'כותרת אלבום'), ('show_sizes_popup', 'הצג פופאפ גדלים'), ('packingTypeProvider__name', 'שיטת אריזה מהספק'), ('packingTypeClient__name', 'שיטת אריזה ללקוח'), 'date_created', 'date_modified', 'can_tag', 'out_of_stock', 'is_active', 'has_physical_barcode', 'cimage', 'free_text', 'whatsapp_text',)
+    advanced_filter_fields = (('title','כותרת'), ('description', 'תיאור'), ('sizes__size', 'גדלים'), ('colors__name','צבעים'), ('providers__name', 'שם ספק'), ('varients__name', 'שם וריאנט'), ('barcode', 'ברקוד'), ('cost_price', 'מחיר עלות'), ('client_price', 'מחיר ללקוח'), ('recomended_price', 'מחיר מומלץ'), ('albums__title', 'כותרת אלבום'), ('show_sizes_popup', 'הצג פופאפ גדלים'), ('packingTypeProvider__name', 'שיטת אריזה מהספק'), ('packingTypeClient__name', 'שיטת אריזה ללקוח'), 'date_created', 'date_modified', 'can_tag', 'out_of_stock', 'is_active', 'has_physical_barcode', 'cimage', 'free_text', 'whatsapp_text',)
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
