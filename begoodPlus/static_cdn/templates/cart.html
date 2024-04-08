@@ -1,0 +1,195 @@
+
+
+<!-- displaying the morder for print or pdf -->
+
+<!-- print / save button to pdf: invisible in print mode -->
+<button class="print-btn" onclick="window.print()" >הדפס</button>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3>פרטי עגלה {{morder.cart.id}}</h3>
+                </div>
+                <!-- show
+                    morder.cart.name
+                    morder.cart.businessName
+                    morder.cart.phone
+                    morder.cart.email
+                    morder.cart.message if exists
+                -->
+                <div class="card-body">
+                    <h4>פרטי הלקוח</h4>
+                    <table class="info-table">
+                        <tbody>
+                            <tr>
+                                <td>שם</td>
+                                <td>{{morder.cart.name}}</td>
+                            </tr>
+                            <tr>
+                                <td>שם עסק</td>
+                                <td>{{morder.cart.businessName}}</td>
+                            </tr>
+                            <tr>
+                                <td>טלפון</td>
+                                <td>{{morder.cart.phone}}</td>
+                            </tr>
+                            <tr>
+                                <td>אימייל</td>
+                                <td>{{morder.cart.email}}</td>
+                            </tr>
+                            {% if morder.cart.message %}
+                            <tr>
+                                <td>הודעה</td>
+                                <td>{{morder.cart.message}}</td>
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                    <!-- show
+                        morder.cart.products
+                    -->
+                    <h4>פרטי המוצרים</h4>
+                    <table class="products-table">
+                        <thead>
+                            <tr>
+                                <th>שם</th>
+                                <th>סה"כ</th>
+                                <th>
+                                    פירוט
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for product in morder.products.all %}
+                            <tr>
+                                <td>{{product.product.title}}</td>
+                                <td>{{product.prop_totalEntriesQuantity}}</td>
+                                <td>
+                                    
+                                    <!-- quantity,color,size,varient -->
+                                    <!-- if varient is None, we do not display it in the table -->
+                                    <table class="entries-table">
+                                        <thead>
+                                            <tr>
+                                                
+                                                <th>צבע</th>
+                                                <th>מידה</th>
+                                                {% if product.entries.first.varient %}
+                                                <th>סוג</th>
+                                                {% endif %}
+                                                <th>כמות</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for entry in product.entries.all %}
+                                            <tr>
+                                                
+                                                <td>{{entry.color}}</td>
+                                                <td>{{entry.size.size}}</td>
+                                                {% if entry.varient %}
+                                                <td>{{entry.varient.name}}</td>
+                                                {% endif %}
+                                                <td>{{entry.quantity}}</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                    {% for entry in product.entries.all %}
+                                    
+                                    {% endfor %}
+
+                                </td>
+                            </tr>
+                            {% endfor %}
+
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    .print-btn {
+        
+        display: block;
+        margin: auto;
+        margin-top: 20px;
+    }
+    @media print {
+        .print-btn {
+            display: none;
+        }
+    }
+    .container {
+        direction: rtl;
+        margin-top: 50px;
+        max-width: 800px;
+        margin: auto;
+    }
+    .card {
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+    .card-header {
+        background-color: #f8f9fa;
+        padding: 10px;
+    }
+    .card-body {
+        padding: 20px;
+    }
+    h3 {
+        margin: 0;
+    }
+    h4 {
+        margin-top: 20px;
+    }
+    table {
+        width: 100%;
+    }
+    th, td {
+        padding: 10px;
+    }
+    th {
+        background-color: #f8f9fa;
+    }
+    
+    tbody tr td {
+        text-align: center;
+    }
+    .btn {
+        margin-top: 20px;
+    }
+
+    .entries-table {
+        width: 100%;
+        background: #f8f9fa;
+    }
+    .entries-table th, .entries-table td {
+        padding: 5px;
+    }
+    .entries-table th {
+        background-color: #f8f9fa;
+    }
+    .entries-table tbody tr td {
+        text-align: center;
+    }
+
+    /* borders to products-table */
+    .products-table {
+        border-collapse: collapse;
+        border: 1px solid rgb(136, 136, 136);
+    }
+    .products-table th, .products-table td {
+        border: 1px solid rgb(136, 136, 136);
+    }
+    .products-table th {
+        background-color: #f8f9fa;
+    }
+
+
+
+</style>

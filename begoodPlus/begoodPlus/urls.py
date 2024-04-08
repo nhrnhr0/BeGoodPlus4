@@ -64,6 +64,7 @@ from productSize.views import SizesViewSet
 from smartbee.views import get_smartbee_doc
 from docsSignature.views import edit_doc_signature, api_adit_doc_signature
 from shareableCarts.views import create_shareable_cart, get_shareable_cart
+from morders.views import display_cart
 router = routers.DefaultRouter()
 router.register(r'CatalogAlbums', CatalogAlbumViewSet)
 router.register(r'CatalogImages', CatalogImageViewSet)
@@ -92,6 +93,7 @@ clientRouter.register(r'logos', LogoClientViewSet)
 # from rest_framework.authtoken.views import obtain_auth_token
 # from rest_framework_simplejwt.views import (TokenObtainPairView,TokenRefreshView,)
 urlpatterns = [
+     path('display-cart/<int:id>/', display_cart, name='display_cart'),
     path('update-sell-price-from-price-proposal-sheet/',
          update_sell_price_from_price_proposal_sheet_view),
     path('morders-create-providers-docx/', morders_create_providers_docx),
