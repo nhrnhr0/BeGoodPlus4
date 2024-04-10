@@ -64,7 +64,8 @@ from productSize.views import SizesViewSet
 from smartbee.views import get_smartbee_doc
 from docsSignature.views import edit_doc_signature, api_adit_doc_signature
 from shareableCarts.views import create_shareable_cart, get_shareable_cart
-from morders.views import display_cart
+from cart.views import display_cart_api
+from cart.views import submit_cart
 router = routers.DefaultRouter()
 router.register(r'CatalogAlbums', CatalogAlbumViewSet)
 router.register(r'CatalogImages', CatalogImageViewSet)
@@ -93,7 +94,7 @@ clientRouter.register(r'logos', LogoClientViewSet)
 # from rest_framework.authtoken.views import obtain_auth_token
 # from rest_framework_simplejwt.views import (TokenObtainPairView,TokenRefreshView,)
 urlpatterns = [
-     path('display-cart/<int:id>/', display_cart, name='display_cart'),
+     path('api-cart-display/<int:id>/', display_cart_api),
     path('update-sell-price-from-price-proposal-sheet/',
          update_sell_price_from_price_proposal_sheet_view),
     path('morders-create-providers-docx/', morders_create_providers_docx),
@@ -316,7 +317,7 @@ urlpatterns = [
     path('search', autocompleteModel),
     path('search-click', autocompleteClick),
     path('contact-form', svelte_contact_form, name='contact-form'),
-    path('cart-form', svelte_cart_form, name='svelte-cart-form'),
+    path('cart-form', submit_cart, name='svelte-cart-form'),
     path('cart-history', svelte_cart_history, name='svelte-cart-history'),
     # path('track-cart', track_cart, name='track-cart'),
     re_path('api/set_csrf_token/(?P<factory_id>.+)/$',

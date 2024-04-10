@@ -430,21 +430,24 @@ def create_providers_docx(doc_data):
 #     serializer = AdminProviderResuestSerializerWithMOrder(data, many=True)
 #     return JsonResponse(serializer.data, status=status.HTTP_200_OK, safe=False)
 
-def display_cart(request, id):
-    # get from SvelteCartModel the cart with the id
+# def display_cart(request, id):
+#     # get from SvelteCartModel the cart with the id
     
-    scms = SvelteCartModal.objects.filter(id=id)
-    if scms.count() == 0:
-        return HttpResponse('No cart found with this id', status=status.HTTP_400_BAD_REQUEST)
-    scm = scms.first()
-    # get the morder with the cart_id
+#     scms = SvelteCartModal.objects.filter(id=id)
+#     if scms.count() == 0:
+#         return HttpResponse('No cart found with this id', status=status.HTTP_400_BAD_REQUEST)
+#     scm = scms.first()
+#     # get the morder with the cart_id
     
-    morders = MOrder.objects.select_related('cart').prefetch_related('products', 'products__entries').filter(cart_id=scm.id)
-    if morders.count() == 0:
-        return HttpResponse('No morder found with this cart id, try again soon', status=status.HTTP_400_BAD_REQUEST)
+#     morders = MOrder.objects.select_related('cart').prefetch_related('products', 'products__entries').filter(cart_id=scm.id)
+#     if morders.count() == 0:
+#         return HttpResponse('No morder found with this cart id, try again soon', status=status.HTTP_400_BAD_REQUEST)
     
-    return render(request, 'cart.html', {'morder': morders.first()})
-    pass
+#     return render(request, 'cart.html', {'morder': morders.first()})
+#     pass
+
+
+
 
 def view_morder_stock_document(request, id):
     if not request.user.is_superuser:

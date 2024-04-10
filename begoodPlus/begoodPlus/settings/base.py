@@ -113,6 +113,7 @@ INSTALLED_APPS = [
     'docsSignature',
     'shareableCarts',
     'msCrm',
+    'cart',
     #### old unused modals ####
     'clientLikedImages',
     'myUserTasks',
