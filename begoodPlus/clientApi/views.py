@@ -1,5 +1,5 @@
 from color.models import Color
-from morders.models import MorderStatus
+#from morders.models import MorderStatus
 from rest_framework.reverse import reverse
 from rest_framework.decorators import api_view
 import time
@@ -9,17 +9,17 @@ from django.contrib.auth import login
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 import random
-from django.db import connection
+#from django.db import connection
 import functools
 from django.views.decorators.cache import cache_page
 from rest_framework.renderers import JSONRenderer, TemplateHTMLRenderer
-from .serializers import MorderStatusSerializer
+#from .serializers import MorderStatusSerializer
 from rest_framework.response import Response
 from django.http.response import JsonResponse
 from django.shortcuts import render
 from clientApi.serializers import VarientSerializer
 from catalogImages.models import CatalogImage
-from client.views import get_user_info, whoAmI
+#from client.views import get_user_info, whoAmI
 from clientApi.serializers import ColorClientApi, ImageClientApi, SizeClientApi
 from clientApi.serializers import AlbumClientApi, LogoClientApi
 from rest_framework import viewsets
@@ -136,10 +136,10 @@ def get_all_varients_api(request):
     return JsonResponse(varients, safe=False)
 
 
-def get_all_morder_statuses_api(request):
-    statuses = MorderStatus.objects.all()
-    ser = MorderStatusSerializer(statuses, many=True)
-    return JsonResponse(ser.data, safe=False)
+# def get_all_morder_statuses_api(request):
+#     statuses = MorderStatus.objects.all()
+#     ser = MorderStatusSerializer(statuses, many=True)
+#     return JsonResponse(ser.data, safe=False)
 
 
 @permission_classes((AllowAny,))
@@ -172,27 +172,27 @@ def main_page_api(request):
     #logos = CatalogLogo.objects.all()
 
 
-class CustomAuthToken(ObtainAuthToken):
-    def post(self, request, *args, **kwargs):
-        serializer = self.serializer_class(data=request.data,
-                                           context={'request': request})
+# class CustomAuthToken(ObtainAuthToken):
+#     def post(self, request, *args, **kwargs):
+#         serializer = self.serializer_class(data=request.data,
+#                                            context={'request': request})
 
-        if not serializer.is_valid(raise_exception=False):
-            return Response({'error': serializer.errors}, status=200)
+#         if not serializer.is_valid(raise_exception=False):
+#             return Response({'error': serializer.errors}, status=200)
 
-        user = serializer.validated_data['user']
+#         user = serializer.validated_data['user']
 
-        login(request, user)
-        response = super(CustomAuthToken, self).post(request, format=None)
-        who_am_i = get_user_info(request.user)
-        token, created = Token.objects.get_or_create(user=user)
-        response.set_cookie(
-            'auth_token',
-            token.key,
-            httponly=True,
-            samesite='strict'
-        )
-        # add whoAmI to the response
-        response.data['me'] = who_am_i
-        print('CustomAuthToken:', response.data)
-        return response
+#         login(request, user)
+#         response = super(CustomAuthToken, self).post(request, format=None)
+#         who_am_i = get_user_info(request.user)
+#         token, created = Token.objects.get_or_create(user=user)
+#         response.set_cookie(
+#             'auth_token',
+#             token.key,
+#             httponly=True,
+#             samesite='strict'
+#         )
+#         # add whoAmI to the response
+#         response.data['me'] = who_am_i
+#         print('CustomAuthToken:', response.data)
+#         return response

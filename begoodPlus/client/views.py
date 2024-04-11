@@ -4,7 +4,7 @@ from django.http.response import JsonResponse
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
-from campains.views import get_user_campains_serializer_data
+#from campains.views import get_user_campains_serializer_data
 from client.models import UserSessionLogger
 from django.http import HttpResponse, HttpResponseRedirect
 from client.models import UserLogEntry
@@ -147,21 +147,21 @@ def whoAmI(request):
             })
     return JsonResponse({'status':'error', 'detail':'user not loged in'})
 
-def get_user_info(user):
-    if user.id != None and user.client:
-        return {
-            'status':'success',
-            #'first_name': request.user.first_name,
-            #'last_name':request.user.last_name,
-            'username':user.username,
-            'email' :user.client.email,
-            'privateCompany': user.client.privateCompany,
-            'businessName': user.client.businessName,
-            'is_superuser': user.is_superuser,
-            'campains': get_user_campains_serializer_data(user),
-            'show_prices': user.client.show_prices,
-        }
-    return {}
+# def get_user_info(user):
+#     if user.id != None and user.client:
+#         return {
+#             'status':'success',
+#             #'first_name': request.user.first_name,
+#             #'last_name':request.user.last_name,
+#             'username':user.username,
+#             'email' :user.client.email,
+#             'privateCompany': user.client.privateCompany,
+#             'businessName': user.client.businessName,
+#             'is_superuser': user.is_superuser,
+#             'campains': get_user_campains_serializer_data(user),
+#             'show_prices': user.client.show_prices,
+#         }
+#     return {}
 
 @api_view(['POST'])
 @permission_classes((AllowAny, ))

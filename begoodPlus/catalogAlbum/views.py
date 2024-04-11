@@ -135,8 +135,8 @@ from django.db.models import Max
 
 
 from catalogLogos.models import CatalogLogo
-from core.forms import FormBeseContactInformation
-from core.models import BeseContactInformation, Customer
+# from core.forms import FormBeseContactInformation
+# from core.models import BeseContactInformation, Customer
 import uuid
 '''
 def catalogView(request, *args, **kwargs):

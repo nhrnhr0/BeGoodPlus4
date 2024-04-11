@@ -1,9 +1,9 @@
 
 
-from morders.models import MorderStatus
+#from morders.models import MorderStatus
 from catalogImages.models import CatalogImageVarient
 from django.db import models
-from campains.models import MonthCampain, CampainProduct
+#from campains.models import MonthCampain, CampainProduct
 from catalogImages.serializers import CatalogImageSerializer
 from catalogImages.models import CatalogImage
 from catalogAlbum.models import CatalogAlbum
@@ -54,10 +54,10 @@ class VarientSerializer(serializers.ModelSerializer):
         fields = ('id', 'name')
 
 
-class MorderStatusSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = MorderStatus
-        fields = ('id', 'name', 'sort_order')
+# class MorderStatusSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = MorderStatus
+#         fields = ('id', 'name', 'sort_order')
 
 
 class ImageClientApi(serializers.ModelSerializer):
@@ -86,6 +86,7 @@ class ImageClientApi(serializers.ModelSerializer):
         return '/main?' + 'top=' + obj.main_public_album.topLevelCategory.slug + '&album=' + obj.main_public_album.slug + '&product_id=' + str(obj.id)
 
     def _get_new_price(self, obj):
+        return 0
         request = self.context.get('request', None)
         if request:
             if request.user.is_authenticated and request.user.client:
@@ -101,8 +102,9 @@ class ImageClientApi(serializers.ModelSerializer):
                     # israel
                     tz = pytz.timezone('Israel')
 
-                    campainProduct = CampainProduct.objects.filter(monthCampain__users__user_id=user_id, catalogImage_id=catalogImage_id,
-                                                                   monthCampain__is_shown=True, monthCampain__startTime__lte=datetime.now(tz), monthCampain__endTime__gte=datetime.now(tz)).first()
+                    campainProduct = None
+                    # CampainProduct.objects.filter(monthCampain__users__user_id=user_id, catalogImage_id=catalogImage_id,
+                    #                                                monthCampain__is_shown=True, monthCampain__startTime__lte=datetime.now(tz), monthCampain__endTime__gte=datetime.now(tz)).first()
                     #campainProduct = campainProduct.first()
                     if campainProduct:
                         return campainProduct.newPrice
@@ -110,6 +112,7 @@ class ImageClientApi(serializers.ModelSerializer):
         return None
 
     def _get_price(self, obj):
+        return 0
         request = self.context.get('request', None)
         if request:
             if request.user.is_authenticated and request.user.client:
