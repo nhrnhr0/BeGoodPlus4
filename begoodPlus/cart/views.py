@@ -3,7 +3,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from django.http import HttpResponse
 from .models import Cart, CartItem, CartItemEntry
-from catalogImages.models import CatalogImage, CatalogImageVarient, Color, ProductSize
+from catalogImages.models import CatalogImage, CatalogImageVarient, ProductSize
 from django.http import JsonResponse
 from .serializers import CartSerializer
 from productSize.models import ProductSizeGroup

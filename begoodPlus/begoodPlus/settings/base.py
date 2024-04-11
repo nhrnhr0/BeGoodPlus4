@@ -122,7 +122,7 @@ INSTALLED_APPS = [
     'productImages',
     'stock',
     'glofa_types',
-    'mcrm',
+    #'mcrm',
     'inventory',
     'customerCart',
     'catalogImageAttrs',

@@ -22,7 +22,7 @@ def get_catalog_albums(request, id=None):
     return JsonResponse(serializer.data, safe=False)
 @api_view(['GET'])
 def get_main_categories(request):
-    qs = TopLevelCategory.objects.all().prefetch_related('albums')
+    qs = TopLevelCategory.objects.prefetch_related('albums').all()
     ser = TopLevelCategorySerializer(qs, many=True)
     data = ser.data
     return JsonResponse(data, safe=False)
@@ -134,7 +134,7 @@ from django.db.models import Max
 #    return render(request, 'catalog2.html', context=context)
 
 
-from catalogLogos.models import CatalogLogo
+#from catalogLogos.models import CatalogLogo
 # from core.forms import FormBeseContactInformation
 # from core.models import BeseContactInformation, Customer
 import uuid

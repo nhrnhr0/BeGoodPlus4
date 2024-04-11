@@ -13,16 +13,16 @@ import decimal
 from core.pagination import StandardResultsSetPagination
 from productColor.models import ProductColor
 from productSize.models import ProductSize
-from catalogLogos.models import CatalogLogo
+#from catalogLogos.models import CatalogLogo
 from datetime import datetime
 import pytz
-from client.models import Client
+#from client.models import Client
 
 
-class LogoClientApi(serializers.ModelSerializer):
-    class Meta:
-        model = CatalogLogo
-        fields = ('id', 'title', 'cimg')
+# class LogoClientApi(serializers.ModelSerializer):
+#     class Meta:
+#         model = CatalogLogo
+#         fields = ('id', 'title', 'cimg')
 
 
 class FirstImageSerializer(serializers.ModelSerializer):

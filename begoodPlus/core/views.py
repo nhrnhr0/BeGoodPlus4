@@ -35,7 +35,7 @@ import json
 #from .models import Customer, BeseContactInformation
 from django.contrib.contenttypes.models import ContentType
 import time
-from .tasks import product_photo_send_notification, send_cantacts_notificatios, send_question_notification, sheetsurl_to_providers_docx_task, test, turn_to_morder_task
+#from .tasks import product_photo_send_notification, send_cantacts_notificatios, send_question_notification, sheetsurl_to_providers_docx_task, test, turn_to_morder_task
 import xlsxwriter
 import io
 import pandas as pd
@@ -60,11 +60,11 @@ from django.db.models.functions import Greatest
 from django.contrib.postgres.search import TrigramSimilarity
 from rest_framework.permissions import AllowAny, IsAuthenticated
 #from campains.views import get_user_campains_serializer_data
-from client.models import UserQuestion
+#from client.models import UserQuestion
 from rest_framework.decorators import authentication_classes
 #from client.views import get_user_info
 from clientApi.serializers import ImageClientApi
-from .models import ActiveCartTracker, UserSearchData
+from .models import UserSearchData
 from django.urls import reverse
 #from core.models import UserProductPhoto
 # Create your views here.

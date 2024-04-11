@@ -1,10 +1,10 @@
 from django.db import models
-from catalogImages.models import CatalogImage, CatalogImageVarient, Color, ProductSize
+from catalogImages.models import CatalogImage, CatalogImageVarient, ProductSize, ProductColor
 
 class CartItemEntry(models.Model):
     quantity = models.IntegerField(default=1)
     color = models.ForeignKey(
-        to=Color, on_delete=models.SET_DEFAULT, default=76, null=True, blank=True)
+        to=ProductColor, on_delete=models.SET_DEFAULT, default=76, null=True, blank=True)
     size = models.ForeignKey(
         to=ProductSize, on_delete=models.SET_DEFAULT, default=108, null=True, blank=True)
     varient = models.ForeignKey(

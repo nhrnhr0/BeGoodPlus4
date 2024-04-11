@@ -4,7 +4,7 @@ from django.db import models
 # from morders.models import MOrderItemEntry
 from begoodPlus.secrects import SECRECT_CLIENT_SIDE_DOMAIN
 from catalogImages.models import CatalogImageVarient
-from color.models import Color
+#from color.models import Color
 from productSize.models import ProductSize
 #from morders.models import MOrder
 from cloudinary.models import CloudinaryField

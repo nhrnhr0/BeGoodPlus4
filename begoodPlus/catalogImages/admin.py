@@ -30,70 +30,70 @@ class CatalogImageVarientAdmin(AdminAdvancedFiltersMixin, admin.ModelAdmin):
 admin.site.register(CatalogImageVarient, CatalogImageVarientAdmin)
 
 
-class tableInline(admin.TabularInline):
-    model = CatalogImage.detailTabel.through
-    # fields = ['',]
-    # fields = ['id', 'provider']
-    # readonly_fields = ['provider']
-    fields = ['id', 'provider', 'dis_colors', 'dis_sizes', 'dis_cost_price',
-              'dis_client_price', 'dis_recomended_price', 'providerMakat']
-    readonly_fields = ['id', 'provider', 'dis_colors', 'dis_sizes',
-                       'dis_cost_price', 'dis_client_price', 'dis_recomended_price', 'providerMakat']
-    extra = 0
+# class tableInline(admin.TabularInline):
+#     model = CatalogImage.detailTabel.through
+#     # fields = ['',]
+#     # fields = ['id', 'provider']
+#     # readonly_fields = ['provider']
+#     fields = ['id', 'provider', 'dis_colors', 'dis_sizes', 'dis_cost_price',
+#               'dis_client_price', 'dis_recomended_price', 'providerMakat']
+#     readonly_fields = ['id', 'provider', 'dis_colors', 'dis_sizes',
+#                        'dis_cost_price', 'dis_client_price', 'dis_recomended_price', 'providerMakat']
+#     extra = 0
 
-    def providerMakat(self, instance):
-        print(instance)
-        if instance and instance.catalogimagedetail_id:
-            return instance.catalogimagedetail.providerMakat
+#     def providerMakat(self, instance):
+#         print(instance)
+#         if instance and instance.catalogimagedetail_id:
+#             return instance.catalogimagedetail.providerMakat
 
-    def price_component(buy, sell):
-        prcent = ((buy / sell) - 1)*100
-        precent_clr = "green" if prcent > 0 else "red"
-        # .format(buy, prcent))
-        return mark_safe(f'<div style="direction: rtl;">{buy:.2f}₪ <span style="color:{precent_clr}">({prcent:.2f}%)</span></div>')
+#     def price_component(buy, sell):
+#         prcent = ((buy / sell) - 1)*100
+#         precent_clr = "green" if prcent > 0 else "red"
+#         # .format(buy, prcent))
+#         return mark_safe(f'<div style="direction: rtl;">{buy:.2f}₪ <span style="color:{precent_clr}">({prcent:.2f}%)</span></div>')
 
-    def provider(self, instance):
-        if instance and instance.catalogimagedetail_id:
-            return instance.catalogimagedetail.provider
-        return 'none'
-    provider.short_description = _('provider')
+#     def provider(self, instance):
+#         if instance and instance.catalogimagedetail_id:
+#             return instance.catalogimagedetail.provider
+#         return 'none'
+#     provider.short_description = _('provider')
 
-    def dis_colors(self, instance):
-        if instance and instance.catalogimagedetail_id:
-            clrs = instance.catalogimagedetail.colors
-            ret = ''
-            for c in clrs.all():
-                ret += c.name + ', '
-            return ret
-    dis_colors.short_description = _('colors')
+#     def dis_colors(self, instance):
+#         if instance and instance.catalogimagedetail_id:
+#             clrs = instance.catalogimagedetail.colors
+#             ret = ''
+#             for c in clrs.all():
+#                 ret += c.name + ', '
+#             return ret
+#     dis_colors.short_description = _('colors')
 
-    def dis_sizes(self, instance):
-        if instance and instance.catalogimagedetail_id:
-            sizes = instance.catalogimagedetail.sizes
-            ret = ''
-            for s in sizes.all():
-                ret += s.size + ', '
-            return ret
-    dis_sizes.short_description = _('sizes')
+#     def dis_sizes(self, instance):
+#         if instance and instance.catalogimagedetail_id:
+#             sizes = instance.catalogimagedetail.sizes
+#             ret = ''
+#             for s in sizes.all():
+#                 ret += s.size + ', '
+#             return ret
+#     dis_sizes.short_description = _('sizes')
 
-    def dis_cost_price(self, instance):
-        if instance and instance.catalogimagedetail_id:
-            return mark_safe(f'<div style="font-weight: bold;">{instance.catalogimagedetail.cost_price}₪<div>')
-    dis_cost_price.short_description = _('cost price')
+#     def dis_cost_price(self, instance):
+#         if instance and instance.catalogimagedetail_id:
+#             return mark_safe(f'<div style="font-weight: bold;">{instance.catalogimagedetail.cost_price}₪<div>')
+#     dis_cost_price.short_description = _('cost price')
 
-    def dis_client_price(self, instance):
-        if instance and instance.catalogimagedetail_id:
-            comp = tableInline.price_component(
-                instance.catalogimagedetail.client_price, instance.catalogimagedetail.cost_price)
-            return comp  # instance.catalogimagedetail.client_price
-    dis_client_price.short_description = _('client price')
+#     def dis_client_price(self, instance):
+#         if instance and instance.catalogimagedetail_id:
+#             comp = tableInline.price_component(
+#                 instance.catalogimagedetail.client_price, instance.catalogimagedetail.cost_price)
+#             return comp  # instance.catalogimagedetail.client_price
+#     dis_client_price.short_description = _('client price')
 
-    def dis_recomended_price(self, instance):
-        if instance and instance.catalogimagedetail_id:
-            comp = tableInline.price_component(
-                instance.catalogimagedetail.recomended_price, instance.catalogimagedetail.client_price)
-            return comp
-    dis_recomended_price.short_description = _('recomended price')
+#     def dis_recomended_price(self, instance):
+#         if instance and instance.catalogimagedetail_id:
+#             comp = tableInline.price_component(
+#                 instance.catalogimagedetail.recomended_price, instance.catalogimagedetail.client_price)
+#             return comp
+#     dis_recomended_price.short_description = _('recomended price')
 
 
 class albumsInline(admin.TabularInline):
@@ -156,7 +156,7 @@ class CatalogImageAdmin(AdminAdvancedFiltersMixin, admin.ModelAdmin):
     list_display_links = ('title',)
     actions = ['turn_on_is_active', 'turn_off_is_active', 'download_images_csv', 'download_images_exel_slim', 'download_images_exel_warehouse', 'turn_sizes_popup_active', 'turn_sizes_popup_inactive',
                'upload_images_to_cloudinary_bool_active', 'upload_images_to_cloudinary_bool_inactive', 'turn_can_tag_active', 'turn_can_tag_inactive', 'turn_out_of_stock_inactive', 'turn_out_of_stock_active']
-    inlines = (albumsInline, tableInline)
+    inlines = (albumsInline,)
     readonly_fields = ('id', 'render_thumbnail',
                        'render_image', 'is_main_public_album_set')
     search_fields = ('title', 'description', 'barcode',

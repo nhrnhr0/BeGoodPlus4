@@ -2,7 +2,6 @@ from django.db import models
 from colorfield.fields import ColorField
 from django.utils.translation import gettext_lazy  as _
 
-# Create your models here.
 class Color(models.Model):
 
     class Meta:

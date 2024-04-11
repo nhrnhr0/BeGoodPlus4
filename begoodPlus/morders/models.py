@@ -1,51 +1,51 @@
-from colorfield.fields import ColorField
-import re
-from begoodPlus.secrects import FULL_DOMAIN
-import pytz
-from core.gspred import get_gspread_client
-from gspread.cell import Cell
-from gspread_formatting import *
-from openpyxl.styles import Alignment
-import copy
+# from colorfield.fields import ColorField
+# import re
+# from begoodPlus.secrects import FULL_DOMAIN
+# import pytz
+# from core.gspred import get_gspread_client
+# from gspread.cell import Cell
+# from gspread_formatting import *
+# from openpyxl.styles import Alignment
+# import copy
 
-import gspread
-from ordered_model.models import OrderedModelBase
-from begoodPlus.secrects import SECRECT_BASE_MY_DOMAIN, SECRECT_CLIENT_SIDE_DOMAIN, ALL_MORDER_FILE_SPREEDSHEET_URL, ALL_PRICE_PROPOSAL_SPREEADSHEET_URL, ARCHIVED_MORDER_FILE_SPREEDSHEET_URL
-from django.conf import settings
-import reversion
-from decimal import Decimal
-import secrets
-from django.forms import ValidationError
-from django.urls import reverse
-from django.utils.translation import gettext_lazy as _
+# import gspread
+# from ordered_model.models import OrderedModelBase
+# from begoodPlus.secrects import SECRECT_BASE_MY_DOMAIN, SECRECT_CLIENT_SIDE_DOMAIN, ALL_MORDER_FILE_SPREEDSHEET_URL, ALL_PRICE_PROPOSAL_SPREEADSHEET_URL, ARCHIVED_MORDER_FILE_SPREEDSHEET_URL
+# from django.conf import settings
+# import reversion
+# from decimal import Decimal
+# import secrets
+# from django.forms import ValidationError
+# from django.urls import reverse
+# from django.utils.translation import gettext_lazy as _
 
-from multiprocessing.connection import Client
-import pandas as pd
-from django.db import models
-from django.contrib.auth.models import User
-from core.utils import number_to_spreedsheet_letter
-from catalogImages.models import CatalogImage
-from client.models import Client
-from color.models import Color
-#from inventory.models import ProviderRequest, WarehouseStock
-from productSize.models import ProductSize
-from catalogImages.models import CatalogImageVarient
-from provider.models import Provider
-from django.utils.html import mark_safe
-import datetime
-from django.db.models import Count, F, Value
-from django.db.models import OuterRef, Subquery
-from django.db.models import Q
-from django.contrib.postgres.aggregates import ArrayAgg
-from django.db.models import Sum, Avg, When, Case
-from django.db.models.functions import Substr
-from django.db.models.functions import Concat
-from django.db.models.functions import Length
-#from begoodPlus.secrects import SMARTBEE_DOMAIN, SMARTBEE_providerUserToken
-#from smartbee.models import SmartbeeResults, SmartbeeTokens
-import requests
-from django.db.models.signals import pre_save, post_save, m2m_changed
-from django.dispatch import receiver
+# from multiprocessing.connection import Client
+# import pandas as pd
+# from django.db import models
+# from django.contrib.auth.models import User
+# from core.utils import number_to_spreedsheet_letter
+# from catalogImages.models import CatalogImage
+# #from client.models import Client
+# from color.models import Color
+# #from inventory.models import ProviderRequest, WarehouseStock
+# from productSize.models import ProductSize
+# from catalogImages.models import CatalogImageVarient
+# from provider.models import Provider
+# from django.utils.html import mark_safe
+# import datetime
+# from django.db.models import Count, F, Value
+# from django.db.models import OuterRef, Subquery
+# from django.db.models import Q
+# from django.contrib.postgres.aggregates import ArrayAgg
+# from django.db.models import Sum, Avg, When, Case
+# from django.db.models.functions import Substr
+# from django.db.models.functions import Concat
+# from django.db.models.functions import Length
+# #from begoodPlus.secrects import SMARTBEE_DOMAIN, SMARTBEE_providerUserToken
+# #from smartbee.models import SmartbeeResults, SmartbeeTokens
+# import requests
+# from django.db.models.signals import pre_save, post_save, m2m_changed
+# from django.dispatch import receiver
 
 
 # class CollectedInventory(models.Model):

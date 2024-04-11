@@ -17,20 +17,20 @@ import client
 from openpyxl.drawing import image
 from openpyxl.utils.cell import get_column_letter
 
-from client.models import UserQuestion
+#from client.models import UserQuestion
 # Register your models here.
-from .models import ActiveCartTracker, UserSearchData
+from .models import  UserSearchData
 
 
-class ActiveCartTrackerAdmin(admin.ModelAdmin):
-    list_display = ('last_updated', 'created_at', 'last_ip',
-                    'active_cart_id', 'cart_products_size')
-    readonly_fields = ('last_updated', 'created_at', 'last_ip', 'active_cart_id',
-                       'products_amount_display_with_sizes_and_colors', 'cart_products_size')
-    ordering = ('-last_updated',)
+# class ActiveCartTrackerAdmin(admin.ModelAdmin):
+#     list_display = ('last_updated', 'created_at', 'last_ip',
+#                     'active_cart_id', 'cart_products_size')
+#     readonly_fields = ('last_updated', 'created_at', 'last_ip', 'active_cart_id',
+#                        'products_amount_display_with_sizes_and_colors', 'cart_products_size')
+#     ordering = ('-last_updated',)
 
 
-admin.site.register(ActiveCartTracker, ActiveCartTrackerAdmin)
+# admin.site.register(ActiveCartTracker, ActiveCartTrackerAdmin)
 
 
 class UserSearchDataAdmin(admin.ModelAdmin):

@@ -16,7 +16,7 @@ Including another URLconf
 
 
 #from core.views import clear_drive_creds
-from msCrm.views import ms_crm_upload_task
+#from msCrm.views import ms_crm_upload_task
 #from core.views import admin_upload_docs_page
 
 #from docsSignature.views import api_get_doc_signature, api_sign_on_doc
@@ -26,22 +26,22 @@ from catalogAlbum.views import get_albums, get_catalog_albums
 from clientApi.views import get_all_varients_api, get_products_info, get_products_info2
 #from inventory.views import add_doc_stock_enter_ppn, add_doc_stock_enter_ppn_entry, create_enter_doc, enter_doc_edit, delete_doc_stock_enter_ppn_entry, doc_stock_detail_api, doc_stock_list_api, get_all_inventory_api, get_all_warehouses_api, enter_doc_insert_inventory, enter_doc_remove_product, get_doc_stock_enter_ppn_entries, inventory_edit_entry, inventory_get_entry_history, inventory_manual_update_entry, search_ppn, search_warehouses, show_inventory_stock, get_product_inventory, doc_stock_list
 
-from clientApi.views import get_all_colors_api, get_all_sizes_api, main_page_api
+from clientApi.views import get_all_colors_api, get_all_sizes_api
 #from campains.views import admin_get_all_campains, admin_get_campain_products, get_user_campains
 #from inventory.views import DocStockEnterViewSet, doc_stock_enter
 # from mcrm.views import , admin_upload_bulk_crm_exel, upload_crm_execl, upload_crm_execl2
 
-from msCrm.views import api_save_lead, fix_ms_crm, get_all_business_types_groups, get_all_mscrm_phone_contacts, get_crm_users_for_whatsapp, get_crm_users_numbers_in_excel, mcrm_lead_register, get_all_business_types, get_all_interests, import_mscrm_from_exel, upload_mscrm_business_select_to_intrests_exel
+# from msCrm.views import api_save_lead, fix_ms_crm, get_all_business_types_groups, get_all_mscrm_phone_contacts, get_crm_users_for_whatsapp, get_crm_users_numbers_in_excel, mcrm_lead_register, get_all_business_types, get_all_interests, import_mscrm_from_exel, upload_mscrm_business_select_to_intrests_exel
 from core.views import autocompleteClick, autocompleteModel
 from catalogImages.views import AlbumImagesApiView, admin_api_get_product_cost_price, all_images_ids, catalogimage_upload_warehouse_excel, create_image_from_exel, get_main_albums_for_main_page, get_main_info, get_product_sizes_colors_martix, admin_add_to_existing_cart, get_products_slim, get_products_viewset, get_similar_products
-from clientApi.views import ColorsClientViewSet, ImageClientViewSet, SizesClientViewSet, LogoClientViewSet, get_album_images
+from clientApi.views import ColorsClientViewSet, ImageClientViewSet, SizesClientViewSet, get_album_images
 from clientApi.views import AlbumClientViewSet
-from catalogImageDetail.views import SvelteCatalogImageDetailViewSet
+# from catalogImageDetail.views import SvelteCatalogImageDetailViewSet
 
 
 from packingType.views import SvelteApiPackingTypeViewSet
-from color.views import SvelteColorsViewSet
-from catalogImages.views import SvelteCatalogImageViewSet, create_mini_table, catalogimage_upload_slim_excel
+# from color.views import SvelteColorsViewSet
+from catalogImages.views import SvelteCatalogImageViewSet, catalogimage_upload_slim_excel
 from productSize.views import SvelteApiSizesViewSet
 from django.contrib import admin
 import debug_toolbar
@@ -55,8 +55,8 @@ from rest_framework import routers
 from django.contrib.auth.models import User
 from catalogImages.views import CatalogImageViewSet
 from catalogAlbum.views import CatalogAlbumViewSet, catalogView_api, get_main_categories
-from client.views import create_client_user, get_all_users_by_admin, whoAmI, userLogEntryView
-from color.views import ColorsViewSet
+#from client.views import userLogEntryView
+# from color.views import ColorsViewSet
 from productSize.views import SizesViewSet
 #from smartbee.views import get_smartbee_doc
 #from docsSignature.views import edit_doc_signature, api_adit_doc_signature
@@ -66,25 +66,25 @@ from cart.views import submit_cart
 router = routers.DefaultRouter()
 router.register(r'CatalogAlbums', CatalogAlbumViewSet)
 router.register(r'CatalogImages', CatalogImageViewSet)
-router.register(r'colors', ColorsViewSet)
+# router.register(r'colors', ColorsViewSet)
 router.register(r'sizes', SizesViewSet)
 
 
 svelteRouter = routers.DefaultRouter()
-svelteRouter.register(r'colors', SvelteColorsViewSet)
+# svelteRouter.register(r'colors', SvelteColorsViewSet)
 svelteRouter.register(r'sizes', SvelteApiSizesViewSet)
 svelteRouter.register(r'products', SvelteCatalogImageViewSet)
 svelteRouter.register(r'packing',  SvelteApiPackingTypeViewSet)
 svelteRouter.register(r'providers', SvelteApiProviderViewSet)
-svelteRouter.register(
-    r'productTabel', SvelteCatalogImageDetailViewSet, basename='catalogImageDetail')
+# svelteRouter.register(
+#     r'productTabel', SvelteCatalogImageDetailViewSet, basename='catalogImageDetail')
 
 clientRouter = routers.DefaultRouter()
 clientRouter.register(r'albums', AlbumClientViewSet)
 clientRouter.register(r'images', ImageClientViewSet)
 clientRouter.register(r'colors', ColorsClientViewSet)
 clientRouter.register(r'sizes', SizesClientViewSet)
-clientRouter.register(r'logos', LogoClientViewSet)
+# clientRouter.register(r'logos', LogoClientViewSet)
 # router.register(r'stores', StoreList.as_view(),basename='stores')
 
 # from customerCart.views import cart_changed
@@ -98,8 +98,8 @@ urlpatterns = [
     path('create-shareable-cart/', create_shareable_cart),
 #     path('providers_docx_task/<int:task_id>/',
 #          providers_docx_task, name='providers_docx_task'),
-    path('ms-crm-upload-task/<int:task_id>/',
-         ms_crm_upload_task, name='ms_crm_upload_task'),
+#     path('ms-crm-upload-task/<int:task_id>/',
+#          ms_crm_upload_task, name='ms_crm_upload_task'),
 #     path('sheetsurl-to-smartbee/', sheetsurl_to_smartbee_async),
 #     path('sign-on-doc/<uuid:uuid>/', api_sign_on_doc),
 #     path('api-signature/<uuid:uuid>/', api_get_doc_signature),
@@ -129,15 +129,15 @@ urlpatterns = [
          get_catalog_albums, name='get-catalog-albums'),
     path('get-catalog-albums/', get_catalog_albums, name='get-catalog-albums'),
     path('get-main-categories/', get_main_categories, name='get-main-categories'),
-    path('fix-ms-crm', fix_ms_crm, name='fix-ms-crm'),
-    path('api-save-lead/', api_save_lead, name='api_save_lead'),
-    path('get_all_mscrm_phone_contacts/', get_all_mscrm_phone_contacts,
-         name='get_all_mscrm_phone_contacts'),
+#     path('fix-ms-crm', fix_ms_crm, name='fix-ms-crm'),
+#     path('api-save-lead/', api_save_lead, name='api_save_lead'),
+#     path('get_all_mscrm_phone_contacts/', get_all_mscrm_phone_contacts,
+#          name='get_all_mscrm_phone_contacts'),
     path('get-products-info', get_products_info, name='get-products-info'),
-    path('create-client-user/', create_client_user, name='create-client-user'),
+    # path('create-client-user/', create_client_user, name='create-client-user'),
 
-    path('upload-mscrm-business-select-to-intrests-exel', upload_mscrm_business_select_to_intrests_exel,
-         name='upload-mscrm-business-select-to-intrests-exel'),
+#     path('upload-mscrm-business-select-to-intrests-exel', upload_mscrm_business_select_to_intrests_exel,
+#          name='upload-mscrm-business-select-to-intrests-exel'),
 #     path('verify-unique-field-by-field-excel',
 #          verify_unique_field_by_field_excel),
 #     path('product-question', client_product_question,
@@ -155,7 +155,7 @@ urlpatterns = [
 #     path('update-provider-request-entry', provider_request_update_entry_admin,
 #          name='provider_request_update_entry_admin'),
     #path('product-photo', send_product_photo, name='send_product_photo'),
-    path('main_page_api/', main_page_api, name='main_page_api'),
+    # path('main_page_api/', main_page_api, name='main_page_api'),
 #     path('admin-api/remove-product-from-cart/',
 #          admin_remove_product_from_cart, name='admin_remove_product_from_cart'),
     path('admin-api/get-product-sizes-colors-martix/<int:id>',
@@ -168,13 +168,13 @@ urlpatterns = [
     path('admin-api/get_product_cost_price/<int:product_id>',
          admin_api_get_product_cost_price),
     #path('test', test_celery_view),
-    path('create_mini_table/<int:id>/',
-         create_mini_table, name='create_mini_table'),
+    # path('create_mini_table/<int:id>/',
+    #      create_mini_table, name='create_mini_table'),
     # path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     # path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 #     path('api/get-token/', CustomAuthToken.as_view(), name='get_token'),
-    path('api/get-all-users/', get_all_users_by_admin,
-         name='get_all_users_by_admin'),
+    # path('api/get-all-users/', get_all_users_by_admin,
+    #      name='get_all_users_by_admin'),
 
     path('admin/', admin.site.urls),
 
@@ -268,21 +268,21 @@ urlpatterns = [
     #path('client-api/get-user-campains/', get_user_campains),
 
     # CRM
-    path('client-api/lead-distribution/', mcrm_lead_register),
-    path('crm-api/get-all-interests/', get_all_interests,
-         name='crm_get_all_interests'),
-    path('crm-api/get-all-business-types/', get_all_business_types,
-         name='crm_get_all_business_types'),
-    path('crm-api/get-all-business-types-groups/',
-         get_all_business_types_groups, name='crm_get_all_business_types_groups'),
-    path('crm-api/get-all-business-users-by-business-types-id',
-         get_crm_users_for_whatsapp, name='crm_get_crm_users_for_whatsapp'),
-    path('crm-api/get_crm_users_numbers_in_excel',
-         get_crm_users_numbers_in_excel, name='crm_get_crm_users_numbers_in_excel'),
+#     path('client-api/lead-distribution/', mcrm_lead_register),
+#     path('crm-api/get-all-interests/', get_all_interests,
+#          name='crm_get_all_interests'),
+#     path('crm-api/get-all-business-types/', get_all_business_types,
+#          name='crm_get_all_business_types'),
+#     path('crm-api/get-all-business-types-groups/',
+#          get_all_business_types_groups, name='crm_get_all_business_types_groups'),
+#     path('crm-api/get-all-business-users-by-business-types-id',
+#          get_crm_users_for_whatsapp, name='crm_get_crm_users_for_whatsapp'),
+#     path('crm-api/get_crm_users_numbers_in_excel',
+#          get_crm_users_numbers_in_excel, name='crm_get_crm_users_numbers_in_excel'),
     # path('admin/crm/crmuser/upload_execl/', upload_crm_execl, name='crm_upload_execl'),
     # path('admin_upload_bulk_crm_exel', admin_upload_bulk_crm_exel, name='admin_upload_bulk_crm_exel'),
-    path('admin/crm/crmuser/upload_execl2/',
-         import_mscrm_from_exel, name='crm_upload_execl2'),
+#     path('admin/crm/crmuser/upload_execl2/',
+#          import_mscrm_from_exel, name='crm_upload_execl2'),
     path('admin/catalogImage/upload_slim_exel', catalogimage_upload_slim_excel,
          name='catalog_catalogimage_upload_slim_excel'),
     path('admin/catalogImage/upload_warehouse_excel', catalogimage_upload_warehouse_excel,
@@ -294,7 +294,7 @@ urlpatterns = [
     path('svelte/api/', include(svelteRouter.urls)),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     #path('api/who-am-i/', whoAmI),
-    path('api/logs/', userLogEntryView),
+    # path('api/logs/', userLogEntryView),
     #path('api/logout/', api_logout),
     path('api/all-image-ids/', all_images_ids),
 

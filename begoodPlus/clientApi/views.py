@@ -1,4 +1,4 @@
-from color.models import Color
+#from color.models import Color
 #from morders.models import MorderStatus
 from rest_framework.reverse import reverse
 from rest_framework.decorators import api_view
@@ -21,21 +21,21 @@ from clientApi.serializers import VarientSerializer
 from catalogImages.models import CatalogImage
 #from client.views import get_user_info, whoAmI
 from clientApi.serializers import ColorClientApi, ImageClientApi, SizeClientApi
-from clientApi.serializers import AlbumClientApi, LogoClientApi
+from clientApi.serializers import AlbumClientApi
 from rest_framework import viewsets
 from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly
 from catalogAlbum.models import CatalogAlbum
 from rest_framework.renderers import JSONRenderer
-from catalogLogos.models import CatalogLogo
+#from catalogLogos.models import CatalogLogo
 from core.views import get_session_key
 from productColor.models import ProductColor
 from productSize.models import ProductSize
 
 
-class LogoClientViewSet(viewsets.ModelViewSet):
-    queryset = CatalogLogo.objects.all()
-    serializer_class = LogoClientApi
-    permission_classes = [IsAuthenticatedOrReadOnly]
+# class LogoClientViewSet(viewsets.ModelViewSet):
+#     queryset = CatalogLogo.objects.all()
+#     serializer_class = LogoClientApi
+#     permission_classes = [IsAuthenticatedOrReadOnly]
 # Create your views here.
 
 
@@ -126,7 +126,7 @@ def get_all_sizes_api(request):
 
 
 def get_all_colors_api(request):
-    colors = ColorClientApi(Color.objects.all(), many=True).data
+    colors = ColorClientApi(ProductColor.objects.all(), many=True).data
     return JsonResponse(colors, safe=False)
 
 
@@ -142,33 +142,33 @@ def get_all_varients_api(request):
 #     return JsonResponse(ser.data, safe=False)
 
 
-@permission_classes((AllowAny,))
-@api_view(('GET',))
-def main_page_api(request):
-    '''
-        colors: colors_ret,
-        sizes: sizes_ret,
-        albums: albums_json,
-        logos: logos_json,
-        all_products: products
-    '''
-    all_albums_qs = CatalogAlbum.objects.filter(
-        is_public=True)  # .prefetch_related('images')
-    albums = AlbumClientApi(all_albums_qs, many=True).data
-    sizes = SizeClientApi(ProductSize.objects.all(), many=True).data
-    colors = ColorClientApi(ProductColor.objects.all(), many=True).data
-    logos = LogoClientApi(CatalogLogo.objects.all(), many=True).data
-    # all_products[album_id] = get_album_images
-    # for album in all_albums_qs:
-    #    all_products_data[album.id] = images_from_album_serializer(album).data
+# @permission_classes((AllowAny,))
+# @api_view(('GET',))
+# def main_page_api(request):
+#     '''
+#         colors: colors_ret,
+#         sizes: sizes_ret,
+#         albums: albums_json,
+#         logos: logos_json,
+#         all_products: products
+#     '''
+#     all_albums_qs = CatalogAlbum.objects.filter(
+#         is_public=True)  # .prefetch_related('images')
+#     albums = AlbumClientApi(all_albums_qs, many=True).data
+#     sizes = SizeClientApi(ProductSize.objects.all(), many=True).data
+#     colors = ColorClientApi(ProductColor.objects.all(), many=True).data
+#     logos = LogoClientApi(CatalogLogo.objects.all(), many=True).data
+#     # all_products[album_id] = get_album_images
+#     # for album in all_albums_qs:
+#     #    all_products_data[album.id] = images_from_album_serializer(album).data
 
-    ret = {
-        'colors': colors,
-        'sizes': sizes,
-        'logos': logos,
-        'albums': albums,
-    }
-    return JsonResponse(ret, safe=False)
+#     ret = {
+#         'colors': colors,
+#         'sizes': sizes,
+#         'logos': logos,
+#         'albums': albums,
+#     }
+#     return JsonResponse(ret, safe=False)
     #logos = CatalogLogo.objects.all()
 
 
