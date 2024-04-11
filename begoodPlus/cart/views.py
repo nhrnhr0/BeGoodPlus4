@@ -57,9 +57,11 @@ def submit_cart(request):
     email = body.get('email')
     phone = body.get('phone')
     privateCompany = body.get('privateCompany')
-    is_inventory_check = body.get('is_inventory_check', False)
-    is_order = body.get('is_order', False)
-    is_price_proposal = body.get('is_price_proposal', False)
+    # is_order = body.get('is_order', False)
+    # is_price_proposal = body.get('is_price_proposal', False)
+    order_type_order = body.get('order_type_order', False)
+    order_type_offer = body.get('order_type_offer', False)
+    order_type_stock = body.get('order_type_stock', False)
     message = body.get('message')
     cart = Cart.objects.create(
         name=name,
@@ -67,9 +69,9 @@ def submit_cart(request):
         phone=phone,
         privateCompany=privateCompany,
         message=message,
-        is_inventory_check=is_inventory_check,
-        is_order=is_order,
-        is_price_proposal=is_price_proposal
+        is_inventory_check=order_type_stock,
+        is_order=order_type_order,
+        is_price_proposal=order_type_offer,
     )
     
     for product in body.get('products'):

@@ -9,10 +9,13 @@ class ProductSizeGroupAdmin(admin.ModelAdmin):
 admin.site.register(ProductSizeGroup, ProductSizeGroupAdmin)
 
 class ProductSizeAdmin(admin.ModelAdmin):
-    list_display = ('id', 'size', 'order', 'group')
+    list_display = ('id', 'size', 'order', 'group', 'product_count')
     list_filter = ('group', )
     search_fields = ('size', 'code', 'group__name')
     list_editable = ('size', 'order', 'group')
+    
+    def product_count(self, obj):
+        return obj.catalogimage_set.count()
 
 
 admin.site.register(ProductSize, ProductSizeAdmin)
