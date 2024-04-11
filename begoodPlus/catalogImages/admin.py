@@ -159,19 +159,17 @@ class CatalogImageAdmin(AdminAdvancedFiltersMixin, admin.ModelAdmin):
     inlines = (albumsInline,)
     readonly_fields = ('id', 'render_thumbnail',
                        'render_image', 'is_main_public_album_set')
-    search_fields = ('title', 'description', 'barcode',
-                     'detailTabel__providerMakat')
+    search_fields = ('title', 'description', 'barcode',)
     list_filter = (FreeTextListFilter, 'albums',
                    'providers', 'sizes', 'colors', )
     filter_horizontal = ('colors', 'sizes', 'providers',
-                         'varients')  # 'detailTabel'
+                         'varients')  
     list_per_page = 50
-    exclude = ('detailTabel',)
     advanced_filter_fields = (('title','כותרת'), ('description', 'תיאור'), ('sizes__size', 'גדלים'), ('colors__name','צבעים'), ('providers__name', 'שם ספק'), ('varients__name', 'שם וריאנט'), ('barcode', 'ברקוד'), ('cost_price', 'מחיר עלות'), ('client_price', 'מחיר ללקוח'), ('recomended_price', 'מחיר מומלץ'), ('albums__title', 'כותרת אלבום'), ('show_sizes_popup', 'הצג פופאפ גדלים'), ('packingTypeProvider__name', 'שיטת אריזה מהספק'), ('packingTypeClient__name', 'שיטת אריזה ללקוח'), 'date_created', 'date_modified', 'can_tag', 'out_of_stock', 'is_active', 'has_physical_barcode', 'cimage', 'free_text', 'whatsapp_text',)
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
-        return qs.prefetch_related('albums', 'detailTabel').select_related('packingTypeProvider', 'packingTypeClient', 'main_public_album', )
+        return qs.prefetch_related('albums', ).select_related('packingTypeProvider', 'packingTypeClient', 'main_public_album', )
 
     def turn_on_is_active(self, request, queryset):
         queryset.update(is_active=True)
@@ -251,7 +249,7 @@ class CatalogImageAdmin(AdminAdvancedFiltersMixin, admin.ModelAdmin):
             ws.write(i, 5, vals[5], value_style)
             provider_offset = 6
             providers_with_makat = []
-            for catalogImageDetail in value.detailTabel.all():
+            for catalogImageDetail in []:#value.detailTabel.all():
                 provider_name = catalogImageDetail.provider.name
                 provider_makat = catalogImageDetail.providerMakat
                 providers_with_makat.append(provider_name)

@@ -94,15 +94,19 @@ def create_auth_token(sender, instance=None, created=False, **kwargs):
 
 
 class UserSearchData(models.Model):
-    session = models.CharField(max_length=50)
-    term = models.CharField(max_length=50)
+    session = models.CharField(max_length=50, verbose_name=_('session'))
+    term = models.CharField(max_length=50, verbose_name=_('term'))
     resultCount = models.IntegerField(verbose_name=_('number of results'))
     created_date = models.DateTimeField(
-        auto_now_add=True, blank=True, null=True)
+        auto_now_add=True, blank=True, null=True, verbose_name=_('created date'))
     content_type = models.ForeignKey(
         ContentType, on_delete=models.CASCADE, null=True, blank=True)
     object_id = models.PositiveIntegerField(null=True, blank=True)
     content_object = GenericForeignKey('content_type', 'object_id')
+    
+    class Meta:
+        verbose_name = _('user search')
+        verbose_name_plural = _('user searchs')
 
 
 # class SvelteContactFormModal(models.Model):

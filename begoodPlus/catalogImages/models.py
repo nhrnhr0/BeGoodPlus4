@@ -40,6 +40,8 @@ class CatalogImageVarient(models.Model):
 
     class Meta:
         ordering = ('id',)
+        verbose_name = _('Product varient')
+        verbose_name_plural = _('Product varients')
 
     def __str__(self):
         return self.name

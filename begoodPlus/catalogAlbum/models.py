@@ -57,13 +57,15 @@ from mptt.models import MPTTModel, TreeForeignKey
 
 
 class TopLevelCategory(models.Model):
-    name = models.CharField(max_length=50, unique=True)
+    name = models.CharField(max_length=50, unique=True, verbose_name=_(
+        "name"))
     my_order = models.PositiveIntegerField(
-        default=0, blank=True, null=True, db_index=True, unique=True)
-    image = CloudinaryField('image', blank=True, null=True, public_id='topLevelCategory/' +
+        default=0, blank=True, null=True, db_index=True, unique=True, verbose_name=_('order'))
+    image = CloudinaryField(_('image'), blank=True, null=True, public_id='topLevelCategory/' +
                             datetime.datetime.now().strftime('%Y-%m-%d-%H_%M_%S_%f'), format='png')
     slug = models.SlugField(max_length=120, verbose_name=_(
         "slug"), unique=True, blank=True, null=True, allow_unicode=True)
+    # TODO: this get_image can be more efficient (save to db or something)
     get_image = property(lambda self: self.image.url[len(CLOUDINARY_BASE_URL):] if self.image else '' if self.albums.order_by(
         'album_order').first() == None else self.albums.order_by('album_order').first().cimage)
 
@@ -72,10 +74,13 @@ class TopLevelCategory(models.Model):
 
     class Meta:
         ordering = ('my_order',)
+        verbose_name = _('top level category')
+        verbose_name_plural = _('top level categories')
 
     def image_display(self):
         img = self.get_image
         return mark_safe('<img src="{}" width="50" height="50" />'.format(CLOUDINARY_BASE_URL + img))
+    image_display.short_description = _('image')
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -83,9 +88,9 @@ class TopLevelCategory(models.Model):
         super(TopLevelCategory, self).save(*args, **kwargs)
 
 
-class CatalogAlbum(MPTTModel):
+class CatalogAlbum(models.Model):
     topLevelCategory = models.ForeignKey(
-        to="TopLevelCategory", on_delete=models.SET_NULL, null=True, blank=True, related_name='albums')
+        to="TopLevelCategory", on_delete=models.SET_NULL, null=True, blank=True, related_name='albums', verbose_name=_('top level category'))
     title = models.CharField(max_length=120, verbose_name=_("title"))
     slug = models.SlugField(max_length=120, verbose_name=_(
         "slug"), unique=True, blank=True, null=True, allow_unicode=True)
@@ -96,20 +101,21 @@ class CatalogAlbum(MPTTModel):
         'keyworks'), default='', blank=True)
     images = models.ManyToManyField(to=CatalogImage, related_name='albums',
                                     blank=True, through='ThroughImage', verbose_name=_('album list'))
-    parent = TreeForeignKey('self', on_delete=models.CASCADE,
-                            null=True, blank=True, related_name='children')
+    # parent = TreeForeignKey('self', on_delete=models.CASCADE,
+    #                         null=True, blank=True, related_name='children')
     is_public = models.BooleanField(verbose_name=_('is public'), default=True)
-    is_campain = models.BooleanField(
-        verbose_name=_('is campain'), default=False)
-    show_on_main_page = models.BooleanField(
-        verbose_name=_('show on main page'), default=False)
+    # is_campain = models.BooleanField(
+    #     verbose_name=_('is campain'), default=False)
+    # show_on_main_page = models.BooleanField(
+    #     verbose_name=_('show on main page'), default=False)
     cimage = models.CharField(max_length=500, verbose_name=_(
         "cimage"), default='', blank=True)
     #campain = models.ForeignKey('MonthCampain', on_delete=models.CASCADE, null=True, blank=True, related_name='album')
     #renew_for = models.DurationField(null=True, blank=True, default=datetime.timedelta(days=3))
     #renew_after = models.DurationField(null=True, blank=True, default=datetime.timedelta(days=1))
     #timer = models.DateTimeField(null=True, blank=True)
-    album_order = models.PositiveIntegerField(default=0, blank=True, null=True)
+    album_order = models.PositiveIntegerField(default=0, blank=True, null=True, verbose_name=_(
+        'album order'))
 
     def save(self, *args, **kwargs):
         if self.cimage == '' and self.id != None:
@@ -139,15 +145,15 @@ class CatalogAlbum(MPTTModel):
     def sorted_image_set(self):
         return self.images.order_by('throughimage__image_order')
 
-    class MPTTMeta:
-        order_insertion_by = ['title']
+    # class MPTTMeta:
+    #     order_insertion_by = ['title']
 
-    class Meta(Sortable.Meta):
-        unique_together = ('slug', 'parent',)
-        ordering = ['album_order']
-        #ordering = ['throughimage__image_order']
-        #ordering = ('throughimage__image_order',)
-
+    class Meta:
+        #unique_together = ('slug', 'topLevelCategory')
+        ordering = ['topLevelCategory__my_order', 'album_order']
+        # translate CatalogAlbum
+        verbose_name = _('catalog album')
+        verbose_name_plural = _('catalog albums')
     def get_absolute_url(self):
         category_url = reverse('shareable_category_view', args=[self.id])
         return category_url

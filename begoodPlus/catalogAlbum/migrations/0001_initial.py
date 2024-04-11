@@ -50,8 +50,8 @@ class Migration(migrations.Migration):
             name='parent',
             field=mptt.fields.TreeForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='children', to='catalogAlbum.CatalogAlbum'),
         ),
-        migrations.AlterUniqueTogether(
-            name='catalogalbum',
-            unique_together={('slug', 'parent')},
-        ),
+        # migrations.AlterUniqueTogether(
+        #     name='catalogalbum',
+        #     unique_together={('slug', 'parent')},
+        # ),
     ]
