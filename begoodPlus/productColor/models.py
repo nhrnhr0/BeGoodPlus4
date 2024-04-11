@@ -1,7 +1,8 @@
 from django.db import models
-from color.models import Color
 from django.utils.translation import gettext_lazy  as _
 from django.utils.html import mark_safe
+from colorfield.fields import ColorField
+from color.models import Color
 
 #from product.models import Product
 # Create your models here.
@@ -12,8 +13,12 @@ class ProductColor(Color):
         ordering = ('code',)
         default_related_name = 'productColors'
         
+    COLOR_PALETTE = [
+        ('#FFFFFF', 'white', ),
+        ('#000000', 'black', ),
+        ('#FFFFFF00', 'transparent', ),
+    ]
     code = models.CharField(verbose_name=_('code'), max_length=2)
-    
     def __str__(self):
         return self.name + '(' + self.code + ')'
 

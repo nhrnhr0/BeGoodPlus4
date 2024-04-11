@@ -15,14 +15,14 @@ from django.conf import settings
 from django.urls import reverse
 import pytz
 from begoodPlus.settings.base import CLOUDINARY_BASE_URL
-from catalogImageAttrs.models import ProductPrices
+#from catalogImageAttrs.models import ProductPrices
 from django.utils.text import slugify
 
-from color.models import Color
+#from color.models import Color
 from provider.models import Provider
 from productSize.models import ProductSize
 from packingType.models import PackingType
-from catalogImageDetail.models import CatalogImageDetail
+#from catalogImageDetail.models import CatalogImageDetail
 import sys
 from cloudinary.models import CloudinaryField
 #from cloudinary.uploader import upload
@@ -40,6 +40,8 @@ class CatalogImageVarient(models.Model):
 
     class Meta:
         ordering = ('id',)
+        verbose_name = _('Product varient')
+        verbose_name_plural = _('Product varients')
 
     def __str__(self):
         return self.name
@@ -109,14 +111,14 @@ class CatalogImage(models.Model):
         verbose_name=_('out of stock'), default=False)
 
     is_active = models.BooleanField(default=False, verbose_name=_('is active'))
-    detailTabel = models.ManyToManyField(
-        related_name='parent', to=CatalogImageDetail, verbose_name=_('mini-tabel'), blank=True)
+    # detailTabel = models.ManyToManyField(
+    #     related_name='parent', to=CatalogImageDetail, verbose_name=_('mini-tabel'), blank=True)
 
     can_tag = models.BooleanField(default=False, verbose_name=_('can tag'))
     #big_discount = models.BooleanField(default=False)
 
-    clientPrices = models.OneToOneField(
-        to=ProductPrices, on_delete=models.SET_NULL, null=True, blank=True)
+    # clientPrices = models.OneToOneField(
+    #     to=ProductPrices, on_delete=models.SET_NULL, null=True, blank=True)
 
     NO_DISCOUNT = ''
     DISCOUNT_10_PRES = '/static/assets/catalog/imgs/discount_10.gif'
@@ -150,28 +152,29 @@ class CatalogImage(models.Model):
     is_main_public_album_set.short_description = 'יש אלבום ראשי'
 
     def get_user_price(self, user_id):
-        from campains.models import CampainProduct
-        if user_id == None:
-            return decimal.Decimal(self.client_price).normalize()
-        catalogImage_id = self.id
-        # check if the product is in any campaign of the client
-        # campain = MonthCampain.objects.filter(users__user_id=user_id, products__id=catalogImage_id).first()
-        # israel
-        tz = pytz.timezone('Israel')
+        return 1
+        # from campains.models import CampainProduct
+        # if user_id == None:
+        #     return decimal.Decimal(self.client_price).normalize()
+        # catalogImage_id = self.id
+        # # check if the product is in any campaign of the client
+        # # campain = MonthCampain.objects.filter(users__user_id=user_id, products__id=catalogImage_id).first()
+        # # israel
+        # tz = pytz.timezone('Israel')
 
-        campainProduct = CampainProduct.objects.filter(monthCampain__users__user_id=user_id, catalogImage_id=catalogImage_id,
-                                                       monthCampain__is_shown=True, monthCampain__startTime__lte=datetime.now(tz), monthCampain__endTime__gte=datetime.now(tz)).first()
-        #campainProduct = campainProduct.first()
-        if campainProduct:
-            return decimal.Decimal(campainProduct.newPrice).normalize()
-        else:
-            from client.models import Client
-            client = Client.objects.get(user_id=user_id)
-            tariff = client.tariff
-            price = self.client_price + (self.client_price * (tariff/100))
-            price = round(price * 2) / \
-                2 if price > 50 else "{:.2f}".format(price)
-            return decimal.Decimal(price).normalize()
+        # campainProduct = CampainProduct.objects.filter(monthCampain__users__user_id=user_id, catalogImage_id=catalogImage_id,
+        #                                                monthCampain__is_shown=True, monthCampain__startTime__lte=datetime.now(tz), monthCampain__endTime__gte=datetime.now(tz)).first()
+        # #campainProduct = campainProduct.first()
+        # if campainProduct:
+        #     return decimal.Decimal(campainProduct.newPrice).normalize()
+        # else:
+        #     from client.models import Client
+        #     client = Client.objects.get(user_id=user_id)
+        #     tariff = client.tariff
+        #     price = self.client_price + (self.client_price * (tariff/100))
+        #     price = round(price * 2) / \
+        #         2 if price > 50 else "{:.2f}".format(price)
+        #     return decimal.Decimal(price).normalize()
 
     def price_component(buy, sell):
         prcent = ((buy / sell) - 1)*100

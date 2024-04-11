@@ -122,7 +122,7 @@ INSTALLED_APPS = [
     'productImages',
     'stock',
     'glofa_types',
-    'mcrm',
+    #'mcrm',
     'inventory',
     'customerCart',
     'catalogImageAttrs',
@@ -246,8 +246,8 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
 
                 # own
-                'pages.context_processors.navbar_load',
-                'core.context_processors.loadBaseInfo',
+                #'pages.context_processors.navbar_load',
+                #'core.context_processors.loadBaseInfo',
             ],
         },
     },

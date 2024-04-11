@@ -11,14 +11,14 @@ from django.shortcuts import redirect, render
 import pytz
 from begoodPlus.settings.base import CLOUDINARY_BASE_URL
 from catalogAlbum.models import TopLevelCategory
-from campains.models import CampainProduct, MonthCampain
-from campains.views import get_user_active_campaigns, get_user_campains_serializer_data
+#from campains.models import CampainProduct, MonthCampain
+#from campains.views import get_user_active_campaigns, get_user_campains_serializer_data
 import catalogAlbum
 from catalogAlbum.models import CatalogAlbum, ThroughImage
-from client.models import Client
+#from client.models import Client
 from clientApi.serializers import ImageClientApi
 
-from core.models import SvelteCartProductEntery
+#from core.models import SvelteCartProductEntery
 from core.pagination import CurserResultsSetPagination, StandardResultsSetPagination
 #from inventory.models import PPN
 from productColor.models import ProductColor
@@ -29,7 +29,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from .serializers import CatalogImageIdSerializer, CatalogImageSerializer, CatalogImageApiSerializer
 from rest_framework.request import Request
-from catalogImageDetail.models import CatalogImageDetail
+#from catalogImageDetail.models import CatalogImageDetail
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view
 import json
@@ -117,52 +117,54 @@ class SlimCatalogImageSerializer(serializers.ModelSerializer):
     def _get_link(self, obj):
         return '/main?' + 'top=' + obj.main_public_album.topLevelCategory.slug + '&album=' + obj.main_public_album.slug + '&product_id=' + str(obj.id)
 
-    def get_user_id(self):
-        request = self.context.get('request', None)
-        ret_user_id = None
-        if request:
-            if request.user.is_authenticated and request.user.client:
-                if request.user.client:
-                    if request.user.is_superuser and request.COOKIES.get('actAs'):
-                        ret_user_id = request.COOKIES.get('actAs')
-                    else:
-                        ret_user_id = request.user.id
-        return ret_user_id
+    # def get_user_id(self):
+    #     request = self.context.get('request', None)
+    #     ret_user_id = None
+    #     if request:
+    #         if request.user.is_authenticated and request.user.client:
+    #             if request.user.client:
+    #                 if request.user.is_superuser and request.COOKIES.get('actAs'):
+    #                     ret_user_id = request.COOKIES.get('actAs')
+    #                 else:
+    #                     ret_user_id = request.user.id
+    #     return ret_user_id
 
-    def __init__(self, instance=None, data=None, **kwargs):
-        super().__init__(instance, data, **kwargs)
-        self.user_id = self.get_user_id()
-        if self.user_id:
-            self.client = Client.objects.get(user_id=self.user_id)
-            self.tariff = self.client.tariff
-        else:
-            self.tariff = 0
-            self.client = None
-        #print('====> self.user_id', self.client, 'tariff', self.tariff)
-        # find user active campains with the products
-        tz = pytz.timezone('Israel')
-        try:
-            catalogImage_ids = [i.id for i in instance] if instance else []
-        except:
-            if instance:
-                catalogImage_ids = [instance.id]
-            else:
-                catalogImage_ids = []
-        # campainProduct = CampainProduct.objects.filter(monthCampain__users__user_id=user_id, catalogImage_id=catalogImage_id,monthCampain__is_shown=True,monthCampain__startTime__lte=datetime.now(tz),monthCampain__endTime__gte=datetime.now(tz)).first()
-        campainProducts = CampainProduct.objects.filter(monthCampain__users__user_id=self.user_id, catalogImage_id__in=catalogImage_ids,
-                                                        monthCampain__is_shown=True, monthCampain__startTime__lte=datetime.now(tz), monthCampain__endTime__gte=datetime.now(tz))
+    # def __init__(self, instance=None, data=None, **kwargs):
+    #     super().__init__(instance, data, **kwargs)
+        # self.user_id = self.get_user_id()
+        # if self.user_id:
+        #     self.client = Client.objects.get(user_id=self.user_id)
+        #     self.tariff = self.client.tariff
+        # else:
+        #     self.tariff = 0
+        #     self.client = None
+        # #print('====> self.user_id', self.client, 'tariff', self.tariff)
+        # # find user active campains with the products
+        # tz = pytz.timezone('Israel')
+        # try:
+        #     catalogImage_ids = [i.id for i in instance] if instance else []
+        # except:
+        #     if instance:
+        #         catalogImage_ids = [instance.id]
+        #     else:
+        #         catalogImage_ids = []
+        # # campainProduct = CampainProduct.objects.filter(monthCampain__users__user_id=user_id, catalogImage_id=catalogImage_id,monthCampain__is_shown=True,monthCampain__startTime__lte=datetime.now(tz),monthCampain__endTime__gte=datetime.now(tz)).first()
+        # campainProducts =[]
+        # # CampainProduct.objects.filter(monthCampain__users__user_id=self.user_id, catalogImage_id__in=catalogImage_ids,
+        # #                                                 monthCampain__is_shown=True, monthCampain__startTime__lte=datetime.now(tz), monthCampain__endTime__gte=datetime.now(tz))
 
-        # create dict if catalogImage_id as key and newPrice as value
-        self.campainProducts_dict = {}
-        for campainProduct in campainProducts:
-            self.campainProducts_dict[campainProduct.catalogImage_id] = campainProduct.newPrice
+        # # create dict if catalogImage_id as key and newPrice as value
+        # self.campainProducts_dict = {}
+        # for campainProduct in campainProducts:
+        #     self.campainProducts_dict[campainProduct.catalogImage_id] = campainProduct.newPrice
         #print('done serializer init')
 
     def _get_new_price(self, obj):
-        if obj.id in self.campainProducts_dict:
-            return self.campainProducts_dict[obj.id]
-        else:
-            return None
+        return 0
+        # if obj.id in self.campainProducts_dict:
+        #     return self.campainProducts_dict[obj.id]
+        # else:
+        #     return None
 
     # def _get_main_album(self, obj):
     #     alb = obj.albums.filter(is_public=True).first()
@@ -170,13 +172,14 @@ class SlimCatalogImageSerializer(serializers.ModelSerializer):
     #         return alb.id
     #     return None
     def _get_price(self, obj):
-        if self.client:
-            price = obj.client_price + (obj.client_price * (self.tariff/100))
-            price = round(price * 2) / \
-                2 if price > 50 else "{:.2f}".format(price)
-            return float(decimal.Decimal(price).normalize())
-        else:
-            return 0
+        return 0
+        # if self.client:
+        #     price = obj.client_price + (obj.client_price * (self.tariff/100))
+        #     price = round(price * 2) / \
+        #         2 if price > 50 else "{:.2f}".format(price)
+        #     return float(decimal.Decimal(price).normalize())
+        # else:
+        #     return 0
 
 
 class SlimThroughImageSerializer(serializers.ModelSerializer):
@@ -223,22 +226,22 @@ def get_main_info(request):
             top_album = FakeTop(0, 'חדשים', 'new', True)
             top_albums = list(CatalogAlbum.objects.filter(is_public=True).order_by(
                 'album_order').values('id', 'title', 'cimage', 'is_public', 'slug',))
-        elif(top_album_slug == 'campaigns'):
-            # top_album = class with id, title, slug, cimage, is_public
-            top_album = FakeTop(0, 'מבצעים', 'campaigns', True)
+        # elif(top_album_slug == 'campaigns'):
+        #     # top_album = class with id, title, slug, cimage, is_public
+        #     top_album = FakeTop(0, 'מבצעים', 'campaigns', True)
 
-            campains = get_user_active_campaigns(request.user)
-            if campains:
-                top_albums = [{
-                    'id': c.album.id,
-                    'title': c.album.title,
-                    'slug': c.album.slug,
-                    'cimage': c.album.cimage,
-                    'is_public': c.album.is_public,
-                } for c in campains]
-            else:
-                top_albums = []
-            #top_albums = list(top_albums.values('id','title', 'cimage', 'is_public', 'slug',))
+        #     campains = []#get_user_active_campaigns(request.user)
+        #     if campains:
+        #         top_albums = [{
+        #             'id': c.album.id,
+        #             'title': c.album.title,
+        #             'slug': c.album.slug,
+        #             'cimage': c.album.cimage,
+        #             'is_public': c.album.is_public,
+        #         } for c in campains]
+        #     else:
+        #         top_albums = []
+        #     #top_albums = list(top_albums.values('id','title', 'cimage', 'is_public', 'slug',))
         else:
             top_album = TopLevelCategory.objects.get(slug=top_album_slug)
             top_albums = list(CatalogAlbum.objects.filter(topLevelCategory=top_album, is_public=True).order_by(
@@ -270,9 +273,9 @@ def get_main_info(request):
         ret['og_meta'] = get_album_og_meta(album)
     elif top_album:
         icon = None
-        if(top_album_slug == 'campaigns'):
-            icon = 'https://res.cloudinary.com/ms-global/image/upload/v1660132407/msAssets/Group_10_copy_10_3_-removebg-preview_1_uq2t66.png'
-        elif (top_album_slug == 'new'):
+        # if(top_album_slug == 'campaigns'):
+        #     icon = 'https://res.cloudinary.com/ms-global/image/upload/v1660132407/msAssets/Group_10_copy_10_3_-removebg-preview_1_uq2t66.png'
+        if (top_album_slug == 'new'):
             icon = 'https://res.cloudinary.com/ms-global/image/upload/v1660122508/msAssets/icons8-new-product-64_gikxga.png'
         ret['og_meta'] = get_top_album_og_meta(top_album, icon)
     else:
@@ -373,16 +376,16 @@ class AlbumImagesApiView(APIView, CurserResultsSetPagination):
                 # .order_by('catalogImage')#.distinct('catalogImage__id')
                 qs = CatalogImage.objects.filter(is_active=True)
                 #qs = qs.order_by('catalogImage_id').distinct('catalogImage_id')
-            elif self.top_album == 'campaigns':
-                all_user_campaigns = get_user_active_campaigns(
-                    self.request.user)
-                if all_user_campaigns:
-                    all_albums = CatalogAlbum.objects.filter(
-                        campain__in=all_user_campaigns)
-                    qs = CatalogImage.objects.filter(
-                        albums__in=all_albums).distinct()
-                else:
-                    qs = CatalogImage.objects.none()
+            # elif self.top_album == 'campaigns':
+            #     all_user_campaigns = get_user_active_campaigns(
+            #         self.request.user)
+            #     if all_user_campaigns:
+            #         all_albums = CatalogAlbum.objects.filter(
+            #             campain__in=all_user_campaigns)
+            #         qs = CatalogImage.objects.filter(
+            #             albums__in=all_albums).distinct()
+            #     else:
+            #         qs = CatalogImage.objects.none()
             else:
                 qs = ThroughImage.objects.filter(
                     catalogAlbum__topLevelCategory__slug=self.top_album).order_by('image_order')
@@ -648,15 +651,15 @@ def catalogimage_upload_slim_excel(request):
             return redirect('/admin/catalogImages/catalogimage/')
 
 
-@csrf_exempt
-def admin_remove_product_from_cart(request):
-    ret = {}
-    if request.method == "POST" and request.user.is_superuser:
-        data = json.loads(request.body.decode('utf8'))
-        afected_rows = SvelteCartProductEntery.objects.filter(
-            id=data['entry_id']).delete()
-        ret = {'afected_rows': afected_rows[0]}
-    return JsonResponse(ret)
+# @csrf_exempt
+# def admin_remove_product_from_cart(request):
+#     ret = {}
+#     if request.method == "POST" and request.user.is_superuser:
+#         data = json.loads(request.body.decode('utf8'))
+#         afected_rows = SvelteCartProductEntery.objects.filter(
+#             id=data['entry_id']).delete()
+#         ret = {'afected_rows': afected_rows[0]}
+#     return JsonResponse(ret)
 
 
 @csrf_exempt
@@ -700,28 +703,28 @@ def all_images_ids(request):
     return JsonResponse(ret)
 
 
-def create_mini_table(request, id):
-    ret = {'actions': []}
-    if request.method == "POST":
-        print(request)
-        catalogImage = CatalogImage.objects.get(pk=id)
-        for provider in catalogImage.providers.all():
-            print(provider)
-            data = CatalogImageDetail.objects.filter(
-                provider=provider, parent__in=[id])
-            if data.count() == 0:
-                obj = CatalogImageDetail.objects.create(provider=provider, cost_price=catalogImage.cost_price,
-                                                        client_price=catalogImage.client_price, recomended_price=catalogImage.recomended_price)
-                obj.parent.set([id])
-                obj.sizes.set(catalogImage.sizes.all())
-                obj.colors.set(catalogImage.colors.all())
-                ret['actions'].append(
-                    {'code': 'new', 'msg': f'[חדש\t, {catalogImage.title}\t, {provider.name}\t]'})
-            else:
-                ret['actions'].append(
-                    {'code': 'exist', 'msg': f'[קיים\t, {catalogImage.title}\t, {provider.name}\t]'})
-            print(data)
-    return JsonResponse(ret)
+# def create_mini_table(request, id):
+#     ret = {'actions': []}
+#     if request.method == "POST":
+#         print(request)
+#         catalogImage = CatalogImage.objects.get(pk=id)
+#         for provider in catalogImage.providers.all():
+#             print(provider)
+#             data = CatalogImageDetail.objects.filter(
+#                 provider=provider, parent__in=[id])
+#             if data.count() == 0:
+#                 obj = CatalogImageDetail.objects.create(provider=provider, cost_price=catalogImage.cost_price,
+#                                                         client_price=catalogImage.client_price, recomended_price=catalogImage.recomended_price)
+#                 obj.parent.set([id])
+#                 obj.sizes.set(catalogImage.sizes.all())
+#                 obj.colors.set(catalogImage.colors.all())
+#                 ret['actions'].append(
+#                     {'code': 'new', 'msg': f'[חדש\t, {catalogImage.title}\t, {provider.name}\t]'})
+#             else:
+#                 ret['actions'].append(
+#                     {'code': 'exist', 'msg': f'[קיים\t, {catalogImage.title}\t, {provider.name}\t]'})
+#             print(data)
+#     return JsonResponse(ret)
 
 
 class SvelteCatalogImageViewSet(viewsets.ModelViewSet):

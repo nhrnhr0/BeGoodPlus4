@@ -5,7 +5,7 @@ from catalogAlbum.models import CatalogAlbum, ThroughImage, TopLevelCategory
 from django.utils.translation import gettext_lazy  as _
 
 from catalogImages.models import CatalogImage
-from adminsortable.admin import (SortableAdmin, SortableTabularInline)
+from adminsortable.admin import  SortableTabularInline
 
 
 class CatalogImageInlineFormset(forms.BaseInlineFormSet):
@@ -32,13 +32,14 @@ class TopLevelCategoryAdmin(admin.ModelAdmin):
     ordering = ('my_order',)
 admin.site.register(TopLevelCategory, TopLevelCategoryAdmin)
 
-class CatalogAlbumAdmin(SortableAdmin, DraggableMPTTAdmin):
+class CatalogAlbumAdmin(admin.ModelAdmin):
     inlines = (CatalogImageInline,)
-    list_display = ('tree_actions','indented_title','topLevelCategory', 'render_cimage_thumbnail', 'slug' ,'related_images_count','is_public','is_campain')#'get_absolute_url')
+    list_display = ('title','topLevelCategory', 'album_order', 'render_cimage_thumbnail', 'slug' ,'related_images_count','is_public',)#'get_absolute_url')
     readonly_fields = ('related_images_count',)
     #readonly_fields = ('get_absolute_url',)
-    #list_editable = ('album_order',)
+    list_editable = ('album_order',)
     prepopulated_fields = {'slug': ('title',),}
+    actions  = ['make_public','make_private']
     
     def make_public(modeladmin, request, queryset):
         queryset.update(is_public=True)
@@ -46,17 +47,18 @@ class CatalogAlbumAdmin(SortableAdmin, DraggableMPTTAdmin):
     def make_private(modeladmin, request, queryset):
         queryset.update(is_public=False)
     make_private.short_description = _('Mark selected albums as private')    
-    actions  = ['make_public','make_private']
+    
     def get_queryset(self, request):
         qs = super().get_queryset(request)
         qs = qs.prefetch_related('images')
+        qs = qs.select_related('topLevelCategory')
         # Add cumulative product count
         qs = qs.annotate(image_count=Count('images'))
         return qs
         
     def related_images_count(self, instance):
         return instance.image_count
-    related_images_count.short_description = 'Related images (for this specific album)'
+    related_images_count.short_description = _('Images count')
 
 
 '''

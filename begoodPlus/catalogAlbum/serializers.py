@@ -38,6 +38,10 @@ class CatalogAlbumSerializer(serializers.ModelSerializer):
 class CatalogAlbumSlimSerializer(serializers.ModelSerializer):
     topLevelCategory__slug = serializers.CharField(
         source='topLevelCategory.slug', default='')
+    is_campain = serializers.SerializerMethodField('_is_campain')
+    
+    def _is_campain(self, obj):
+        return False
 
     class Meta:
         model = CatalogAlbum
