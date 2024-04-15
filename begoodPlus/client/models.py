@@ -34,10 +34,6 @@
 # from begoodPlus.celery import telegram_bot
 
 # Create your models here.
-from django.db import models
-from django.contrib.auth.models import User
-from django.db.models.fields.related import OneToOneField
-from django.utils.translation import gettext_lazy as _
 
 
 # class UserLogEntry(models.Model):
@@ -526,16 +522,20 @@ from django.utils.translation import gettext_lazy as _
 #     (CLIENT_TYPE_KB, CLIENT_TYPES_DICT[CLIENT_TYPE_KB]),
 # ]
 
+# from django.db import models
+# from django.contrib.auth.models import User
+# from django.db.models.fields.related import OneToOneField
+# from django.utils.translation import gettext_lazy as _
 
-class Client(models.Model):
-    # שדה תאריך ושעה של יצירת החשבון במערכת
-    created_at = models.DateTimeField(auto_now_add=True)
-    #CLIENT_TYPE = Choices((0, 'not_defined', _('not defined')), (1, 'private', _('private')), (2, 'kibuttz', _('kibuttz')))
+# class Client(models.Model):
+#     # שדה תאריך ושעה של יצירת החשבון במערכת
+#     created_at = models.DateTimeField(auto_now_add=True)
+#     #CLIENT_TYPE = Choices((0, 'not_defined', _('not defined')), (1, 'private', _('private')), (2, 'kibuttz', _('kibuttz')))
 
-    user = OneToOneField(to=User,
-                         on_delete=models.CASCADE,
-                         primary_key=True,
-                         verbose_name=_('user'))
+#     user = OneToOneField(to=User,
+#                          on_delete=models.CASCADE,
+#                          primary_key=True,
+#                          verbose_name=_('user'))
 
 #     def __str__(self):
 #         # try:

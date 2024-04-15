@@ -17,7 +17,7 @@ from celery import shared_task
 
 import time
 
-from client.models import UserSessionLogger
+# from client.models import UserSessionLogger
 
 
 # @shared_task
@@ -45,28 +45,28 @@ def test(a, b):
     return a+b
 
 
-@shared_task
-def close_inactive_user_sessions():
-    print('=================== close_inactive_user_sessions is running ==========================')
-    active_sessions = UserSessionLogger.objects.filter(is_active=True)
-    ret = []
-    for session in active_sessions:
-        last_log = session.logs.last()
-        # set session_expiry_time to 5 minutes
-        session_expiry_time = datetime.timedelta(hours=1)
-        now = timezone.now()
-        if last_log.timestamp < now - session_expiry_time:
-            session.is_active = False
-            session.session_end_timestemp = last_log.timestamp
-            session.save()
-            ret.append({session, True})
-            try:
-                session.send_telegram_message()
-            except:
-                pass
-        else:
-            ret.append({session, False})
-    return ret
+# @shared_task
+# def close_inactive_user_sessions():
+#     print('=================== close_inactive_user_sessions is running ==========================')
+#     active_sessions = UserSessionLogger.objects.filter(is_active=True)
+#     ret = []
+#     for session in active_sessions:
+#         last_log = session.logs.last()
+#         # set session_expiry_time to 5 minutes
+#         session_expiry_time = datetime.timedelta(hours=1)
+#         now = timezone.now()
+#         if last_log.timestamp < now - session_expiry_time:
+#             session.is_active = False
+#             session.session_end_timestemp = last_log.timestamp
+#             session.save()
+#             ret.append({session, True})
+#             try:
+#                 session.send_telegram_message()
+#             except:
+#                 pass
+#         else:
+#             ret.append({session, False})
+#     return ret
 
 
 # @shared_task
