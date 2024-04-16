@@ -13,7 +13,7 @@ from rest_framework.renderers import JSONRenderer
 @api_view(['GET'])
 def get_catalog_albums(request, id=None):
     if not id:
-        albums = CatalogAlbum.objects.filter(is_public=True,is_campain=False,).order_by('topLevelCategory','album_order').select_related('topLevelCategory')
+        albums = CatalogAlbum.objects.filter(is_public=True).order_by('topLevelCategory','album_order').select_related('topLevelCategory')
         serializer = CatalogAlbumSlimSerializer(albums, many=True)
     else: 
         album = CatalogAlbum.objects.get(id=id)

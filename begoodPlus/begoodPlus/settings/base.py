@@ -59,7 +59,18 @@ CELERY_BEAT_SCHEDULE = {
 # Application definition
 APPEND_SLASH = True
 INSTALLED_APPS = [
+    'django_admin_index',
+    ### django modals ###
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
 
+    'django.contrib.staticfiles',
+    'cloudinary_storage',
+    'cloudinary',
+    'django_admin_multiple_choice_list_filter',
 
     # 3rd party
     # 'django_crontab',
@@ -69,7 +80,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'django_user_agents',
     'django_extensions',
-    'django_admin_index',
+    
     'ordered_model',
     'admin_adv_search_builder',
     'mptt',
@@ -86,8 +97,8 @@ INSTALLED_APPS = [
     'advanced_filters',
     # 'rest_framework_simplejwt',
     'corsheaders',
-    'celery',
-    'django_celery_beat',
+    # 'celery',
+    # 'django_celery_beat',
     'django_svelte',
 
     # own
@@ -126,17 +137,6 @@ INSTALLED_APPS = [
     'inventory',
     'customerCart',
     'catalogImageAttrs',
-    ### django modals ###
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-
-    'django.contrib.staticfiles',
-    'cloudinary_storage',
-    'cloudinary',
-    'django_admin_multiple_choice_list_filter'
 
     # 'debug_toolbar', # TODO: remove in production
 ]

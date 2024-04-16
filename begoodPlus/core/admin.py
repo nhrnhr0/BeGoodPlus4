@@ -21,6 +21,20 @@ from openpyxl.utils.cell import get_column_letter
 # Register your models here.
 from .models import  UserSearchData
 
+# unregister users and groups, and advanced filters, and tokens, and application groups
+from django.contrib.auth.models import Group, User
+from advanced_filters.models import AdvancedFilter
+from django_admin_index.models import AppGroup
+admin.site.unregister(Group)
+admin.site.unregister(User)
+admin.site.unregister(AdvancedFilter)
+admin.site.unregister(AppGroup)
+try:
+    from rest_framework.authtoken.models import TokenProxy as DRFToken
+except ImportError:
+    from rest_framework.authtoken.models import Token as DRFToken
+
+admin.site.unregister(DRFToken)
 
 # class ActiveCartTrackerAdmin(admin.ModelAdmin):
 #     list_display = ('last_updated', 'created_at', 'last_ip',

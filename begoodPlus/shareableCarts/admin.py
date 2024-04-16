@@ -10,4 +10,4 @@ class ShareableCartAdmin(admin.ModelAdmin):
     readonly_fields = ('uuid', 'created_at', 'times_used', 'logs')
 
 
-admin.site.register(ShareableCart, ShareableCartAdmin)
+# admin.site.register(ShareableCart, ShareableCartAdmin)
