@@ -82,7 +82,7 @@ def submit_cart(request):
         if len(entries) == 0:
             entries.append({
                 'color_id': 76, # Assuming default color_id is 76 ON COLOR
-                'size_id': 108, # Assuming default size_id is 108 ONE SIZE
+                'size_id': 86, # Assuming default size_id is 86 ONE SIZE
                 'varient': None, # Assuming default varient is None
                 'quantity': product.get('amount', 0)
             })
