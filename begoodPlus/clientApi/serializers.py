@@ -69,8 +69,8 @@ class ImageClientApi(serializers.ModelSerializer):
 
     class Meta:
         model = CatalogImage
-        fields = ('id', 'title', 'description', 'cimage', 'colors', 'sizes', 'varients', 'can_tag', 'discount', 'albums', 'amountSinglePack',
-                  'amountCarton', 'show_sizes_popup', 'out_of_stock', 'barcode', 'has_physical_barcode', 'price', 'newPrice', 'link')
+        fields = ('id', 'title', 'description', 'image', 'colors', 'sizes', 'varients', 'albums', 'amountSinglePack',
+                  'amountCarton', 'show_sizes_popup', 'out_of_stock', 'barcode', 'price', 'newPrice', 'link')
         filter_backends = [DjangoFilterBackend]
         filterset_fields = ['albums']
     # Use this method for the custom field
@@ -144,4 +144,4 @@ class ColorClientApi(serializers.ModelSerializer):
 class SizeClientApi(serializers.ModelSerializer):
     class Meta:
         model = ProductSize
-        fields = ('id', 'size', 'code')
+        fields = ('id', 'size',)

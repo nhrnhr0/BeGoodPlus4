@@ -35,11 +35,13 @@ admin.site.register(TopLevelCategory, TopLevelCategoryAdmin)
 class CatalogAlbumAdmin(admin.ModelAdmin):
     inlines = (CatalogImageInline,)
     list_display = ('title','topLevelCategory', 'album_order', 'render_cimage_thumbnail', 'slug' ,'related_images_count','is_public',)#'get_absolute_url')
-    readonly_fields = ('related_images_count',)
+    readonly_fields = ('related_images_count','render_cimage_thumbnail',)
     #readonly_fields = ('get_absolute_url',)
     list_editable = ('album_order',)
     prepopulated_fields = {'slug': ('title',),}
     actions  = ['make_public','make_private']
+    fields= ('render_cimage_thumbnail','image','is_public','topLevelCategory','title','slug','album_order','description','fotter','keywords',)
+    
     
     def make_public(modeladmin, request, queryset):
         queryset.update(is_public=True)
@@ -60,12 +62,4 @@ class CatalogAlbumAdmin(admin.ModelAdmin):
         return instance.image_count
     related_images_count.short_description = _('Images count')
 
-
-'''
-class CatalogAlbumAdmin(admin.ModelAdmin):
-    inlines = (CatalogImageInline,)
-    list_display = ('__str__', 'slug',)#'get_absolute_url')
-    #readonly_fields = ('get_absolute_url',)
-    prepopulated_fields = {'slug': ('title',),}
-'''
 admin.site.register(CatalogAlbum,CatalogAlbumAdmin)
