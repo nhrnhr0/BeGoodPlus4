@@ -64,21 +64,16 @@ class CatalogImage(models.Model):
         'free text'), null=True, blank=True)
     whatsapp_text = models.TextField(verbose_name=_(
         'whatsapp text'), blank=True, null=True)
-
-    @property
-    def has_free_text(self):
-        return self.free_text != None and self.free_text != '' and self.free_text != ' '
-
-    def desc(self):
-        return self.description[0:30]
-    desc.short_description = _('short description')
-    update_image_to_cloudinary = models.BooleanField(default=True)
+    #update_image_to_cloudinary = models.BooleanField(default=True)
     # CloudinaryField('product_image', overwrite=True,resource_type="image",null=True, blank=True)
+    # cimage = models.CharField(verbose_name=_(
+    #     'cloudinary image url'), null=True, blank=True, max_length=2047)
+    # image = models.ImageField(verbose_name=_("image"), null=True, blank=True)
+    # image_thumbnail = models.ImageField(
+    #     verbose_name=_("local image"), null=True, blank=True)
+    image = CloudinaryField('תמונת מוצר', null=True, blank=True)
     cimage = models.CharField(verbose_name=_(
         'cloudinary image url'), null=True, blank=True, max_length=2047)
-    image = models.ImageField(verbose_name=_("image"), null=True, blank=True)
-    image_thumbnail = models.ImageField(
-        verbose_name=_("local image"), null=True, blank=True)
     cost_price = models.FloatField(verbose_name=_(
         'cost price, before tax'), blank=False, null=False, default=1)
     client_price = models.FloatField(verbose_name=_(
@@ -102,7 +97,7 @@ class CatalogImage(models.Model):
     varients = models.ManyToManyField(
         to=CatalogImageVarient, verbose_name=_('varients'), blank=True)
     providers = models.ManyToManyField(
-        to=Provider, verbose_name=_('providers'))
+        to=Provider, verbose_name=_('providers'), blank=True)
     qyt = models.IntegerField(verbose_name=_(
         'qyt'), blank=False, null=False, default=0)
     show_sizes_popup = models.BooleanField(
@@ -120,21 +115,27 @@ class CatalogImage(models.Model):
     # clientPrices = models.OneToOneField(
     #     to=ProductPrices, on_delete=models.SET_NULL, null=True, blank=True)
 
-    NO_DISCOUNT = ''
-    DISCOUNT_10_PRES = '/static/assets/catalog/imgs/discount_10.gif'
-    DISCOUNT_20_PRES = '/static/assets/catalog/imgs/discount_20.gif'
+    # NO_DISCOUNT = ''
+    # DISCOUNT_10_PRES = '/static/assets/catalog/imgs/discount_10.gif'
+    # DISCOUNT_20_PRES = '/static/assets/catalog/imgs/discount_20.gif'
 
     main_public_album = models.ForeignKey(
         to='catalogAlbum.CatalogAlbum', related_name='main_album', on_delete=models.SET_NULL, null=True, blank=True)
 
-    DISCOUNT_TYPES = [
-        (NO_DISCOUNT, 'ללא הנחה'),
-        (DISCOUNT_10_PRES, '10% הנחה'),
-        (DISCOUNT_20_PRES, '20% הנחה'),
-    ]
-    discount = models.CharField(
-        max_length=50, choices=DISCOUNT_TYPES, default=NO_DISCOUNT, null=True, blank=True)
+    # DISCOUNT_TYPES = [
+    #     (NO_DISCOUNT, 'ללא הנחה'),
+    #     (DISCOUNT_10_PRES, '10% הנחה'),
+    #     (DISCOUNT_20_PRES, '20% הנחה'),
+    # ]
+    # discount = models.CharField(
+    #     max_length=50, choices=DISCOUNT_TYPES, default=NO_DISCOUNT, null=True, blank=True)
+    @property
+    def has_free_text(self):
+        return self.free_text != None and self.free_text != '' and self.free_text != ' '
 
+    def desc(self):
+        return self.description[0:30]
+    desc.short_description = _('short description')
     def free_text_display(self):
         # div with truncating text and title with full text
         truncating_size = 7

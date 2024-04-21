@@ -3,7 +3,6 @@
 import adminsortable.fields
 from django.db import migrations, models
 import django.db.models.deletion
-import mptt.fields
 
 
 class Migration(migrations.Migration):
@@ -48,7 +47,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='catalogalbum',
             name='parent',
-            field=mptt.fields.TreeForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='children', to='catalogAlbum.CatalogAlbum'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='children', to='catalogAlbum.CatalogAlbum'),
         ),
         # migrations.AlterUniqueTogether(
         #     name='catalogalbum',

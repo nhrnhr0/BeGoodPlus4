@@ -8,20 +8,19 @@
 {% endblock %}
 
 {% block field_sets %}
-
     {% for fieldset in adminform %}
-        <div class="temp">{{fieldset}}</div>
         {% include "admin/includes/fieldset.html" %}
     {% endfor %}
-    <script>
+    
+    <!-- <script>
         let currUrl = window.location.href;
         currUrl = currUrl.substr(currUrl.indexOf('catalogimage/') + 'catalogimage/'.length);
         let id = currUrl.substr(0, currUrl.indexOf('/'));
     </script>
     <svelte-custom-element id="custom" catalog_image_id={id}></svelte-custom-element>
-    <button type="button" onclick="exportDetailTabel()">ייצא לטבלת פרטים (פעולה חד פעמית!)</button>
+    <button type="button" onclick="exportDetailTabel()">ייצא לטבלת פרטים (פעולה חד פעמית!)</button> -->
     
-    <div id="export_report"></div>
+    <!-- <div id="export_report"></div>
     <script>
         function update_ppns_eventlistener() {
             let ppns_sets_elements = document.getElementsByClassName('dynamic-ppn_set');
@@ -122,7 +121,7 @@
         let customElement = document.getElementById('custom');
         customElement.setAttribute('catalog_image_id', id)
         console.log(customElement);
-    </script>
+    </script> -->
     <script src="{%static 'admin/catalogImages/handlePrices.js' %}"></script>
-    <script src="{%static 'admin/catalogImages/svelte-custom-element.0.1.0.min.js' %}"></script>
+    <!-- <script src="{%static 'admin/catalogImages/svelte-custom-element.0.1.0.min.js' %}"></script> -->
 {% endblock %}

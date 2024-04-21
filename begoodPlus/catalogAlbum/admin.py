@@ -5,7 +5,7 @@ from catalogAlbum.models import CatalogAlbum, ThroughImage, TopLevelCategory
 from django.utils.translation import gettext_lazy  as _
 
 from catalogImages.models import CatalogImage
-from adminsortable.admin import  SortableTabularInline
+# from adminsortable.admin import  SortableTabularInline
 
 
 class CatalogImageInlineFormset(forms.BaseInlineFormSet):
@@ -13,15 +13,15 @@ class CatalogImageInlineFormset(forms.BaseInlineFormSet):
         super(CatalogImageInlineFormset, self).__init__(*args, **kwargs)
         self.queryset = self.queryset.select_related("catalogImage", "catalogAlbum")
 
-class CatalogImageInline(SortableTabularInline):
+class CatalogImageInline(admin.TabularInline):
     model = CatalogAlbum.images.through
     formset = CatalogImageInlineFormset
     extra = 0
     fields = ('image_order', 'catalogImage', 'catalogAlbum')
-    readonly_fields = ('image_order','catalogImage', 'catalogAlbum')
+    readonly_fields = ('catalogAlbum',)
+    # catalogImage as autocomplete
+    autocomplete_fields = ('catalogImage',)
 
-from mptt.admin import MPTTModelAdmin
-from mptt.admin import DraggableMPTTAdmin
 from django.db.models import Count, fields
 
 class TopLevelCategoryAdmin(admin.ModelAdmin):
