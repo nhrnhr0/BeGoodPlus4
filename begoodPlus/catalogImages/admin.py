@@ -167,6 +167,16 @@ class CatalogImageAdmin(AdminAdvancedFiltersMixin, admin.ModelAdmin):
     list_per_page = 50
     advanced_filter_fields = (('title','כותרת'), ('description', 'תיאור'), ('sizes__size', 'גדלים'), ('colors__name','צבעים'), ('providers__name', 'שם ספק'), ('varients__name', 'שם וריאנט'), ('barcode', 'ברקוד'), ('cost_price', 'מחיר עלות'), ('client_price', 'מחיר ללקוח'), ('recomended_price', 'מחיר מומלץ'), ('albums__title', 'כותרת אלבום'), ('show_sizes_popup', 'הצג פופאפ גדלים'), ('packingTypeProvider__name', 'שיטת אריזה מהספק'), ('packingTypeClient__name', 'שיטת אריזה ללקוח'), 'date_created', 'date_modified', 'can_tag', 'out_of_stock', 'is_active', 'has_physical_barcode', 'cimage', 'free_text', 'whatsapp_text',)
 
+    def download_images_csv(self, request, queryset):
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="catalog_images.csv"'
+        writer = csv.writer(response)
+        writer.writerow(['id', 'title', 'cimage',])
+        for obj in queryset:
+            writer.writerow([obj.id, obj.title, obj.cimage if obj.cimage else ''])
+        return response
+        pass
+
     def get_queryset(self, request):
         qs = super().get_queryset(request)
         return qs.prefetch_related('albums', ).select_related('packingTypeProvider', 'packingTypeClient', 'main_public_album', )
@@ -213,73 +223,73 @@ class CatalogImageAdmin(AdminAdvancedFiltersMixin, admin.ModelAdmin):
     upload_images_to_cloudinary_bool_inactive.short_description = _(
         'upload images to cloudinary inactive')
 
-    def download_images_csv(modeladmin, request, queryset):
-        buffer = io.BytesIO()
-        wb = xlwt.Workbook()
-        file_name = 'data'
-        ws = wb.add_sheet('sheet1', cell_overwrite_ok=True)
-        ws.cols_right_to_left = True
-        title_style = XFStyle()
-        value_style = XFStyle()
-        alignment_center = xlwt.Alignment()
-        alignment_center.horz = xlwt.Alignment.HORZ_CENTER
-        alignment_center.vert = xlwt.Alignment.VERT_CENTER
-        title_style.alignment = alignment_center
-        value_style.alignment = alignment_center
-        title_style.font.bold = True
-        # writer.writerow(['id', 'title', 'description', 'cimage', 'cost_price', 'packingTypeClient'])
-        i = 1
-        ws.write(0, 0, 'id', title_style)
-        ws.write(0, 1, 'כותרת', title_style)
-        ws.write(0, 2, 'תיאור', title_style)
-        ws.write(0, 3, 'מחיר עלות ללא מע"מ', title_style)
-        ws.write(0, 4, 'מחיר חנות ללא מע"מ', title_style)
-        ws.write(0, 5, 'מחיר לקוח פרטי ללא מע"מ', title_style)
-        ws.write(0, 6, 'ספק', title_style)
-        ws.write(0, 7, 'מקט אצל הספק', title_style)
+    # def download_images_csv(modeladmin, request, queryset):
+    #     buffer = io.BytesIO()
+    #     wb = xlwt.Workbook()
+    #     file_name = 'data'
+    #     ws = wb.add_sheet('sheet1', cell_overwrite_ok=True)
+    #     ws.cols_right_to_left = True
+    #     title_style = XFStyle()
+    #     value_style = XFStyle()
+    #     alignment_center = xlwt.Alignment()
+    #     alignment_center.horz = xlwt.Alignment.HORZ_CENTER
+    #     alignment_center.vert = xlwt.Alignment.VERT_CENTER
+    #     title_style.alignment = alignment_center
+    #     value_style.alignment = alignment_center
+    #     title_style.font.bold = True
+    #     # writer.writerow(['id', 'title', 'description', 'cimage', 'cost_price', 'packingTypeClient'])
+    #     i = 1
+    #     ws.write(0, 0, 'id', title_style)
+    #     ws.write(0, 1, 'כותרת', title_style)
+    #     ws.write(0, 2, 'תיאור', title_style)
+    #     ws.write(0, 3, 'מחיר עלות ללא מע"מ', title_style)
+    #     ws.write(0, 4, 'מחיר חנות ללא מע"מ', title_style)
+    #     ws.write(0, 5, 'מחיר לקוח פרטי ללא מע"מ', title_style)
+    #     ws.write(0, 6, 'ספק', title_style)
+    #     ws.write(0, 7, 'מקט אצל הספק', title_style)
 
-        for value in queryset:
-            vals = [value.id, value.title, value.description,
-                    value.cost_price, value.client_price, value.recomended_price]
-            ws.write(i, 0, vals[0], value_style)
-            ws.write(i, 1, vals[1], value_style)
-            ws.write(i, 2, vals[2], value_style)
-            ws.write(i, 3, vals[3], value_style)
-            ws.write(i, 4, vals[4], value_style)
-            ws.write(i, 5, vals[5], value_style)
-            provider_offset = 6
-            providers_with_makat = []
-            for catalogImageDetail in []:#value.detailTabel.all():
-                provider_name = catalogImageDetail.provider.name
-                provider_makat = catalogImageDetail.providerMakat
-                providers_with_makat.append(provider_name)
-                ws.write(i, provider_offset, provider_name, value_style)
-                provider_offset += 1
-                ws.write(i, provider_offset, provider_makat, value_style)
-                provider_offset += 1
-            all_providers = value.providers.all()
-            # filter out the providers that are in the catalogImageDetail
-            all_providers = all_providers.exclude(
-                name__in=providers_with_makat)
-            for provider in all_providers:
-                ws.write(i, provider_offset, provider.name, value_style)
-                provider_offset += 1
-                ws.write(i, provider_offset, '-', value_style)
-                provider_offset += 1
+    #     for value in queryset:
+    #         vals = [value.id, value.title, value.description,
+    #                 value.cost_price, value.client_price, value.recomended_price]
+    #         ws.write(i, 0, vals[0], value_style)
+    #         ws.write(i, 1, vals[1], value_style)
+    #         ws.write(i, 2, vals[2], value_style)
+    #         ws.write(i, 3, vals[3], value_style)
+    #         ws.write(i, 4, vals[4], value_style)
+    #         ws.write(i, 5, vals[5], value_style)
+    #         provider_offset = 6
+    #         providers_with_makat = []
+    #         for catalogImageDetail in []:#value.detailTabel.all():
+    #             provider_name = catalogImageDetail.provider.name
+    #             provider_makat = catalogImageDetail.providerMakat
+    #             providers_with_makat.append(provider_name)
+    #             ws.write(i, provider_offset, provider_name, value_style)
+    #             provider_offset += 1
+    #             ws.write(i, provider_offset, provider_makat, value_style)
+    #             provider_offset += 1
+    #         all_providers = value.providers.all()
+    #         # filter out the providers that are in the catalogImageDetail
+    #         all_providers = all_providers.exclude(
+    #             name__in=providers_with_makat)
+    #         for provider in all_providers:
+    #             ws.write(i, provider_offset, provider.name, value_style)
+    #             provider_offset += 1
+    #             ws.write(i, provider_offset, '-', value_style)
+    #             provider_offset += 1
 
-            '''
-            url = vals[3]
-            response = requests.get(url)
-            img = Image.open(BytesIO(response.content))
-            r, g, b, a = img.split()
-            img = Image.merge("RGB", (r, g, b))
-            img.save('imagetoadd.bmp')
-            ws.insert_bitmap('imagetoadd.bmp', i, 6)
-            '''
-            i += 1
-        wb.save(buffer)
-        buffer.seek(0)
-        return FileResponse(buffer, as_attachment=True, filename=file_name + '.xls')
+    #         '''
+    #         url = vals[3]
+    #         response = requests.get(url)
+    #         img = Image.open(BytesIO(response.content))
+    #         r, g, b, a = img.split()
+    #         img = Image.merge("RGB", (r, g, b))
+    #         img.save('imagetoadd.bmp')
+    #         ws.insert_bitmap('imagetoadd.bmp', i, 6)
+    #         '''
+    #         i += 1
+    #     wb.save(buffer)
+    #     buffer.seek(0)
+    #     return FileResponse(buffer, as_attachment=True, filename=file_name + '.xls')
 
     def download_images_exel_warehouse(modeladmin, request, queryset):
 
