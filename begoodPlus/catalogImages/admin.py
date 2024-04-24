@@ -10,7 +10,7 @@ import csv
 import io
 
 #from inventory.models import PPN
-from .models import CatalogImage, CatalogImageVarient
+from .models import CatalogImage, CatalogImageVarient, SubImages
 from django.http import FileResponse
 from xlwt.Style import XFStyle
 from catalogAlbum.models import ThroughImage
@@ -104,7 +104,14 @@ class albumsInline(admin.TabularInline):
     # readonly_fields = ['id','provider','dis_colors', 'dis_sizes', 'dis_cost_price', 'dis_client_price', 'dis_recomended_price']
     extra = 1
 # Register your models here.
-
+class ImagesInline(admin.TabularInline):
+    model = SubImages
+    extra = 0
+    verbose_name = _('image')
+    verbose_name_plural = _('images')
+    fields = ('image_tag','image', 'order', )
+    readonly_fields = ('image_tag',)
+    
 
 # class ppnInline(admin.TabularInline):
 #     model = PPN
@@ -170,7 +177,7 @@ class CatalogImageAdmin(AdminAdvancedFiltersMixin, admin.ModelAdmin):
     list_display_links = ('title',)
     actions = ['turn_on_is_active', 'turn_off_is_active', 'download_images_csv', 'download_images_exel_slim', 'download_images_exel_warehouse', 'turn_sizes_popup_active', 'turn_sizes_popup_inactive',
                'upload_images_to_cloudinary_bool_active', 'upload_images_to_cloudinary_bool_inactive', 'turn_can_tag_active', 'turn_can_tag_inactive', 'turn_out_of_stock_inactive', 'turn_out_of_stock_active']
-    inlines = (albumsInline,)
+    inlines = (albumsInline,ImagesInline)
     readonly_fields = ('id',
                        'render_image','date_modified','date_created',)
     search_fields = ('title', 'description', 'barcode',)

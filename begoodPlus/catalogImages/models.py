@@ -48,8 +48,45 @@ class CatalogImageVarient(models.Model):
 
 
 # Create your models here.
-
-
+class SubImages(models.Model):
+    image = CloudinaryField('תמונת מוצר', null=True, blank=True, folder='catalogImages', resource_type="image")
+    order = models.IntegerField(verbose_name=_('order'), default=0)
+    catalogImage = models.ForeignKey(
+        to='catalogImages.CatalogImage', related_name='images', on_delete=models.CASCADE, verbose_name=_('catalog image'))
+    class Meta:
+        ordering = ('catalogImage', 'order')
+    def image_tag(self):
+        ret = ''
+        if self.image:
+            # ret += '<img src="%s"/>' % (self.image.url)
+            # <div class="product-image svelte-1kkcau8"> <img src="https://res.cloudinary.com/ms-global/image/upload/e_shadow,x_13,y_13/v1669532443/site/products/WhatsApp_Image_2022-11-06_at_11" alt="מעיל מע&quot;צ" class="svelte-1kkcau8">  </div>
+            #product-image style = background: radial-gradient(circle, white 0%, white 32%, #c7c7c7 84%);,width: 100%;,height: 100%;,display: flex;,justify-content: center;,align-items: center;,overflow: hidden;,border-top-left-radius: var(--var-product-border-radius);,border-top-right-radius: var(--var-product-border-radius);
+            # img style = width: 175px;height: 175px;
+            ret += f'<div class="wraper" style="max-width: 175px;"><div class="product-image" style="background: radial-gradient(circle, white 0%, white 32%, #c7c7c7 84%);width: 100%;height: 100%;display: flex;justify-content: center;align-items: center;overflow: hidden;border-top-left-radius: var(--var-product-border-radius);border-top-right-radius: var(--var-product-border-radius);"><img src="{self.image.url}" alt="" style="width: 175px;height: 175px;"/></div></div>'
+            return mark_safe(ret)
+        return mark_safe(ret)
+    image_tag.short_description = _("")
+    def save(self, *args, **kwargs):
+        if isinstance(self.image, InMemoryUploadedFile):
+            # fails if your don't upload an image, so don't upload image to cloudinary
+            mfile = None
+            try:
+                output = CatalogImage.optimize_image(
+                    self.image, size=(923, 715))
+                mfile = InMemoryUploadedFile(output, 'ImageField', "%s.png" % self.image.name.split('.')[0], 'image/PNG',
+                                             sys.getsizeof(output), None)
+                if mfile:
+                    self.image = mfile
+            except Exception as e:
+                print(e)
+            finally:
+                pass
+        
+        # if created: update the order to be the last
+        if self.pk is None:
+            self.order = self.catalogImage.images.count()
+        
+        super(SubImages, self).save(*args, **kwargs)
 class CatalogImage(models.Model):
     image = CloudinaryField('תמונת מוצר', null=True, blank=True, folder='catalogImages', resource_type="image")
     title = models.CharField(
@@ -66,7 +103,7 @@ class CatalogImage(models.Model):
     main_public_album = models.ForeignKey(
         to='catalogAlbum.CatalogAlbum', related_name='main_album', on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_('main album'))
     description = models.TextField(verbose_name=_("description"))
-    
+        
     # has_physical_barcode = models.BooleanField(
     #     verbose_name=_('has physical barcode'), default=False)
     free_text = models.TextField(verbose_name=_(
@@ -272,16 +309,6 @@ class CatalogImage(models.Model):
                 print(e)
             finally:
                 pass
-
-        # if not self.slug:
-        #     self.slug = slugify(self.title, allow_unicode=True)
-        #     # check if slug is unique
-        #     if CatalogImage.objects.filter(slug=self.slug).exists():
-        #         if self.id:
-        #             self.slug = self.slug + '-' + str(self.id)
-        #         else:
-        #             self.slug = self.slug + '-' + \
-        #                 str(uuid.uuid4()).split('-')[1]
 
         super(CatalogImage, self).save(*args, **kwargs)
 

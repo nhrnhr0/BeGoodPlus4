@@ -251,7 +251,7 @@ def get_main_info(request):
 
     productInfo = None
     if product_id:
-        product = CatalogImage.objects.get(id=product_id)
+        product = CatalogImage.objects.prefetch_related('images').get(id=product_id)
         #productObj = product.select_related('packingTypeClient')
         productSer = ImageClientApi(product, many=False, context={
             'request': request

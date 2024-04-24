@@ -66,11 +66,17 @@ class ImageClientApi(serializers.ModelSerializer):
     price = serializers.SerializerMethodField('_get_price')
     newPrice = serializers.SerializerMethodField('_get_new_price')
     link = serializers.SerializerMethodField('_get_link')
-
+    images = serializers.SerializerMethodField('_get_images')
+    
+    def _get_images(self, obj):
+        ret = []
+        for i in obj.images.all():
+            ret.append(i.image.url)
+        return ret
     class Meta:
         model = CatalogImage
         fields = ('id', 'title', 'description', 'image', 'colors', 'sizes', 'varients', 'albums', 'amountSinglePack',
-                  'amountCarton', 'show_sizes_popup', 'out_of_stock', 'barcode', 'price', 'newPrice', 'link')
+                  'amountCarton', 'show_sizes_popup', 'out_of_stock', 'barcode', 'price', 'newPrice', 'link','images',)
         filter_backends = [DjangoFilterBackend]
         filterset_fields = ['albums']
     # Use this method for the custom field
