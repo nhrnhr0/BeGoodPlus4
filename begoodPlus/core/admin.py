@@ -27,7 +27,7 @@ from advanced_filters.models import AdvancedFilter
 from django_admin_index.models import AppGroup
 admin.site.unregister(Group)
 admin.site.unregister(User)
-admin.site.unregister(AdvancedFilter)
+#admin.site.unregister(AdvancedFilter)
 admin.site.unregister(AppGroup)
 try:
     from rest_framework.authtoken.models import TokenProxy as DRFToken

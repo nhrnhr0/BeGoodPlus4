@@ -2,7 +2,6 @@ from rest_framework import serializers
 
 from catalogImages.models import CatalogImage
 from catalogAlbum.models import CatalogAlbum
-from drf_multiple_model.views import ObjectMultipleModelAPIView
 from django.urls import reverse
 
 class SearchCatalogAlbumSerializer(serializers.ModelSerializer):

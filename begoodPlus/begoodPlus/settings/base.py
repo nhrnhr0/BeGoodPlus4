@@ -83,8 +83,6 @@ INSTALLED_APPS = [
     
     'ordered_model',
     'admin_adv_search_builder',
-    'mptt',
-    'django_mptt_admin',
     'adminsortable',
     'admin_numeric_filter',
     # 'jet',
@@ -92,7 +90,6 @@ INSTALLED_APPS = [
     # 'webpush',
     # 'tof',
     'bootstrap5',
-    'drf_multiple_model',
     # 'compressor',
     'advanced_filters',
     # 'rest_framework_simplejwt',

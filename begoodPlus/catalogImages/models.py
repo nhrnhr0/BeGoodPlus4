@@ -48,37 +48,78 @@ class CatalogImageVarient(models.Model):
 
 
 # Create your models here.
-
-
+class SubImages(models.Model):
+    image = CloudinaryField('תמונת מוצר', null=True, blank=True, folder='catalogImages', resource_type="image")
+    order = models.IntegerField(verbose_name=_('order'), default=0)
+    catalogImage = models.ForeignKey(
+        to='catalogImages.CatalogImage', related_name='images', on_delete=models.CASCADE, verbose_name=_('catalog image'))
+    class Meta:
+        ordering = ('catalogImage', 'order')
+    def image_tag(self):
+        ret = ''
+        if self.image:
+            # ret += '<img src="%s"/>' % (self.image.url)
+            # <div class="product-image svelte-1kkcau8"> <img src="https://res.cloudinary.com/ms-global/image/upload/e_shadow,x_13,y_13/v1669532443/site/products/WhatsApp_Image_2022-11-06_at_11" alt="מעיל מע&quot;צ" class="svelte-1kkcau8">  </div>
+            #product-image style = background: radial-gradient(circle, white 0%, white 32%, #c7c7c7 84%);,width: 100%;,height: 100%;,display: flex;,justify-content: center;,align-items: center;,overflow: hidden;,border-top-left-radius: var(--var-product-border-radius);,border-top-right-radius: var(--var-product-border-radius);
+            # img style = width: 175px;height: 175px;
+            ret += f'<div class="wraper" style="max-width: 175px;"><div class="product-image" style="background: radial-gradient(circle, white 0%, white 32%, #c7c7c7 84%);width: 100%;height: 100%;display: flex;justify-content: center;align-items: center;overflow: hidden;border-top-left-radius: var(--var-product-border-radius);border-top-right-radius: var(--var-product-border-radius);"><img src="{self.image.url}" alt="" style="width: 175px;height: 175px;"/></div></div>'
+            return mark_safe(ret)
+        return mark_safe(ret)
+    image_tag.short_description = _("")
+    def save(self, *args, **kwargs):
+        if isinstance(self.image, InMemoryUploadedFile):
+            # fails if your don't upload an image, so don't upload image to cloudinary
+            mfile = None
+            try:
+                output = CatalogImage.optimize_image(
+                    self.image, size=(923, 715))
+                mfile = InMemoryUploadedFile(output, 'ImageField', "%s.png" % self.image.name.split('.')[0], 'image/PNG',
+                                             sys.getsizeof(output), None)
+                if mfile:
+                    self.image = mfile
+            except Exception as e:
+                print(e)
+            finally:
+                pass
+        
+        # if created: update the order to be the last
+        if self.pk is None:
+            self.order = self.catalogImage.images.count()
+        
+        super(SubImages, self).save(*args, **kwargs)
 class CatalogImage(models.Model):
+    image = CloudinaryField('תמונת מוצר', null=True, blank=True, folder='catalogImages', resource_type="image")
     title = models.CharField(
         max_length=120, verbose_name=_("title"), unique=False)
     slug = models.SlugField(max_length=255, verbose_name=_(
         'Slug'), unique=True, null=True, blank=True, allow_unicode=True)
-    description = models.TextField(verbose_name=_("description"))
     barcode = models.CharField(verbose_name=_(
         'barcode'), max_length=50, blank=True, null=True)
-    has_physical_barcode = models.BooleanField(
-        verbose_name=_('has physical barcode'), default=False)
+    show_sizes_popup = models.BooleanField(
+        verbose_name=_('show sizes popup'), default=True)
+    out_of_stock = models.BooleanField(
+        verbose_name=_('out of stock'), default=False)
+    is_active = models.BooleanField(default=False, verbose_name=_('is active'))
+    main_public_album = models.ForeignKey(
+        to='catalogAlbum.CatalogAlbum', related_name='main_album', on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_('main album'))
+    description = models.TextField(verbose_name=_("description"))
+        
+    # has_physical_barcode = models.BooleanField(
+    #     verbose_name=_('has physical barcode'), default=False)
     free_text = models.TextField(verbose_name=_(
         'free text'), null=True, blank=True)
     whatsapp_text = models.TextField(verbose_name=_(
         'whatsapp text'), blank=True, null=True)
-
-    @property
-    def has_free_text(self):
-        return self.free_text != None and self.free_text != '' and self.free_text != ' '
-
-    def desc(self):
-        return self.description[0:30]
-    desc.short_description = _('short description')
-    update_image_to_cloudinary = models.BooleanField(default=True)
+    #update_image_to_cloudinary = models.BooleanField(default=True)
     # CloudinaryField('product_image', overwrite=True,resource_type="image",null=True, blank=True)
-    cimage = models.CharField(verbose_name=_(
-        'cloudinary image url'), null=True, blank=True, max_length=2047)
-    image = models.ImageField(verbose_name=_("image"), null=True, blank=True)
-    image_thumbnail = models.ImageField(
-        verbose_name=_("local image"), null=True, blank=True)
+    # cimage = models.CharField(verbose_name=_(
+    #     'cloudinary image url'), null=True, blank=True, max_length=2047)
+    # image = models.ImageField(verbose_name=_("image"), null=True, blank=True)
+    # image_thumbnail = models.ImageField(
+    #     verbose_name=_("local image"), null=True, blank=True)
+    
+    # cimage = models.CharField(verbose_name=_(
+    #     'cloudinary image url'), null=True, blank=True, max_length=2047)
     cost_price = models.FloatField(verbose_name=_(
         'cost price, before tax'), blank=False, null=False, default=1)
     client_price = models.FloatField(verbose_name=_(
@@ -102,39 +143,25 @@ class CatalogImage(models.Model):
     varients = models.ManyToManyField(
         to=CatalogImageVarient, verbose_name=_('varients'), blank=True)
     providers = models.ManyToManyField(
-        to=Provider, verbose_name=_('providers'))
+        to=Provider, verbose_name=_('providers'), blank=True)
     qyt = models.IntegerField(verbose_name=_(
         'qyt'), blank=False, null=False, default=0)
-    show_sizes_popup = models.BooleanField(
-        verbose_name=_('show sizes popup'), default=True)
-    out_of_stock = models.BooleanField(
-        verbose_name=_('out of stock'), default=False)
 
-    is_active = models.BooleanField(default=False, verbose_name=_('is active'))
-    # detailTabel = models.ManyToManyField(
-    #     related_name='parent', to=CatalogImageDetail, verbose_name=_('mini-tabel'), blank=True)
 
-    can_tag = models.BooleanField(default=False, verbose_name=_('can tag'))
-    #big_discount = models.BooleanField(default=False)
+    # can_tag = models.BooleanField(default=False, verbose_name=_('can tag'))
+    
+    # def get_image_url(self):
+    #     return self.image.url
 
-    # clientPrices = models.OneToOneField(
-    #     to=ProductPrices, on_delete=models.SET_NULL, null=True, blank=True)
+    
 
-    NO_DISCOUNT = ''
-    DISCOUNT_10_PRES = '/static/assets/catalog/imgs/discount_10.gif'
-    DISCOUNT_20_PRES = '/static/assets/catalog/imgs/discount_20.gif'
+    @property
+    def has_free_text(self):
+        return self.free_text != None and self.free_text != '' and self.free_text != ' '
 
-    main_public_album = models.ForeignKey(
-        to='catalogAlbum.CatalogAlbum', related_name='main_album', on_delete=models.SET_NULL, null=True, blank=True)
-
-    DISCOUNT_TYPES = [
-        (NO_DISCOUNT, 'ללא הנחה'),
-        (DISCOUNT_10_PRES, '10% הנחה'),
-        (DISCOUNT_20_PRES, '20% הנחה'),
-    ]
-    discount = models.CharField(
-        max_length=50, choices=DISCOUNT_TYPES, default=NO_DISCOUNT, null=True, blank=True)
-
+    def desc(self):
+        return self.description[0:30]
+    desc.short_description = _('short description')
     def free_text_display(self):
         # div with truncating text and title with full text
         truncating_size = 7
@@ -209,15 +236,6 @@ class CatalogImage(models.Model):
         ordering = ('-date_created',)
         #ordering = ['throughimage__image_order']
 
-    def get_cloundinary_url(self):
-        if self.cimage and self.cimage != '':
-            return CLOUDINARY_BASE_URL + self.cimage
-        else:
-            ''
-
-    def get_small_cloundinary_url(self):
-        if self.cimage and self.cimage != '':
-            return CLOUDINARY_BASE_URL + 'w_25,h_25,c_scale,q_auto/' + self.cimage
 
     def optimize_image(image, size, *args, **kwargs):
         desired_size = 500
@@ -277,7 +295,7 @@ class CatalogImage(models.Model):
             self.save()
 
     def save(self, *args, **kwargs):
-        if self.update_image_to_cloudinary:
+        if isinstance(self.image, InMemoryUploadedFile):
             # fails if your don't upload an image, so don't upload image to cloudinary
             mfile = None
             try:
@@ -286,48 +304,34 @@ class CatalogImage(models.Model):
                 mfile = InMemoryUploadedFile(output, 'ImageField', "%s.png" % self.image.name.split('.')[0], 'image/PNG',
                                              sys.getsizeof(output), None)
                 if mfile:
-                    res = cloudinary.uploader.upload(mfile,
-                                                     folder="site/products/",
-                                                     #public_id = fname,
-                                                     unique_filename=False,
-                                                     use_filename=True,
-                                                     overwrite=True,
-                                                     invalidate=True
-                                                     )  # public_id = self.title + '_' + str(self.id))
-                    self.cimage = 'v' + \
-                        str(res['version']) + '/' + res['public_id']
-                    self.image = None
+                    self.image = mfile
             except Exception as e:
                 print(e)
             finally:
-                self.update_image_to_cloudinary = False
-
-        if not self.slug:
-            self.slug = slugify(self.title, allow_unicode=True)
-            # check if slug is unique
-            if CatalogImage.objects.filter(slug=self.slug).exists():
-                if self.id:
-                    self.slug = self.slug + '-' + str(self.id)
-                else:
-                    self.slug = self.slug + '-' + \
-                        str(uuid.uuid4()).split('-')[1]
+                pass
 
         super(CatalogImage, self).save(*args, **kwargs)
 
-    def render_thumbnail(self, *args, **kwargs):
-        ret = ''
-        if self.cimage:
-            ret += '<img width="50px" height="50px" src="%s" />' % (
-                CLOUDINARY_BASE_URL + self.cimage)
-        return mark_safe(ret)
-    render_thumbnail.short_description = _("thumbnail")
+    # def render_thumbnail(self, *args, **kwargs):
+    #     # ret = ''
+    #     # if self.cimage:
+    #     #     ret += '<img width="50px" height="50px" src="%s" />' % (
+    #     #         CLOUDINARY_BASE_URL + self.cimage)
+    #     # return mark_safe(ret)
+    #     return 'TODO'
+    # render_thumbnail.short_description = _("thumbnail")
 
     def render_image(self, *args, **kwargs):
         ret = ''
         if self.image:
-            ret += '<img src="%s"/>' % (settings.MEDIA_URL + self.image.name)
+            # ret += '<img src="%s"/>' % (self.image.url)
+            # <div class="product-image svelte-1kkcau8"> <img src="https://res.cloudinary.com/ms-global/image/upload/e_shadow,x_13,y_13/v1669532443/site/products/WhatsApp_Image_2022-11-06_at_11" alt="מעיל מע&quot;צ" class="svelte-1kkcau8">  </div>
+            #product-image style = background: radial-gradient(circle, white 0%, white 32%, #c7c7c7 84%);,width: 100%;,height: 100%;,display: flex;,justify-content: center;,align-items: center;,overflow: hidden;,border-top-left-radius: var(--var-product-border-radius);,border-top-right-radius: var(--var-product-border-radius);
+            # img style = width: 175px;height: 175px;
+            ret += f'<div class="wraper" style="max-width: 175px;"><div class="product-image" style="background: radial-gradient(circle, white 0%, white 32%, #c7c7c7 84%);width: 100%;height: 100%;display: flex;justify-content: center;align-items: center;overflow: hidden;border-top-left-radius: var(--var-product-border-radius);border-top-right-radius: var(--var-product-border-radius);"><img src="{self.image.url}" alt="{self.title}" style="width: 175px;height: 175px;"/></div></div>'
+            return mark_safe(ret)
         return mark_safe(ret)
-    render_image.short_description = _("image")
+    render_image.short_description = _("")
 
     def __str__(self):
         return self.title
@@ -335,6 +339,7 @@ class CatalogImage(models.Model):
 
 @receiver(post_save, sender=CatalogImage, dispatch_uid="recalculate_main_public_album")
 def recalculate_main_public_album_post_save(sender, instance, **kwargs):
+    print('recalculate_main_public_album_post_save')
     if not instance.main_public_album:
         instance.recalculate_main_public_album()
     else:

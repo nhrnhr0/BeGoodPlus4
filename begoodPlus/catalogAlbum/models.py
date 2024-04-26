@@ -13,47 +13,12 @@ from django.utils.translation import gettext_lazy as _
 
 from begoodPlus.settings.base import CLOUDINARY_BASE_URL
 
-'''
-class CatalogAlbum(models.Model):
-    title = models.CharField(max_length=120, verbose_name=_("title"))
-    slug = models.SlugField(max_length=120, verbose_name=_("slug"))
-    images = models.ManyToManyField(to=CatalogImage, related_name='images', blank=True, through='ThroughImage')# 
-    
-    parent = models.ForeignKey('self',blank=True, null=True ,related_name='children', on_delete=models.CASCADE)
-    class Meta:
-        unique_together = ('slug', 'parent',)   
-        
-
-    
-    def __str__(self):                           
-        full_path = [self.title]                  
-        k = self.parent
-        while k is not None:
-            full_path.append(k.title)
-            k = k.parent
-        return ' -> '.join(full_path[::-1])
-    #def __str__(self):
-    #    return self.title
-    
-    def get_absolute_url(self, *args, **kwargs):
-        from django.urls import reverse
-        parent = self.parent
-        full_slug = ''
-        while parent != None:
-            full_slug = parent.slug + '/' + full_slug
-            parent = parent.parent
-        full_slug = full_slug + '/' + self.slug
-        return reverse('albumView', args=[full_slug])
-    get_absolute_url.short_description = 'URL'
-
-'''
 import datetime
 import uuid
 
 from adminsortable.models import Sortable
 from cloudinary.models import CloudinaryField
 from django.utils.text import slugify
-from mptt.models import MPTTModel, TreeForeignKey
 
 
 class TopLevelCategory(models.Model):
@@ -66,8 +31,18 @@ class TopLevelCategory(models.Model):
     slug = models.SlugField(max_length=120, verbose_name=_(
         "slug"), unique=True, blank=True, null=True, allow_unicode=True)
     # TODO: this get_image can be more efficient (save to db or something)
-    get_image = property(lambda self: self.image.url[len(CLOUDINARY_BASE_URL):] if self.image else '' if self.albums.order_by(
-        'album_order').first() == None else self.albums.order_by('album_order').first().cimage)
+    # get_image = property(lambda self: self.image.url[len(CLOUDINARY_BASE_URL):] if self.image else '' if self.albums.order_by(
+    #     'album_order').first() == None else self.albums.order_by('album_order').first().cimage)
+    def get_image(self):
+        if self.image:
+            return self.image
+        if self.albums.count() > 0:
+            return self.albums.order_by('album_order').first().get_image()
+        return None
+    def get_image_url(self):
+        img = self.get_image()
+        return img.url if img else ''
+    
 
     def __str__(self) -> str:
         return self.name
@@ -78,8 +53,8 @@ class TopLevelCategory(models.Model):
         verbose_name_plural = _('top level categories')
 
     def image_display(self):
-        img = self.get_image
-        return mark_safe('<img src="{}" width="50" height="50" />'.format(CLOUDINARY_BASE_URL + img))
+        img = self.get_image().url
+        return mark_safe('<img src="{}" width="50" height="50" />'.format(img))
     image_display.short_description = _('image')
 
     def save(self, *args, **kwargs):
@@ -89,11 +64,15 @@ class TopLevelCategory(models.Model):
 
 
 class CatalogAlbum(models.Model):
+    image = CloudinaryField('תמונה', blank=True, null=True,folder='catalogAlbum')
+    is_public = models.BooleanField(verbose_name=_('is public'), default=True)
     topLevelCategory = models.ForeignKey(
         to="TopLevelCategory", on_delete=models.SET_NULL, null=True, blank=True, related_name='albums', verbose_name=_('top level category'))
     title = models.CharField(max_length=120, verbose_name=_("title"))
     slug = models.SlugField(max_length=120, verbose_name=_(
         "slug"), unique=True, blank=True, null=True, allow_unicode=True)
+    album_order = models.PositiveIntegerField(default=0, blank=True, null=True, verbose_name=_(
+        'album order'))
     description = models.TextField(verbose_name=_(
         'description'), default='', blank=True)
     fotter = models.TextField(verbose_name=_('fotter'), default='', blank=True)
@@ -101,43 +80,54 @@ class CatalogAlbum(models.Model):
         'keyworks'), default='', blank=True)
     images = models.ManyToManyField(to=CatalogImage, related_name='albums',
                                     blank=True, through='ThroughImage', verbose_name=_('album list'))
+    
+    cimage = property(lambda self: self.get_image())
     # parent = TreeForeignKey('self', on_delete=models.CASCADE,
     #                         null=True, blank=True, related_name='children')
-    is_public = models.BooleanField(verbose_name=_('is public'), default=True)
+    
     # is_campain = models.BooleanField(
     #     verbose_name=_('is campain'), default=False)
     # show_on_main_page = models.BooleanField(
     #     verbose_name=_('show on main page'), default=False)
-    cimage = models.CharField(max_length=500, verbose_name=_(
-        "cimage"), default='', blank=True)
+    # cimage = models.CharField(max_length=500, verbose_name=_(
+    #     "cimage"), default='', blank=True)
+    
     #campain = models.ForeignKey('MonthCampain', on_delete=models.CASCADE, null=True, blank=True, related_name='album')
     #renew_for = models.DurationField(null=True, blank=True, default=datetime.timedelta(days=3))
     #renew_after = models.DurationField(null=True, blank=True, default=datetime.timedelta(days=1))
     #timer = models.DateTimeField(null=True, blank=True)
-    album_order = models.PositiveIntegerField(default=0, blank=True, null=True, verbose_name=_(
-        'album order'))
+    
 
-    def save(self, *args, **kwargs):
-        if self.cimage == '' and self.id != None:
-            img = self.images.order_by('throughimage__image_order').first()
-            if img:
-                self.cimage = img.cimage
+    # def save(self, *args, **kwargs):
+    #     if self.cimage == '' and self.id != None:
+    #         img = self.images.order_by('throughimage__image_order').first()
+    #         if img:
+    #             self.cimage = img.cimage
 
-        if not self.slug or self.slug == '' or CatalogAlbum.objects.filter(slug=self.slug).count() > 1:
-            self.slug = slugify(self.title, allow_unicode=True)
-            if CatalogAlbum.objects.filter(slug=self.slug).exists():
-                if self.id:
-                    self.slug = self.slug + '-' + str(self.id)
-                else:
-                    self.slug = self.slug + '-' + \
-                        str(uuid.uuid4()).split('-')[1]
-        super(CatalogAlbum, self).save(*args, **kwargs)
-
+    #     if not self.slug or self.slug == '' or CatalogAlbum.objects.filter(slug=self.slug).count() > 1:
+    #         self.slug = slugify(self.title, allow_unicode=True)
+    #         if CatalogAlbum.objects.filter(slug=self.slug).exists():
+    #             if self.id:
+    #                 self.slug = self.slug + '-' + str(self.id)
+    #             else:
+    #                 self.slug = self.slug + '-' + \
+    #                     str(uuid.uuid4()).split('-')[1]
+    #     super(CatalogAlbum, self).save(*args, **kwargs)
+    def get_image(self):
+        if self.image:
+            return self.image
+        if self.images.count() > 0:
+            return self.images.first().image
+        return None
+    def get_image_url(self):
+        img = self.get_image()
+        return img.url if img else ''
     def render_cimage_thumbnail(self, *args, **kwargs):
         ret = ''
-        if self.cimage:
+        img = self.get_image()
+        if img:
             ret += '<img width="50px" height="50px" src="%s" />' % (
-                CLOUDINARY_BASE_URL + self.cimage)
+                img.url)
         return mark_safe(ret)
     render_cimage_thumbnail.short_description = _("thumbnail")
 
@@ -204,10 +194,12 @@ class ThroughImage(Sortable):
         CatalogAlbum, on_delete=models.CASCADE, verbose_name=_('catalog album'))
 
     image_order = models.PositiveIntegerField(
-        default=0, editable=False, db_index=True)
+        default=0, editable=True, db_index=True)
 
     class Meta(Sortable.Meta):
         ordering = ['image_order']
+        verbose_name = _('extra category')
+        verbose_name_plural = _('extra categories')
 
 
 # ThroughImage post save

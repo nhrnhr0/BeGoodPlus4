@@ -13,6 +13,7 @@ class ProductSizeAdmin(admin.ModelAdmin):
     list_filter = ('group', )
     search_fields = ('size', 'code', 'group__name')
     list_editable = ('size', 'order', 'group')
+    autocomplete_fields = ('group', )
     
     def product_count(self, obj):
         return obj.catalogimage_set.count()

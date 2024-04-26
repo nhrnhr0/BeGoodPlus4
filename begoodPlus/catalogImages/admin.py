@@ -1,6 +1,7 @@
 from typing import Any
 from django.contrib import admin
 from advanced_filters.admin import AdminAdvancedFiltersMixin
+from django.db.models.query import QuerySet
 from django.http.response import HttpResponse
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
@@ -9,7 +10,7 @@ import csv
 import io
 
 #from inventory.models import PPN
-from .models import CatalogImage, CatalogImageVarient
+from .models import CatalogImage, CatalogImageVarient, SubImages
 from django.http import FileResponse
 from xlwt.Style import XFStyle
 from catalogAlbum.models import ThroughImage
@@ -19,6 +20,7 @@ import requests
 from io import BytesIO
 from django.conf import settings
 from core.utils import url_to_edit_object
+from productSize.models import ProductSize
 
 
 class CatalogImageVarientAdmin(AdminAdvancedFiltersMixin, admin.ModelAdmin):
@@ -102,7 +104,14 @@ class albumsInline(admin.TabularInline):
     # readonly_fields = ['id','provider','dis_colors', 'dis_sizes', 'dis_cost_price', 'dis_client_price', 'dis_recomended_price']
     extra = 1
 # Register your models here.
-
+class ImagesInline(admin.TabularInline):
+    model = SubImages
+    extra = 0
+    verbose_name = _('image')
+    verbose_name_plural = _('images')
+    fields = ('image_tag','image', 'order', )
+    readonly_fields = ('image_tag',)
+    
 
 # class ppnInline(admin.TabularInline):
 #     model = PPN
@@ -147,25 +156,38 @@ class FreeTextListFilter(admin.SimpleListFilter):
             return queryset.exclude(id__in=yes_qs)
         else:
             return queryset
-
+class SizesFilter(admin.SimpleListFilter):
+    title = _('sizes')
+    parameter_name = 'sizes'
+    
+    def queryset(self, request: Any, queryset: QuerySet[Any]):
+        return queryset.prefetch_related('sizes__group')
+    
+    
+    def lookups(self, request: Any, model_admin: Any):
+        # return a list of all sizes as str
+        sizes = ProductSize.objects.select_related('group').all()
+        ret = ((size.id, str(size)) for size in sizes)
+        return ret
 
 class CatalogImageAdmin(AdminAdvancedFiltersMixin, admin.ModelAdmin):
-    list_display = ('id', 'render_thumbnail', 'title', 'barcode', 'free_text_display', 'cost_price_dis', 'client_price_dis', 'recomended_price_dis', 'get_albums',
-                    'cost_price', 'client_price', 'recomended_price', 'date_created', 'date_modified', 'is_main_public_album_set', 'is_active', 'show_sizes_popup', 'has_physical_barcode',)
+    list_display = ('id', 'render_image', 'title', 'barcode', 'free_text_display', 'cost_price_dis', 'client_price_dis', 'recomended_price_dis', 'get_albums',
+                    'cost_price', 'client_price', 'recomended_price', 'date_created', 'date_modified', 'is_main_public_album_set', 'is_active', 'show_sizes_popup',)
     list_editable = ('cost_price', 'client_price', 'recomended_price',)
     list_display_links = ('title',)
     actions = ['turn_on_is_active', 'turn_off_is_active', 'download_images_csv', 'download_images_exel_slim', 'download_images_exel_warehouse', 'turn_sizes_popup_active', 'turn_sizes_popup_inactive',
                'upload_images_to_cloudinary_bool_active', 'upload_images_to_cloudinary_bool_inactive', 'turn_can_tag_active', 'turn_can_tag_inactive', 'turn_out_of_stock_inactive', 'turn_out_of_stock_active']
-    inlines = (albumsInline,)
-    readonly_fields = ('id', 'render_thumbnail',
-                       'render_image', 'is_main_public_album_set')
+    inlines = (albumsInline,ImagesInline)
+    readonly_fields = ('id',
+                       'render_image','date_modified','date_created',)
     search_fields = ('title', 'description', 'barcode',)
     list_filter = (FreeTextListFilter, 'albums',
-                   'providers', 'sizes', 'colors', )
+                   'providers', 'colors', SizesFilter)
     filter_horizontal = ('colors', 'sizes', 'providers',
                          'varients')  
     list_per_page = 50
-    advanced_filter_fields = (('title','כותרת'), ('description', 'תיאור'), ('sizes__size', 'גדלים'), ('colors__name','צבעים'), ('providers__name', 'שם ספק'), ('varients__name', 'שם וריאנט'), ('barcode', 'ברקוד'), ('cost_price', 'מחיר עלות'), ('client_price', 'מחיר ללקוח'), ('recomended_price', 'מחיר מומלץ'), ('albums__title', 'כותרת אלבום'), ('show_sizes_popup', 'הצג פופאפ גדלים'), ('packingTypeProvider__name', 'שיטת אריזה מהספק'), ('packingTypeClient__name', 'שיטת אריזה ללקוח'), 'date_created', 'date_modified', 'can_tag', 'out_of_stock', 'is_active', 'has_physical_barcode', 'cimage', 'free_text', 'whatsapp_text',)
+    advanced_filter_fields = (('title','כותרת'), ('description', 'תיאור'), ('sizes__size', 'גדלים'), ('colors__name','צבעים'), ('providers__name', 'שם ספק'), ('varients__name', 'שם וריאנט'), ('barcode', 'ברקוד'), ('cost_price', 'מחיר עלות'), ('client_price', 'מחיר ללקוח'), ('recomended_price', 'מחיר מומלץ'), ('albums__title', 'כותרת אלבום'), ('show_sizes_popup', 'הצג פופאפ גדלים'), ('packingTypeProvider__name', 'שיטת אריזה מהספק'), ('packingTypeClient__name', 'שיטת אריזה ללקוח'), 'date_created', 'date_modified', 'can_tag', 'out_of_stock', 'is_active', 'cimage', 'free_text', 'whatsapp_text',)
+    fields = ('render_image', 'image','title','slug','barcode','show_sizes_popup','out_of_stock','is_active','main_public_album','description','free_text','whatsapp_text','cost_price','client_price','recomended_price','packingTypeProvider','amountSinglePack','amountCarton','colors','sizes','varients','providers','qyt',)
 
     def download_images_csv(self, request, queryset):
         response = HttpResponse(content_type='text/csv')
@@ -176,10 +198,17 @@ class CatalogImageAdmin(AdminAdvancedFiltersMixin, admin.ModelAdmin):
             writer.writerow([obj.id, obj.title, obj.cimage if obj.cimage else ''])
         return response
         pass
-
     def get_queryset(self, request):
         qs = super().get_queryset(request)
-        return qs.prefetch_related('albums', ).select_related('packingTypeProvider', 'packingTypeClient', 'main_public_album', )
+        return qs.prefetch_related(
+            'albums__topLevelCategory',  # Assuming `topLevelCategory` is a ForeignKey in `Album`
+            'sizes__group',  # Assuming `group` is a ForeignKey in `Size`
+            'colors',  # Assuming colors are directly related
+        ).select_related(
+            'packingTypeProvider', 
+            'packingTypeClient', 
+            'main_public_album',
+        )
 
     def turn_on_is_active(self, request, queryset):
         queryset.update(is_active=True)

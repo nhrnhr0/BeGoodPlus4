@@ -103,14 +103,15 @@ class SlimCatalogImageSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CatalogImage
-        fields = ('id', 'title', 'cimage', 'price', 'new_price',
+        fields = ('id', 'title', 'image', 'price', 'new_price',
                   'main_public_album__slug', 'main_public_album_top__slug', 'link', 'out_of_stock')
     #main_album = serializers.SerializerMethodField('_get_main_album')
     new_price = serializers.SerializerMethodField('_get_new_price')
     price = serializers.SerializerMethodField('_get_price')
     link = serializers.SerializerMethodField('_get_link')
     out_of_stock = serializers.SerializerMethodField('_get_out_of_stock')
-
+    # cimage = serializers.SerializerMethodField('_get_cimage')
+    
     def _get_out_of_stock(self, obj):
         return obj.out_of_stock
 
@@ -224,35 +225,33 @@ def get_main_info(request):
     if top_album_slug:
         if(top_album_slug == 'new'):
             top_album = FakeTop(0, 'חדשים', 'new', True)
-            top_albums = list(CatalogAlbum.objects.filter(is_public=True).order_by(
-                'album_order').values('id', 'title', 'cimage', 'is_public', 'slug',))
-        # elif(top_album_slug == 'campaigns'):
-        #     # top_album = class with id, title, slug, cimage, is_public
-        #     top_album = FakeTop(0, 'מבצעים', 'campaigns', True)
-
-        #     campains = []#get_user_active_campaigns(request.user)
-        #     if campains:
-        #         top_albums = [{
-        #             'id': c.album.id,
-        #             'title': c.album.title,
-        #             'slug': c.album.slug,
-        #             'cimage': c.album.cimage,
-        #             'is_public': c.album.is_public,
-        #         } for c in campains]
-        #     else:
-        #         top_albums = []
-        #     #top_albums = list(top_albums.values('id','title', 'cimage', 'is_public', 'slug',))
+            top_albums_objs = CatalogAlbum.objects.prefetch_related('images').filter(is_public=True).order_by(
+                'album_order')
         else:
             top_album = TopLevelCategory.objects.get(slug=top_album_slug)
-            top_albums = list(CatalogAlbum.objects.filter(topLevelCategory=top_album, is_public=True).order_by(
-                'album_order').values('id', 'title', 'cimage', 'is_public', 'slug',))
+            top_albums_objs = CatalogAlbum.objects.prefetch_related('images').filter(topLevelCategory=top_album, is_public=True).order_by(
+                'album_order')
+
+
+
+
+        # top_albums = id, title, is_public, slug, get_image()
+        top_albums = []
+        for album in top_albums_objs:
+            top_albums.append({
+                'id': album.id,
+                'title': album.title,
+                'is_public': album.is_public,
+                'slug': album.slug,
+                'image': album.get_image_url()
+            })
+            
     else:
-        # list(CatalogAlbum.objects.filter(is_public=True).order_by('album_order').values('id','title', 'cimage', 'is_public', 'slug',))
         top_albums = []
 
     productInfo = None
     if product_id:
-        product = CatalogImage.objects.get(id=product_id)
+        product = CatalogImage.objects.prefetch_related('images').get(id=product_id)
         #productObj = product.select_related('packingTypeClient')
         productSer = ImageClientApi(product, many=False, context={
             'request': request
@@ -286,19 +285,26 @@ def get_main_info(request):
 
 def get_product_og_meta(product_id):
     product = CatalogImage.objects.get(id=product_id)
-    cimage = product.cimage if product.cimage else 'undefined'
-    #
+    cimage = product.image.url if product.image else None
+    if cimage:
+        icon = CLOUDINARY_BASE_URL + 'c_scale,w_219,h_219/c_scale,u_v1649744644:msAssets:spotlight.jpg,w_300/' + cimage.split('/upload')[1]
+    else:
+        icon = ''
     return {
-        'icon': CLOUDINARY_BASE_URL + 'c_scale,w_219,h_219/c_scale,u_v1649744644:msAssets:image_5_qo7yhx.jpg,w_300/' + cimage,
+        'icon': icon,
         'title': product.title,
         'description': product.description[:175] + '...',
     }
 
 
 def get_album_og_meta(album):
-    album_cimage = album.cimage if album.cimage else 'undefined'
+    album_cimage = album.cimage.url if album.cimage else 'undefined'
+    if album_cimage:
+        icon = CLOUDINARY_BASE_URL + 'c_scale,w_219,h_219/c_scale,u_v1649744644:msAssets:spotlight.jpg,w_300/' + album_cimage.split('/upload')[1]
+    else:
+        icon = ''
     return {
-        'icon': CLOUDINARY_BASE_URL + 'c_scale,w_219,h_219/c_scale,u_v1649744644:msAssets:image_5_qo7yhx.jpg,w_300/' + album_cimage,
+        'icon': icon,
         'title': album.title,
         'description': album.description[:175] + '...',
         'keywords': album.keywords,
@@ -309,13 +315,13 @@ def get_top_album_og_meta(top_album, icon=None):
     if not icon:
         if not top_album.image:
             first_album = CatalogAlbum.objects.filter(
-                Q(topLevelCategory__id=top_album.id) & ~Q(cimage='')).first()
+                Q(topLevelCategory__id=top_album.id) & ~Q(image=None)).first()
             if first_album:
-                icon = CLOUDINARY_BASE_URL + 'c_scale,w_219,h_219/c_scale,u_v1649744644:msAssets:image_5_qo7yhx.jpg,w_300/' + first_album.cimage
+                icon = CLOUDINARY_BASE_URL + 'c_scale,w_219,h_219/c_scale,u_v1649744644:msAssets:spotlight.jpg,w_300/' + first_album.image.public_id
             else:
                 icon = ''
         else:
-            icon = CLOUDINARY_BASE_URL + 'c_scale,w_219,h_219/c_scale,u_v1649744644:msAssets:image_5_qo7yhx.jpg,w_300/' + top_album.image.public_id
+            icon = CLOUDINARY_BASE_URL + 'c_scale,w_219,h_219/c_scale,u_v1649744644:msAssets:spotlight.jpg,w_300/' + top_album.image.public_id
     return {
         'icon': icon,
         'title': top_album.name,
@@ -429,11 +435,6 @@ class AlbumImagesApiView(APIView, CurserResultsSetPagination):
             self.album = CatalogAlbum.objects.get(slug=album_slug)
         else:
             self.album = None
-
-            cmp_slug = request.GET.get('cmp', None)
-
-            if cmp_slug:
-                self.album = CatalogAlbum.objects.get(slug=cmp_slug)
         #self.album = CatalogAlbum.objects.get(id=self.album_id)
         products = self.get_queryset()
         # if the products is of type QuerySet<ThroughImage>

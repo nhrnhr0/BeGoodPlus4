@@ -11,12 +11,21 @@ class TopLevelCategorySerializer(serializers.ModelSerializer):
 
     def _get_sub_albuns(self, obj):
         albums = obj.albums.filter(is_public=True).order_by(
-            'album_order').values('id', 'title', 'slug', 'cimage', 'album_order',)
-        return list(albums)
+            'album_order')#.values('id', 'title', 'slug', 'cimage', 'album_order',)
+        ret = []
+        for album in albums:
+            ret.append({
+                'id': album.id,
+                'title': album.title,
+                'slug': album.slug,
+                'cimage': album.get_image_url(),
+                'album_order': album.album_order,
+            })
+        return list(ret)
 
     class Meta:
         model = TopLevelCategory
-        fields = ('id', 'name', 'get_image', 'albums',
+        fields = ('id', 'name', 'get_image_url', 'albums',
                   'slug', 'my_order', 'sub_albums')
         ordering = ('my_order',)
 
