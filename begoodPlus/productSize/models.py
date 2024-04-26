@@ -29,4 +29,6 @@ class ProductSize(models.Model):
     group = models.ForeignKey(
         to=ProductSizeGroup, on_delete=models.SET_NULL, related_name='sizes', null=True, blank=True)
     def __str__(self):
+        if self.group is None:
+            return self.size
         return self.size + ' (' + self.group.name + ')'
