@@ -48,11 +48,13 @@ class CatalogAlbumSlimSerializer(serializers.ModelSerializer):
     topLevelCategory__slug = serializers.CharField(
         source='topLevelCategory.slug', default='')
     is_campain = serializers.SerializerMethodField('_is_campain')
-    
+    image = serializers.SerializerMethodField('_get_image')
+    def _get_image(self, obj):
+        return obj.get_image_url()
     def _is_campain(self, obj):
         return False
 
     class Meta:
         model = CatalogAlbum
         fields = ('id', 'topLevelCategory', 'topLevelCategory__slug', 'title',
-                  'slug', 'is_public', 'is_campain', 'cimage', 'album_order',)
+                  'slug', 'is_public', 'is_campain', 'image', 'album_order',)

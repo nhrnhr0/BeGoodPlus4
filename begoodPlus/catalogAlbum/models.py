@@ -15,7 +15,7 @@ from begoodPlus.settings.base import CLOUDINARY_BASE_URL
 
 import datetime
 import uuid
-
+import cloudinary
 from adminsortable.models import Sortable
 from cloudinary.models import CloudinaryField
 from django.utils.text import slugify
@@ -113,11 +113,13 @@ class CatalogAlbum(models.Model):
     #                 self.slug = self.slug + '-' + \
     #                     str(uuid.uuid4()).split('-')[1]
     #     super(CatalogAlbum, self).save(*args, **kwargs)
-    def get_image(self):
+    
+    def get_image(self)->cloudinary.CloudinaryResource:
         if self.image:
             return self.image
-        if self.images.count() > 0:
-            return self.images.first().image
+        qs = self.images.filter(is_active=True).order_by('throughimage__image_order')
+        if qs.count() > 0:
+            return qs.first().image
         return None
     def get_image_url(self):
         img = self.get_image()

@@ -91,7 +91,7 @@ class SearchProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CatalogImage
-        fields = ('id', 'title', 'cimage', 'public_album_slug',
+        fields = ('id', 'title', 'image', 'public_album_slug',
                   'public_album_id', 'albums', 'public_album_top_slug')
 
 
@@ -298,7 +298,7 @@ def get_product_og_meta(product_id):
 
 
 def get_album_og_meta(album):
-    album_cimage = album.cimage.url if album.cimage else 'undefined'
+    album_cimage = album.cimage.url if album.cimage else '/upload/v1649744644/msAssets/spotlight.jpg'
     if album_cimage:
         icon = CLOUDINARY_BASE_URL + 'c_scale,w_219,h_219/c_scale,u_v1649744644:msAssets:spotlight.jpg,w_300/' + album_cimage.split('/upload')[1]
     else:

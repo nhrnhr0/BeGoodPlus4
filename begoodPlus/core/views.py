@@ -1105,8 +1105,8 @@ def autocompleteModel(request):
     context = {'all': all_data,
                'q': q,
                'id': search_history.id}
-    print('autocompleteModel', time.time() - start)
-    print('autocompleteModel', len(all_data))
+    # print('autocompleteModel', time.time() - start)
+    # print('autocompleteModel', len(all_data))
 
     end = time.time() - start
     print('autocompleteModel: ', start-end)
