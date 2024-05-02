@@ -16,3 +16,6 @@ SESSION_COOKIE_SECURE = False
 CSRF_COOKIE_SAMESITE = 'lax'
 SESSION_COOKIE_SAMESITE = 'lax'
 
+CORS_ORIGIN_WHITELIST= [
+    'https://catalog.ms-global.co.il',
+]
