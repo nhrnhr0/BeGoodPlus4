@@ -36,8 +36,16 @@ class TopLevelCategory(models.Model):
     def get_image(self):
         if self.image:
             return self.image
-        if self.albums.count() > 0:
-            return self.albums.order_by('album_order').first().get_image()
+
+        # Prefetch related albums to avoid multiple queries
+        albums = self.albums.all().order_by('album_order')
+
+        # Check if there are any albums
+        if albums.exists():
+            # Return the image of the first album
+            return albums.first().get_image()
+
+        # If no image found in albums, return None
         return None
     def get_image_url(self):
         img = self.get_image()

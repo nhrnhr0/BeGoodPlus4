@@ -25,6 +25,8 @@ CORS_ALLOWED_ORIGINS = [
 
 MIDDLEWARE += [
     'debug_toolbar.middleware.DebugToolbarMiddleware',
+    'core.middleware.NonHtmlDebugToolbarMiddleware',
+
     # 'silk.middleware.SilkyMiddleware',
     # 'livereload.middleware.LiveReloadScript',
 ]
